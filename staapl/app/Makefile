@@ -27,7 +27,7 @@ COMP=mzc
 # STAAPLC_FLAGS = -c uart -c pickit2
 
 # make sure this works without the "staaplc" command line app wrapper installed
-STAAPLC = $(INTERP) -p zwizwa/staapl/staaplc --
+STAAPLC = $(INTERP) -l staapl/staaplc --
 
 PROGRAM = pk2cmd -I -M -R 
 

@@ -15,7 +15,7 @@
      (eval
       `(begin
          ;; (require (file ,(path->string (simplify-path demo))))
-         (require (planet zwizwa/staapl/pic18/demo))
+         (require staapl/pic18/demo)
          (require scheme/pretty)
          (pretty-print-columns
           (- (pretty-print-columns) 10))))
@@ -59,7 +59,7 @@ This section uses REPL interaction with some example code written on
 top of the compiler to demonstrate the code generation process.
 
 @;defmodule/this-package[pic18/demo]
-@defmodule[(planet zwizwa/staapl/pic18/demo)]
+@defmodule[pic18/demo]
 @subsection{Forth to Machine Code}
 
 The @scheme[code>] form provided by the demonstration module
@@ -858,7 +858,7 @@ To import a Forth module in a Forth project use the @forth{require},
 the subsequent examples.
 
 @forth-ex{
-planet zwizwa/staapl/pic18/route
+require staapl/pic18/route
 }
 @ex[()(code)]
 
@@ -916,7 +916,7 @@ safe.
 
 @section{Reference}
 
-@defmodule[(planet zwizwa/staapl/macro)]
+@defmodule[staapl/macro]
 
 @defform[(scat: rpn-form ...)]{ Most basic RPN form with the following grammar}
 

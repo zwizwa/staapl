@@ -1770,7 +1770,7 @@ processes.")
   (interactive)
   (save-excursion
     (goto-char (point-min))
-    (insert "#lang planet zwizwa/staapl/pic18 \\ -*- forth -*-\nprovide-all\n")
+    (insert "#lang staapl/pic18 \\ -*- forth -*-\nprovide-all\n")
     (forth-mode)))
 
 

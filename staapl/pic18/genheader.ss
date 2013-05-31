@@ -42,7 +42,7 @@
 
 (define (print-dict dict)
   (printf "#lang scheme/base\n")
-  (printf "(require (planet zwizwa/staapl/pic18/define-constants))\n")
+  (printf "(require staapl/pic18/define-constants)\n")
   (printf "(provide (all-defined-out))\n")
   (printf "(define-pic18-const-unit\n")
   (printf "   pic18-const^\n")

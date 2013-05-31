@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 staapl pic18/double-math

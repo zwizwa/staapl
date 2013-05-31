@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18
+#lang staapl/pic18
 provide-all
 \ Byte lookup table: works like 'route' but returns a byte.
 

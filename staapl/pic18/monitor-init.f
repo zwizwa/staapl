@@ -38,7 +38,7 @@ forth
     \ Cold start chip and VM.
     init-cold
 
-    testi
+    \ testi
     
     \ 0 for 0 for 0 for next next next testi
 
@@ -48,4 +48,4 @@ forth
     interactive? if interpreter ; then
     
     \ Else fall into application..
-    testi
+    \ testi

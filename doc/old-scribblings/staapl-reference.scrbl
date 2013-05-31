@@ -43,7 +43,7 @@ instantiated languages.
 
 @section{Representation Language}
 
-@for-module[(planet zwizwa/staapl/scat)]
+@for-module[staapl/scat]
 
 
 All concatenative code is built on top of a concatenative and
@@ -157,7 +157,7 @@ documented.
 
 @section{Concatenative Macros}
 
-@for-module[(planet zwizwa/staapl/coma)]
+@for-module[staapl/coma]
 
 
 The Coma language is a Scat-like language residing in the
@@ -388,7 +388,7 @@ definition of other macros, it is a better idea to leave the
 @section{Forth: Structured programming, Prefix Macros and Code
          Instantiation}
 
-@for-module[(planet zwizwa/staapl/purrr)]
+@for-module[staapl/purrr]
 
 The Forth language built on top of Coma can be seen as a
 @emph{programmer interface}, providing a simplified view of the Staapl
@@ -519,7 +519,7 @@ implement the command line compiler frontend @litchar{staaplc} which
 generates Intel HEX files and dictionary information for target
 interaction.
 
-@for-module[(planet zwizwa/staapl/prj/pic18)]
+@for-module[staapl/prj/pic18]
 
 Note that here we use the @scheme[prj/pic18] module and not the
 @scheme[pic18] module directly.  The former is a dynamic version of

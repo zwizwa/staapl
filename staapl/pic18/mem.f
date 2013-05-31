@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18
+#lang staapl/pic18
 \ convert access bank address to real address in ah:al
 : access>a
     dup al !

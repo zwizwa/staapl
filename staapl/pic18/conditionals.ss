@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ Standard forth conditionals not using the flags.  These are less

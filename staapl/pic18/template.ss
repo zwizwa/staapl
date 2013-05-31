@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ Template buffer for initializing RAM.  Returns the address of the

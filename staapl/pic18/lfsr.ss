@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ noise generators using polynomials in GF[2] modulo a prime P[x]

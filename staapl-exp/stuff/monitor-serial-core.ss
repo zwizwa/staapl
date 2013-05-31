@@ -1,6 +1,6 @@
-#lang planet zwizwa/staapl/pic18-unit \ -*- forth -*-
+#lang staapl/pic18-unit \ -*- forth -*-
 
-{ require { planet  zwizwa/staapl/pic18/sig } }
+{ require staapl/pic18/sig }
 { import pic18-chip^ }
 
 staapl pic18/boot         \ chip init code

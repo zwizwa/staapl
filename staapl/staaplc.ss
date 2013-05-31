@@ -6,7 +6,7 @@
 ;; Provides a standard command line interface to all (compilation)
 ;; functionality.  It is invoked as:
 ;;
-;;   mzscheme -p zwizwa/staapl/staaplc -- <arg> ...
+;;   racket -l staapl/staaplc -- <arg> ...
 
 ;; The dictionary file produced is a mzscheme module that when invoked
 ;; produces a REPL to a live target.  This makes it possible to lift
@@ -35,7 +35,7 @@
 
 (require scheme/pretty
          scheme/cmdline
-         (planet zwizwa/staapl/tools))
+         staapl/tools)
 
 (define-syntax-rule (flags: name ...)
   (begin (define name (make-parameter #f)) ...))
@@ -115,7 +115,7 @@
 
 (define (requirements kernel-path)
   `(require
-    (planet zwizwa/staapl/live-pic18)
+    staapl/live-pic18
     (file ,(path->string kernel-path))))
 
 (define (process-arguments)
@@ -245,7 +245,6 @@
 ;; TESTING
 ;(current-command-line-arguments
 ; (vector "-m" "/home/tom/staapl/app/1220-8.fm"))
-
 
 (main)
 

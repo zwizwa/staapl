@@ -1,5 +1,5 @@
 #lang scheme/base
-(require (planet zwizwa/staapl/pic18/define-constants))
+(require staapl/pic18/define-constants)
 (provide (all-defined-out))
 (define-pic18-const-unit
    pic18-const^

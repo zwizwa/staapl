@@ -21,7 +21,7 @@
 (define (install prog)
   (let ((at (mzscheme-program-launcher-path prog)))
     (make-mzscheme-launcher
-     `("-p" ,(format "zwizwa/staapl/~a" prog) "--") at)
+     `("-l" ,(format "staapl/~a" prog) "--") at)
     (printf "installed: ~a\n" (path->string at))
     (with-handlers ((void void)) ;; attempt.. might fail due to permissions
       (case (system-type)

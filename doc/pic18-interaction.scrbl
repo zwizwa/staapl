@@ -72,7 +72,7 @@ To get going, start MzScheme using the command
 namespace at the Scheme prompt.
 
 @ex[() 
-(require (planet zwizwa/staapl/prj/pic18)) 
+(require staapl/prj/pic18)
 (init-prj)
 ]
 
@@ -369,7 +369,7 @@ into the compiler namespace directly.
 To leave again use @scheme[(leave-prj)]. Note that it is also possible
 to load the compiler straight into the toplevel namespace and get rid
 of the project management altogether, i.e. using @scheme[(require
-(planet zwizwa/staapl/pic18))].
+staapl/pic18)].
 
 To create new new interaction commands in the @scheme[(target)]
 namespace, use the Scheme @scheme[subsititutions] macro.  For example,

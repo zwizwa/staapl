@@ -191,7 +191,7 @@
   (syntax-case stx (spec file planet staapl)
     ((_ file id)   (req `(file ,(path->string (stx->path #'id)))))
     ((_ planet id) (req `(planet ,#'id)))
-    ((_ staapl id) (req `(planet ,(string->symbol
-                                   (format "zwizwa/staapl/~a"
-                                           (syntax->datum #'id))))))))
+    ((_ staapl id) (req  (string->symbol
+                          (format "staapl/~a"
+                                  (syntax->datum #'id)))))))
 

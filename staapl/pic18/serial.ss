@@ -56,7 +56,7 @@
 
 #|
 
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ Serial port target code - no interrupts.

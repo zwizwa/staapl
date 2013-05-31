@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ Dictionary compiler.  Compiles to RAM before transferring a string

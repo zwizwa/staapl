@@ -24,7 +24,7 @@ dev:
 	make pic18
 
 install:
-	$(MZSCHEME) -p zwizwa/staapl/install
+	$(MZSCHEME) -l staapl/install
 
 # Compile all .ss files found in the package tree.  This mimicks what
 # setup-plt does, and is a quick way to prevent problems when packaging.

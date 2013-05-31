@@ -1,4 +1,4 @@
-#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 \ Simple logic analyzer and debugging tool. PIC18F2620 @ 40Mhz
 
@@ -6,16 +6,10 @@ provide-all
 \
 \ To compile you need MzScheme 4.1 or higher.
 \
-\ Optionally: use the darcs archive instead of PLaneT.
+\ For Staapl installation instructions see http://zwizwa.be/staapl
 \
-\ # darcs get http://zwizwa.be/darcs/staapl
-\ # cd staapl
-\ # make pic18 planet-link
+\ To compile:
 \
-\ Install the staaplc wrapper.  This will pull in the distro from
-\ PLaneT when not using darcs.
-\
-\ # sudo mzscheme-p zwizwa/staapl/install
 \ # staaplc logan.f
 \
 \ This produces logan.hex (binary image to upload to target) and

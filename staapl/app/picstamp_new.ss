@@ -1,5 +1,5 @@
 #lang scheme/base
-(require (planet zwizwa/staapl/pic18)) 
+(require staapl/pic18)
 
 ;; Code for the USBPicStamp by Johannes Taelman.
 ;; http://www.flickr.com/photos/_-j/1350651639/
@@ -19,12 +19,11 @@
 
 (require
  ; target code and macros
- (planet zwizwa/staapl/pic18/shift)
- (planet zwizwa/staapl/pic18/interpreter)
- (planet zwizwa/staapl/pic18/route)
- (planet zwizwa/staapl/pic18/ramblock)
- (planet zwizwa/staapl/pic18/template)
-; (planet zwizwa/staapl/pic18/inc/P18F2550)
+ staapl/pic18/shift
+ staapl/pic18/interpreter
+ staapl/pic18/route
+ staapl/pic18/ramblock
+ staapl/pic18/template
  )
 
 
