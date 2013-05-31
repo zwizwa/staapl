@@ -1,0 +1,25 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+
+provide-all
+
+\ Code for the USBPicStamp by Johannes Taelman.
+
+
+\ config
+#x300000 org-begin
+
+\ extended instruction set, no wdt, no code protect, 
+
+#x21 , #x02 , #x3A , #x1E ,
+#x00 , #x81 , #x85 , #x00 ,   \ extended instruction set disabled
+#x0F , #xC0 , #x0F , #xE0 ,
+#x0F , #x40 , 
+
+org-end
+
+staapl pic18/boot   \ chip init code
+load p18f2550.f     \ chip macros
+load monitor-icsp.f \ boot block + icsp comm monitor code
+
+load usb.f
+

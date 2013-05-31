@@ -1,0 +1,16 @@
+#lang scheme/base
+
+;; Cleaned up version of a partial evaluator / concatenative language.
+
+;; ROADMAP:
+
+;;  * Port the pattern matching syntax to 1stack operation. This
+;;    should be quite straightforward, only 'pattern-tx->macro'
+;;    changes.
+;;
+;;  * Get the primitive macros to work (compile, literal)
+;;
+;;  * Split the current macro/ language into clean Coma and dirty
+;;    Control macros.
+
+

@@ -1,0 +1,22 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+
+provide-all
+
+\ ICD serial example for PIC18F452 @ 40Mhz
+\ The line below is the programmer command used in the Makefile.
+
+\ Chip config.  Look in the data sheet for these.
+#x300000 org-begin
+  #x00 , #x26 , #x0F , #x0E ,  
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xE0 ,   \ no write protect
+  #x0F , #x40 , 
+org-end
+
+staapl pic18/boot    \ chip init code
+load p18f452.f       \ chip macros
+load monitor-icsp.f  \ boot block + icsp monitor code
+
+\ #sh# pk2cmd -I -M -R -p PIC18F452 -f $1
+
+

@@ -1,0 +1,27 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+provide-all
+
+
+\ PIC18F2620 @ 10Mhz
+
+\ This is the same as 2620-40 but not using the 4x PLL.  Useful for
+\ running the same board at lower speed to allow for lower operating
+\ voltage.  See figure 26-3 in the 18LF2620 data sheet.
+
+\ Chip config.  Look in the data sheet for these.
+#x300000 org-begin
+  #x00 , #x02 , #x09 , #x0E ,  
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xE0 ,   \ no write protect
+  #x0F , #x40 , 
+org-end
+
+load p18f2620.f        \ chip macros
+load monitor-serial.f  \ boot block + serial monitor code
+
+macro
+: fosc 10 MHz ;     \ 4 clock cycles per instruction cycle gives 10 MIPS.
+: baud 230400 ;
+forth
+
+\ #sh# pk2cmd -I -M -R -p PIC18F2620 -f $1

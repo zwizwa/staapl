@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# This is where the main version is defined. REMEMBER:
+# 1. Tag the archive with the version number and commit.
+# 2. Bump up the patch level after a release and commit.
+
+VERSION=`cat staapl-version.txt`
+
+[ -z "$1" ] || [ "$1" == "-d" ] && shift && APPEND=".`date +%Y%m%d`"
+
+VER="$VERSION$APPEND"
+NAME=staapl-$VER
+
+# for autoconf patch in bin/predist
+export STAAPL_VERSION=$VER
+
+# create archive
+darcs dist -d "$NAME" >/dev/null
+
+# echo the name
+echo "$NAME"

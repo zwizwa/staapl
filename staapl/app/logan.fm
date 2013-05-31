@@ -1,0 +1,93 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+provide-all
+\ Simple logic analyzer and debugging tool. PIC18F2620 @ 40Mhz
+
+\ --------------------------------------------------------------------
+\
+\ To compile you need MzScheme 4.1 or higher.
+\
+\ Optionally: use the darcs archive instead of PLaneT.
+\
+\ # darcs get http://zwizwa.be/darcs/staapl
+\ # cd staapl
+\ # make pic18 planet-link
+\
+\ Install the staaplc wrapper.  This will pull in the distro from
+\ PLaneT when not using darcs.
+\
+\ # sudo mzscheme-p zwizwa/staapl/install
+\ # staaplc logan.f
+\
+\ This produces logan.hex (binary image to upload to target) and
+\ logan.ss (a Scheme script for target interaction. ).  To look at the
+\ generated code try:
+\
+\ # gpdasm -p 18F2620 logan.hex 
+\
+\ To upload with pk2cmd (from Microchip website).  If pk2 isn't
+\ registered with udev this might need sudo.
+\
+\ # pk2cmd -I -p PIC18F2620 -F logan.hex -M
+\ --------------------------------------------------------------------
+
+\ Chip config.  Look in the data sheet for these.
+#x300000 org-begin
+  #x00 , #x26 , #x0F , #x0E ,  
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xA0 ,  \ B: boot write protect
+  #x0F , #x40 , 
+org-end
+
+
+macro
+: fosc 40 MHz ;  \ 4 clock cycles per instruction cycle gives 10 MIPS.
+: baud 230400 ;  \ Highest standard rate working with FTDI USB-TTL cable.
+: app-boot boot-size ;  \ default boot protect size
+forth
+
+load p18f2620.f        \ chip macros
+load monitor-serial.f  \ boot block + serial monitor code
+
+\ This code will go into the bootloader.
+load busyloop.f
+
+\ The simplest logic analyzer: 23.04 k samples/sec - 8 channels.
+: logan8 #xFF TRISB ! begin PORTB @ transmit again ;
+
+\ A single channel serial one with higher rate, using TMR2 which can
+\ be set to an arbitrary period.
+
+  
+macro
+: sync-flag PIR1 TMR2IF ;
+forth
+
+: sync-period
+    begin sync-flag high? until   \ Wait for timer IF
+          sync-flag low ;         \ Acknowledge
+
+: sample+  
+    PORTB @ rot>>c drop   \ Move bit to carry flag
+    rot<<c ;              \ Accumulate
+
+: start-timer
+    PR2 !           \ set period
+    #x04 T2CON ! ;  \ activate timer w. no pre/post scaling    
+
+: logan1
+    #xFF TRISB !
+    54 start-timer
+    begin
+        -1 \ accumulator
+            8 for sync-period sample+ next
+        transmit
+    again
+
+
+\ : logan1-test
+\     #xFF TRISB !
+\     54 start-timer
+\     -1 8 for sync-period sample+ next ;
+  
+  
+\ #sh# pk2cmd -I -M -R -p PIC18F2620 -f $1

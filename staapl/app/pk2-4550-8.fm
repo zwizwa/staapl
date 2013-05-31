@@ -1,0 +1,31 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+
+provide-all
+
+\ Code for the USBPicStamp by Johannes Taelman.
+
+\ This is still in bootstrap phase.  My current setup uses a PK2 for
+\ programming and console.  PIC's RX/TX are connected to ICD2 PGC and
+\ PGD signals.
+
+\ staaplc -u -d pk2 picstamp.f 
+
+\ config
+#x300000 org-begin
+
+\ extended instruction set, no wdt, no code protect, 
+
+#x21 , #x08 , #x3A , #x1E ,   \ intosc
+#x00 , #x81 , #x85 , #x00 ,   \ extended instruction set disabled
+#x0F , #xC0 , #x0F , #xE0 ,
+#x0F , #x40 , 
+
+org-end
+
+staapl pic18/boot   \ chip init code
+load p18f4550.f     \ chip macros
+load monitor-icsp.f \ boot block + icsp comm monitor code
+
+
+\ #sh# pk2cmd -I -M -R -p PIC18F2550 -f $1
+

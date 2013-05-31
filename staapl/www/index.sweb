@@ -1,0 +1,119 @@
+#lang scribble/doc
+@;{ -*- scheme -*- }
+
+@;{ Only two macros needed: one for refs and one to make xhtml tag words. }
+@(define-syntax-rule (define-tags name ...) 
+   (begin (define (name . args) `(name () ,@args)) ...))
+@(define-syntax-rule (define-ref ref (k v) ...)
+   (begin
+     (define refs
+       (make-immutable-hash '((k . v) ...)))
+     (define (ref key . text)
+       `(a ((href ,(hash-ref refs key))) ,@text))))
+
+@(define-tags title h1 h2 p ul li pre)
+
+@(define-ref ref
+(plt "http://www.plt-scheme.org")
+(conc "http://en.wikipedia.org/wiki/Concatenative_programming_language")
+(forth "http://en.wikipedia.org/wiki/Forth_%28programming_language%29")
+(pic18 "http://www.microchip.com/PIC18/")
+(intro "http://zwizwa.be/archive/staapl.html")
+(dialect "http://zwizwa.be/archive/pic18-forth.pdf")
+(reference "http://zwizwa.be/archive/staapl-reference.html")
+(interactive "http://zwizwa.be/archive/pic18-interaction.html")
+(synth "http://zwizwa.be/archive/pic18-synth.pdf")
+(blog "http://zwizwa.be/ramblings/staapl-blog")
+(plt-doc "http://docs.plt-scheme.org")
+(list "http://zwizwa.be/cgi-bin/mailman/listinfo/staapl-list")
+(me "http://zwizwa.be/personal")
+(sheep "sheep/")
+(forthtv "forthtv/")
+(catkit "catkit/")
+(krikit "krikit/")
+)
+
+@title{Staapl}
+
+@h1{Staapl}
+
+@h2{About}
+
+Staapl is a collection of abstractions for metaprogramming
+microcontrollers from within @ref['plt]{PLT Scheme}. The core of the
+system is a programmable code generator structured around a functional
+@ref['conc]{concatenative} macro language with partial evaluation. On
+top of this it includes a syntax frontend for creating
+@ref['forth]{Forth} style languages, a backend code generator for the
+Microchip @ref['pic18]{PIC18} microcontroller architecture, and
+interaction tools for a productive edit-compile-run cycle.
+
+
+@h2{Status}
+
+The phase I goal - to build a practical, well-factored, easily
+extensible base system - is completed and put in maintenance mode. It
+will serve as the basis for phase II: further experiments with domain
+specific languages for DSP and embedded control and more elaborate
+compilation techniques to implement them.
+
+@h2{Documentation}
+
+@ul{
+
+@li{ The @ref['intro]{general idea} behind Staapl metaprogramming for
+     PLT Scheme. }
+
+@li{ An overview of @ref['dialect]{PIC18 macro Forth dialect}. }
+
+@li{ The @ref['reference]{reference guide} for the Scheme API. }
+
+@li{ A practical tutorial about @ref['interactive]{interactive
+     tethered development}. }
+
+@li{ A tutorial about @ref['synth]{writing a low-level DSL} using
+     bottom up programming with procedures and macros. }
+
+@li{ Some articles on the @ref['blog]{blog}. }
+
+@li{ The excellent @ref['plt-doc]{PLT Scheme documentation}. }
+@li{ Interactive documentation on @ref['list]{mailing list}. }
+
+}
+
+
+Since this is a developer-oriented project with a lot of effort put
+into clean organization, I suggest looking at the source code to
+pierce through the top-layer of workflow glue. Staapl is structured as
+a library with multiple entry points, not a monolithic application. I
+encourage you to build your own workflow on top of it, and integrate
+it with other tools. (And share that code!).
+
+
+@h2{Projects}
+
+I am currently looking for projects that apply Staapl to practical
+problems in the embedded DSP/control field. I am particularly
+interested in adding backends for other architectures. Staapl contains
+a preliminary port for the 12 and 14 bit PIC cores, and I've been
+looking into porting staapl to dsPIC. While Staapl's niche is
+microcontrollers, larger 32 bit machines are intended to be supported
+through a C backend for which there is preliminary code. For more
+information please @ref['me]{contact me} directly.  
+
+@p{}
+
+The PIC18 Forth language has been used in:
+
+    @ul{
+
+       @li{ The @ref['sheep]{Sheep} sound synthesizer. }
+       @li{ The @ref['forthtv]{ForthTV} B/W composite video
+            generator. }
+       @li{ The @ref['catkit]{CATkit} and @ref['krikit]{KRIkit}
+            boards. }
+       @li{ Several hands-on workshops. }
+
+    }
+
+

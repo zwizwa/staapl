@@ -1,0 +1,36 @@
+
+Project history:
+
+BROOD 5.x
+- static name management: modules + lambda (no more hash tables)
+- separation of rpn macro language and forth syntax (parsing words)
+- base scat language: stack + hidden state threading
+- macro laguage: 2stack = scat stack + assembly stack
+- more macro / postponed-word unification (i.e. multi-exit macros)
+- better target specialization: controlled redefine of core words
+- simplified assembler + improved code data structure
+- asm pattern matcher with static checking
+- state rep: structure type inheritance + functional update (factory)
+
+BROOD 4.x
+- host language implemented as mzscheme macros (without interpreter)
+- made most macros hygienic, including pattern + forth preprocessor.
+- purification: eliminated some side effects
+- added better state syntax + state combinators
+
+BROOD 3.x
+- switched to host language with static binding
+- moved from implicit functional store -> explicit state binding (lifting)
+- introduced pattern matching language for peephole optimizer
+
+BROOD 2.x
+- switched from forth to functional host language with dynamic binding
+- uses functional store
+- sheepsint 2.0 on 18f1220
+
+BROOD 1.x (original BADNOP)
+- imperative forth host language
+- simple PIC specific
+- sheepsint 1.0 on 12f675
+
+

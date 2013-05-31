@@ -1,0 +1,6 @@
+#lang planet zwizwa/staapl/pic18
+\ -*- forth -*-x
+
+\ An example of a simple module wrapper.
+load monitor-p18f1220.f
+

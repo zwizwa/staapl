@@ -1,0 +1,39 @@
+<html><body>
+<h2>The Sheep</h2>
+
+<pre>
+The Sheep is an idiosyncratic 1-bit sound synthesizer implemented in
+Staapl's PIC18 Forth dialect.  It serves purpose as a the test suite
+of the Staapl distribution.  Next to that it is a fully functional
+sound synthesis library that tries to take the most out of 1-bit sound
+synthesis on a limited architecture using a layered bottom-up
+approach.  It can be seen as an example of how to ``squeeze'' an
+application into a much smaller platform by slight modification of the
+requirements.
+
+The time-critical part is a 3-oscillator synth engine based on 3
+hardware 16-bit timers, giving an effective sample rate of 2 MHz.  A
+counter provides synchronization events on different time scales based
+on the remaining 8-bit timer.  The 3 oscillators can be combined to
+square waves, cross modulated square waves (XOR) or envelopped waves
+(AND).  One of the oscillators can be switched to noise mode.  The
+oscillators can be synced to support hard-sync formant synthesis.
+
+The lower frequency modulation part (around 200Hz) is not time
+critical.  The PIC runs at 2 MIPS which gives about 10k instructions
+per modulation tick.  The code contains abstractions to split sound
+generation in two cooperative tasks: one to implement loops (virtual
+sound samples) and one to trigger those loops in a standard
+hierarichal procedural way (music, notes).  In addition it contains
+some abstractions to build a pattern sequencer.
+
+The current version of Sheep runs on the PIC18F1220.  It was
+originally written for the PIC12F625 as part of the first iteration of
+Staapl (april 2005).  The Sheep software is released under the GPL v2,
+and the schematic is placed in the public domain.
+
+Documentation:
+ * <a href="http://zwizwa.be/archive/pic18-synth.pdf">tutorial</a>
+ * <a href="http://zwizwa.be/archive/sheep-schem.ps.gz">schematic</a>
+
+</pre></body></html>

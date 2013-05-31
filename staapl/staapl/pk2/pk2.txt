@@ -1,0 +1,414 @@
+Racket driver for PICkit2 v2.
+
+This project is a Staapl[3] spin-off.  It interfaces the PK2[1]
+programmer to the Racket programming language[2].
+
+The PK2 v2 firmware contains a collection of communication primitives
+that implement the basic Microchip ICD protocol, and provides a simple
+scripting engine on top to tailor programming algorithms to different
+chips.
+
+My ultimate goal is to use the PK2 together with the Staapl framework
+as a programmer and debugger.
+
+Old information is scattered around the Staapl dev log [4].
+
+
+[1] http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&nodeId=1406&dDocName=en023805
+[2] http://racket-lang.org
+[3] entry://../staapl-blog/
+[4] entry://../staapl/
+
+Entry: next
+Date: Sun Feb 15 13:19:34 CET 2009
+
+I left off last time trying to program an 18f2620 while the software
+was set to 18f1220.  For the rest, I think I understand how the
+protocol works now: the code just needs to be cleaned up and tested.
+It worked before, except for some bugs here and there.
+
+
+Entry: tried to re-integrate with staapl
+Date: Sun Mar  8 12:19:38 CET 2009
+
+so.. tried for 18F2550 with device set correctly.. no change
+though. reset + subsequent dump works, but everything after that
+doesn't..
+
+i do like to get to a point where the PK2 can be used to just connect
+to a target without extra console serial port..
+
+
+
+Entry: Picking back up
+Date: Tue Mar  1 23:53:04 EST 2011
+
+Almost 2 years later it still doesn't work ;)
+
+Let's pick it back up.  I forgot where I left off; the previous
+messages do not make much sense.  What is the basic binary?
+
+Trying the obvious: make.  This breaks:
+
+
+make -C ~/pk2
+make: Entering directory `/home/tom/pub/darcs/pk2'
+mzc -v -k pk2.ss
+mzc v4.2.4.5 [3m], Copyright (c) 2004-2010 PLT Scheme Inc.
+"pk2.ss":
+  making "/home/tom/pub/darcs/pk2/pk2.ss"
+  making "/home/tom/pub/darcs/pk2/libusb.ss"
+libusb.ss:155:16: module: duplicate definition for identifier at: usb-device-descriptor in: (define-values (_usb-device _usb-device-pointer _usb-device-pointer/null usb-device? usb-device-tag make-usb-device usb-device-next usb-device-prev usb-device-filename usb-device-bus usb-device-descriptor usb-device-config usb-device-dev usb-device-devnum usb-device-num_children usb-device-children set-usb-device-next! set-usb-device-prev! set-usb-device-filename! set-usb-device-bus! set-usb-device-descriptor! set-usb-device-config! set-usb-device-dev! set-usb-device-devnum! set-usb-device-num_children! ...
+make: *** [pk2] Error 1
+make: Leaving directory `/home/tom/pub/darcs/pk2'
+
+First hurdle is to get back in the the FFI.  My guess is that it's
+something to do with recursive datastructures.
+
+
+Entry: The plan
+Date: Mon Mar 21 10:03:26 EDT 2011
+
+Jaromir Sukuba has released some info on the PIC background debugger
+unit (DBU) [1].  This has revived my interest in using an unmodifed
+PK2 to act as a run-time interface for Staapl code.
+
+Roadmap:
+  1. Get the programmer back up (libusb changes)
+  2. Get bulk data transfer to work to Staapl using the 20bit ICD protocol
+  3. Enable the debugger features from [1].
+
+[1] entry://../electronics/20110320-225422
+
+
+Entry: Previous work
+Date: Mon Mar 21 10:21:42 EDT 2011
+
+Frankly I don't remember much of what worked and what didn't.  This[1]
+seems to be a good starting point.
+
+I think I never got the programming to work, but I did get the serial
+connection to do something however unreliably.
+
+[1] entry://../staapl/20081122-151042
+
+
+Entry: FFI changes
+Date: Sat Mar 26 11:02:26 EDT 2011
+
+Looks like the behaviour of `define-cstruct' changed.  I have a clash
+between a struct name and an accessor name.
+
+Solution: mirror the libusb names exactly, which then disambiguates:
+
+usb_device_descriptor : struct name
+usb_device-descriptor : accessor of `descriptor' field in `usb_device' struct
+
+
+
+Ok, it's loading.
+
+
+
+
+Entry: Send out a data packet using standard PIC protocol.
+Date: Sat Mar 26 13:07:59 EDT 2011
+
+Start at 
+pk2.ss: write-program-memory
+
+Now hook scope to the data and clock lines.
+
+
+  ICD2    serial                 color
+
+1 /MCLR                          white
+2 VDD                            red
+3 GND                            black
+4 PGD     RX  (<- target TX/CK)  yellow
+5 PGC     TX  (-> target RX/DT)  orange
+6 PGM
+
+
+Ok I got scope setup to capture the data.  ( Still learning how to use
+the Rigol.  Got some weird readings with propes on 10x.. )
+
+
+
+The command to use is WRITE_BITS_BUFFER, which clocks out 1-8 bits
+from the Downstream Data Buffer and increments the pointer.
+
+I got something working using this:
+
+1. use the pk2cmd program to program the chip
+2. (enter-programming 0)
+3. (EXECUTE_SCRIPT (WRITE_BITS_LITERAL 8 #xAA))
+
+So this means that at least some init is not done properly, and the
+`enter-programming' performs some init that's necessary.
+
+
+Got the dasm working (damn, I did hide the data pretty deep!) and this
+is what thats cript does:
+
+
+	VPP_OFF
+	MCLR_GND_ON
+	VPP_PWM_ON
+	BUSY_LED_ON
+	SET_ICSP_PINS 0
+	DELAY_LONG 20
+	MCLR_GND_OFF
+	VPP_ON
+	DELAY_SHORT 127
+	MCLR_GND_ON
+	VPP_OFF
+	VPP_ON
+	MCLR_GND_OFF
+	DELAY_LONG 19
+
+
+So, reduced it to
+
+  (reset-hold)
+  (target-on)
+  (EXECUTE_SCRIPT
+     (SET_ICSP_PINS 0)
+     (WRITE_BITS_LITERAL 8 byte))
+
+
+And indeed the 2 first commands are not necessary.  
+
+
+Final word:
+
+(define (icsp-send bytes)
+  (when (> (length bytes) 29)
+    (error 'buffer-overflow))
+  (apply EXECUTE_SCRIPT
+         (cons (SET_ICSP_PINS 0)
+               (for/list ((b bytes))
+                 (WRITE_BYTE_LITERAL b)))))
+   
+
+For receive I'll need to use buffers.
+
+
+Entry: Read a packet
+Date: Sat Mar 26 20:00:46 EDT 2011
+
+What's too bad is that this mode is host-polled.  Ideally, you'd want
+a ping-pong protocol, letting the target do the timing for commands
+that are not immediate.
+
+So we need a protocol that take this into account.  The problem is
+that if the target wakes up during a host poll, it doesn't know at
+what clock pulse it has arrived.
+
+The simplest way to do this seems to be to have the host poll the data
+line.  If it makes a transition, the target is ready to send and the
+synchronous readout can start.
+
+Protocol:
+
+1. Host sends out size-prefixed byte packet.
+2. Host polls target receive-ack (i.e. data ->high)
+3. Host polls for target ready-tos-end (i.e. data ->low)
+4. Host clocks out one byte (size)
+5. Host clocks out the remainder of the data packet
+
+
+Read mechanism also seems to work.
+
+(define (icsp-recv bytes)
+  (CLR_UPLOAD_BFR)
+  (if (< bytes 1)
+      '()
+      (begin
+        (EXECUTE_SCRIPT (SET_ICSP_PINS 0)) ;; only clock matters
+        (if (= 1 bytes)
+            (EXECUTE_SCRIPT (READ_BYTE_BUFFER))
+            (EXECUTE_SCRIPT (READ_BYTE_BUFFER) (LOOP 1 (- bytes 1))))
+        (UPLOAD_DATA))))
+
+
+I quickly tried the ICD protocol handshake but that doesn't seem to do
+anything.  Maybe it should trigger on the other line?
+
+
+Entry: Read PGD
+Date: Sun Mar 27 00:49:50 EDT 2011
+
+How to read the status of the data pin?
+
+There doesn't seem to be much choice apart from reading out RA (PORTA
+= 0xF80) directly:
+
+ICSPDAT RA2  4
+ICSPCLK RA3  8
+
+Verified, this works:
+
+(EXECUTE_SCRIPT (PEEK_SFR #x80))
+(UPLOAD_DATA)
+
+
+
+Entry: Busy
+Date: Sun Mar 27 18:27:45 EDT 2011
+
+I'm thinking of using PGD as a busy indicator.  This works as long as
+we're careful about not driving from both sides.  It's a bit
+unpredictable to know what PK2 is doing; it doesn't release
+immediately.  Therefore it might be best to install a 1K current
+limiting resistor on the PGD line.
+
+However that's a severe limitation.  I'd like this to work with just
+the chip in a socket tied to a PK2.
+
+Maybe the AUX line should be used?
+
+Wait.. I could use the RB pullups.  Pullup enabled = busy, released =
+ready.
+
+All that is to stick to 2 lines.  Going to 3 lines it's probably best
+to switch to I2C or SPI.
+
+pullups configured by active low: INTCON2 RBPU
+
+Nope... they are too weak.  Only go up to about 1V?
+
+
+So...  If I want 2-wire, I need better timing.
+
+
+Entry: I2C or SPI?
+Date: Mon Mar 28 00:17:50 EDT 2011
+
+While I2C is only 2-wire, AUX is used on the PK2 to support it.  Maybe
+because PGD is used for debug signalling?
+
+I tried both I2C and SPI, and I can't get I2C to do anything.
+Probably pin or pullup misconfig.  However, SPI is straightforward.
+
+Getting the SPI to work on the pic seems trivial.  However, there is
+still the same problem of target-side signalling; I2C and SPI are not
+going to solve that, and probably only complicate matters by using the
+AUX pin.
+
+Simplest seems to be to use the ordinary ICSP proto, and use AUX for
+client busy signalling.  This is safe, as the pin is dedicated, and
+PK2 can switch it to input before doing anything else.
+
+My guess is that the secret ICD debug proto does something similar.
+
+
+Entry: Try to use only 2 wires.
+Date: Mon Mar 28 10:16:33 EDT 2011
+
+1. REQ: Simple connection
+
+The objective of the Staapl comm over ICSP pins is to reduce comm pin
+and part count on small circuits.  The ICSP has to be there anyway, so
+better use it for debug comm.  The reason to only use 2 wires apart
+from simplicity is that not everyone wires up the PGM (AUX) port.  Any
+other wiring assumptions need to be dropped as most circuits just
+connect PGC and PGD directly.
+
+2. REQ: Async operation
+
+The problem is sync.  In the ICSP protocol the host initiates transfer
+which means the target needs to be listening.  In the Staapl console
+case the target can detach and execute code before it comes back to
+listen for comm.  So some kind of sync is necessary.
+
+
+3. Separate handshake?
+
+Using one of the ICSP lines (the AUX/PGM line) to implement busy/ready
+handshake makes it easy to solve the sync issue when the software is
+operating properly.
+
+Using the PGD line to indicate busy/ready state works, but creates bus
+conflicts which needs to be handled in hardware by using current
+limiting resistors.
+
+Both of these solutions add extra hardware constraints.
+
+
+4. Synchronous preamble
+
+The other option is to encode the sync information in the data stream,
+and use the fact that a non-asserted PGD line is pulled low by the
+PK2, i.e. when the client is not listening, the host will read 0.
+
+The PK2 can poll a single bit at a time, so the simplest solution
+seems to be to send a 1 bit to indicate target-ready state.
+
+Note that bus conflicts can still occur when the sync gets off so it's
+still safer to use current limiters but at least it has a chance of
+working out-of-the-box.
+
+To make this work efficiently, it's probably best to switch to packet
+mode: the sync is valid for a full data packet.  The first byte
+transmitted after the sync is the packet size.
+
+Whether this needs buffering depends on what is actually sent.  For
+the Staapl protocol, an execution command will always be the last byte
+in the comm, requiring resync for the reply.
+
+Note: the preamble needs to be at least 2 bits: bit 1 for signalling
+the host and bit 2 for releasing the line.
+
+5. Synchronous postamble
+
+We have to release the line after the last bit is written, but we
+don't have any timing info.  Seems that a postamble might be
+necessary.
+
+If we use a generic command/reply structure the postamble can be
+avoided.
+
+
+
+Entry: Bi-directional point-to-point link
+Date: Mon Mar 28 22:06:52 EDT 2011
+
+To summarize: a preamble is necessary to indicate target ready/busy.
+It might also be best to build the data direction straight into the
+handshake to allow a 2-way packet interface instead of a request,reply
+structure: a point-to-point bidirectional link.
+
+( Am I re-inventing I2C? )
+
+In idle state, host is polling one bit at a time from the target.
+Target returns 1Z which reads as 10 on the host side.
+
+At this point the host know the client is in sync and can write out
+the data direction bit.
+
+After that host generates clock and communication happens in one of
+the 2 directions.  If the client is sending it needs an extra clock
+bit to allow for the line to be released.
+
+
+This gives the following transaction protocol (target side).
+
+
+1ZR           preamble + dir bit
+<byte>        size
+[<byte> ...]  payload
+Z             postamble
+
+Z = high-Z (pulled down)
+R = client read
+
+
+Testing the 1Z preamble, PK2 reads the 2nd bit as 1, presumably
+because it's not pulled to ground fast enough.  (I love my DSO!)  It
+might be a good idea to have the target pull it down, and use the 10
+sequence as a consitency check to make sure the target is fast enough.
+
+
+Tested on target: this works OK.
+

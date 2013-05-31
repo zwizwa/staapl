@@ -1,0 +1,42 @@
+#lang scheme/base
+
+;; Baseline Flash 8-bit PIC Microcontroller with 12 bit instruction word.
+;; This includes PIC10, PIC12 and PIC16 chips.
+
+(require "../asm.ss")
+(instruction-set
+
+ (addwf  (f d)    "0001 11df ffff")
+ (andwf  (f d)    "0001 01df ffff")
+ (clrf   (f  )    "0000 011f ffff")
+ (clrw   (   )    "0000 0100 0000")
+ (comf   (f d)    "0010 01df ffff")
+ (decf   (f d)    "0000 11df ffff")
+ (decfsz (f d)    "0010 11df ffff")
+ (incf   (f d)    "0010 10df ffff")
+ (incfsz (f d)    "0011 11df ffff")
+ (iorwf  (f d)    "0001 00df ffff")
+ (movf   (f d)    "0010 00df ffff")
+ (movwf  (f  )    "0000 001f ffff")
+ (nop    (   )    "0000 0000 0000")
+ (rlf    (f d)    "0011 01df ffff")
+ (rrf    (f d)    "0011 00df ffff")
+ (subwf  (f d)    "0000 10df ffff")
+ (swapf  (f d)    "0011 10df ffff")
+ (xorwf  (f d)    "0001 10df ffff")
+ (bcf    (f b)    "0100 bbbf ffff")
+ (bsf    (f b)    "0101 bbbf ffff")
+ (btfsc  (f b)    "0110 bbbf ffff")
+ (btfss  (f b)    "0111 bbbf ffff")
+ (andlw  (k  )    "1110 kkkk kkkk")
+ (call   (k  )    "1001 kkkk kkkk")
+ (clrwdt (   )    "0000 0000 0100")
+ (goto   (k  )    "101k kkkk kkkk")
+ (iorlw  (k  )    "1101 kkkk kkkk")
+ (movlw  (k  )    "1100 kkkk kkkk")
+ (option (   )    "0000 0000 0010")
+ (retlw  (k  )    "1000 kkkk kkkk")
+ (sleep  (   )    "0000 0000 0011")
+ (tris   (f  )    "0000 0000 0fff")
+ (xorlw  (k  )    "1111 kkkk kkkk")
+)

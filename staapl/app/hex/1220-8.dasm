@@ -1,0 +1,276 @@
+000000:  d01f  bra	0x40
+000040:  d0f1  bra	0x224
+000044:  ba9e  btfsc	0x9e, 0x5, 0
+000046:  d001  bra	0x4a
+000048:  d7fd  bra	0x44
+00004a:  a2ab  btfss	0xab, 0x1, 0
+00004c:  d003  bra	0x54
+00004e:  98ab  bcf	0xab, 0x4, 0
+000050:  88ab  bsf	0xab, 0x4, 0
+000052:  d7f8  bra	0x44
+000054:  6eec  movwf	0xec, 0
+000056:  50ae  movf	0xae, 0, 0
+000058:  a4ab  btfss	0xab, 0x2, 0
+00005a:  d002  bra	0x60
+00005c:  50ed  movf	0xed, 0, 0
+00005e:  d7f2  bra	0x44
+000060:  0012  return	0
+000062:  b2ac  btfsc	0xac, 0x1, 0
+000064:  d001  bra	0x68
+000066:  d7fd  bra	0x62
+000068:  6ead  movwf	0xad, 0
+00006a:  50ed  movf	0xed, 0, 0
+00006c:  0012  return	0
+00006e:  36ef  rlcf	0xef, 0x1, 0
+000070:  34e8  rlcf	0xe8, 0, 0
+000072:  0005  push
+000074:  6efe  movwf	0xfe, 0
+000076:  50ed  movf	0xed, 0, 0
+000078:  6efd  movwf	0xfd, 0
+00007a:  50ed  movf	0xed, 0, 0
+00007c:  0012  return	0
+00007e:  6ada  clrf	0xda, 0
+000080:  6ed9  movwf	0xd9, 0
+000082:  50fd  movf	0xfd, 0, 0
+000084:  6ede  movwf	0xde, 0
+000086:  50fe  movf	0xfe, 0, 0
+000088:  6ede  movwf	0xde, 0
+00008a:  50ed  movf	0xed, 0, 0
+00008c:  0006  pop
+00008e:  0012  return	0
+000090:  60ef  cpfslt	0xef, 0
+000092:  6eef  movwf	0xef, 0
+000094:  50ed  movf	0xed, 0, 0
+000096:  44e8  rlncf	0xe8, 0, 0
+000098:  26fd  addwf	0xfd, 0x1, 0
+00009a:  0b01  andlw	0x1
+00009c:  22fe  addwfc	0xfe, 0x1, 0
+00009e:  50ed  movf	0xed, 0, 0
+0000a0:  0012  return	0
+0000a2:  6eec  movwf	0xec, 0
+0000a4:  9ef2  bcf	0xf2, 0x7, 0
+0000a6:  0e55  movlw	0x55
+0000a8:  6ea7  movwf	0xa7, 0
+0000aa:  0eaa  movlw	0xaa
+0000ac:  6ea7  movwf	0xa7, 0
+0000ae:  82a6  bsf	0xa6, 0x1, 0
+0000b0:  8ef2  bsf	0xf2, 0x7, 0
+0000b2:  50ed  movf	0xed, 0, 0
+0000b4:  0012  return	0
+0000b6:  84a6  bsf	0xa6, 0x2, 0
+0000b8:  88a6  bsf	0xa6, 0x4, 0
+0000ba:  d7f3  bra	0xa2
+0000bc:  84a6  bsf	0xa6, 0x2, 0
+0000be:  98a6  bcf	0xa6, 0x4, 0
+0000c0:  000a  tblrd	*-
+0000c2:  dfef  rcall	0xa2
+0000c4:  0009  tblrd	*+
+0000c6:  0012  return	0
+0000c8:  6eec  movwf	0xec, 0
+0000ca:  5000  movf	0, 0, 0
+0000cc:  6eec  movwf	0xec, 0
+0000ce:  5001  movf	0x1, 0, 0
+0000d0:  d7d0  bra	0x72
+0000d2:  6eec  movwf	0xec, 0
+0000d4:  5002  movf	0x2, 0, 0
+0000d6:  6eec  movwf	0xec, 0
+0000d8:  5003  movf	0x3, 0, 0
+0000da:  d7cb  bra	0x72
+0000dc:  0005  push
+0000de:  d82a  rcall	0x134
+0000e0:  6efe  movwf	0xfe, 0
+0000e2:  50ed  movf	0xed, 0, 0
+0000e4:  6efd  movwf	0xfd, 0
+0000e6:  50ed  movf	0xed, 0, 0
+0000e8:  0012  return	0
+0000ea:  6eec  movwf	0xec, 0
+0000ec:  0eff  movlw	0xff
+0000ee:  dff1  rcall	0xd2
+0000f0:  d7f0  bra	0xd2
+0000f2:  6eec  movwf	0xec, 0
+0000f4:  0e00  movlw	0
+0000f6:  d7f9  bra	0xea
+0000f8:  6eec  movwf	0xec, 0
+0000fa:  0e01  movlw	0x1
+0000fc:  dff6  rcall	0xea
+0000fe:  d7e9  bra	0xd2
+000100:  8ea6  bsf	0xa6, 0x7, 0
+000102:  9ca6  bcf	0xa6, 0x6, 0
+000104:  dfd8  rcall	0xb6
+000106:  d7f5  bra	0xf2
+000108:  8ea6  bsf	0xa6, 0x7, 0
+00010a:  9ca6  bcf	0xa6, 0x6, 0
+00010c:  dfd7  rcall	0xbc
+00010e:  d7f1  bra	0xf2
+000110:  0b0f  andlw	0xf
+000112:  dfc1  rcall	0x96
+000114:  d7ee  bra	0xf2
+000116:  d010  bra	0x138
+000118:  d7ef  bra	0xf8
+00011a:  d010  bra	0x13c
+00011c:  d05e  bra	0x1da
+00011e:  d063  bra	0x1e6
+000120:  d7e8  bra	0xf2
+000122:  00ff  reset
+000124:  d03b  bra	0x19c
+000126:  d02f  bra	0x186
+000128:  d04e  bra	0x1c6
+00012a:  d042  bra	0x1b0
+00012c:  d062  bra	0x1f2
+00012e:  d06d  bra	0x20a
+000130:  d7e7  bra	0x100
+000132:  d7ea  bra	0x108
+000134:  dfc9  rcall	0xc8
+000136:  d7c8  bra	0xc8
+000138:  dfc7  rcall	0xc8
+00013a:  d7db  bra	0xf2
+00013c:  dfcf  rcall	0xdc
+00013e:  d7d9  bra	0xf2
+000140:  dfc3  rcall	0xc8
+000142:  0fff  addlw	0xff
+000144:  50ed  movf	0xed, 0, 0
+000146:  e302  bnc	0x14c
+000148:  dfbf  rcall	0xc8
+00014a:  dfe2  rcall	0x110
+00014c:  0012  return	0
+00014e:  dfc1  rcall	0xd2
+000150:  dfbb  rcall	0xc8
+000152:  6eec  movwf	0xec, 0
+000154:  dfbe  rcall	0xd2
+000156:  0fff  addlw	0xff
+000158:  0f01  addlw	0x1
+00015a:  e102  bnz	0x160
+00015c:  50ed  movf	0xed, 0, 0
+00015e:  0012  return	0
+000160:  6ee4  movwf	0xe4, 0
+000162:  50ed  movf	0xed, 0, 0
+000164:  dfb1  rcall	0xc8
+000166:  dfb5  rcall	0xd2
+000168:  06e7  decf	0xe7, 0x1, 0
+00016a:  e1fc  bnz	0x164
+00016c:  52e5  movf	0xe5, 0x1, 0
+00016e:  0012  return	0
+000170:  dfab  rcall	0xc8
+000172:  0fff  addlw	0xff
+000174:  e203  bc	0x17c
+000176:  50ed  movf	0xed, 0, 0
+000178:  dfe3  rcall	0x140
+00017a:  d001  bra	0x17e
+00017c:  dfe8  rcall	0x14e
+00017e:  d7f8  bra	0x170
+000180:  dfa3  rcall	0xc8
+000182:  6eec  movwf	0xec, 0
+000184:  d7b2  bra	0xea
+000186:  dffc  rcall	0x180
+000188:  6ee4  movwf	0xe4, 0
+00018a:  50ed  movf	0xed, 0, 0
+00018c:  6eec  movwf	0xec, 0
+00018e:  0009  tblrd	*+
+000190:  50f5  movf	0xf5, 0, 0
+000192:  df9f  rcall	0xd2
+000194:  06e7  decf	0xe7, 0x1, 0
+000196:  e1fa  bnz	0x18c
+000198:  52e5  movf	0xe5, 0x1, 0
+00019a:  0012  return	0
+00019c:  dff1  rcall	0x180
+00019e:  6ee4  movwf	0xe4, 0
+0001a0:  50ed  movf	0xed, 0, 0
+0001a2:  6eec  movwf	0xec, 0
+0001a4:  50de  movf	0xde, 0, 0
+0001a6:  df95  rcall	0xd2
+0001a8:  06e7  decf	0xe7, 0x1, 0
+0001aa:  e1fb  bnz	0x1a2
+0001ac:  52e5  movf	0xe5, 0x1, 0
+0001ae:  0012  return	0
+0001b0:  df8b  rcall	0xc8
+0001b2:  6ee4  movwf	0xe4, 0
+0001b4:  50ed  movf	0xed, 0, 0
+0001b6:  df88  rcall	0xc8
+0001b8:  6ef5  movwf	0xf5, 0
+0001ba:  000d  tblwt	*+
+0001bc:  50ed  movf	0xed, 0, 0
+0001be:  06e7  decf	0xe7, 0x1, 0
+0001c0:  e1fa  bnz	0x1b6
+0001c2:  52e5  movf	0xe5, 0x1, 0
+0001c4:  d796  bra	0xf2
+0001c6:  df80  rcall	0xc8
+0001c8:  6ee4  movwf	0xe4, 0
+0001ca:  50ed  movf	0xed, 0, 0
+0001cc:  df7d  rcall	0xc8
+0001ce:  6ede  movwf	0xde, 0
+0001d0:  50ed  movf	0xed, 0, 0
+0001d2:  06e7  decf	0xe7, 0x1, 0
+0001d4:  e1fb  bnz	0x1cc
+0001d6:  52e5  movf	0xe5, 0x1, 0
+0001d8:  d78c  bra	0xf2
+0001da:  dfac  rcall	0x134
+0001dc:  6eda  movwf	0xda, 0
+0001de:  50ed  movf	0xed, 0, 0
+0001e0:  6ed9  movwf	0xd9, 0
+0001e2:  50ed  movf	0xed, 0, 0
+0001e4:  d786  bra	0xf2
+0001e6:  dfa6  rcall	0x134
+0001e8:  6ef7  movwf	0xf7, 0
+0001ea:  50ed  movf	0xed, 0, 0
+0001ec:  6ef6  movwf	0xf6, 0
+0001ee:  50ed  movf	0xed, 0, 0
+0001f0:  d780  bra	0xf2
+0001f2:  6eec  movwf	0xec, 0
+0001f4:  0e40  movlw	0x40
+0001f6:  6ee4  movwf	0xe4, 0
+0001f8:  0eff  movlw	0xff
+0001fa:  6eec  movwf	0xec, 0
+0001fc:  0009  tblrd	*+
+0001fe:  50f5  movf	0xf5, 0, 0
+000200:  14ed  andwf	0xed, 0, 0
+000202:  06e7  decf	0xe7, 0x1, 0
+000204:  e1fa  bnz	0x1fa
+000206:  52e5  movf	0xe5, 0x1, 0
+000208:  d777  bra	0xf8
+00020a:  6eec  movwf	0xec, 0
+00020c:  50e9  movf	0xe9, 0, 0
+00020e:  d774  bra	0xf8
+000210:  6eec  movwf	0xec, 0
+000212:  0e00  movlw	0
+000214:  df34  rcall	0x7e
+000216:  d716  bra	0x44
+000218:  6eec  movwf	0xec, 0
+00021a:  0e02  movlw	0x2
+00021c:  df30  rcall	0x7e
+00021e:  d721  bra	0x62
+000220:  dff7  rcall	0x210
+000222:  d7fa  bra	0x218
+000224:  0e00  movlw	0
+000226:  6efc  movwf	0xfc, 0
+000228:  ee00  lfsr	0, 0x7f
+00022a:  f07f
+00022c:  ee10  lfsr	0x1, 0x8f
+00022e:  f08f
+000230:  0e00  movlw	0
+000232:  6efc  movwf	0xfc, 0
+000234:  688a  setf	0x8a, 0
+000236:  6eec  movwf	0xec, 0
+000238:  0e70  movlw	0x70
+00023a:  6ed3  movwf	0xd3, 0
+00023c:  8ac1  bsf	0xc1, 0x5, 0
+00023e:  8cc1  bsf	0xc1, 0x6, 0
+000240:  8893  bsf	0x93, 0x4, 0
+000242:  8293  bsf	0x93, 0x1, 0
+000244:  0e0c  movlw	0xc
+000246:  6eaf  movwf	0xaf, 0
+000248:  0e24  movlw	0x24
+00024a:  6eac  movwf	0xac, 0
+00024c:  0e90  movlw	0x90
+00024e:  6eab  movwf	0xab, 0
+000250:  50ed  movf	0xed, 0, 0
+000252:  dfe6  rcall	0x220
+000254:  a881  btfss	0x81, 0x4, 0
+000256:  d001  bra	0x25a
+000258:  d78b  bra	0x170
+60000000:  c800  movff	0x800, 0xf
+60000002:  000f
+60000004:  8000  bsf	0, 0, 0
+60000006:  0080  dw	0x80  ;unknown opcode
+60000008:  c003  movff	0x3, 0x3
+6000000a:  e003
+6000000c:  4003  rrncf	0x3, 0, 0

@@ -1,0 +1,70 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+staapl pic18/geo  \ scheme extension module
+provide-all
+
+\ Boot file for the burgler alarm application.
+\  target : PIC18F1220 (or comapatible, like 1330)
+\  comm   : Hardware serial port 38400 baud
+
+
+\ config bits
+\ internal oscillator, watchdog disabled
+#x300000 org-begin
+ #x00 , #xC8 , #x0F , #x00 ,  \ 0 1 2 3
+ #x00 , #x80 , #x80 , #x00 ,  \ 4 5 6 7
+ #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B  Using PK2, so don't need boot protect
+ #x03 , #x40 ,                \ C D
+org-end
+
+load p18f1220.f
+load monitor-serial-core.f
+
+path /home/tom/staapl/app  \ ???
+load synth/synth.f    \ application
+
+: warm
+    ' warm init-boot
+    init-all
+    init-board
+    engine-off
+    debug-serial? if interpreter ; then
+
+\ Run free without console.
+: go alarm sleep ;
+
+
+\ Setup info.    
+macro
+: fosc 8000000 ; \ internal osc
+: baud 38400 ;  
+forth
+
+
+\ bit 7 of state variable is sound on/off flag
+variable beep-state
+: beep beep-state 7 high?
+    if square 1 p0
+    else silence then ;
+
+\ POT 4 determines beep frequency.
+: state+
+    4 ad@ >> >> beep-state +! ;
+
+
+\ max duration +- 25 seconds, .1 sec resolution
+: alarm
+    engine-on
+    0 ad@ 1+ for 
+        10 for
+            7 sync \ FIXME (*)
+            beep state+
+        next
+    next
+    silence engine-off
+    ;
+
+\ (*) The other task is not initialized, but the app still seems to
+\ work fine.  It will probably break at some point (read: I don't
+\ understand why it works, but no time to fix it now).
+
+\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1

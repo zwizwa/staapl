@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Executes a staapl dictionary script.
+# Note that by default, the dictionaries are exported as modules.
+
+exec mzscheme -f $1 -e '(require readline/rep)(run)'

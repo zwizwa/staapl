@@ -1,0 +1,14 @@
+This package is part of the Staapl project, and contains the all the
+files necessary to support automatic installation through PLaneT.
+More information at
+
+  http://planet.plt-scheme.org/display.ss?package=staapl.plt&owner=zwizwa
+
+The full documentation, releases and darcs archive are available at
+
+  http://zwizwa.be/staapl
+
+Unless otherwise mentioned, all the files in this code tree are (c)
+2006-2008 Tom Schouten, and subject to the terms of the GPL v2.  See
+the file COPYING for more information.  Contact the author for
+alternative licencing options.

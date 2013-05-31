@@ -1,0 +1,4513 @@
+Edited Staapl blog.
+
+This is the Staapl blog.  It contains articles on topics related to
+the Staapl metaprogramming system.  The articles are continuously
+updated, with the intention to grow them into chapters of the Staapl
+manual.  This blog does not allow on-line comments, but you are
+invited to send reactions to me privately or the mailing list
+
+http://zwizwa.be/cgi-bin/mailman/listinfo/staapl-list
+
+The disorganized development log for Staapl can be found here:
+
+http://zwizwa.be/ramblings/staapl
+
+Staapl is also known under the working name Brood, which is
+unfortunately impossible to google..  For more information on the
+Staapl project see
+
+http://zwizwa.be/staapl
+
+
+
+
+Entry: The new Staapl (Brood-5)
+Date: Wed May 21 16:20:45 CEST 2008
+
+The main motivation for the 5th Staapl refactoring iteration was
+name scope management.
+
+The objective was to turn all names that occur in .f files into
+(Scheme) compile-time identifiers, and no longer use (Scheme) run-time
+hash tables indexed by symbolic names.  This is quite an important
+change, since it allows to treat all names hygienically.
+
+Relying more on PLT Scheme's scoping mechanism (lambda + modules)
+instead of ad-hoc hash table based namespaces makes Staapl behave
+better as a PLT Scheme extension[1].  Scope is everything!
+
+
+So, what does Staapl 5 look like?  The Coma language is defined as a
+collection of code transformers, which are (pure) Scat functions that
+operate on a stack of machine code (Scat's parameter stack).
+
+Staapl is implemented as a classical layered bottom-up Scheme
+application written in functional programming style, where Scheme
+macros are used extensively to construct binding forms and
+specification minilanguages.
+
+   * Scat layer.  A language layer on top of Scheme that implements a
+     concatenative language with threaded state.
+
+   * Coma layer. A collection of _primitive_ Scat functions that
+     implement (local) machine code transformations, specified in
+     terms of target machine code pattern matching.  Coma inherits
+     Scat's _composition_ model.
+
+   * Structured programming layer.  Forth-style control flow words
+     implemented using a 2nd compile time stack.
+
+   * Instantiation layer.  Create target code by evaluating generator
+     functions.  This produces code arranged in a control flow graph.
+
+   * Forth-style syntax: in addition to the s-expression syntax, some
+     frontends are provided for: prefix parsers, a forth-style lexer,
+     combined macro/word definition in a single .f file
+
+   * Interaction and name management code.  Independent of the
+     compiler, this layer provides target machine console interaction
+     for interactive debugging and (automated) testing.
+
+
+[1] What I realized, is that thinking about code _graph structure_ is
+    a whole lot more revealing than thinking about names in a flat
+    space!  This is where Scheme differs significantly from Lisp and
+    other dynamically typed languages.
+
+    For more information about the PLT Scheme declarative module
+    system, have a look at:
+    http://www.cs.utah.edu/plt/publications/macromod.pdf
+
+    This also finally made me see how to unify and represent both
+    dynamic interactive ``toplevel'' development and static
+    hierarchical modules.
+
+
+
+
+Entry: Compiler specialization: bottom up with holes?
+Date: Wed May 21 19:39:42 CEST 2008
+
+This is a justification for the violation of Staapl's bottom op code
+structure.  Code transformers living in the '(macro) namespace, can be
+arbitrarily mutated, to allow a cross-cutting specialization without
+too much red tape.  This allows the core language implementation to be
+separated from optimal target implementation, which replaces primitive
+operations in the core language.
+
+The main problem this solves is the impossibility to know in advance
+which primitive code generators need to be replaced for a specific
+target.  The main problem this introduces is that it is unrestricted.
+
+Properties of this system:
+
+  * All '(macro) transformers are boxed functions.  They can be
+    replaced with specialized versions.
+
+  * Each compiler specialization is instantiated in a separate
+    namespace, making these mutations less harmful due to limited
+    scope.
+
+This mechanism behaves somehow as a local 'parameterize operation, but
+is implemented differently.
+
+This could be solved using subclassing, but each ``object'' provides
+only a single method, meaning that it's better modeled as a
+parameterized function.
+
+All such mutations generate events.  Currently this triggers logging
+of the mutated macro to the console to keep an eye on this extension
+process, until I figure out a more static mechanism that can prevent
+some misuse of this mechanism:
+
+;; \__ target
+;; \__ scat
+;; \__ coma
+;; macro/jump     <- the 'control module redefines the 'jump macro
+;; \__ control
+;; macro/sym
+;; macro/label:
+;; macro/exit
+;; \__ comp
+;; \__ asm
+;; \__ forth
+;; \__ live
+;; macro/+
+;; macro//
+;; macro/*
+;; macro/-
+;; macro/dup
+;; macro/drop
+;; macro/swap
+;; macro/,
+;; macro/or-jump
+;; macro/not
+;; macro/then
+;; \__ purrr
+;; \__ pic18
+
+
+Entry: The use of macros in Scheme
+Date: Fri May 23 09:36:28 CEST 2008
+
+
+In this message Matthias Felleisen talks about 3 cases of Scheme macro
+use.  I'll give some examples of these below.
+
+  http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg01539.html
+
+1.
+
+The use of macros as a _data sublanguage_ is visible in the assembler
+generator.  It will create a representation (as functions) of a
+machine code specification typically found in a microcontroller data
+sheet.  Here is an excerpt from the PIC18F assembler:
+
+(instruction-set
+ (addwf   (f d a) "0010 01da ffff ffff")
+ (addwfc  (f d a) "0010 00da ffff ffff")
+ (andwf   (f d a) "0001 01da ffff ffff")
+ (clrf    (f a)   "0110 101a ffff ffff"))
+
+If you can stylize data entry macros such that what you are actually
+typing in the end can't be concentrated any further, then you basicly
+have a configuration file encoding your domain knowledge in a natural
+way.
+
+
+2.
+
+In the PIC18 compiler, a nice example of introduction of new _binding
+constructs_ is the 'patterns macro, which provides an RPN pattern
+matching syntax to specify machine code transformation.  It destructs
+machine instructions and makes their operands available as lexical
+Scheme names.
+
+(patterns (macro)
+   ;; Define '-' to subtract two numbers
+   (([qw a] [qw b] -)              ([qw (target: a b -)]))
+   (([addlw a] [qw b] -)           ([addlw (target: a b -)]))
+   (([qw a] -)                     ([addlw (target: a -1 *)]))
+   (([save] [movf a 0 0] -)        ([bpf 0 STATUS 0 0] [subfwb a 0 0]))
+   ((-)                            ([subwf POSTDEC0 0 0]))
+)
+
+The input patterns on the left are assembly code sequences, and the
+output is again an assembly code sequence.  The 'qw' pseudo operation
+Quotes a data Word: it pushes a number to the data stack.  Here the
+'-' subtraction operation is either is optimized away, which means the
+computation performed at compile time either fully or partially, or
+compiled as a PIC18 [subwf] instruction.
+
+
+3.
+
+Change of evaluation order is present in the 'target: macro above,
+which constructs assembly time expressions.  During compilation, code
+and data addresses are not assigned yet, meaning that computations
+depending on them need to be delayed until all the data is available
+at assembly time.  Note that due to multipass relaxation in the
+assembler, these expressions will end up being evaluated multiple time
+with possibly different input addresses.
+
+
+
+Entry: Unrolling Forth
+Date: Mon May 26 14:20:11 CEST 2008
+
+The most difficult task in Staapl has been finding a bridge between
+the layered, non-reflective, cross-compiled structure of Coma (lexer,
+parser, compiler, interpreter + Scheme code written using PLT's
+hierarchical module system) and the more traditional self-hosted
+reflective Forth approach.
+
+This ``unrolling'' makes explicit metaprogramming simpler, since it
+creates a static code structure, compared to a dynamically updated one
+that is updated on the fly.  Standard Forth is essentially imperative,
+and is read from top to bottom[1].
+
+It is not possible to ``unroll'' the reflectivity in ANS Forth
+completely [2].  In order to write an ANS standard Forth, some of this
+reflectivity needs to be restored.  The problem is mostly parsing
+words.  Traditionally, immediate words (macros) have access to the
+input stream, which is not possible in the current Staapl approach
+since lexing is a separate step.  After lexing, only preprocesser
+macros (prefix parsers) have access to the word stream, while ordinary
+macros can only generate (and transform) machine code.  As a
+consequence, Staapl's Forth cannot be standard[3].
+
+This makes Staapl more complicated.  Is this complication justified?
+
+Yes. The simplicity of the purely function Scat model and its name
+hygiene are more important than any inconveniences that are a
+consequence of Coma being different[4] from standard reflective Forth.
+Everything is built on top of Coma/Scat in layers to make
+metaprogramming easier, and to integrate better with PLT's bias
+towards a static, layered non-reflective approach.
+
+
+[1] The irony is, that trying to perform this unrolling step, I have
+    come to appreciate more the elegance of the standard reflective
+    Forth approach.  Forth's compactnes comes exactly from leaving the
+    intermedate representations out, and maximally exploiting
+    reflectivity.  There seems to be much debate even in the Scheme
+    community about the trade-offs between interactive ``toplevel''
+    program development and the declarative module approach as used in
+    PLT Scheme. (The DrScheme "run" button, or "require" vs "load").
+    This debate is also quite central to the design of Staapl.
+
+[2] It is always possible to unroll any reflective sequence by
+    providing one language layer per statement.  However, that doesn't
+    really solve much, so the implied condition is to create not too
+    many layers.
+
+[3] There is however a way around this by using only the Staapl
+    machine model, which boils down to writing a standard ANS Forth
+    compiler that compiles to Coma code.  This could be extended with
+    a run-time simulator to make this cross-compiled Forth behave more
+    like a standalone one.
+
+[4] I still find the concept of parsing words useful as a _user
+    interface_ so Staapl contains some front-end to write code that
+    looks like traditional Forth, by introducing a ``prefix parser''
+    layer that emulates Forth's parsing words, and a lexer that
+    provides the basic whitespace separated Forth tokenizing.
+
+
+
+Entry: Extract Method
+Date: Mon May 26 14:43:19 CEST 2008
+
+This article is about the benefits of programming in a concatenative
+language, viewed from the point of programming as iterative
+refactoring of a prototype.
+
+Let's say composition and decomposition are the basic tools of any
+engineering discipline:
+
+   * build complex, specialized systems out of simple, generic parts
+   * refactor an evolved complex design to create a toolbox of generic parts
+
+The most difficult step is obviously the latter one.
+
+Decomposition creates interfaces: when a monolithic part is split in
+2, there is now a thing connecting them.  Good decompositions can be
+judged by the complexity of the interfaces they create.  You do the
+right thing if cutting at some point hides the stuff you want to
+forget, but keeps open some sane way of interacting with the rest of
+the world.  Simple interfaces promote reuse.
+
+In most programming languages, the procedure / function / message is a
+basic unit of composition: it can be used to create a black box which
+reacts to input and produces output.  Decomposition or refactoring in
+such languages amounts to the "extract method" pattern: split up a
+complex uncontrolled interaction by identifiying primitive operations,
+and rewrite the complex interaction as a simpler interaction between
+these primitives.
+
+Looking at Martin Fowler's explanation in Refactoring: Improving the
+Design of Existing Code:
+
+    "You have a code fragment that can be grouped together. Turn the
+    fragment into a method whose name explains the purpose of the
+    method."
+
+Important consequences of extracting methods:
+
+   * compression and modularity: Code will be smaller because
+     duplication is removed: share NOW.  This reduces local
+     complexity.
+
+   * promotes reuse: It creates a possibility that code can be shared
+     by new nodes LATER, possibly outside of the current project.
+
+   * documentation: The name annotate the code note with a meaningful
+     explanation. the better the factorization, the easier it becomes
+     to give names.
+
+Now, an advantage of concatenative programming languages is that
+'extract method' is a simple cut and paste operation: the absence of
+names for function parameters disposes of the hurdle of inventing them
+when factoring out code.  This leads to easier identification of
+components, which usually ends up in concatenative code having a very
+fine factoring granularity.
+
+
+
+
+Entry: What is Partial Evaluation?
+Date: Mon May 26 19:00:32 CEST 2008
+
+Some clarification of terminology:
+
+   * Currying
+   * Partial Application
+   * Partial Evaluation
+   * Staging
+
+These are all very related:
+
+* Curry: move a parameter out of a function's parameter list to create
+  a higher order function. I.e. for Scheme's multiple argument lambda:
+
+     (lambda (a b) (+ a b)) -> (lambda (a) (lambda (b) (+ a b))).
+
+  In a language like ML or Haskell the default representation is
+  curried (all functions are unary).
+
+* Partial Application: given a higher order (curried) function, obtain
+  function of a lower order by applying one or more arguments.
+
+* Staging: moving computations between compilation stages (i.e. from
+  run-time to compile-time). A stage converts source code of a higher
+  level form to a lower level form.
+
+* Partial evaluation: Automatic staging based on input data available
+  at compile time.
+
+
+Partial application and staging are somewhat related (in a functional
+setting, they are both about beta-reductions), but differ mainly in
+the way the result of the reduction is represented.  Staging performs
+substitution on expression _syntax_ while partial application
+typically creates an abstract closure object comprised of a
+representation of the original un-reduced expression and an
+environment of name->value bindings, where final reduction (execution
+of base-machine code) only happens when _all_ variables are available.
+
+Partial evaluation makes most sense for functional languages, where
+evaluation order can be easily manipulated.  To apply it to imperative
+languages requires the identification of a functional subset.
+
+In a language based on function composition, partial evaluation is a
+trivial operation based only on associativity of function composition.
+This the main idea behind Staapl's code representation.
+
+In the face of unrestricted recursion, the main problem of automatic
+staging is to decide what NOT to evaluate, to avoid infinite expansion
+size.  Therefore it is useful to restrict the language a bit, the main
+idea being that full turing-completeness is not always necessary, and
+can make automatic specialization simpler.
+
+
+
+Sources:
+
+http://lambda-the-ultimate.org/node/2266
+http://srfi.schemers.org/srfi-26/mail-archive/msg00000.html
+http://www.brics.dk/~hosc/local/HOSC-13-4-pp355-368.pdf
+http://www.dina.kvl.dk/~sestoft/pebook/
+http://citeseer.ist.psu.edu/taha99metaml.html
+
+
+
+Entry: Scheme, Coma and Stack Machine Code
+Date: Mon May 26 20:33:30 CEST 2008
+
+This post talks about how the concatenative macro language Coma is
+integrated with Scheme code.  It explains the mechanisms of binding
+through pattern matching and derefence through quasiquotation.
+
+To set the stage, let's define a deeply embedded program as the
+specialization of a general program in such a way that run-time
+complexity (and so cost of supporting hardware) is significantly
+reduced.  For large reduction in cost/complexity (or a large enough
+production volume) significant fixed engineering cost can be spent on
+specialization.  Deeply embedded programming is about spending time
+and money on program specialization.
+
+When the specialization techniques can be abstracted, manual program
+specialization (writing a machine code program by hand) can be
+automated using staging: a parametric model of the code is constructed
+which, when given some parameters, reduces to a specialized model.
+
+
+
+BINDING: stack machine code pattern matching
+
+The binding form can be best introduced in the form it is most used,
+to impelement code transformation rules, which are mostly based on
+partial evaluation of concatenative code.  For example, the
+concatenative code sequence
+
+                             1 2 +
+
+will is reduced to a single literal 3 in the target code.  This
+mechanism is implemented by specifying the behaviour of the code
+transformer "+" using code substitution patterns.  The specific
+substitution pattern for the case above is:
+
+                [qw 1] [qw 2]     ->     [qw 3]
+
+Where "[qw 1]" is the target (virtual) stack machine code generated by
+the code generator called "1".  This is an instance of the generic
+substitution pattern:
+
+                [qw a] [qw b]     ->     [qw (+ a b)]
+
+Here the Scheme expression "(+ a b)", which adds the two variables "a"
+and "b", is used to perform a computation that give the correct
+semantics to this code transformation rule.  Any sequence of two
+literal values represented by two "[qw <number>]" stack machine
+instructions gets replaced by a single literal value containing the
+sum of these two numbers.
+
+Staapl contains a scheme macro called "patterns" which is the the
+destructuring binding from for target stack machine code[2].  This can
+be used to build subsitution rules.  The complete example for "+"
+looks like:
+
+(patterns (macro)
+   (([qw a] [qw b] +) ([qw (+ a b)]))
+)
+
+This reads as follows: if the "+" code transformer operates on a stack
+of two literal "qw" instructions, bind the values these "qw"
+instructions contain to the variables "a" and "b" respectively, and
+replace the two instructions by a single "qw" instruction that
+contains the result of the scheme operation "+" applied to the
+variables "a" and "b".
+
+The general idea behind the substution rule is:
+
+    If all the inputs for an operation are available during code
+    generation time, then the operation can be performed, and only
+    code needs to be generated that makes available this result at run
+    time.
+
+This can be generalized quite far: using this mechanism, the basic
+concatenative macro language can be extended by explicit (virtual
+machine code) generators, accessible from concatenative source code,
+for any kind of Scheme -> assembly code metaprogramming.
+
+
+
+QUASIQUOTATION: name space merging
+
+To generate Coma code from within a Scheme context, i.e. as the right
+hand side of a "patterns" rule, a quasiquotation mechanism is
+provided.  The "unquote" operator has a similar semantics for the
+"macro:" concatenative code constructor as for the "quasiquote" list
+constructor.
+
+Consider these 3 forms:
+
+  (macro: 1 +)          ;; 1.
+  (macro: 1 ,operator)  ;; 2.
+  (macro: ',operand +)  ;; 3.
+
+1. This constructs a macro which is the composition of the macro "1"
+   (which generates code to quote the number 1) and the macro "+"
+   which is fetched from the '(macro) namespace.
+
+2. Constructs a macro which is the composition of the macro "1" and a
+   macro bound to the Scheme identifier "operator".
+
+3. Constructs a macro which is the composition of a macro that
+   generates code to quote the constant bound to the Scheme identifer
+   "operand" and the macro "+" from the '(macro) namespace.
+
+In short, the "unquote" operator allows the introduction of code
+generators and quoted date from the Scheme namespace into
+concatenative code, which uses a namespace different from that of
+Scheme.  This allows the construction of code templates for Scheme ->
+coma metaprogramming.
+
+
+CONCLUSION
+
+These two mechanisms (deconstructive binding and quasiquotation) allow
+a simple impedance match between concatenative code an Scheme,
+building on top of Scheme's lexical structure.
+
+
+
+NOTES
+
+[1] This can also be combined with the second quasiquoting macro
+    mechanism to yield more powerful constructs.
+
+[2] The binding construct simulates pattern matching for algebraic
+    data types, but limited to stacks: next to deconstruction it
+    provides a single level of construction (the "qw" instructions on
+    the right hand side are interpreted as constructors).  On top of
+    that, the pattern matching is from the scheme/match PLT module.
+
+[3] Instead of a stack of instructions, the RHS of a "patterns" rule
+    can contain arbitrary scheme code if it is a list that starts with
+    an identifier.  (It can always be made such by wrapping it in a
+    "begin" form).  If the RHS is a list of lists, it is interpreted
+    as a machine code sequence constructor.
+
+
+
+Entry: Forth and Metaprogramming
+Date: Tue May 27 14:55:47 CEST 2008
+
+This article introduces the general architecture of the Forth
+dialect's language tower.
+
+Using a highlevel language to describe a problem and compiling it down
+to lower level code is such a ubiquitous abstraction mechanism it is
+hardly noticed as one.  But what happens when this abstraction
+mechanism is made programmable?
+
+Instead of using a fixed compiler for a fixed language, make the
+compiler extensible using a 'plug-in' mechanism.  This is one of the
+powerful ideas behind languages like Lisp and Forth, where the
+extension mechanism is implemented in terms of code transformers, also
+called macros. In Lisp, the transformation is performed on structured
+data, while in Forth the transformation is similar, but usually
+implemented more directly without intermediate data step.
+
+With a powerful extension mechanism, the base language and compiler
+can be kept relatively minimal: a lot of choices can be left to the
+programmer, who can build on top of the simple language primitives.
+The choice of base language then can be to maximise flexibility
+(Scheme: the untyped lambda calculus with a garbage collected
+persistent memory model) or to minimise implementation complexity
+(Forth: stack machines with a concrete array memory model).
+
+In Lisp in particular, there are 2 composition mechanisms:
+
+  (A) procedure: composition by lambda abstraction and application
+  (B) notation: composition of macros (code transformers)
+
+Here (A) is the basic composition mechanism and can be used to express
+solutions to all problems, but is not always terribly succinct because
+of its intrinsic notational limitation.  The (B) mechanism can be used
+to solve most notational problems by translating arbitrary notation
+into base language syntax(1).  An example of a severe notational
+problem is the expression of one language in terms of another one.
+
+The Forth dialect in Staapl is implemented as a set of pure
+concatenative functions that generate or transform machine code.  This
+functional approach greatly simplifies compiler and optimizer
+construction.  The language is layered in the following way:
+
+  * [PRIMITIVE CODE PROCESSING] The macro language primitives are
+    written mostly in terms of a pattern matching language that
+    operates on target (pseudo) code. This implements code generation,
+    peephole optimization, partial evaluation, arbitrary code
+    generator plugins and specification of intermediate (pseudo code)
+    objects used for communication between code generators for compile
+    time parameter passing.
+
+  * [MACRO COMPOSITION] The macro language is a purely functional
+    concatenative language (Coma, based on Scat) with extensions to
+    implement Forth style structured programming words. It can be used
+    to compose the primitive code generators into higher level code
+    generator abstractions.
+
+  * [INSTANTIATION] In a Forth file, one has the choice to define
+    functionality as macros (2) or as instantiated code.  This is
+    implemented using an identical (3) syntax to make it easy to
+    switch between the two modes.
+
+  * [PREFIX PARSER] The forth syntax layer provides a pattern
+    substitution mechanism for prefix words in order to maintain
+    standard Forth syntax (4).
+
+The power of Purrr lies mostly in the combination of the purely
+functional concatenative macro language supporting a form of
+quasiquotation to build template code, and the pattern matching
+binding form used to define language primitives that perform partial
+evaluation and more general compile time tranformation of target stack
+machine code.
+
+
+Notes:
+
+(1) Whether (B) is necessary also depends on the base language. For a
+    strict language, composition of code that manipulates evaluation
+    order cannot be performed with (A) alone. (for example 'if' and
+    'delay' in Scheme). In a lazy language like Haskell, (A) can be
+    stretched a long way, however, Haskell is full of syntactic sugar
+    and there's a Template Haskell library to perform (B).
+
+(2) Traditional forth implements primitives in machine code and tries
+    to keep the use of macros to a minimum, to limit (on-target)
+    compiler complexity. This is not a constraint in the
+    cross-compiled Purrr language, where all primitives are macros and
+    no primitive run-time code is necessary.
+
+(3) Almost identical. The instantiated Forth language differs from the
+    Macro language in that it has access to the data structure used
+    for run-time function composition: the return stack. In addition,
+    Forth words can have multiple entry points, which means code can
+    fall through to the next definition in a source file.
+
+(4) Traditional Forth employs a more direct and low-level
+    metaprogramming syntax (i.e. "postpone", "compile", "accept",
+    ...), and uses reflection to reduce code size. Purrr limits this
+    kind of reflection and replaces it by 'unrolled' language
+    towers. It is still an open question wether using standard Forth
+    syntax for the Purrr system is a good idea. Forth syntax is
+    limiting to the way metaprogramming is used in Purrr, and is also
+    fairly bound to the reflective structure of a standard Forth
+    parser/compiler. In any case, in Purrr, the Forth syntax is merely
+    a front-end to a more general s-expression based syntax for the
+    Macro language, so it is always possible to fall back onto this
+    syntax to express particular abstractions.
+
+
+Entry: Name spaces: load vs. require
+Date: Thu Jun  5 11:33:34 CEST 2008
+
+This post fits in the toplevel namespace vs. modules idea.
+
+Tree-structured modules are a great way to manage namespaces in large
+software projects, but there is something to say for the 'one big
+namespace' approach when single instances are the rule and not the
+exception.
+
+For example:
+
+   * Generic interpreter code is parameterized by the words 'receive'
+     and 'transmit'.
+
+   * Specific toplevel code links generic code together by simply
+     inlining into its namespace the interpreter code and a particular
+     definition of these words.
+
+The benefit of this pattern is that it doesn't need much red tape:
+there is basicly no namespace management, which can be a down side
+when code gets big, and needs to be more generic.  However, for deeply
+embedded programming more often than not there is usually only one
+static instance of a certain object, in the case of the example it's
+the debugging serial port.  Moreover, the ratio of glue code necessary
+to implement the binding and the code that does something useful can
+be high.
+
+So why not use the simple mechanism until more abstraction is needed?
+For example, generic interpreter code can be defined in a file that's
+simply included.  Whenever multiple instances or late binding is
+necessary, this file is wrapped in a module to shield namespaces.
+This is how it is solved right now: you're free to use load (include)
+or require (proper module namespace management).  The monitor kernel
+is implemented with load.
+
+On top of this, macros can be redefined, but compilation generates a
+notification of this.  This is basically hierarchical modules +
+parameters, but without specifying in advance which behaviour can be
+parameterized.
+
+
+
+
+Entry: History and Semantics of Coma
+Date: Wed Jun 25 16:28:39 CEST 2008
+
+This text deals mostly with the implementation and how this approach
+came into being.  The semantics of Coma are explained more concisely
+in a different post:
+
+  entry://20080806-212034
+
+
+An interesting idea in
+
+  http://www.latrobe.edu.au/philosophy/phimvt/joy/j07rrs.html
+
+is the re-introduction of stacks in the implementation of rewrite
+rules.  Manfred talks about giving Joy a rewrite semantics, without
+the use of stacks, but eventually comes back to stacks as a way to
+efficiently implement these rewrite rules.  This seems to be due to
+the fact that Joy's rewrite rules are local, and stacks support
+operations with local effects.
+
+A more formal treatment would be definitely interesting.  In Coma
+however, pragmatism rules and rewriting is implemented as
+deterministic target stack machine code pattern matching.
+
+  * Primitive semantics in Coma are provided by operations on target
+    machine code programs.  Each identifier (word separated by spaces)
+    that occurs in a source file represents a pure function that
+    transforms a list of machine instructions.  Primitive functions
+    are declared as pattern matching rules, which form an
+    implementation of a set of rewrite rules.
+
+  * New Coma functions can be obtained by means of ordinary function
+    composition, which is syntactically represented by concatenation
+    of function names, yielding a concatenative language.
+
+       x == a b c
+
+  * With identifiers primary representing TRANSFORMERS, the DERIVED
+    semantics of identifiers is obtained as the target program which
+    results from the application of the function represented by the
+    identifier to the empty program.
+
+It is essential to separate the two levels of semantics: code
+transformers, and the code being transformed which is exectued by a
+concrete machine.  Obviously, these two are somehow linked!  I.e. for
+PIC18 the transformer "+" has the derived semantics of addition
+because it generates an ADDWF instruction, but it also performs
+partial evaluation if possible.
+
+To make a concatenative language useful, some form of locality of
+effect has to be introduced(1).  Locality makes it possible to create
+reusable components.  A straightforward way of introducing locality is
+to make the space of values on which the functions operate take the
+form of a space of stacks of values.
+
+For Coma, the choice is easy to make:
+
+  * Target programs are a concatenation of primitive machine
+    instructions.
+
+  * Rewriting happens locally: Rewriting functions operate on
+    (possibly infinite) target programs by replacing a finite number
+    of instructions M by a finite number of instructions N at the
+    right end of a target program, leaving the leftmost instructions
+    intact.
+
+This makes the Macro language a purely functional concatenative stack
+language: all its primitives operate on a stack of values, each value
+representing a machine instruction.
+
+That's nice and clean. The language makes it possible to implement a
+peephole optimizing compiler which next to code generation (macro
+expansion), also performs some form of partial evaluation (target code
+rewriting that eliminates run time computation by reducing the number
+of instructions necessary to perform a certain computation).
+
+To perform partial evaluation correctly, care needs to be taken to
+align semantics that are a consequence of computations that are
+performed during compilation, with computations that need to be
+postponed to runtime. For example, the program [1 1 +] might be
+rewritten to [2], but [+] has no rewrite rule, so in order to preserve
+proper dervied semantics of '+' it needs to be rewritten as a program
+that adds two numbers present on a run time stack, and replaces them
+with the result(2).
+
+In short, starting from the locality of code transformers, and
+consistency requirements coming from partial evaluation operations,
+the target machine has to behave as a stack machine.
+
+Now, let's make it a bit more useful. In order to get interesting
+properties for parameterized metaprogramming, we relax the semantics a
+bit, allowing for the existence of code transformers without
+associated derived semantics.  Individual code transformers,
+identifiable by names in a source program, might _lack_ derived
+semantics because:
+
+  * their domain does not contain the empty program.
+
+     They do not have a purely code-generating form but need non-empty
+     program input to rewrite to something else.
+
+  * their codomain is not contained in the set of concatenative
+    programs generated by the target machine primitive instructions.
+
+     They generate intermediate instructions, which are compile time
+     values, that might be collected by other rewrite rules to
+     influence their code generation.
+
+Such macros are called ``intermediate macros''.  Their closing space
+is called the space of intermediate programs, which is generated by
+the set of primitives comprised of (real) target primitives combined
+with these (virtual) intermediate primitives(3).
+
+This allows to define the notion of 'real' macros as macros that (are
+concatenative and) map the empty program to a program in the target
+program space.  Real macros can be instantiated on the target machine.
+
+Using an (intermediate) program space that is larger than the target
+program space gives a means to use intermediate macros for
+constructing components of parameterized target programs: build real
+macros by composing intermediate macros.  It provides a parameter
+passing mechansim for macros that can host values not possible to
+represent in the target semantics(4).  This makes it possible to factor
+code generation patterns into smaller elements that can be recombined
+in several ways.
+
+
+Conclusion:
+
+Using rewrite primitives and function composition, the Coma language
+allows the conversion of a concatenative program to a value whenever
+the concatenative program has a _pure_ associated target semantics
+(all operations are local to the stack), meaning the entire program
+can be reduced to a stack of values.
+
+However, the target semantics isn't pure because target programs
+depend on input available only at run time.  As a consequence, not all
+programs can be completely reduced.  This partial reduction (partial
+evaluation) is the target program.
+
+Combine this with a larger compile time value space and associated
+rewrite rules to get a powerful metaprogramming system.
+
+
+(1) Or modify all of it in a uniform way.  For example a language like
+    FP or any kind of monad language might have primitive operations
+    that modify all the state.  For example a 'map'
+    operation.  However, I'm more interested in a model for a complete
+    system, not an embedded sublanguage.
+
+(2) For Purrr18, the semantics doesn't always match completely.  For
+    example, numbers and associated operations are bignums at compile
+    time, but 8 bit integers for run time operations.  This could be
+    called 'projected semantics'.  I've found this to be really
+    useful, i.e. to compute constants.  This combination of a
+    well-defined macro semantics with a link to a (somewhat less
+    powerful and approximate) target program semantics gives a very
+    powerful metaprogramming system: the time at which computations
+    happen can be largely ignored when trying to understand overall
+    program semantics, and can be unignored when trying to understand
+    its implementation (instantiation and approximation).  Both things
+    are equally essential in resource constrained programming, less so
+    in general programming where correctness/consistence usually takes
+    precidence over implementation efficiency.
+
+(3) For example, in the PIC18 architecture, there is no generic
+    conditional branch instruction, but a whole family of such
+    instructions optimized for different conditionals.  In the code
+    generation, this is solved by using a virtual intermediate
+    condition value type that is combined with a conditional branch
+    instruction to yield one of the specialized branch/skip
+    instructions.
+
+(4) Somewhat analogous to quarks and gluons in physics.  Quarks can be
+    bound to other quarks through gluon exchange, but are never seen
+    in isolation.
+
+
+--
+
+Now, that's a nice story, but that's not how it happened :) The
+specification of rewriting rules came quite naturally as a syntactic
+abstraction for some previously manually coded peephole optimizations
+in the first iteration of the Forth compiler.  This rewrite system
+however seemed way more useful than just for performing simple
+optimizations, and by introducing pseudo target assembly instructions
+has been transformed into a different kind of two-level language
+semantics: powerful compile time type system with an analogous run
+time type system with 'projected semantics' derived from eager macro
+rewrite rules.
+
+The downside of this is that in order to write programs, one has to
+make decisions about what to instantiate, and what not.  It might be
+interesting to try how far this can be automated: don't instantiate
+what cannot be instantiated, but try to isolate subprograms that have
+real semantics.
+
+
+Entry: Staapl goals
+Date: Wed Jul  2 22:13:52 CEST 2008
+
+1. Practical: Build a framework for metaprogramming (multi-stage
+   programming) in 'lisp-and-forth-style'.  This is taken to mean the
+   design of a programmable compiler for 2-stack machine models in a
+   clean dynamic language.  This goal is reached through the use of a
+   purely functional dynamically typed stack language, and implemented
+   in a Scheme extended with a hygienic macro system that works well
+   with modular code development. (PLT Scheme's macro system).
+
+This framework is supposed to get practical issues out of the way so
+an intuition can be built about Resource Aware Programming (RAP)
+centered around metaprogramming of 2-stack machines.  Note that there
+is not much new here: it is merely a combination of existing ideas
+(Forth, Joy, Scheme) into a coherent system.
+
+In Staapl there is a balance between a static and a dynamic approach;
+this according to / borrowed from the PLT Scheme tradition: a static
+hierarchical module system for large scale code management, and
+dynamic interactive compilation, incremental code upload and target
+interaction.  The concrete target architectures are small
+microcontrollers and DSP processors.  The core could be called a
+dynamically typed, concatenative macro assembler (CMA).
+
+The basic framework is as good as ready. There is a single test
+backend for Microchip PIC18, and some bits and pieces for a C code
+generator.  Most changes in the last year were about implementation
+and simplification: better integration with the PLT Scheme macro and
+module system, and simplification of the low level language model to
+eliminate ad-hoc non-composable constructs.
+
+2. Experimental: Design DSLs for resource (time/space) constrainted
+   programming on top of the concatenative macro assembler idea.
+
+Currently, there's Purrr, a Forth dialect, and Coma, a cleaner
+s-expression based concatenative Macro language used to implement the
+purely functional core of Purrr.  Future work is mostly about program
+transformations (fusing/deforestation/...) in a Backus' FP and related
+"Algebra of Programs" framework, OBJ's "theories", and a look into
+typed staged systems ala Taha's RAP research.  I am also interested in
+parallel programming, trying to figure out a way to marry process
+calculi with the 2-stack machine model.
+
+
+
+Entry: Projected Semantics
+Date: Sun Jul  6 15:18:49 CEST 2008
+
+ Q: What?
+
+All arithmetic expressions in Coma are evaluated as soon as possible.
+However, the partial evaluation of arithmetic operators does _not_ use
+the target's limited word length representation, so not all operations
+yield the same result if they are evaluated at compile time.  This is
+in the same spirit of macro assembler expression languages.
+
+ Q: Why is it useful?
+
+It's a sharp knife that can be a great tool if you know how to handle
+it.  Essentially, it allows Forth's staging annotations - the words [
+and ] - to be dropped in Coma code.
+
+ Q: Doesn't it lead to a mess?
+
+Yes, if you don't know when an expression is evaluated.  This is well
+specified however.  The problem is in realizing that the operations of
+expression evaluation and value+operation projection _don't commute_
+for all operations.  They do commute for addition and subtraction
+(i.e. for PIC18 equivalence modulo 2^8), but involving multiplication
+and division (and bit shifts) breaks the morphism.
+
+ Q: Can I get some more hand-holding?
+
+I don't know how to appropriately add constraints to this to eliminate
+common mistakes.
+
+
+Entry: Sheep works!
+Date: Wed Jul 23 19:23:52 CEST 2008
+
+The Sheep synth, Purrr's test app with an attitude is working on the
+new application core. This means the Brood 5 refactoring has come to
+an end, and it's time for a release.
+
+
+Entry: Staapl 0.5 release notes
+Date: Thu Jul 24 11:35:47 CEST 2008
+
+The Staapl project has come to a point where it is ready for public
+scrutiny.
+
+http://zwizwa.be/staapl
+
+Staapl is a collection of abstractions for (meta)programming
+microcontrollers from within PLT Scheme. The core of the system is a
+programmable code generator structured around a functional
+concatenative macro language. On top of this it includes a syntax
+frontend for creating Forth-style languages, a backend code generator
+for Microchip's PIC18 microcontroller architecture, and interaction
+tools for shortening the edit-compile-test cycle.
+
+This is the completion of the phase I goal: to build a practical,
+well-factored, easily extensible base system upon which to build phase
+II: experiments with domain specific languages for DSP and embedded
+control.
+
+From this point I will continue fixing bugs and polishing
+documententation. An overview can be found here:
+
+http://zwizwa.be/archive/staapl.html
+
+The PIC18 Forth dialect is documented in the following papers:
+
+http://zwizwa.be/archive/pic18-forth.pdf
+http://zwizwa.be/archive/pic18-synth.pdf
+
+The interactive aspect is documented here:
+
+http://zwizwa.be/archive/pic18-interaction.html
+
+Staapl is available on PLaneT as zwizwa/staapl. To install and compile
+the test application:
+
+  mzscheme -p zwizwa/staapl/examples/build-synth
+
+
+
+Entry: A simple example
+Date: Sun Jul 27 11:53:19 CEST 2008
+
+Staapl is now installed on PLT Planet, which is the central repository
+for PLT Scheme user contributions, so it's very easy to install.  Get
+the latest PLT Scheme at http://pre.plt-scheme.org You only need the
+command line version (MzScheme)
+
+To try it out in batch mode, create a file test.ss with the following
+contents:
+
+ #lang scheme/base
+ (require (planet zwizwa/staapl/prj/pic18))
+ (forth-compile ": inc 1 + ;")
+ (save-ihex "test.hex")
+
+Then execute it like this:
+
+> mzscheme test.ss
+
+This will locally cache the Staapl distribution, and create a file
+test.hex containing the compiled Forth code ": inc 1 + ;". Check it
+with gpdasm:
+
+> gpdasm -p 18f1220 test.hex
+000000:  0f01  addlw	0x1
+000002:  0012  return	0
+
+This only uses the barebones compiler. To compile a Forth application
+together with the boot monitor, replace the 'require line in the build
+script with:
+
+ (require (planet zwizwa/staapl/prj/pic18f1220-serial))
+
+And compile again. The top file of the monitor code can be found here:
+
+ http://zwizwa.be/darcs/staapl/staapl/pic18/monitor-p18f1220.f
+
+These files are cached locally in this directory:
+
+> mzscheme -p zwizwa/staapl/prj/pic18 -e pic18-lib
+
+
+
+Entry: Coma semantics
+Date: Wed Aug  6 21:20:34 BST 2008
+
+The semantics of Coma is defined in terms of concrete step by step
+deterministic rewrite rules.  This post tries to find the relation to
+declarative rewrite rules and place everything in a more formal
+setting.  For a more concrete step-by-step exposition of how this is
+implemented, see:
+
+  entry://20080625-162839
+
+The goal of the compilation process is to translate a source
+concatenative term s into a target concatenative term t.
+Concatenative terms are either concatenations of concatenative terms
+or primitive terms.
+
+Let  s = s0 s1 ... | s'   source programs
+     t = t0 t1 ... | t'   target programs
+
+Here s, t are terms and s', t' are primitive terms. Denote the set of
+s and t as S and T, and the set of s' and t' as S' and T'.
+
+Basicly, pure concatenative translation maps primitives to primitives
+S' -> T'.  The complete compilation expands a source concatenation
+into into a concatenation of primitives which then one by one can be
+translated to a target primitives.
+
+In order to make this a bit more interesting, we allow substitutions
+to occur in the language and make the translation more general.
+Substitutions replace a subconcatenation with another one.
+
+   Define the translation system {p,r} consisting of a map p : S' -> T
+   together with a collection r of rewrite rules on T.
+
+The map p associates primitive source terms with concatenations of
+primitive target terms.  The rewrite rules r allow the construction of
+a reduction system that translates the concatenation of terms p(s0)
+p(s1) ... obtained from the source program s = s0 s1 ... to a term t_n
+in normal form.
+
+The alternative approach where substitution rules are defined on S
+followed by a direct primitive map S'->T' is equivalent, so we
+can concentrate on rewrite rules in T only.
+
+Now, the implementation in Coma is a bit different, and modeled after
+standard Forth macros.
+
+   Define the translation system {m} where m : S' -> T -> T maps each
+   source primitive to a target code transformer T -> T (1)
+
+In uncurried form, Coma replaces the concatenation operation by a
+binary operator T x S' -> T.  Given a source program S = S0 S1 ...
+this operator can be used to create a whole program concatenation
+operator S0' x S1' x ... -> T by folding the binary operator over S
+initalized with the empty program.
+
+The question is, how are {p,r} and {m} related? The rewrite system r
+obviously needs an algorithm to implement it and some constraints that
+allow the existance of normal forms for all terms t.  I think the
+interesting questions are then:
+
+  * What are these constraints and how to derive the representation of
+    the reduction algorithm {m} from a higher level declarative
+    representation {p,r}?
+
+  * Is it useful to implement it like that, or is a more direct
+    pattern matching approach good enough? (2)
+
+
+Notes:
+
+(1) Stack semantics in Coma comes from an extra constraint that gives
+    the code transformers T -> T some locality by having them operate
+    only at the end of the primitive code concatenation, essentially
+    viewing the target program string as a stack.  The specification
+    language for primitive transfomers in Coma enforces this, by
+    building on top of Scat.  However the general principle exposed
+    here is applicable to more general point-free languages.
+
+(2) The Coma pattern matching approach {m} is not exactly limited.  A
+    central idea in Coma is that the (directly) expressed rewrite
+    rules encode 2 kinds of equivalence relations.  The first one is
+    partitioning of target programs with the same target semantics.
+    For PIC18 the resulting reduction is mainly a reduction of program
+    size. This is a fairly straightforward OPTIMIZATION technique.
+    The second relation collapses concatenation of pseudo instructions
+    that have no individual target semantics into constructs that do.
+    This is the PARAMETERIZATION part of Coma.
+
+
+
+
+Entry: Staapl in a nutshell
+Date: Thu Aug  7 08:24:37 BST 2008
+
+Staapl aims to work out the claim that Forth is a decent machine
+language on which to build DSLs using macros in Scheme style.
+
+  * [UNROLLED REFLECTION] It places the the basic compositional forms
+    of Forth (procedures, macros, parsing words) in a non-reflective
+    declarative hierarchical language tower framework.  The main
+    advantage is that it gives an declarative a-cyclic ``unrolled''
+    layered language structure that is easier for metaprogramming.
+
+  * [FUNCTIONAL PROGRAMMING] Staapl models Forth macros as a pure
+    functional stack language, operating on a stack of (virtual)
+    machine code instructions.  To this end it provides a pattern
+    matching language for writing primitive code transformers in terms
+    of instruction templates.
+
+  * [PARTIAL EVALUATION] It uses the purely functional subset of Forth
+    (words that operate on the top of the stack only) as a guide to
+    derive a set of pattern matching rules that implement partial
+    evaluation for this subset.  This is done by eagerly moving
+    computations to compile time.
+
+  * [PARAMETERIZED CODE GENERATION] The partial evaluation mechanism
+    is generalized to use Scheme's data types, including its number
+    system, to facilitate the construction of arbitrary code generator
+    primitives.
+
+  * [SCHEME] To avoid any aribitrarily introduced abstraction walls,
+    all these mechanisms are available in and built on top of PLT
+    Scheme modules.  This allows the construction of s-expression
+    based DSLs by expanding code down to a concatenative machine
+    language.
+
+  * [INTERACTION] On top of the declarative structure, a toplevel
+    interaction environment is provided that allows interactive code
+    compilation and execution.  Care is taken to make this convenient,
+    i.e. to provide simulation for common language constructs if they
+    are not instantiated.
+
+  * [CULTURE] Giving up Forth's traditional imperative self-reflective
+    property and absence of intermediate representation dispenses with
+    some minimalist elegance.  Staapl is very different in ``culture''
+    from traditional Forth.
+
+
+
+Entry: Is classic code analysis necessary?
+Date: Thu Aug  7 08:33:59 BST 2008
+
+The Coma compiler includes a somewhat traditional but at the moment
+quite limited intermediate code processor to implement optimizations.
+Between compilation and assembly there is a point where the code is
+structured as a control flow graph. This is not used yet, but there to
+perform some optimizations not possible in the rewrite framework.
+(I.e. jump chaining, loop tricks, ...)
+
+However, I'm still not convinced such a postprocessor is actually
+necessary. For very simple target architectures, I suspect the
+generated code will be already quite optimal because:
+
+  * Generating good specialized code is the whole point of staging,
+    and mostly the responsability of the person writing the code
+    generator.
+
+  * The partial evaluation for the functional subset works quite well
+    to eliminate obvious parameterizations and the pattern matching
+    allows the specification of a good impedance match to the machine
+    instruction set.
+
+As practical evidence for this, the PIC18 rewrite language already
+provides quite optimal code in the practical uses that I've
+encountered, which is low level embedded programming with some simple
+language extensions, mainly to generate data lookup and code dispatch
+tables.
+
+On the other hand, when implementing more elaborate DSLs on top of
+this system, it might be interesting to perform proper data flow
+analysis and register allocation. For more complex targets however, I
+suspect that Staapl looses its benefits.
+
+
+
+Entry: Interaction: single chip vs. distributed applications
+Date: Sat Aug  9 10:23:45 BST 2008
+
+I've been thinking about the interaction model for Staapl.  In order
+to make things more manageble, I will introduce two different cost
+models for interactive development.  The main distinction is about
+single/multi core applications.
+
+* SINGLE CHIP
+
+  Defined as an application where a single uC performs a well-defined
+  task without much higlevel communication to other chips, and can be
+  developed and tested in isolation.
+
+* DISTRIBUTED
+
+  Defined as an application where a single uC is integrated in a
+  communication network.  The communication between uCs is an
+  essential part of the solution, and cannot be conveniently developed
+  or tested in isolation.
+
+These two applications deserve a different solution pattern.  For
+single chip applications, communication overhead necessary for
+debugging should be minimized, while in distributed systems,
+communication is essential to the operation and can be used to support
+debugging.
+
+
+To simplify matters, the rest of the exposition is specific to the
+Microchip PIC line, but should be easily generalizable to other
+manufacturer's chip lines.
+
+For single chip applications, the aim should be at making the hardware
+interface necessary for programming and debugging as simple as
+possible since it is not part of the solution.  If interactive
+debugging is required, use a communication protocol that minimizes
+on-chip resource usage.  For PIC this means the use of the native
+Microchip programming interface, and use the same pins for the
+debugging protocol.  PicKit2 [1][2] could be of use here.
+
+For distributed applications, Staapl will concentrate on PICs that are
+self-programmable: the ones that have an internal charge pump to
+generate the Flash programming voltage. (Anything > PIC18 and some of
+the PIC16).  Each PIC should be equipped once with a (read-only)
+monitor that understands the basic network protocol and can update
+firmware.  The programming host <-> network interface can then be
+implemented using the single chip approach which interfaces to a
+network entry node.
+
+Learning from past attempts at building an easy to interface platform,
+the most important drawback has been the necessity for expensive
+programming and interaction hardware.  I managed to bring it down to
+20 Euro per person for the serial interface + chip with bootloader.
+With the availability of the PicKit2 for 25 Euro it is probably not
+possible to find a cheaper solution for bootstrapping blank chips.  It
+looks like the protocol is open, so direct support in Staapl should be
+feasible.
+
+[1] http://www.microchip.com/stellent/idcplg?IdcService=SS_GET_PAGE&nodeId=1406&dDocName=en023805
+[2] http://www.didel.com/
+
+
+Entry: Forth's 2 modes: interpret and compile
+Date: Sun Aug 10 14:28:24 CEST 2008
+
+Classically, Forth distinguishes two modes:
+
+  (I) Interpret mode
+  (C) Compile mode
+
+Staapl's Forth does the same.
+
+For most languages, this difference is not exposed to the programmer.
+Compiled languages usually expose only a single entry point to
+compiled code (the "main" procedure), unless they are compiled as
+libraries, in which case they are linked to other programs or
+libraries and not invoked directly.
+
+Forth however uses the observation that code entry points (program
+procedures) behave as individual programs and thus can be executed
+individually. This is both convenient and confusing.
+
+Convenient: Interactive use of program components is convenient for
+            testing.  Only exposing the compiled procedures comes
+            essentially for free: a jump to the code address.
+            Additionally, this mechanism allows simple implementation
+            of reflective beaviour.  I.e. the subprogram ":"
+            accessible starts the compilation of new code by switching
+            to compile mode.
+
+Confusing:  Not all language elements that are accessible during
+            compilation can be accessed in interpret mode.  More
+            specifically, all macros (immediate words) cannot be used.
+            This includes all structured programmig words like
+            conditionals and loops.
+
+In order to eliminate this confusion, most compiled languages that
+support an interactive console will compile commands given at the
+console before executing the freshly compiled code.  This makes sure
+all language elements are there at the console.
+
+From that perspective, it's probably better to compare Forth's
+interactive console to a unix command shell (executing compiled
+programs, executing commands to compile new programs) than an
+interactive language shell that exposes all language features
+available to code to be compiled.  In comparison, Haskell's ghci also
+do not expose the full language in the repl, i.e. you cannot create
+definitions.
+
+In Staapl, interpret mode is not really necessary since the reflection
+mechanism of standard Forth that is rooted in this interpret/compile
+distinction is not present.  It is not that difficult to implement an
+extra compile step to make sure console input can use the full
+language, not only compiled words, to lessen confusion.  In fact a
+previous version of Staapl included a ``scratch buffer'' used for
+compiling code directly, and I'm planning a simplified language that
+uses this as a primary interaction method.
+
+However, the mechanism has been preserved because of the use of Flash
+ROM code memory in contemporary microcontrollers with Harvard
+architecture.  Such memory isn't as easily overwritten as RAM, which
+makes generation of temporary code for translation of console commands
+difficult.  The standard Forth interpret mode allows the execution of
+compiled code without touching the Flash memory.
+
+This is extended in Staapl with a simulation layer which can offload
+some functionality to the host if it is not present as compiled code.
+The reason is that compared to standard Forth, Staapl's Forth is
+heavily macro based, and some basic words might always be inlined,
+making them not available in interpret mode.
+
+
+
+Entry: Coma and names: reflection vs. staging
+Date: Wed Aug 13 10:51:53 CEST 2008
+
+Why does Staapl need two abstraction mechanisms: macros and prefix
+macros?
+
+The short answer: Coma's code generators are flat anonymous higher
+order combinators.  All names are just notational shorthands that
+identify combinator expressions.  Because the naming mechanism is
+completely orthogonal to the semantics of the Coma language,
+abstractions built on top of the mechanism that associates names to
+expressions needs a separate mechanism.  See next post.
+
+
+
+1. TRANSFORMATION
+
+Let's define a macro as a function that transforms program code into
+program code.
+
+A Scheme macro transforms a list of Scheme expressions into into a new
+Scheme expression.  The macros live in the same space as the
+expressions that are being transformed.
+
+A Coma macro transforms a stack of instructions into a stack of
+instructions.  The instructions come from some target concatenative
+language.
+
+
+2. STAGING
+
+One essential difference that is immediately observed is that program
+transformation with Scheme macros is reflective.  Macros operate on
+Scheme code and produce Scheme code.  The process of expansion is
+repeated iteratively until all macros have been invoked and only
+primitive forms remain.
+
+In Coma, program transformation is staged.  Every transformer function
+is a component of a meta language that manipulates a base laguage as
+data.  These languages are distinct.  A Coma program defines a base
+language transformer.
+
+Note that the Coma language is a higher order functional language.  A
+lot of parameterization can be solved using anonymous macros.  This
+approach gives a really simple structure to Coma that allows to treat
+staging in a very straightforward algebraic way without having to
+worry about bindings at all.  Absence of ``special forms'' allows one
+to maintain a very direct relationship between syntax (concatenation)
+and semantics (function composition).
+
+
+3. PREPROCESSING
+
+When one would like to parameterize over names in a Coma program, a
+different abstraction mechanism is necessary.  Since Coma is embedded
+in Scheme, the straightforward approach is to use Scheme's reflective
+macro system to handle this.  This mechanism is introduced into
+Staapl's Forth preprocessor as ``prefix macros'' or ``parsing words''.
+
+Additionally, since names in Coma are all global, it makes a lot of
+sense to build some scoping mechanism on top of this.  Coma uses both
+PLT Scheme's hierarichal module namespace mechanism and an additional
+subdivision into separate namespaces for compilation stages: (macro)
+and (target), plus namespaces to embed alternative concatenative
+semantics like (scat).  On top of this, it is possible to mix Coma and
+Scheme code in a way that allows Scheme's lexical bindings to be
+spliced into Coma code.
+
+
+
+
+Entry: The role of names in concatenative languages
+Date: Wed Aug 13 12:56:04 CEST 2008
+
+Lambda calculus is based on the two complementary operations of
+abstraction and applications.  Combinatory logic is a variant of the
+lambda calculus expressed in terms of just application and a couple of
+primitive lambda terms called combinators[1].  Further simplification is
+possible: the combinators can be made ``flat'' by using only left
+associative application[2].
+
+In Scheme, a practical programming language based on the lambda
+calculus, some forms are allowed to be abbreviated using names.  This
+abbreviation mechanism is not essential to computation: it is merely a
+notational device.
+
+  * A set of primivite abstractions and values.
+  * function application
+  * abstractions through LAMBDA
+  * abbreviation of values thorugh DEFINE
+
+In Scheme there are 2 mechanisms that introduce names.  DEFINE
+introduces abbreviations for expressions on the toplevel, while LAMBDA
+uses names to create parameterized code, which are later filled in
+using (explicit) applications.
+
+Eliminating abstraction (LAMBDA) from Scheme can be done in a similar
+way as for the lambda calculus -> flat combinators conversion.
+Replacing application with only left associative application creates a
+language which has a mechanism to define names (DEFINE) that is
+completely independent of its primary abstraction mechanism
+(concatenation of terms).
+
+This is quite remarkable.  In Scheme it is possible to unify these two
+name mechanisms by interpreting DEFINE as the introduction of lexical
+variable by wrapping a Scheme expression in a LAMBDA.  However, in a
+concatenative language we are now free to take another route: to take
+names _out of the language_ completely, making it part of some meta
+language.
+
+This is what happens in Coma.  All the metaprogramming machinery can
+be concentrated in a very simple combinatory ``algebra'' instead of
+having to deal with scoping of names.
+
+[1] http://en.wikipedia.org/wiki/Combinators
+[2] http://www.eecs.usma.edu/webs/people/okasaki/pubs.html#jfp03
+
+
+
+Entry: Programmer bootstrap, Staapler and PicKit2
+Date: Wed Aug 13 17:11:34 CEST 2008
+
+Byron Jeff gives some good arguments here that a zero-cost bootstrap
+is not really possible anymore with contemporary hardware:
+
+http://www.nabble.com/Re%3A-New-open-USB-programmer-p18963084.html
+
+Jean-Daniel Nicoud mentions in the same thread that:
+
+   It is not worth to loose time with serial or parallel programmers.
+   I like the Pickit2 USB programmer, cheap and it can be used as an
+   UART-USB interface when it has finished its work of programming
+   your Hex file. It encouraged me to develop a set of boards that
+   makes both learning and development more easy. Have a look to
+   http://www.didel.com/ It's brand new, so I put the links on the top
+   of the page.
+
+From the PICkit 2 Interface guide Kit
+PICkit2SourceGuidePCv2-52FWv2-32.pdf available in
+http://ww1.microchip.com/downloads/en/DeviceDoc/FirmwareV2-32-00.zip
+
+   5.1.2    UART Mode
+
+     UART Mode allows the PICkit 2 to be used as a simple UART.
+     ICSPCLK = TX (data transmitted from the PICkit 2)
+     ICSPDAT = RX (data received from target UART)
+
+     Signal levels are inverted (ie Start Bit = GND) logic level
+     signals between GND and VDD.
+
+It would be interesting to try to use this instead of writing
+Staapler, or let Staapler be the interface to networked programming on
+top of a PicKit host connection
+
+
+
+Entry: Improving Forth
+Date: Mon Aug 18 16:41:36 CEST 2008
+
+Does Forth need improvement?  Forth already has metaprogramming
+capabilities, so why add another layer?  The short answer is that
+Staapl REPLACES the metaprogramming mechanism with a different one.
+
+I use the name ``Forth'' in texts about Staapl because the machine
+model used is close enough to Forth for the resulting language to be
+called a Forth dialect.  But to understand the idea behind Staapl, the
+Forth language needs to be split up into two parts:
+
+ (1) the 2-stack machine model that supports the language
+
+ (2) the low-level reflective self-hosted language structure
+
+My claim is that (1) is an idea powerful enough to exist outside of
+(2), and that in a cross compiled, non-self-hosted language setup, the
+standard (2) can be replaced by something more powerful.  In a
+minimalist self-hosted environment, there is little room for improving
+(2).  Apart from small changes found in a myriad of incompatible Forth
+dialects, the core design seems to be quite optimal.
+
+The problem with Forth is that when you DO want to use some standard
+compiler techniques factored out in different steps, instead of the
+usual highly reflective ultra-minimalist no-datastructures-necessary
+Forth approach, using a low level language like Forth to implement the
+compiler just makes things more difficult.
+
+
+So I have this to say:
+
+* Staapl doesn't use Forth, the reflective language, as you know it.
+  It is mostly inspired by the Forth machine model.  It stays close to
+  the Forth language legacy, but is significantly different in key
+  points, where it replaces reflection by explicit staging.
+
+* Staapl uses the Joy model, a functional language related to Forth,
+  to implement metaprogramming.  For practical reasons, the Joy model
+  is slightly adapted to be embedded in Scheme.  PLT Scheme is used
+  for its advanced module system that simplifies programming with
+  macros, and its overall coherance as a well-documented Scheme based
+  programming environment.
+
+
+
+Entry: Two kinds of parameterized code
+Date: Tue Aug 19 15:27:29 CEST 2008
+
+
+1.  Quoted macros are (compile time) values in Coma, so they can be
+    used to parameterize other macros.
+
+2.  It is possible to use Scheme's macro mechanism and the ``parsing
+    words'' extension built on top of it.
+
+
+Which one should you use?
+
+These two are somewhat complementary.  The former is cleaner, since it
+works on the code transformation level.  The latter is specifically
+designed to introduce names and is _just_ source syntax manipulation,
+but can be useful for abbreviations.
+
+An example of the first approach: waiting for a startbit, which is a
+high->low transition on a pin.
+
+macro
+: wait | q-cond? |
+    q-cond? i if begin q-cond? i not until then
+                 begin q-cond? i     until ;
+
+: startbit? PORTC 0 low? ;
+forth
+
+: wait-start  ' startbit? wait ;
+
+
+Parameterization here is accomplished by passing the quoted macro
+"startbit?" to another macro "wait" that will instantiate (interpret)
+the macro.  Instantiation/interpretation uses the short Joy-inspired
+word "i".
+
+Shorter, with anonymous quotations enabled:
+
+: wait-start  [ PORTC 0 low? ] wait ;
+
+
+
+Entry: Staapl design choices
+Date: Fri Aug 22 10:45:43 CEST 2008
+
+These are the 4 mostly orthogonal big choices that are at the core of
+the structure of Staapl.
+
+* [LIBRARY vs. LANGUAGE] Staapl is not a different language.  It uses
+  existing ideas and implementations from Scheme and Forth, and is
+  structured as a library extension of PLT Scheme.  This avoids all
+  problems with concrete syntax.  Concrete syntax can be built on top
+  of the existing concrete syntax system (i.e. the Forth parsing
+  words) but the abstract syntax is kept as clean as possible: Scheme
+  syntax + purely concatenative for the intermediate representation
+  and low level machine model.
+
+* [OOP vs. FP] Staapl is based on functional programming instead of
+  object orientation.  The main advantage is that partial evaluation is
+  easier (almost trivial) in the absence of state.
+
+* [STACK vs. REGISTER] 2-stack machines live at the intersection of FP
+  and imperative programming.  This simplifies machine models:
+  register (RISC) machines have NON-LOCAL state (registers) at their
+  core, while stack machines are built around a LOCAL state mechanism.
+  This difference cannot be stressed enough!
+
+* [UNTYPED vs. TYPED] Staapl is based on Scheme (untyped lambda
+  calculus) and not on ML/Haskell.  The reason for this is largely
+  historical.  Currently I see no reason why it cannot be implemented
+  in a language with ML-style type system.  Such an approach would
+  make some corner cases (ad-hoc union types) more explicit.  However,
+  Staapl's _implementation_ heavily uses macros for creating new
+  binding and composition structures, so it might need
+  re-implementation in a different style.  It seems a better approach
+  to gradually introduce more static features into Staapl than to
+  rewrite the system in an all-static language.
+
+
+
+
+
+Entry: PICkit2 v2.x support
+Date: Wed Aug 27 14:24:43 CEST 2008
+
+The v2.x Firmware for Microchip's PICkit2 contains a little script
+interpreter used to decouple device support from programmer firmware.
+
+I took this as an opportunity to experiment a bit with a different
+flavour of metaprogramming.  Since it's not a stack machine, I thought
+I'd try something special-purpose.
+
+The scripting language contains two parts:
+
+  * Interactive commands.  The device responds to a set of bytecode
+    commands transported in 64byte buffers.
+
+  * Scripts.  In addition, it is possible to store scripts in
+    programmer RAM using an extra set of instructions.
+
+The first implementation generated a simple assembler from a byte code
+table with names stored in a hash table, and a wrapper macro that
+allows composition of commands and scripts.  Something in the form of:
+
+ (begin-script  (PRIM1) (PRIM2 arg1 arg2 arg3))
+ (begin-command (CMD1) (CMD2 arg1 arg2))
+
+Where the first form would compile a script to a list of numbers and
+the second would compile an interactive command list and execute it,
+collecting the reply.
+
+The second implementation has the interactive and script commands all
+visible in the pk2 module namespace.  Since they are all upper case,
+they do not collide with scheme code.  The big advantage here is that
+the names are lexical and represent first class functions, and the
+composition is scheme's function nesting and procedure sequencing, not
+some special purpose 'begin-xxx macro.  This allows things like:
+
+ (begin
+   (EXECUTE_SCRIPT     ;; interactive command
+    (PEEK_SFR #x80)    ;; script
+    (PEEK_SFR #x81))   ;; script
+   (UPLOAD_DATA))      ;; interactive
+
+ => (32 251)
+
+Here 'EXECUTE_SCRIPT refers to a function that concatenates all script
+code it receives as an argument, uploads it to the PICkit2 for
+execution, and waits for a reply.  'PEEK_SFR refers to a function that
+checks its arguments and compiles a byte code list.
+
+The code to generate the functional/procedural representation is
+really simple, and deals mostly with special case argument formats and
+binary data formatting (64 byte buffers).
+
+ http://zwizwa.be/darcs/staapl/staapl/pickit2/interpreter.ss
+
+Then the byte code specification is just a table:
+
+ http://zwizwa.be/darcs/staapl/staapl/pickit2/pk2script.ss
+
+The part- and family-specifict scripts in the PK2DeviceFile.dat
+database are similarly accessible using a single Scheme identifier.
+This means they can be passed as arguments to 'EXECUTE_SCRIPT.
+
+(ProgEntryScript)
+
+=> (250 247 249 245 243 0 232 20 246 251 231 127 247 250 251 246 232 19)
+
+The other properties are available as well too:
+
+(Vpp)
+
+=> 12.0
+
+
+Entry: Staapl command line compiler
+Date: Fri Sep  5 12:14:52 CEST 2008
+
+I've added a standard command line interface to the compiler.  It is
+accessible as:
+
+  mzscheme -p zwizwa/staapl/staaplc -- <arg> ...
+
+The default language environment is pic18.  It is a simple frontend
+for a couple of scheme functions, and best explained by quoting it's
+main routine, after command line argument processing.
+
+(eval
+ `(begin
+    (require ,(base-language))
+    (forth-load/compile ,(filename))
+    (current-console '(,(device) ,(baud)))
+    (save-ihex ,(output-hex))
+    (save-dict ,(output-dict)))
+ (make-base-namespace))
+
+Given a source file, it produces an Intel HEX file to upload to the
+target, and a script which instantiates the dictionary (global symbol
+table) and console information.  The latter is only useful when the
+target contains the monitor code.
+
+I.e. to compile a file "foo.f" containing:
+
+   : foo 1 2 3 ;
+   : bar foo foo bar ;
+
+Do this:
+
+   mzscheme -p zwizwa/staapl/staaplc -- foo.f
+
+This produces the files foo.hex and foo.ss
+
+It is possible to install a launcher called 'staaplc' by issuing the
+following command:
+
+   mzscheme -p zwizwa/staapl/install
+
+You probably need to do this using administrator priviliges.  From
+then on it's possible to use
+
+   staaplc <arg> ...
+
+
+
+
+Entry: Staapl PLaneT package snapshots
+Date: Mon Sep  8 21:26:43 CEST 2008
+
+The latest prereleases of the Staapl PLaneT packages can be found
+here:
+
+  http://zwizwa.be/darcs/staapl/staapl.plt
+
+Other prereleases can be found in the same directory.  To install,
+download the file and use the following command from the PLT
+distribution:
+
+  planet fileinject zwizwa staapl.plt 1 7
+
+where "1 7" needs to be replaced with the current prerelease version.
+To remove use the following command:
+
+  planet remove zwizwa staapl.plt 1 7
+
+
+
+Entry: Blink-A-Led
+Date: Tue Sep  9 16:55:33 CEST 2008
+
+The example can be found here:
+http://zwizwa.be/darcs/staapl/staapl/examples/blink-a-led.f
+
+Complete recipe:
+
+  * Install PLT Scheme v4.1 or higher from http://plt-scheme.org
+
+  * Run "mzscheme -p zwizwa/staapl/install" to download and compile
+    the Staapl code. This creates a wrapper command line application
+    called "staaplc".
+
+  * Copy-Paste the code below, or download it from the link given
+    above and run "staaplc blink-a-led.f" to the PIC18F452.
+
+  * Upload the generated blink-a-led.hex
+
+You don't need the full PLT distro to run Staapl.  If space is an
+issue, download just MzScheme from:
+http://pre.plt-scheme.org/installers
+
+The example will probably work on other PIC18 chips, but you might
+need to tweak the configuration bits.
+
+I just noticed this example doesn't initialize the stack pointers.
+Add this definition and call it in init.
+
+: init-stacks
+      #x7F 0 lfsr            \ DATA stack 16 bytes at #x80
+      #x8F 1 lfsr            \ AUX stack  16 bytes at #x90
+      0 movlw STKPTR movwf   \ hardware return stack
+;
+
+---- cut here ----
+
+\ stand-alone BLINK-A-LED for PIC18F452
+
+load p18f452.f
+
+\ config bits (40 MHz XTAL)
+#x300000 org
+  #x00 , #x26 , #x0F , #x0E ,
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xA0 ,  \ B: boot write protect
+  #x0F , #x40 ,
+
+\ we just start at the head of flash memory
+0 org
+
+: main     init begin blink busyloop again
+
+: init     0 LATB ! 0 TRISB ! ;
+: blink    LATB 0 toggle ;
+
+\ The inner loop takes 3 cycles to execute. [DECF + BNZ]
+: busyloop 100 for 100 for 100 for next next next ;
+
+
+
+Entry: Incremental development
+Date: Fri Sep 12 11:25:35 CEST 2008
+
+As already hinted before, the Staapl framework contains some tension
+between ``transparent'' and ``toplevel'' development frameworks.
+
+TOPLEVEL:
+
+  Also called ``image based'' development.  Typically in a dynamically
+  typed language it is possible to create and change definitions
+  during interaction.  This has traditionally been the model in Lisp,
+  Forth and especially Smalltalk.  This model is heavy based on
+  mutation and the sequence of code (re)definitions.
+
+TRANSPARENT:
+
+  Here application structure is a property ONLY of the source code,
+  and does not depend on load order.  It is essentially declarative.
+  All definitions are permanent, and cannot be redefined.  This
+  approach is typically taken in statically typed languages, but is
+  also used in the PLT Scheme module system.
+
+
+Staapl allows you to use both approaches, mostly coming from PLT
+Scheme's "load" and "require" forms.  It is possible to create
+applications with a fully static module structure which can then be
+interactively extended.  The workflow looks like this:
+
+ 1. build an application kernel using the module system (this can be a
+    single module with a flat namespace)
+
+ 2. compile it and upload the kernel image to the target system.
+
+ 3. connect a console to the target system, and incrementally upload
+    new code.  when it's stable, add it to the kernel and reflash the
+    whole application.
+
+In order for 3. to work, the console application needs to know where
+to find the kernel code, since the target does not contain a symbol
+table.  This can be done by either not leaving the compiler after
+compiling and uploading the kernel, keeping all the symbol tables
+alive, or by reconstructing this state using a dictionary file.  Such
+a file looks like this:
+
+  (require (planet zwizwa/staapl/prj/pic18))
+  (init-prj)
+  (forth-load/compile "/tmp/foo.f")
+  (words! '((asdf code 0)))
+  (console! '("/dev/staapl0" #f))
+  (pointers! '((code 1) (data 0)))
+  (begin)
+
+The first two lines initialize the compiler namespace with the base
+language.  The third line re-loads the top application file,
+reconstructing all macros and code.  The fourth line makes sure the
+target words are linked to the correct addresses.  The remaining lines
+set console parameters and pointers to free code and data memory
+respectively.
+
+The catch is in the 'words! and 'pointers! procedures.  The source
+code can get out of sync with the binary code uploaded to the
+microcontroller.  When the application has changed compared to the
+code present on the microcontroller, these two commands are relevant,
+as they will replace the dictionary compiled from the application
+source so it reflects the older, out of sync target code, to ensure
+interactive compilation will still work.
+
+This approach is intentionally not transparent.  There are cases where
+it is more convenient to let the application source code and on-target
+compiled code get slightly out of sync, to benefit from the shorter
+edit-compile-upload cycle which doesn't need a target reboot.  In
+those cases however it is important to have the new _macros_ available
+for interactive compilation.
+
+
+
+Entry: Staapl vs. MetaML / MetaScheme
+Date: Sat Sep 13 09:31:58 CEST 2008
+
+This post is an attempt to list the differences between the kind of
+metaprogramming Staapl uses, and the approach used in (untyped)
+MetaML.
+
+Scheme's hygienic macros:
+
+  Allow manipulation of arbitrary expression trees, but provide both
+  referential transparency (all identifiers take semantics from the
+  definition site) and avoid variable capture (identifiers introduced
+  by a macro never bind variable references that were already present
+  in the code.)
+
+  Scheme's approach is about IDENTIFIERS, not about abstract syntax
+  trees.  The bindings of these identifiers (syntax or values) drives
+  the expansion.  Lexical structure comes from extending the
+  expander's local identifier environment whenever new binding forms
+  are encountered.  Binding information from the local environment is
+  available through functions like 'bound-identifier=?.
+
+Lisp macros and quasiquotation:
+
+  A simpler templating mechanism that does not interpret names in any
+  way, and thus has problems with hygiene when manipulating or
+  generating code with lexical structure.
+
+MetaML's staging:
+
+  Ignoring the type system details, this becomes MetaScheme[1].  It is
+  based on the operations: Bracket, Escape, Lift, and Run.  These
+  operations are performed on a code data structure.
+
+  Such a system needs a more highlevel representation of code as
+  lambda terms.  Care needs to be taken to ensure proper renaming when
+  manipulating binding forms and providing cross-stage-persistence.
+
+Staapl's staging:
+
+  The comparison to MetaML is a bit difficult because Staapl doesn't
+  have a clear concept of ``code object'' in the sense that MetaML
+  does.  Staapl's metaprogramming is function-oriented instead of
+  data-oriented.  The central object in Staapl is a ``code
+  transformer'' which operates on primitive stack machine code.
+
+  Metaprogramming in Staapl is established by two mechanisms.  The
+  first one is similar to MetaML's 4 operations on code objects, but
+  operates on compositions of code transformers instead of a code data
+  structure, and is no longer a true staging operation in the MetaML
+  sense.  The second is the definition of primitive transformers
+  operating on stack machine code (the data-oriented part).
+
+  Due to the absence of a binding mechanism in Coma code, the
+  equivalents of Bracket and Escape are simply quasiquote and unquote.
+  Bracket corresponds to the concatenative composition form 'macro:
+  while escape is an 'unquote operation which allows interpolation
+  from the Scheme lexical environment.
+
+  There is an analog for MetaML's cross-stage persistence (Lift), but
+  this is usually better made more explicit in Staapl: Unquote
+  operations are usually preferred over automatic lifting:
+
+    (let ((square (macro: dup *))
+          (one 1))
+       (macro: ,square ,square ',one +))      ;; 4th power + 1
+
+  This is for two reasons: Scheme and Coma have different name spaces
+  to support different language semantics side-by-side and unquoting
+  explicitly chooses between them.  By default 'macro: takes from the
+  '(macro) namespace, i.e. the '+ 'dup and '* identifiers in the
+  example above.  Moreover, Coma code handles values and functions
+  differently, which requires a choice of how Scheme identifiers
+  should be interpreted.  This is reflected in the two unquote forms ,
+  and ', which insert functions and literals from the Scheme name
+  space in the Coma code respectively.
+
+  However, when it's clear whether identifiers should represent
+  functions or values, automatic cross-stage lifting is easily added.
+  It is used in the 'tscat: composition operation where Scheme lexical
+  names can be referenced as values:
+
+    (let ((one 1))
+       (tscat: one +))                 ;; increment
+
+  Similarly, one could choose to use default function semantics, where
+  Scheme lexical identifiers are dereferenced as Coma functions.  This
+  is used in a language extension that allows the introduction of
+  local functions.
+
+  Note that the code generator closes over identifiers in the
+  currently visible '(macro) namespace also.  These identifiers behave
+  exactly as Scheme identifiers; they are implemented as prefixed
+  identifiers.  There's a corresponding let form:
+
+    (let-ns (macro) ((inc (macro: 1 +)))
+       (macro: inc inc))                  ;; add 2
+
+  The analog for MetaML's Run operation is more difficult to identify,
+  since this requires on-target stack machine code execution.  While
+  it is possible in Staapl, compilation is usually kept separate from
+  on-target code exection.
+
+  However, the different model used in Staapl does present an
+  ``instantiate'' operation which produces stack machine code from a
+  code generator.  A generator is a code transformer that accepts the
+  empty program.
+
+  Upto now we ignored the other metaprogramming mechanism that uses
+  pattern matching to define machine code transformer primitives.
+  This is an essential part of Staapl, and is in some sense
+  complementary to the Scheme->Coma bracketing operations in that it
+  can be used to represent Partial Evaluation rules which
+  _deconstruct_ code.  They have no equivalent in MetaML, but resemble
+  abstract interpretation techniques that have been used in
+  conjunction with MetaOcaml code construction.  In Staapl this is an
+  integral part, and it's the interplay between quasiquotation and
+  deconstruction that gives the system its expressiveness.
+
+
+[1] http://okmij.org/ftp/Computation/Generative.html#meta-scheme
+
+
+Entry: Staapl's metaprogramming approach
+Date: Tue Sep 16 13:06:06 CEST 2008
+
+Staapl isn't a conventional multi-stage system which concentrate on
+``code as data''.  Staapl concentrates on _code transformers_ where
+higher order generation is modeled with higher order functions
+(functions producing code transformers) instead of explicit staging.
+
+
+
+1. MACHINE CODE and MACHINE CODE TRANSFORMERS
+
+There are only two forms of ``code'' in Staapl:
+
+    1.  Machine code (M), represented a list of primitive machine
+        instructions, where the machine primitives are modeled as an
+        algebraic data type[1].
+
+    2.  Machine code transformers (M->M), modeled as functions that
+        operate on _one end_ of a list of machine primitive
+        instructions.  These machine code transformers thus behave as
+        instructions of a stack machine.
+
+( Assume for now that the target machine is a concrete 2-stack
+  machine.  The partial evaluation mechanism explained below is
+  suitable to include compile time mapping to register based machine
+  architectures in a very straightforward way. )
+
+Because machine code transformers can be combined using function
+composition, they can be used to build a programming language (== a
+set of primitives + composition mechanism).  This forms the language
+of Concatenative Macros called Coma.  By enforcing M->M transformers
+to only operate on one end of generated code, Coma behaves as a stack
+language that can support a Forth language dialect.
+
+An important observation is that this language doesn't merely support
+macro _expansion_ as one would see in a macro assembler.  The
+mechanism necessary to pass arguments to macros is _identical_ to the
+one that represents machine code: the algebraic data type mentioned
+above.
+
+Macro arguments and target code are placed on the same level by the
+introduction of the (pseudo) machine instruction [qw <number>], short
+for Quote Word.  This instruction causes a number (a machine data
+word) to be loaded on the run-time parameter stack when the generated
+program executes.  However, when the qw instruction appears as the
+input of a transformer, it can be removed from the instruction stack
+as long as it is possible to use the the argument it carries in a
+compile time computation that doesn't change the meaning of the code.
+This is called constant folding[2].
+
+    An example to illustrate this.  The macro "1" pushes the machine
+    code instruction [qw 1] to the current code stack.  (qw is short
+    for Quote Word).  The run time effect of this code is to load that
+    number onto the run time parameter stack.  The macro "2" does the
+    same for [qw 2].  The composition of these two macros, the Coma
+    program "1 2" will produce code on top of the code stack looking
+    like
+
+           ... [qw 1] [qw 2]
+
+    with the top of the stack on the right.  This code has the
+    run-time effect of loading the two numbers on the run-time stack.
+    With this code present on the code stack, the code transformer
+    associated to the coma code "+",can perform a compile-time
+    computation, and replace the top of the code stack with
+
+           ... [qw 3]
+
+    In other cases "+" will merely insert code to perform an addition
+    at run-time, using data from the run-time parameter stack.
+
+
+An essential observation is the possibility to generalize the
+arguments of [qw <number>] to any kind of abstract data type that can
+be represented in Scheme, but behaves as a ``constant'' in the sense
+that it can somehow be eliminated compile time.  I.e. it can be a code
+generator, or a data structure with a high level representation of
+code to be generated.  The key point is that these objects can be
+manipulated _from within Forth_ code as if they were present at run
+time, hiding the compile-time specialization behind the scenes.  This
+allows the addition of high-level domain-specific language extensions
+written in Scheme to a project with low-level logic written in Forth,
+keeping the local semantics simple.
+
+Both the high and low level languages are thus extensible, and can be
+used as the substrate for DSLs.  Scheme's macro system can be used to
+construct "data-entry" front-ends for algorithms that compile a
+specification down to a level where it can run on the abstract
+machine, and interface with low-level code written in Forth (or any
+other language based on the Coma language).  All identifiers that
+occur in any part of the code are managed by PLT Scheme's declarative
+module system, providing a prooven way to control complexity of large
+systems through modularity.
+
+
+
+2. HIGHER ORDER FUNCTIONS
+
+In order to make this mechanism more flexible, the Coma _composition_
+mechanism is exposed to Scheme.  Next to deconstruction and
+construction of stack machine code, it is also possible to _construct_
+concatenative macros from Scheme, and to _evaluate_ them.  This
+mechanism is orthogonal to the machine code pattern matching
+functionality.
+
+Because of the absence of lexical structure in the combinator based
+Coma language, there are no hygiene issues when the composition
+mechanism is extended with _quasiquotation_ mechanism that can be used
+to construct code templates.
+
+These operations correspond to the MetaML operations of Bracket (code
+composition), Escape (unquote) and Run (macro evaluation) with
+MetaML's code object is replaced with Staapl's code representation
+based on stack machine code transformers.  MetaML's cross-stage
+persistance is mostly handled by Scheme's lexical scoping rules, and
+doesn't present a problem because code is opaque and represented by
+closures.
+
+
+
+3. MACHINE MODEL
+
+An important remark is that the hardware abstraction layer for the
+concrete machine is not the machine language, but a set of named Coma
+transformers that needs to be implemented for each concrete machine.
+This has the advantage that the machine model doesn't need a byte code
+and a separate JIT.
+
+Implementing a port uses exactly the same mechanism as the one used
+for the more highlevel metaprogramming on top of the machine model.  A
+port is a set of rewrite rules for a concrete instruction set using
+the pattern matching and quasiquotation metaprogramming tools.  A port
+can be kept as straightforward as possible, using only part of the
+real machine's instruction set.  Optimizations can be added as needed,
+and pseudo instructions can be added as way to factor code rewrite
+rules.  (I.e. the PIC18 port uses factors the highly specialized
+test+branch opcodes into separate test and branch pseudo opcodes.)
+
+
+
+[1] http://en.wikipedia.org/wiki/Algebraic_data_types
+[2] http://en.wikipedia.org/wiki/Constant_folding
+
+
+Entry: A type system for Coma
+Date: Fri Sep 26 11:30:58 CEST 2008
+
+I've been thinking a bit about a type system for Coma, and I've run
+into two problems where dynamic typing features are used in a way that
+is not trivially eliminated:
+
+  * Quasiquotation from Scheme expressions.
+  * Code generation dispatch on operand values.
+
+My conclusion is that adding the appropriate ``compile time value
+passing'' is probably going to impose some restrictions that require
+invasive restructuring.
+
+A more interesting approach is probably to try to build the core of
+the compiler on top of a language with static typing.  The
+functionality of the compiler itself is available in high-level form
+and straightforwardly transferred to Haskell or Ocaml code.
+
+Ignoring the prefix -> postfix trick, this:
+
+  Techniques for Embedding Postfix Languages in Haskell by Chris
+  Okasaki. Haskell Workshop, October 2002, pages 105-113.
+  http://www.eecs.usma.edu/webs/people/okasaki/hw02.ps
+
+contains a straightforward type system, modeling stacks as nested
+tuples:
+
+   add :: ((s, Int), Int) -> (s, Int)
+
+Which is simply extended using type classes as:
+
+   add :: Num n => ((s, n), n) -> (s, n)
+
+It looks like this solves the main embedding problem.  The patterns
+macro can then be replaced by Haskell's (or Ocaml's) pattern matching
+functions.
+
+Such an approach should be able to be used as a test suite for Staapl.
+As long as a translation exists from (a subset of) Staapl's
+transformer core to an embedding in a typed language, the system
+(subset) is type safe.
+
+This approach is rooted in the idea that program correctness can be
+approached from two sides: dynamic type systems + tests (allow more,
+but cannot eliminate all run-time type errors) or static type systems
+(allow less, but eliminate all rtte).
+
+
+
+
+
+Entry: A MetaOcaml offshoring example
+Date: Sat Sep 27 10:30:24 CEST 2008
+
+This post contains some examples of metaprogramming based on
+MetaOcaml's staging operations and Ocaml->C offshoring.  By
+representing a subset of C as a subset of Ocaml, basic Ocaml->Ocaml
+metaprogramming can be used, avoiding manual generation of C code.
+
+MetaOcaml:    http://www.metaocaml.org/
+terminology:  http://web.cecs.pdx.edu/~sheard/staged.html
+
+See the following paper for an introduction by the authors:
+``Implicitly Heterogeneous Multi-Stage Programming''
+http://www.cs.rice.edu/~taha/publications/journal/ngc07.pdf
+
+The idea is that heterogenous metaprogramming can be implemented in a
+homogeneous staged language by directly mapping a particular subset of
+a representation language to an as large as possible subset of a
+target language.
+
+This translation is different from ordinary compilation in that
+
+1. Translation is DIRECT.  In order to give full control over
+   generated code, there is no optimization as there is in an ordinary
+   language compiler.
+
+2. The aim is at full coverage of the TARGET language, not the source
+   language as happens in ordinary language compilation.  Support as
+   many of C's language features as possible, but do not attempt to
+   translate all of Ocaml's features, like higher order functions,
+   because they have no equivalent target representation.
+
+
+The staging operations used are:
+
+.< e >.            bracket
+.~ e               escape
+.! e               run
+.!{Trx.run_gcc} e  offshored run, using gcc backend
+
+
+GENERATING PLAIN C CODE
+-----------------------
+
+Ocaml code that can be translated to C needs to have the following
+properties: Functions need to be first order, and can use only the C
+base types char,int,double and 1/2 dimensional arrays of those base
+types as function arguments.  Functions can return only base types.
+
+C function that take multiple arguments correspond to first-order
+Ocaml functions that take a single tuple as input.
+
+# .!{Trx.run_gcc}(.< fun (a, b) -> a + b >.) ;;
+- : int * int -> int = <fun>
+
+This produces a piece of C code:
+
+  int procedure(int a_1 , int b_2 )
+  {
+    return a_1 + b_2;
+  }
+
+The other code in the C file is necessary to run within Ocaml, but is
+guarded by an #ifdef OCAML_COMPILE to make sure the source can be
+included as-is into different projects.
+
+The following defines a higher order (curried) function, which cannot
+be translated.
+
+# .!{Trx.run_gcc}(.< fun a b -> a + b >.) ;;
+Can't translate function return type in  <int -> int>
+Can't run sth that is not a function
+   or is not of int type; you passed <int -> int -> int>
+Fatal error: exception Typecore.Error_Translation_type_check_subset
+
+Replacing + by +. (Ocaml's numeric operations are not polymorphic
+between ints and floats) generates floating point code:
+
+# .!{Trx.run_gcc}(.< fun (a, b) -> a +. b >.) ;;
+- : float * float -> float = <fun>
+
+  double procedure(double a_1 , double b_2 )
+  {
+    return a_1 + b_2;
+  }
+
+Arrays are supported: Ocaml's arrays map to C arrays.
+
+# .!{Trx.run_gcc}.<fun x -> x.(0) + 123>. ;;
+- : int array -> int = <fun>
+
+  int procedure(int *  x_1 )
+  {
+    return x_1[0] + 123;
+  }
+
+The looping construct supported is Ocaml's "for" loop.  Note that
+functions cannot return void (unit) so this includes a dummy "0"
+expression after the side-effecting array element assignment loop.
+
+# .!{Trx.run_gcc}.<fun x -> for i=0 to 99 do x.(i) <- 123 done ; 0>. ;;
+- : int array -> int = <fun>
+
+  int procedure(int *  x_1 )
+  {
+    int i_2 ;
+    for(i_2 = 0; i_2 <= 99; i_2++)
+    {
+      x_1[i_2] = 123;
+    }
+    ;
+    return 0;
+  }
+
+
+Options can be passed to gcc like this:
+
+# ( .!{Trx.run_gcc with compiler_flags="-g -O2";
+                        working_dir=".";
+                        file_name="test";
+                        main_function_name="procedure"}
+                  .<fun x -> x + x>.) 2;;
+ - : int = 4
+
+The following examples use a file called /tmp/test.ml which when
+loaded generates test.c as a side effect.
+
+  #use "/tmp/test.ml" ;;
+
+This assumes the .ml file contains a line
+
+  let p = .!{Trx.run_gcc}procedure
+
+at the end, where "procedure" is bound to the code object that needs
+to be offshored.
+
+
+
+PARAMETERIZED CODE
+------------------
+
+Creating parameterized code can be done using two mechanisms:
+explicit excape (unquote) and cross-stage persistence.
+
+The simplest example I can think of is a specialized addition
+operation.
+
+  let make_adder c = .< fun x -> x + .~c >.
+  let procedure = make_adder .< 123 >.
+
+The following C code is produced from the code above:
+
+  int procedure(int x_1 )
+  {
+    return x_1 + 123;
+  }
+
+This is an example of explicit escape: the variable "c" is bound to a
+piece of code that is spliced into the body of the function.
+
+The same example using a mechanism called "cross-stage persistence"
+(csp) looks like this:
+
+  let make_adder n = .< fun x -> x + n >.
+  let procedure = make_adder 123
+
+Here one of the operands "n" is taken from the lexical environment
+outside the quoted code.  This variable lives at an earlier stage than
+the code fragment, and so needs to be carried over to the next stage.
+
+Carrying over such values to the next stage is no problem as long as
+one stays inside Ocaml, where csp values can remain abstract.  In
+order for csp values to work for gcc offshoring, they must be
+representable as concrete C literals.  In the example above this is no
+problem since "n" refers to a numeric value.
+
+
+
+ABSTRACT INTERPRETATION
+-----------------------
+
+Code expansion without reduction (partial evaluation) is quite
+limited.  When generating code, often some kind of specialization is
+desired which eliminates unnecessary run-time computations.
+
+In the following paper the technique of abstract interpretation is
+employed to generate FFT code:
+http://www.cs.rice.edu/~taha/publications/conference/emsoft04.pdf
+
+Instead of working with abstract code objects directly as produced by
+the bracket operation, and consumed by the run and escape operations,
+one works with types that allow the representation of extra
+information when it is available.  The idea is that code represented
+by such objects can be "processed" without having to look inside any
+abstract code objects.  Deconstructing code objects could violate
+guarantees provided by the type system and is not possible in
+MetaOcaml.
+
+I.e. an integer could be modeled as One | Other, indicating that we
+know whether the code value is 1 or otherwise do not have more
+information and will model it as an abstract integer code object.
+This enables the definition of an abstract interpreting multiplication
+operator operating on this type, that can eliminate multiplication by
+1 at generation time, but defers the multiplication operation to the
+next stage by generating multiplication code when there is no
+information about the value of the code.
+
+
+Entry: A new introduction.
+Date: Sat Mar  7 13:08:13 CET 2009
+
+After a couple of months of settling time, here's a new basic
+introduction to Staapl.
+
+----
+
+Staapl is a metaprogramming system based on the Forth and Scheme
+programming languages.  Staapl currently contains the following
+distinct layers:
+
+  * A compiled Forth-like language for the Microchip PIC18
+    microcontroller architecture.
+
+  * A language for macro definition and instantiation (target code
+    generation) using Forth syntax.  Used to implement the PIC18, and
+    written in terms of Coma.
+
+  * A stack-based macro language called Coma.  It can be used for the
+    specification of Forth-like stack-based languages ("specification
+    by compiler").  Coma primitives generate and process sequential
+    imperative machine language (a real stack machine or a RISC
+    machine emulating a stack machine).  Coma contains mechanism for
+    creating primitives that support partial evaluation based on
+    pattern matching.  Coma's composition mechanism (concatenation)
+    can be manipulated from Scheme using hygienic quasiquotation.
+    Coma is written as an extension of Scat.
+
+  * An untyped stack language called Scat.  Scat is written as an
+    extension of the Scheme programming language (PLT Scheme), and is
+    very similar to the Joy language.
+
+These layers comprise the layered organization of the stack languages.
+Most of the highlevel code is Scheme, and specialized macros written
+in Scheme.
+
+How does Staapl differ from its sources of inspiration?
+
+  * Staapl's idea of Forth differs from traditional Forth in that it
+    is heavily macro-based: all "words" in Staapl's Forth are macros,
+    and macro and procedure definitions are (mostly) the same:
+    procedures are instantiated macros.
+
+  * Scat is not Joy, because Scat's code is opaque, while Joy allows
+    for direct introspection and creation of code objects using list
+    operations.
+
+  * Coma is not just a macro assembler.  Macros are _programs_ that
+    can operate on data (base machine language programs) in arbitrary
+    ways.
+
+  * Staapl is very different from metaprogramming tools based on
+    lexical scoping (i.e. MetaML).  Staapl uses using a lexically
+    scoped metalanguagelanguage (Scheme) to metaprogram a stack
+    language which lacks local variables, avoiding problems with
+    lexical scope of the target language.
+
+
+
+Entry: Small computers
+Date: Sat Mar 14 20:15:10 CET 2009
+
+Forth & lisp & small computers.
+http://netzhansa.blogspot.com
+
+Eventual goal: independent "full" but simple computer systems.
+Getting rid of current pool of fast time-to-market crap.
+
+The basic idea is networks and computers (languages).
+Find out what's wrong with unix and fix it.
+
+
+Entry: Stack machines with large register files
+Date: Sat Mar 14 22:01:18 CET 2009
+
+Somehow a lot of the actual code i wrote in Staapl's forth dialect is
+an exercise in global resource allocation.  I never knew data
+indirection was so expensive until i met the PIC chip :)
+
+But the idea is more general: the tension between simple
+machine/hardware and macros and code generation is very visible with
+this chip.  Programming on a bigger RISC with cheap indirection makes
+this not so obvious..  So maybe the point is really to get to hardware
+in the end?
+
+
+Entry: Stacks and Lambda
+Date: Mon Mar 30 14:35:22 CEST 2009
+
+To be fair, I have to admit that my earlier obsession with using Forth
+and stacks (early Packet Forth and Badnop) for everything was a
+delusion rooted in ignorance.  For general purpose programming the
+lambda calculus extended with some useful binding forms is a much
+better model.
+
+However, this obsession did put me on quite an interesting path about
+functional programming and staging, and the use of stack machines as
+compilation targets with a human-programmable/readable machine
+language.
+
+Forth is slightly more abstract than register/memory machines which
+have no locality at all.  You need stacks..  So better embrace them.
+
+
+
+Entry: Restating Goals
+Date: Wed Apr  8 15:52:17 CEST 2009
+
+Before restating the new goals, I'm going to list the things that are
+no longer part of Staapl objective:
+
+  - DSP / dataflow code (moved to the IP project).
+
+    The reason for this is quite straightforward: dataflow
+    representation exposes parallelism and implementation is mostly
+    about the interaction between memoization and code/block
+    sequencing: how to keep track of intermediate results given a
+    certain memory hierarchy.
+
+    Concatenative code is inherently _serial_ in nature, and execution
+    context is easily swapped, which makes it more suited for a
+    concurrency oriented programming model.
+
+    It might make sense to use concatentative code as a
+    _specification_ language for DSP operations by translating it into
+    dataflow representation, but that is not the goal of Staapl as of
+    yet.
+
+So, what are the goals:
+
+  + Understand modules in a language without local names.  This has
+    been the most important problem in using Staapl's Forth to write
+    applications.  Almost all generic code will have macro form and
+    directives about instantiation.
+
+  + Investigate bottom-up (safe) language design and verification
+    rooted in concrete machine semantics and compile-time checks for
+    language abstraction (typed macros).
+
+  + Find a meet-in-the-middle (MIM) model for small microcontrollers
+    based on concrete semantics.
+
+  + Find the border between a) static semantic relations relating
+    concrete machine, through MIM model to higher order static
+    functions and b) dynamic behaviour which is interaction with
+    memory and communication with external events/devices/machines.
+
+  + Optimize the MIM model for FPGA implementation.
+
+
+Some of these terms are a bit vague, but I hope the general idea will
+become more clear later on.
+
+
+
+Entry: Eliminating Reflection
+Date: Mon Apr 20 10:20:12 CEST 2009
+
+Funny how I started out being convinced about the possibility of deep
+reflection as the one true way to build Staapl.  Ever since I started
+to understand hygienic macros and phase separation in PLT Scheme I'm
+leaning more towards the static side.  This journey has given me a
+much clearer understanding of the reason why you might want to _limit_
+flexibility: to be able to reason more about the structure of the
+program without it this being a consequence of the program's dynamics.
+
+At the one end there is mutable everything (Smalltalk style
+reflection) and late binding (interpretation), possibly cached.  At
+the other end there is declarative (once things are created, they
+never change) and early binding (things don't get re-interpreted).
+
+Compilers are quite straightforward.  The most important thing to
+figure out is the order in which things are evaluated.  No better way
+than to stick to non-cyclic structure and make linking of cyclic
+structure explicit. (As opposed to let the program bootstrap itself
+using mutation.)
+
+
+Entry: Forth is already CPS / ANF / SSA
+Date: Sun Apr 26 17:19:47 CEST 2009
+
+( Background: I've been skimming some papers by Oleg Kiselyov about
+  metaprogramming[4].
+
+  Some of the recent papers are about avoiding CPS or monads for
+  writing generators, and instead using delimited continuations to
+  hide side-effects so they won't mess up guarantees made by the type
+  system.
+
+  However, in a concatenative language, there is no need to do
+  anything else than CPS.  Maybe there is something interesting to
+  find there? )
+
+I've been re-examining the way RPN code gets compiled to Scheme after
+having trouble with the lexical variables in the Coma macro language.
+Basicly I was mixing forward (CPS-style) and backward (expression
+style) nesting.
+
+
+A concatenative function in CPS has two parameters: 'p' the parameter
+stack and 'k' the continuaton.  In Scheme syntax the composition of
+CPS functions (A B C) is written as:
+
+  (lambda (p k)
+    (A p (lambda (p)
+    (B p (lambda (p)
+    (C p k))))))
+
+Alternatively concatenative code can be represented quite directly
+with p -> p functions and implicit continuations as:
+
+  (lambda (p)
+    (let ((p (A p)))
+    (let ((p (B p)))
+    (let ((p (C p)))
+      p))))
+
+Let's call this "nested let" form.  It is related[2] to single
+assignment form[3] and administrative normal form[1].  This is what the
+previous CPS form gets optimized to in PLT Scheme.  Look at the output
+of "mzc --decompile" to see this.
+
+To see that these two are closely related, think of the invocation of
+a continuation as the assignment to a viariable and a jump to the code
+label / execution of next primitive.
+
+The above is nested let equivalent to the following nested expression.
+
+  (lambda (p)
+    (C
+    (B
+    (A p))))
+
+Which is _backwards_ from the perspective of the concatenative code.
+This backward notation together with forward nesting of let
+expressions lead to a lexical variable form which i couldn't get to
+nest properly.  However, in the nested let form local bindings are
+introduced quite naturally, binding to the right.
+
+[1] http://en.wikipedia.org/wiki/Administrative_normal_form
+[2] http://chak.web.cse.unsw.edu.au/~patrykz/papers/ssa-lambda/
+[3] http://en.wikipedia.org/wiki/Static_single_assignment_form
+[4] http://okmij.org/ftp/Computation/Generative.html
+
+
+
+Entry: Released staapl-0.5.8
+Date: Mon May 18 12:03:00 CEST 2009
+
+After a couple of months spent doing Linux/C systems programming, I'm
+happy to be back to Scheme and Forth.  Version 0.5.8 is available on
+PLaneT[1].
+
+During the last 2 months I've been working on a single big change:
+
+  * Forth projects as PLT Scheme modules.
+
+Previous dependency on namespaces and dynamic overloading of
+functionality using mutation or Scheme parameters is removed.  The
+compiler is now completely ``hook-less'' with all pluggable behaviour
+organized as PLT Scheme units, and the rest implemented as bottom-up
+static modules.
+
+Note that while this move to a fully static compiler makes it easier
+to structure programs, it is still possible to shoot yourself in the
+foot with REPL-based interactive incremental development for
+exploratory programming.  We don't want to give that up!
+
+For details about how this was done see the ramblings[2] starting mid
+march 2009.  It was quite a bit of work to disentangle, but apparently
+the structure was already there in spirit.  I believe it is now
+possible to gently move to a more statically typed system.
+
+[1] http://planet.plt-scheme.org/display.ss?package=staapl.plt&owner=zwizwa
+[2] http://zwizwa.be/ramblings/staapl
+
+Entry: Onward
+Date: Mon May 18 12:58:04 CEST 2009
+
+So what's next?  Several things to do, one of the most pressing
+practical ones is to get USB to work on PIC18F2550.  With the new
+static structure it should be straightforward to write a mini-language
+for implementing USB drivers.
+
+The second thing that has been on my mind is a proper partial
+evaluation architecture.  I'd like to write a concatenative language
+that doesn't distinguish between functions and macros, but performs
+inlining and function specialization automatically.  What I've been
+calling partial evaluation upto now is actually only a form of
+eager constant folding: it doesn't do automatic specialization but
+requires you to specify which functions are macros and thus to be
+inlined.
+
+And then there is of course documentation.  I'm thinking about writing
+a single manual, of which the first section is an introductory guide.
+
+
+Entry: Live interaction
+Date: Mon May 25 13:37:42 CEST 2009
+
+While the compiler language tower is ever moving towards a more static
+approach, the target interaction language just has become more
+dynamic.
+
+The (target: word ...) form is like any other RPN form in Staapl where
+the (word ...) represent concatenative code with possible prefix
+parser extensions.  However, as opposed to other such forms it has
+late-bound semantics: identifiers are interpreted at run-time in a
+toplevel environment.
+
+The static name structure of the debugger (as opposed to that of the
+program) isn't all that interesting.  For debugging, dynamic tweaking
+power comes in handy.
+
+Identifiers in the (target: ...) form are tried in several
+interpretations successively in the following order until one
+succeeds:
+
+  1. Prefix parsers from the (target) dictionary like "ul" (upload)
+     which modify the semantics of subsequent words.  Most of these
+     will expand to scat code that operate on filenames or word names.
+
+  2. Compiled words from the (target) dictionary present in the target
+     code memory.  These are simply executed.
+
+  3. Macros from the (macro) dictionary.  These are compiled to
+     intermediate code and then interpreted.  This doesn't work for
+     all macros (most notably control words) but provides a convenient
+     way to perform a computation without having to instantiate macros
+     as compiled target words.
+
+  4. Words residing in the (scat) dictionary are executed.
+
+  5. Scheme procedures are dynamically converted to scat semantics and
+     executed.
+
+Doing it this way gives maximum flexibility (all names can be
+redefined at run-time in the toplevel namespace) and avoid unnecessary
+static wrapping.
+
+All the target interaction is defined in live/tethered.ss as a bunch
+of scheme functions accessible at all levels.  The target console is a
+very simple layer on top of this.
+
+One example of how this is quite useful:
+
+tom@zzz:~/staapl/app$ mzscheme picstamp.dict
+Connected (/dev/ttyUSB0 230400)
+erasing blocks: 22 memory clear.
+Press ctrl-D to quit.
+OK
+scheme
+> (define (x) (target> ul /tmp/eq.f))
+> OK
+x
+ include "/tmp/eq.f"
+......OK
+
+
+Entry: Compile mode accessible at console
+Date: Thu May 28 17:16:22 CEST 2009
+
+With the recent simplification of the interaction language, it wasn't
+so difficult to allow a switch to compile mode from the interactive
+console.  The words
+
+    forth macro :
+
+Will trigger compile mode.  The word and all subsequent words on the
+line will be compiled as if they occured in a Forth file, and uploaded
+to the target.
+
+Similarly, the following words perform compilation, but will switch
+back to interpret mode after the single symbolic argument they take.
+
+    variable 2varaiable require planet staapl
+
+Note that in standard Forth the ';' word will exit compilation mode,
+but in Staapl Forth it just indicates procedure exit.  A word or macro
+can have multiple exit points.
+
+This also allowed the creation of the '::' word, which will compile a
+line as Forth code, upload it and execute it.  This makes it easier to
+test macros.  To run the code again use 'last'.
+
+
+
+Entry: Writing device drivers
+Date: Tue Jun  2 11:08:00 CEST 2009
+
+What I'd really like to figure out is if there is a proper workflow
+when writing a device driver.  I'm getting a good dose of it with the
+USB code.
+
+In my experience it is always trial and error: even if the datasheet
+has correct information, it is usually presented in such a way that
+you have to "sort it" first..  Then, if there is example code, it is
+usually difficult to understand the underlying idea from a big ball of
+mud that works.  Usually you want to do it slightly different for
+whatever reason, so picking out the right information from example
+code becomes error-prone.
+
+The problem is really state: as I've mentioned before, hardware is
+very stateful and very sensitive to the order of operations.  Its
+state space usually contains a lot of non-working or even lockup
+states that have to be avoided.
+
+This seems to get only worse for modern equipment: devices get more
+complicated and much of the "getting it right" is left to the
+software.  This makes sense: hardware becomes simpler to build and is
+more flexible that way, while software just needs to be written once.
+
+However, this doesn't make the life of the driver writer much fun..
+If I'm to tackle any real problem, maybe this is the one?
+
+So, what is a device driver exactly?  It's the missing piece of
+control software that abstracts a collection of loosely coupled state
+machines as a coherent piece of equipment with simple services and a
+couple of modes: an object.  The number of modes (states) presented to
+the used should probably be kept to a minimum.  The most flexible
+approach is a simple on/off mode.
+
+Why is writing a device driver so difficult?  Individuality of modules
+gets lost.  Idially, you want to hide state but instead the controller
+(driver software) gets to manage all of it.  So the first thing to do
+is to abstract all items that are actually independent.
+
+I've found building these abstractions to be the most difficult point
+because of interdependency (i.e. resource sharing) being very hard to
+articulate.
+
+Let's find some pubs.  NDL[1][2] seems to be the state of the art.
+Summarized it has the following features:
+
+  - Bitfields are individually addressable.
+
+  - The language understands the conept of "device state".
+
+  - States can be coupled: state transitions might cascade.
+
+  - Accesses can be predicated (only valid in certain states + state
+    transitions generated)
+
+Optimizations (metric = # IO ops)
+
+  - idempotence (prune successive writes to state registers)
+  - field aggregation (combine stores to bitfields)
+
+
+These features seem simple yet effective.  Maybe some similar approach
+could be taken with some Staapl Forth extensions.
+
+
+
+[1] http://www1.cs.columbia.edu/~sedwards/papers/conway2004ndl.pdf
+[2] http://cs.nyu.edu/~cconway/present/ndl-overview-ibm.pdf
+
+
+
+Entry: Why use (Scheme) macros?
+Date: Tue Jun  2 13:17:13 CEST 2009
+
+Essentially this[1], but put a bit differently.
+
+Macros escape the default semantics of plain Scheme:
+
+  - names produce values by variable reference
+
+  - parentheses produce values by passing values to abstract
+    computations (application).
+
+The exceptions to this standard behaviour are expressed using the
+primitive forms LAMBDA and QUOTE.
+
+The LAMBDA form is used for two things: to _introduce_ variables in a
+body of code (create code with holes in it) and _abstract_ code as a
+value that can be stored in a variable.  This value is a computation
+that takes inputs it received upon application, puts them in the
+holes, and evaluates the resulting expression producing a result
+value.
+
+The QUOTE form changes the meaning of parenthesis and names entirely,
+and instantiates them as a data structure.
+
+In essence, all other macros compose these two forms or abstractions
+built on top of them.  One could distinguish different classes based
+on distinct intentions:
+
+(A) Abstraction: the only way to build a construct out of macros is to
+    build it as a macro.
+
+(B) Binding: Introducting names in code bodies using LAMBDA.  New
+    binding forms facilitate the introduction of local names for
+    domain-specific data structures. (i.e. data structure pattern
+    matching).
+
+(C) Code abstraction: strict evaluation (run-it-now) can only be
+    escaped by wrapping code in a LAMBDA form.  Sometimes it makes
+    sense to build abstractions that modify _when_ code executes, by
+    keeping possible future behaviour stored in a variable.
+    (i.e. lazy evaluation).
+
+(D) Data abstraction: analogous to Code abstraction, it is possible to
+    create data structures using the QUOTE form.  (i.e. QUASIQUOTE).
+
+
+Note that this classification excludes macros for partial evaluation =
+compile-time code specialization.  However, Scheme is not well
+equipped for this kind of use: functions abstracted by macros can no
+longer be used as function values for higher-order programming.
+
+[1] http://people.csail.mit.edu/gregs/ll1-discuss-archive-html/msg01539.html
+[2] entry://20080523-093628
+
+
+
+Entry: Why Forth works
+Date: Tue Jun  2 17:03:19 CEST 2009
+
+(TODO: Reformulate.  The ideas are ok, but not well put.)
+
+Forth works because:
+
+   * It has a powerful composition mechanism (words and stacks) which
+     provides referential transparency and absence of side effects,
+     allowing for a functional programming style.
+
+   * Using early binding and cooperative multitasking, the global
+     memory and machine state can be used without loosing local
+     reasoning, to extend the words+stacks core language.
+
+Let's start with the biggest disadvantage of Forth or the Forth-like
+approach to designing run-time systems: Forth requires you to think
+differently about programs and programming.
+
+Coming from a main-stream (C/C++) programming background, working
+without lexical or object scope is weird.  Giving up the use of local
+names (random access to your problem's sub-parts) and exchanging them
+with programming in terms of _incremental updates_ requires a change
+in perspective.
+
+One of the most amazing observations I made while _learning_ Forth is
+is how my use of stack shuffling words drasticly reduced once I got
+the knack of factoring.  While it is in general more difficult to
+factor a solution into very small steps, it is skill that can be
+learned.  Writing well factored code has the side-effect of bringing
+deeper understanding.  It requires an initial investment (think harder
+about representation) but often provides good payback in the long run.
+
+Once the problem is reduced to the right granularity of sub-problems,
+the top-level solution is often trivial.  A big advantage of
+wel-factored code is that the individual parts can be tested
+interactively and in isolation.  Such is really important for
+low-level programming, where the first words you write abstract the
+concrete machine into something more intuitive to understand.
+
+Surprisingly often the process of factoring leads to words that
+operate only on the stacks.  However, in some cases spilling to global
+variables is necessary.  Another thing that amazed me is that global
+variables and dynamic scope seem to work better in Forth.
+
+Single-threaded execution makes shallow binding easy: just push/pop
+variables when you use them, preferrably in an abstract way.  The
+second is early binding.  Code that defines names that already exist
+won't interfere with the existing code.  On top of this, for simple
+embedded problems, often the global namespace is yours, which makes
+state management into a design guideline without requiring much
+language support.
+
+
+
+Entry: A balance between lowlevel and highlevel Scheme macros
+Date: Mon Jun  8 14:27:33 CEST 2009
+
+Most of Staapl is now in macro form.  Most of the macros themselves
+are high-level rewrite macros that only use syntax-rules.  Some are
+low-level syntax-case macros that use Scheme code to operate on syntax
+objects directly, usually because they need to do some form of global
+analysis.
+
+The breaking point between the two forms is usually taken to be the
+point where you want to do write a macro that uses some abstract code
+to process its syntax input before it generates its syntax output.
+
+However, I've found it to ly a little bit further than that.  There
+are cases where the absence of a composition mechanism (macro
+subroutine calls) doesn't offset the convenience of a pattern
+language, mostly because of the convenience of ellipsis "...".
+
+Sometimes it is possible to construct CPS-style macros that are
+parameterized in the form they will expand to.  As long as the actual
+processing that is happening is linear (a simple pipe, i.e. a lexer
+macro passing data to a parser macro) this works fairly well.
+
+
+
+Entry: MetaOcaml
+Date: Thu Jun 11 18:50:51 CEST 2009
+
+What is the point of guaranteeing type-correctness of generator output
+when the first thing you do is to compile it?  I find this[1] to be
+quite an interesting point:
+
+> but Template Haskell does not guarantee before running a generator
+> that the generator will only generate well-formed code.
+
+That's right, but since generated code will have to be
+compiled before execution, only well-typed code will ever
+be executed. (The scope-extrusion problem discussed
+in previous mails suggests that MetaOCaml's typing system
+cannot guarantee to generate only well-formed code either.)
+
+[1] http://www.nabble.com/Questions-about-Equality-of-Code%2C-CSP-and-State-td23866336.html
+
+
+
+Entry: Released staapl-0.5.9
+Date: Tue Jun 30 11:35:15 CEST 2009
+
+This release fixes some bugs in 0.5.8, most notably the broken
+"staaplc".  Installing the package from planet will still give some
+error messages, however these are due to junk files and can be
+ignored.  They will disappear once I've figured out how to properly
+test a planet package before uploading.
+
+[1] http://planet.plt-scheme.org/display.ss?package=staapl.plt&owner=zwizwa
+
+
+
+Entry: Connecting with current engineering practices
+Date: Wed Jul 15 14:04:59 CEST 2009
+
+Staapl is a tool chain based on metaprogramming, which attempts to
+provide the means to find an equilibrium between manual low-level
+software development and representation of application structure in
+the form of domain-specific abstractions.
+
+
+                    Application specific compiler
+
+   High level description   ------------->   Base language
+
+The broader goal is to bring old and new techniques from Lisp / Scheme
+macro systems and multi-stage programming to practical application in
+a world that is dominated by the C programming language.
+
+The concrete problem which needs to be solved is to make the bridge
+from Staapl's current incubation form to a programming environment
+based on C, and to figure out ways to teach the basic principles of
+partial evaluation and metaprogramming to engineers in the field.
+
+I'm concentrating those efforts in two separate logs/projects.
+The meta[1] logs are about dynamic/static metaprogramming mostly aimed
+at C code generation.  The libprim[2] project is about writing a
+top-level dynamic language core to serve as application core or
+debugging/testing framework.
+
+[1] entry://../meta
+[2] entry://../libprim
+
+
+
+
+
+Entry: Escaping concrete machine semantics through simulators
+Date: Thu Jul 16 13:21:53 CEST 2009
+
+One thing which is important in the way Staapl is built up is the
+relation to the concrete machine.  Above else, there should be no
+abstraction barrier to the lowest level.
+
+What I mean is: currently, Staapl is just a fancy macro assembler.
+
+All semantics is relative to the specification of the instruction
+rewrite rules.  This is called "specification by compiler".
+
+This makes it an electronics engineer's dream (fully hackable low
+level control with ad-hoc abstraction) and a computer scientist's
+nightmare (essentially there is nothing you can do rigorously on the
+metalevel).
+
+I would like to bring this nightmare to a closure.  Taking CPU
+simulators into the picture, defined relative w.r.t some stable
+semantics, i.e. Scheme's.  That way there is at least a single
+well-defined semantics for a subset of the base language, transitively
+defined in terms of Scheme.
+
+Think of it like this:
+
+             Arch 1
+          /         \
+   Forth  -- Arch 2 -  Scheme
+          \         /
+             Arch 3
+
+The left side is a Forth dialect which directly translates to a couple
+of machine architectures.  The forking point from Forth to Arch is
+where different implementations's concrete semantics diverge.
+
+The right side is a fully-specified bottom line of each of the machine
+semantics in a standard representation (could be Scheme or some other
+form written in scheme that could be easily translated to a subset of
+C to solve the practical issue that simulation needs to be fast.)
+
+The problem is to "lift" the semantics of the simulator in terms of
+Scheme code _through_ the implementation of each of the different
+architectures to make it decidable _by machine_ which constructs are
+portable and well-defined, and which are target-specific hacks.
+
+The basic idea to make this work is that given a specification of a
+simulator, Forth functions can be mapped to a pair containing:
+
+   - stateless computation (boolean functions)
+   - clobbered machine state
+
+What this might solve is the language specification problem:  it makes
+it possible to define a "moving target standard" in terms of a
+collection of source code + making this standard machine-checkable.
+
+Alternatively it can assist greatly in the definition of a Forth ->
+ASM compiler, since the semantics is directly testable.  Possibly
+human intervention is still necessary to come up with good translation
+rules, but the correctness could then be either proven or if that's
+too difficult, unit-tested.
+
+It seems to me that what needs to be done is to model everything as a
+set of equations, and derive everything from that.
+
+
+
+Entry: An approach to bootstrapping static semantics
+Date: Tue Jul 21 12:43:20 CEST 2009
+
+Currently it's a bit muddy what exactly I mean with ``static
+semantics'' but as I see now, this can be turned into an advantage.
+
+1.  It is important that Staapl be, at the bottom level, a macro
+    assembler.  One should not loose _any_ ground to abstraction, but
+    improve on the current concept of `assembler'.  Concretely, what
+    this needs in order to support higher levels is a way to make
+    verification possible by defining concrete machine languages in
+    terms of a common operational semantics (i.e. a simulator for each
+    supported architecture).
+
+    Bottom Staapl = macro assembler + simulator
+
+    This is enough to provide ``dynamically typed specification by
+    compiler'', which when done in an integrated environment (Scheme
+    macros with proper name management) already improves quite a bit
+    over current standard practice.
+
+
+2.  Provide a means to raise the _static properties_ of the
+    abstractions used, by facilitating the bootstrap of type systems
+    or any other kind of static source code property.  Tools that help
+    would take the form of verification (approximate, static) and test
+    (dynamic) based on the low level operational semantics.
+
+    Top Staapl = collection of tools to build higher level semantics
+
+
+The overall goal of this is to make sure that a programmer can stay
+within a certain ``safety level'', but has a straightforward way to
+build abstractions that bridge low and high level by dropping out of
+the safe zone in a controlled manner.  This is quite a general idea,
+and there are many systems that attempt it.  In order to make it fit
+in my mind, I make a couple of assumptions:
+
+One assumption is that picking a combinator language as the part that
+is able to drop to machine level is a good choice.  This started from
+``gut feeling'' but I've found at least two good reasons to date:
+1. it allows all issues that come with improperly closed lexical scope
+to be avoided which makes it trivial to meta-program (the machine can
+use it), and 2. as a language itself it is quite effective to build
+reasonably complex yet well-factored systems (the human can use it).
+
+Another assumption is that leaving the lowest layer _untyped_ is a
+good idea: it keeps things simple and allows ``locally contained
+hacks'' inside the machinery for higher level constructs, without
+having to leave the system.  Note that this might disappear gradually
+depending on how well the simulation based static analysis works out
+in the end, but it is my belief that a certain amount of hackery is
+going to be essential to get any highlevel structure implemented
+efficiently.  Containing these hacks is what I see as the main problem
+in electronics design and low-level systems programming.
+
+
+
+
+
+
+
+
+
+Entry: Backlinks
+Date: Thu Jul 23 08:13:23 CEST 2009
+
+http://lambda-the-ultimate.org/node/2934
+http://concatenative.org/wiki/view/Staapl
+http://planet.plt-scheme.org/display.ss?package=staapl.plt&owner=zwizwa
+http://groups.google.com/group/comp.lang.scheme/browse_thread/thread/62255a0e90bc483e
+http://playpower.org/blog/2008/08/programming-the-nes-in-basic/#comment-8
+http://www.qooiii.com/blog/?p=502
+http://delicious.com/doelie/staapl
+
+
+
+
+Entry: A Forth console on PIC 18F1320
+Date: Wed Aug 12 19:19:03 CEST 2009
+
+# This demo requires these files[1][2] from the source distribution.
+# The PLaneT package only contains the compiler.
+
+# Start with staapl/app/1220-8.fm[2] as the baseline.  This will
+# provide an interactive interpreter into which code can be loaded.
+
+# For the buld process, look at staapl/app/Makefile for more
+# information.  In short:
+
+tom@zni:~/staapl/app$ make 1220-8.hex
+cat 1220-8.fm | grep '\\ #sh#' | cut -b7- >1220-8.program
+mzc -vk 1220-8.fm
+mzc v4.2.1.1 [3m], Copyright (c) 2004-2009 PLT Scheme Inc.
+"1220-8.fm":
+  making "/home/tom/darcs/brood-5/app/1220-8.fm"
+ include "/home/tom/staapl/staapl/pic18/p18f1220.f"
+ include "/home/tom/staapl/staapl/pic18/p18f1220-const.f"
+ include "/home/tom/staapl/staapl/pic18/monitor-serial.f"
+ include "/home/tom/staapl/staapl/pic18/monitor-serial-core.f"
+ include "/home/tom/staapl/staapl/pic18/monitor-serial-warm.f"
+ [output to "./compiled/1220-8_fm.zo"]
+mzscheme -p zwizwa/staapl/staaplc -- -c /dev/ttyUSB0 1220-8.fm
+
+# This will produce a .hex file that can be uploaded to the target and
+# a .dict file with a symbol table necessary to interact with the
+# stripped machine code on the PIC.
+
+# If you have a PicKit 2 w. pk2cmd you can use the following,
+# otherwise simply upload the .hex file using your programmer.
+
+tom@zni:~/staapl/app$ make 1220-8.flash
+cat 1220-8.fm | grep '\\ #sh#' | cut -b7- >1220-8.program
+sh 1220-8.program 1220-8.hex
+PICkit 2 Program Report
+12-8-2009, 19:29:22
+Device Type: PIC18F1220
+
+Program Succeeded.
+Device ID = 07C0
+Revision  = 0007
+Device Name = PIC18F1320   !WARNING! -P device mismatch
+
+Operation Succeeded
+rm 1220-8.program
+
+# Now start the console.  The .dict file is packaged as an mzscheme
+# module.  Invoke as:
+
+tom@zni:~/staapl/app$ mzscheme 1220-8.dict
+Connected (/dev/ttyUSB0 38400)
+Press ctrl-D to quit.
+OK
+
+# At this point you have interactive access to the pic chip.  The
+# 18f1320 has 8kB of flash.  The flash erase unit is 64 byte blocks.
+# A map of the available blocks can be printed like this:
+
+8 kb
+x x x x x x x x
+x x . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+OK
+
+# Currently the interactive monitor uses 640 bytes.  The rest is
+# yours.  The first block is reserved for boot code, and we'll use it
+# later to add the startup code.
+
+# Now it is possible to define code.  Let's create and upload a word
+# `add1'.  The dot before the `OK' indicates that one line (8 bytes)
+# of flash has been written.
+
+: add1 1 + ;
+.OK
+
+# Run the code:
+
+123 add1 p
+124 OK
+
+# The `p' word prints the top of the stack.  (The `.' word does the
+# same, and is th standard way.)  Next to `p' there is `px' to print
+# hex and `ps' to print unsigned numbers.
+
+123 px
+7B OK
+
+# When you exit the interpreter by pressing ctrl-D, the next time you
+# start it up, all your interactively loaded code will be erased.
+
+tom@zni:~/staapl/app$ mzscheme 1220-8.dict
+Connected (/dev/ttyUSB0 38400)
+erasing blocks: 10 memory clear.
+Press ctrl-D to quit.
+OK
+
+# Permanent changes are best written as modules and made part of the
+# kernel .hex file.  This code will be left intact.  Think of console
+# interaction as using `scratch space' next to the kernel code on the
+# PIC.  Stuff you load on top of this is mainly for debugging and as
+# such can be cleared on boot to start with a clean slate.
+
+# To inspect the machine code use `see'.  This takes byte addresses or
+# symbolic words.
+
+see add1
+<anonymous>:
+	0280 0F01 [addlw 1]
+	0282 0012 [return 0]
+	0284 FFFF [_nop 4095]
+	0286 FFFF [_nop 4095]
+	0288 FFFF [_nop 4095]
+	028A FFFF [_nop 4095]
+	028C FFFF [_nop 4095]
+	028E FFFF [_nop 4095]
+	0290 FFFF [_nop 4095]
+	0292 FFFF [_nop 4095]
+	0294 FFFF [_nop 4095]
+	0296 FFFF [_nop 4095]
+	0298 FFFF [_nop 4095]
+	029A FFFF [_nop 4095]
+	029C FFFF [_nop 4095]
+	029E FFFF [_nop 4095]
+OK
+see 0
+<anonymous>:
+	0000 D01F [bra block1]
+	0002 FFFF [_nop 4095]
+	0004 FFFF [_nop 4095]
+	0006 FFFF [_nop 4095]
+	0008 FFFF [_nop 4095]
+	000A FFFF [_nop 4095]
+	000C FFFF [_nop 4095]
+	000E FFFF [_nop 4095]
+	0010 FFFF [_nop 4095]
+	0012 FFFF [_nop 4095]
+	0014 FFFF [_nop 4095]
+	0016 FFFF [_nop 4095]
+	0018 FFFF [_nop 4095]
+	001A FFFF [_nop 4095]
+	001C FFFF [_nop 4095]
+	001E FFFF [_nop 4095]
+OK
+see block1
+<anonymous>:
+	0040 D0F1 [bra warm]
+	0042 FFFF [_nop 4095]
+	0044 BA9E [btfsp 1 jsr/ack 5 0]
+	0046 D001 [bra .L2]
+	0048 D7FD [bra .L0]
+	004A A2AB [btfsp 0 171 1 0]
+	004C D003 [bra .L5]
+	004E 98AB [bpf 1 171 4 0]
+	0050 88AB [bpf 0 171 4 0]
+	0052 D7F8 [bra .L0]
+	0054 6EEC [movwf 236 0]
+	0056 50AE [movf .L30 0 0]
+	0058 A4AB [btfsp 0 171 2 0]
+	005A D002 [bra .L9]
+	005C 50ED [movf lda 0 0]
+	005E D7F2 [bra .L0]
+OK
+
+
+
+[1] http://zwizwa.be/darcs/staapl/app/Makefile
+[2] http://zwizwa.be/darcs/staapl/app/1220-8.fm
+
+
+
+Entry: Lazy partial evaluation
+Date: Wed Aug 26 10:14:35 CEST 2009
+
+The cool thing about a concatenative language (or any purely
+functional formulation) is that it allows lazyness, and your `compile
+time' becomes completely arbitrary, because the order of evaluation
+makes no difference.  In a concatenative language this is a lot easier
+to express than in the lambda calculus: it's just the associativity
+law of the syntactic/semantic monoids.
+
+Now, in practice however, you do want side-effects as `external
+input'.  (In Staapl's low-level Forth-like language this also
+includes memory operations.)
+
+Moral: you can't fully reduce to a value: some of that needs
+to be done in a 2nd stage, the program's run-time.  This re-introduces
+compilation, but as a real staging / partial-eval operation.
+
+It points the finger to the sour spot too: what I want in Staapl is
+really this lazy semantics.  The current eager approach is an
+approximation that makes the evaluator easier to get right, but it's
+probably a dead end in that the neat tricks lazyness allows won't be
+possible.
+
+Some relevant links:
+
+[1] http://thyer.name/phd-thesis/
+[2] http://lukepalmer.wordpress.com/2009/05/04/lazy-partial-evaluation/
+
+
+
+
+Entry: Why 2 stacks?
+Date: Wed Sep  2 14:08:44 CEST 2009
+
+I've been trying to answer this question in a straightforward way for
+a while.  Usually this translates to something like ``decoupling
+argument passing from procedure calls''.  As Chuck Moore says[1]:
+
+  ``Forth is highly factored code. I don't know anything else to say
+    except that Forth is definitions. If you have a lot of small
+    definitions you are writing Forth. In order to write a lot of
+    small definitions you have to have a stack. Stacks are not
+    popular. Its strange to me that they are not. There is a just lot
+    of pressure from vested interests that don't like stacks, they
+    like registers. Stacks are not a solve all problems concept but
+    they are very very useful, especially for information hiding and
+    you have to have two of them.''
+
+My attempt at this is to approach what Chuck calls ``small
+definitions'' from the point of view of locality and structure of
+primitive and composite rewrite rules.  When reductions and expansions
+are local, two stacks emerge quite naturally from a purely syntactic
+desciption.
+
+Let's take as an example the formal variant of the Joy language.  Here
+we don't consider semantics.  Semantics is usually expressed directly
+as functions operating on a stack, or operationally where also
+function evaluation is made explicit as 2 stacks: a parameter stack on
+which functions operate and a control / return / continuation stack
+used for function nesting.
+
+Formally (syntactically), we're only interested in describing the
+equivalence of two quotations, not in what they actually mean.
+Equivalence can be proven by supplying a sequence of quotations (a
+proof) in which each consecutive quotation is related to the previous
+one by the application of a rewrite rule.
+
+Syntactic rewrite rules can be classified as:
+
+  * local reduction: primitive operators are defined in terms of
+    rewrite rules that reduce in combination with values
+
+  * local expansion: composite operators can be replaced by the
+    constituents of the quotation that defines them.
+
+Note that the concept of `value' is important.  It is exactly this
+concept, and the form of the primitive rewrite rules which are
+specified as reductions on values, that gives the language its proper
+form.  I.e. the primitive `swap' is defined as a rule:
+
+       <v1> <v2> swap   =   <v2> <v1>
+
+Two details are important: `swap' is the only non-value in the
+expression, and it appears on the _right_ of a concatenation of
+values.
+
+Let's examine the behaviour of this formal system, defining numbers as
+values, and assuming there are rules of the kind above defined for all
+symbols (primitive words) or that they expand into quotations
+(composite words).
+
+The structure of the rules allows the following notation to be used.
+Let the symbol `|' denote a separation between values on the left
+side, and programs on the right.  This is only an _annotation_ of
+reduction proofs (adding visual reminders of which objects are
+values), not an essential part of the rules!  We move the `|' one
+position to the right whenever we encounter a value.  If it is not a
+value, we perform a primitive reduction or a composite expansion.
+
+A example of an equivalence proof based on two primitive rules:
+
+| 2 5 + 3 *
+2 | 5 + 3 *
+2 5 | + 3 *
+7 | 3 *
+7 3 | *
+21 |
+
+An equivalence proof including the expansion of a composite program
+
+  square   =   [dup *]
+
+looks like:
+
+| 12 square dup
+12 | square dup
+12 | dup * dup
+12 12 | * dup
+144 | dup
+144 144 |
+
+This illustrates that the 2 stacks _emerge_ as a notation device for
+presenting equivalence proofs: the parameter stack on the left of `|'
+and the program (continuation) stack on the right, with facing tops.
+
+( Note that I am begging the question.  _Of course_ the reduction
+rules are structured in such a way that stacks emerge.  My point is
+that you don't need stacks to explain concatenative stack languages,
+just a principle of locality and some concept of reduction order, here
+enforced by the concept of `value'.  Semantically this then neatly
+corresponds to function composition, where the reduction order
+directly relates to the fact that function composition in general does
+not commute. )
+
+[1] http://www.ultratechnology.com/1xforth.htm
+
+
+Entry: Implementability
+Date: Thu Sep  3 10:36:07 CEST 2009
+
+It's starting to become more clear that what I am looking for with
+Staapl and other metaprogramming based on functional programming
+techniques is the concept of `implementability': is it possible to
+eliminate high-level constructs that cannot be implemented at run time
+due to the different  semantics of the target language.
+
+Given a generic representation of an algorithm and a staging compiler,
+is it possible to map the representation on the targed given the
+current set of constraints.
+
+So, this would be something inbetween staging and partial evaluation.
+
+
+
+Entry: Getting rid of CONS
+Date: Thu Sep 10 13:01:50 CEST 2009
+
+The point in [1] is that ordinary recursive first/rest approach is
+inherently serial, and in order to make it parallizable the
+decomposition should be more vector-like: split / process / append.
+
+The interesting remark (p.68) is that for any serial program that can
+be written as a composition of functions, it might be possible to
+parallellize those because of associativity as long as some kind of
+decoupling of intermediate functions can be found.
+
+This reminds me of something ;)
+
+Anyways, apparently ``parallel prefix function composition'' is
+something that can be used here[2].
+
+The conclusion seems to be that MapReduce is a big deal, and that
+there are ways around the need for commutativity.
+
+One thing that cought my eye is this[3]:
+
+  ``If you can construct two sequential versions of a function that is
+  a homomorphism on lists, one that operates left-to-right and one
+  right-to-left, then there is a technique for constructing a parallel
+  version automatically.''
+
+Just derive a weak right inverse function and then apply the Third
+Homomorphism Theorem[4]:
+
+  ``A function on lists that can be computed both from left-to-right
+  and from right-to-left is _necessarily_ a list homomorphism--it can
+  be computed according to any parenthesization of the list.''
+
+
+Some remarks.  I'm trying to relate this to constructing algebra of
+recursion operators on algebraic data types in [5] on vectors.
+
+
+[1] http://research.sun.com/projects/plrg/Publications/ICFPAugust2009Steele.pdf
+[2] http://wwwtcs.inf.tu-dresden.de/~voigt/popl202-voigtlaender.pdf
+[3] http://www.ipl.t.u-tokyo.ac.jp/~takeichi/attachments/pldi07.pdf
+[4] http://researchspace.auckland.ac.nz/bitstream/2292/3514/1/005thirdht.pdf
+[5] http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.41.125
+
+Entry: Two Attacks
+Date: Fri Sep 11 11:07:48 CEST 2009
+
+1. Concatenative languages and combinators.
+
+I believe that concatenative languages (point-free functional
+programming) are a good framework for expressing performance-oriented
+DSLs with well-formed mathematical models.
+
+First, as a basic substrate, concatenative _stack_ languages can serve
+as the basic _sequential_ scripting substrate of an overall system.
+
+Second, (not necessarily as a stack language) point-free style allows
+a higher abstraction level (data flow instead of sequential control
+flow), while at the same time allowing _restricted_ semantics to
+emerge as sublanguages.  The more restrictions on the language, the
+easier mathematical manipulation of _programs_ becomes.
+
+I see two main advantages here:
+
+   * Automated program manipulation is important for abstracting
+     implementation strategies.  Automatic partial evaluation alone
+     can not solve this, because it assumes there is a single good
+     solution.  (The main problem being whether to unroll/inline or
+     not is in general not decidable.)
+
+   * In data-oriented programming, the combinators might have a large
+     design space for mapping to actual hardware.  Making these
+     parameters explicit allows one to get a better grip on how they
+     relate to performance and implementability.
+
+In short: separating algorithm+correctness from implementation mapping
+is undoubtedly a great productivity gain, _if_ the specification of
+implementation mapping is done in a _meaningful_ way, i.e. as a point
+in a search space, possibly in combination with some mathematical laws
+about the search space, in a form that makes sense.
+
+
+2. Focus on static semantics and program manipulation.
+
+Practically, in Staapl I would like to shift focus to
+
+   * Putting the current eager partial evaluation (staging without
+     annotation) on a better theoretical ground.  The guideline here
+     is partially evaluating threaded state.  The attack is probably
+     related to monads and arrows.
+
+   * Construction of combinator subsets that satisfy mathematical laws
+     (in the FL sense) on top of this substrate of partial evaluation
+     of parallel threaded state.
+
+
+So, the slogan is something like:
+
+   ``Avoid low-level control constructs such as recursion and
+   sequencing.''
+
+Any serial code (i.e. accumulation), expressed as function
+composition, should indicate only _necessary_ data dependency.  All
+control flow should be expressed as higher order combinators which can
+then be treated as opaque mathematical objects.  As Guy Steele[1] with
+his mind on Fortress puts the latter: ``Get rid of CONS!'', maybe one
+should also add[2]: ``and LAMBDA!'' ;)
+
+[1] http://research.sun.com/projects/plrg/Publications/ICFPAugust2009Steele.pdf
+[2] http://news.ycombinator.com/item?id=814632
+
+
+
+Entry: From Stack to Point-Free
+Date: Sun Sep 20 16:26:37 CEST 2009
+
+I've been thinking a bit more about DSP-style ``parallel pipelined
+RISC (VLIW/VECTOR)'' programming vs. serial stack-machine approach.
+Both have their uses.
+
+The stack machine approach seems to work best for non-numeric
+sequencing style code: very simple recursive processors performing
+tasks that can be handled by dedicated state machines.  Essentially:
+stack machines have cheap branching.
+
+On the other end of the spectrum there is the DSP mainstream: VLIW +
+VECTOR (i.e. TI C6000).  Here the data-oriented approach seems to work
+best.  Control structures are very expensive, but for sufficiently
+streamlined data, the architecture packs a lot of power.
+
+( Granted, Chuck Moore's view on DSP (many simple stack machine cores)
+  does have its appeal as it combines a bit of both worlds.  I'd like
+  to give it a try, but current economic inertia doesn't seem to
+  favour the idea much... )
+
+I'd like to steer Staapl a bit into the direction of the DSP world.
+Mostly because I'm convinced that the concatenative / compostional /
+point-free style is a good abstraction for building high-level DSP
+specifications, and Staapls macro system, together with some to-be
+constructed type system, could serve as the vehicle for developping
+such applications.
+
+Some pointers from John Nowak:
+
+Backus[1]. De Moor[2], Bird[3], Meijer[4], Patterson[5], Tatsuya[6],
+Iverson[7], Meertens[8], Gibbons[9].
+
+[1] http://nl.wikipedia.org/wiki/John_Backus
+[2] http://www.comlab.ox.ac.uk/people/oege.demoor/
+[3] http://en.wikipedia.org/wiki/Richard_Bird_%28computer_scientist%29
+[4] http://lambda-the-ultimate.org/user/776
+[5] http://www.soi.city.ac.uk/~ross/
+[6]
+[7] http://en.wikipedia.org/wiki/Kenneth_E._Iverson
+[8] http://en.wikipedia.org/wiki/Lambert_Meertens
+[9]
+
+
+Entry: Lexical Scope is Difficult
+Date: Thu Oct  8 16:10:52 CEST 2009
+
+It has become more clear to me recently that lexical scope is indeed
+quite difficult to get right for metaprogramming.  The design of
+MetaOCaml is non-trival (i.e. side effects and scope extrusion).
+
+Picking an algebraic (point-free) formalism seems to make program
+manipulation a lot simpler.
+
+An interesting observation is that the same system (Staapl) can host
+both a general-purpose stack-based language for systems glue, as well
+as special-purpose algebraic/numerical formalisms for algorithm
+specification.
+
+
+Entry: Getting started with Staapl
+Date: Sun Mar  7 17:16:06 CET 2010
+
+(see also [1])
+
+To try Staapl it's best to use the darcs version.  The PLaneT version
+is not up-to-date and contains only the compiler and not the Makefiles
+& examples.
+
+These are instructions for linux.  If you try on OSX or Cygwin and it
+doesn't work, drop me a line.
+
+$ darcs get http://zwizwa.be/darcs/staapl
+$ cd staapl
+$ make
+
+At this point it's possible to compile applications.  To compile the
+blink-a-led try:
+
+$ cd app
+$ make blink-a-led.hex
+
+This produces a HEX file that can be uploaded to a 18f452 chip with a
+40 MHz XTAL.  To use different configuration, see the config bits in
+any of the .fm files.
+
+The simplest interactive app is 1220-8.fm which has the serial console
+attached.  This is for an 18F1220 with internal osciallator.
+
+To produce only the dictionary (and hex) do:
+
+$ make 1220-8.dict
+
+The .dict files are PLT Scheme modules that can be executed.  They
+configure a front-end console to the binary code in the HEX file once
+uploaded to the target.  If the target running, the console can be
+started as:
+
+$ mzscheme 1220-8.dict
+Connected (/dev/ttyUSB0 38400)
+Press ctrl-D to quit.
+OK
+
+If you use a PicKit2 programmer and a USB serial cable on
+/dev/ttyUSB0, the following method can be used to compile, upload and
+connect:
+
+$ make 1220-8.live
+
+See app/Makefile and the .fm files for more information.
+
+
+Once at the console, you can execute commands and load 8-bit numbers
+on the stack.  See the `words' and `commands' commands to display a
+list of on-target compiled words and console commands respectively.
+The `macros' command displays a list of macros that can be used inside
+word definitions only.
+
+
+Using standard forth syntax like
+
+: foo 123 ;
+: bar foo foo ;
+
+you can compile and upload new word definitions into the scratch
+buffer.  These are persistent: they go into Flash memory.
+
+The scratch buffer is emptied whenever the console is started to make
+sure the state is predictable.  The `empty' command does the same, but
+it does not clean the dictionary.
+
+Definitions can be placed in a file and loaded into the scratch buffer
+using:
+
+load /tmp/definitions.f
+
+It is possible to develop a small application like this by simply
+leaving the last uploaded version on the target.  However for larger
+applications it is better to use the forth module (.fm) approach to
+build a new kernel that can be compiled to HEX file.
+
+[1] entry://20090812-191903
+
+
+Entry: Verifying the ad-hoc PIC18 code generator
+Date: Sun Mar 14 19:21:09 CET 2010
+
+      PROBLEM: verify the correctness an ad-hoc collection of
+               reduction rules (pattern matching).
+
+The solution I see is the use of an explicit representation of target
+machine semantics.  I.e. run the generated code in a simulator and
+hook it up to a test system that tries to provide full coverage.
+
+My main point of confusion is not explicitly recognizing all these
+language levels involved.  Each level's data is next level's function;
+between every level lies an interpreter.
+
+      FUNCTION               DATA
+ rep  Scheme functions       Scheme syntax objects
+----------------------------------------------------------------------------
+  1)  Forth prefix parsers   concatenative syntax
+  2)  Macro functions        machine assembly code (-> binary machine code)
+  3)  Machine state TX       machine state
+
+
+Level 1) can largely be ignored: it is a trivial preprocessing step to
+relate traditional Forth to the functional macro model.
+
+Level 2) is where the beef is.  This part contains a lot of
+information (transformation rules) as it encodes semantics of the
+machine in an indirect way, i.e. preserving an approximation of the
+semantics of machine code.
+
+Level 3) is given: the concrete semantics of the target machine can be
+used to build a simulator in Scheme.
+
+
+The point is verification of the error-prone creative hackery step 2)
+by making an interpretation arrow from concatenative syntax (the data
+of 1) to an abstract (function) domain that can somehow be related to
+the translation that the compiler makes from data in 1) to the
+function domain of level 3).
+
+The trick is then to find a collection of input code that produces
+programs that fire the optimization rules in different ways.
+
+
+
+         COMPILER (w/o prefix parser)
+
+
+                        asm stx
+                           |
+         conc stx  =====>  | macro     machine
+                           | code       state
+                           V              |
+                        asm stx   =====>  | machine state tx
+                                          |
+                                          V
+                                       machine
+                                        state
+
+         REF SEMANTICS:
+
+                      vm state
+                         |
+         conc stx  ===>  | vm state tx
+                         |
+                         V
+                      vm state
+
+
+A diagram that relates the interpretation (=>) and function (->)
+relations.  Interpretation maps syntax (data) to semantics (function).
+
+
+Entry: Released staapl-0.5.10 (PLaneT 1.10)
+Date: Sun Oct  3 09:36:18 CEST 2010
+
+Bugfix release.
+
+
+Entry: Lambda the Ultimate
+Date: Sun Nov 14 09:43:42 EST 2010
+
+Staapl got mentioned on LtU[1].  Here's a comment:
+
+Staapl consists of two parts that complement each other: a module
+compiler and an interactive toplevel.  The compiler marries the Racket
+macro system with a Forth-like low level 2-stack language that acts as
+a machine abstraction.  The interactive toplevel is an ad-hoc command
+interface bolted on top of the compiler and a target machine monitor.
+
+The Racket macro system makes language towers easier to understand by
+pinning down the meaning of identifiers at compile time, eliminating
+some "moving parts" and so making code easier to reason about and
+easier to modularize.  The "functional nature" of a 2-stack machine as
+opposed to a register machine adds simple low-level code composition
+and so further facilitates modularization.
+
+The complementary interactive toplevel emulates a standalone Forth
+interpreter, allowing the execution of existing on-target code and the
+definition of new on-target code by invoking the compiler and
+uploading machine code while the target is running.
+
+The interactive toplevel is there to "break the rules" when you need
+more direct control over the target hardware.  While the "static" and
+"purely functional" approach are nice for building well-structured
+programs, the reality of embedded programming is still that hardware
+issues are related to state and ill-defined behaviour and require
+interactive trial and error to resolve.
+
+[1] http://lambda-the-ultimate.org/node/3999
+
+
+Entry: Staapl and RISC machines
+Date: Sun Nov 14 11:30:46 EST 2010
+
+From an implementation perspective a 2-stack machine model allows for
+a very simple low-level code generator which is mostly just a peephole
+optimizer.
+
+Note however that while this works very well for a chip like the
+Microchip PIC18, a many-register machine like ARM or MIPS probably
+requires a "real" compiler with more aggressive inlining and register
+allocation if execution speed is an issue.
+
+Staapl is side-stepping this issue by concentrating on code size as
+opposed to execution speed.  Forth-style programming can lead to very
+dense code at the expense of having to think a bit harder to encode
+your problem and factor it appropriately.
+
+
+
+
+Entry: What is a Staapl macro?  I :: m -> (t -> t)
+Date: Tue Nov 16 08:37:47 EST 2010
+
+Traditionally, a (Lisp/Scheme/...) macro perfoms only expansion while
+the compiler can perform partial evaluation on the resulting
+expression independently of the behaviour of the macro; working only
+with the expansion results.
+
+In Lisp/Scheme it is possible to inspect sub-forms at macro expansion
+time to alter their behaviour originally specified as primitive forms
+or other macro forms.  However, this isn't so well-behaved as the
+meaning of forms is no longer defined in a single spot.
+
+In Staapl, macros perform their own evaluation, but they don't modify
+the structure of program text (with opaque, unknown semantics), but
+instead operate on a well-defined lower-level representation language.
+
+More formally, suppose t is a concatenative target language (syntax)
+and m is a concatenative macro language (syntax).  Each token in m is
+mapped (interpreted) to a function t->t or I :: m -> (t->t).  Each
+non-primitive element in m consists of a concatenation of primitive
+elements of m, which each map to a t->t function, thus each
+non-primitive element of m also corresponds to a t->t function which
+is the function composition of all the t->t functions associated to
+each m token.  The t-meaning of m is then given by ((I m) t0) where t0
+is the empty t program.
+
+It doesn't seem that you can do this with an applicative language as
+there is no relation between concatenation and composition and no
+"natural" target language.  The Scheme above can be towered: in fact
+in real life the target language t will be interpreted by a machine
+execution unit E :: t -> (s->s) which maps each t token (machine
+instruction) to a function transforming the machine state s.
+
+One additional element is necessary: in order to get to a usable
+programming language that supports modularity, the functions (t->t)
+and (s->s) need to be ``local'' or ``small-dimensional'' in some way.
+Staapl PIC18 currently uses stack machines where both t and s are
+stacks of respectively PIC18 code and 8-bit machine words.
+
+
+
+Entry: S-expression based syntax
+Date: Thu Dec 30 15:32:11 EST 2010
+
+I started an effort to provide an s-expression based syntax for
+instantiated target words.  The big difference with macros is that
+target code is inherently flat, i.e. it uses labels instead of
+well-deliniated functions.
+
+I'm not sure if that's the right way to go, but the low level control
+flow access you get in this way is at least useful.  However it might
+turn out to be better to use a higher level function-based abstraction
+later on, and provide some guarantees in the code generation phase.
+
+But really, I'm not going to fuss about that now.  Target code is
+flat, and this flatness is accessible.
+
+   words-flat : Define a sequence of (name . code) pairs with
+                fallthrough.  This is essentially the stack-based
+                machine language.
+
+   words : On top of `words-flat', define a list of (name . code)
+           pairs where code has implicit `exit'.
+
+
+   variables, variables-flat:  Same, but for reserving RAM space.
+
+
+Having the code available in s-expression form allows PLT units to be
+used for parameterization.  In short, the Forth parser is too
+convoluted to be able to blend in unit support.  This is caused by the
+flatness of the Forth language, and the fact that names can be
+introduced along the way.
+
+If possible I'd like to save the Forth syntax on the long term.
+However this would require some serious redesign.  Currently it is
+kept as-is.  New developments will be implemented in the s-expression
+syntax.
+
+
+
+Entry: Abstract Interpretation (staapl/absint)
+Date: Sat Jan 22 16:25:38 EST 2011
+
+I'm working on porting some of the DSP DSL ideas recently explored in
+Haskell back to Scheme to see how much I'm going to miss the type
+system.  I already know that I don't miss the continuation monad too
+much!
+
+It seems that pure functional specification combined with abstract
+domains implemented with well-behaved side effects works better.
+I.e. it's ok to use dynamic variables to implement dictionary
+threading, but it's not ok to update the _values_ these dynvars point
+to, as that will mess up partial continuations.
+
+An advantage of pure specifications is that the specs themselves can
+later be transferred to Haskell without problems for analysis that do
+not require the sharing structure (i.e. black box / semantic
+analysis).
+
+I guess template haskell could also be used to translate the
+specificiations to monadic form to implement the Scheme strict
+evaluation order side-effect the Scheme code relies on, without the
+ugly notation this would give in Haskell.
+
+All this is logged in the meta[1] postings, somwhere around [2].
+
+[1] entry://../meta/
+[2] entry://../meta/20110121-113603
+
+
+
+Entry: Embedded development is #ifdef-land
+Date: Tue Mar  8 16:39:23 EST 2011
+
+One of the ideas behind Staapl is to step away from the C macro
+preprocessor to implement compile time conditionals.
+
+Essentially, an application's top level module is a script that links
+together units, specifying implementations for interfaces.
+
+
+Entry: Staapl's target is flat
+Date: Fri Mar 11 09:59:12 EST 2011
+
+Staapl's target code generation is very similar to PostScript: a
+sequence of drawing operations constructs a 2D paper grid.
+
+While macros (compilation state transformers) are purely functional,
+one of the layers in the state that is passed along is the target code
+graph.
+
+It is an "evolved decision" to keep this as a graph, and not a tree.
+
+
+
+Entry: Right or Fast?
+Date: Tue Mar 29 00:51:25 EDT 2011
+
+* The ``right'' way to build an application is to build a monolithic
+  kernel.  This taps into the lexically sane hygienic macro magic of
+  Racket.  A kernel (really a kernel generator) is a Racket module.
+
+* The ``fast'' way to build an application is to incrementally add
+  definitions on a live target, relative to a fixed kernel.
+
+Both approaches are valid.  The monilithic kernel approach is very
+close to ordinary Racket programming, and is a good approach for
+developing large programs.  Read the Racket guide and manual for more
+information.  The disadvantage is that the cycle is slower (compile,
+upload).
+
+The incremental approach is a ColorForth[1] style early binding
+approach, and not a lisp style which would allow change of bindings in
+existing code.  You can add new code on top of old code obscuring old
+bindings for new code, but you can't modify existing bonds unless you
+provide your own indirection mechanisms.  This seems overall a more
+bullet-proof default.
+
+The incremental approach has an `empty' and `load' cycle.  The `empty'
+command will reset the code back to the initial kernel state, and
+`load' can be used to add (non-modular) on top of this.  A workflow I
+use is to develop code in a single file and use `empty' and `load' to
+quickly change the code on a running target.  When done, move the code
+to the kernel and recompile.
+
+The incremental approach doesn't require a chip reset, and so works
+better with applications that need to maintain state or run-time
+behaviour inbetween code updates.  Overall I've found this to be the
+case in deeply embedded programming.  You spend most of your time
+setting up ad-hoc tests and measurements to see why things are not
+working as expected.  A fast incremental state-change approach works
+better here than a recompile-the-world functional approach.
+
+
+[1] http://en.wikipedia.org/wiki/ColorForth
+
+
+Entry: Forth Syntax
+Date: Tue Mar 29 11:40:48 EDT 2011
+
+Staapl is a descendant of a Forth compiler[1].  It is a point in a
+long line of iterations to rewrite the original in Racket (PLT Scheme)
+using and learning about the approach native to Racket: powerful
+hygienic macros.
+
+I've gone to great lengths to try to maintain a Forth syntax frontend
+despite of the core going through several makeovers while absorbing
+new Racket abstractions and approaches.  Recently I was weighing the
+idea of dropping Forth syntax completely because of the tension it
+creates with the Racket macro & module framework.  Eventually, I was
+able to push the workarounds behind an interface, thinking it was
+better to not break what worked before, but intending to not use it
+for newer work.
+
+However, some recent work on low-level PIC code has lead me to
+re-apprecite the usefulness of Forth syntax and mindset.  Maybe it's
+just what I'm used to (and the emacs syntax highlighting ;) but for
+writing straight line code it is a very good user interface.  Combined
+with the the interactive incremental setting which allows quick
+one-line function definitions to run ad-hoc tests on the PIC, it is
+quite powerful.
+
+So it's probably going to stay.
+
+In any case, all functionality that used to be only available in the
+Forth syntax is now available in s-expression form without the prefix
+parser construct.  The latter is very hard to reconcile with
+s-expression macros in the current approach.  I plan to rewrite the
+old Forth parser on top of the new s-expression format (now it's
+special-purpose) but we'll see if there's time and necessity.
+
+
+[1] http://zwizwa.be/pic/badnop
+
+Entry: PICkit 2
+Date: Fri Apr  1 00:00:39 EDT 2011
+
+While the PK2 is being phased out by Microchip to be replaced by the
+PK3, it is still a neat toy.  The 2.x firmware (last one is 2.32) is
+essentially a small scripting interpreter that contains primitives for
+data communication and voltage control.  Its best feature is that it
+is fully documented.  It is currently still available from Microchip,
+but will probably remain available for a while as a clone[1].
+
+Due to its versatility, the PK2 has been used for many alternative
+purposes, which might be the reason why Microchip is phasing it out in
+favor of the PK3 which doesn't have an open architecture.
+
+I started writing a driver for use of PK2 in Staapl a bit after the
+PK2 came out.  I gave up after not getting it to work relyably and
+moving to other projects.  Recently however, Jaromir Sukuba published
+a description of the non-documented PIC on-chip debugger features[2]
+which has revived my interest in getting the PK2 to work with Staapl.
+
+The main issue I had was the hassle involved using both an ICSP port
+and a serial console on a PIC with low pin count.  Moving towards
+console + programming on only a single port would simplifiy some of my
+development setups.  With info on the debugger available I finally
+traded some sleep for getting it to work.
+
+So it works now.  Staapl talks to a PIC over the ICSP connector.
+
+The current downside is that it's not particulary fast in practice due
+to the nature of the handshake protocol I'm using, which ping-pongs
+across a 1ms USB delay.  However this is not intrinsic to the PK2 as
+it does work well for single-direction burst transfers.  Some long
+tail work TODO there.
+
+
+[1] http://shop.ebay.com/?_nkw=pickit2
+[2] entry://../electronics/20110320-225422
+
+
+
+Entry: All over the place
+Date: Fri Apr  1 12:33:44 EDT 2011
+
+( This probably deserves a whole article.  Consider it as a seed. )
+
+It has been interesting and challenging to map the requirements of
+Staapl onto the Racket code organization abstractions.  Most of the
+organization in Staapl is guided by Racket's macro & module system.  I
+started out completely uninformed and made all the usual beginner
+mistakes (including dynamic binding, of course).
+
+- Modules and macros
+
+This is the heart of Racket.  It is what makes flexible language
+extension possible, and Staapl uses it as its default code
+organization principle.
+
+- Alternative interpreter/compilers (syntax certificates)
+
+A more advanced form of low-level syntax manipulation.  This is used
+to implement the RPN code compiler/interpreter.  Currently the way
+this is done in Staapl needs some rework as I've not 100% figured out
+the details.
+
+- Units, and the way they mesh with the above.
+
+Units are used to implement the compiler internals in a modular way.
+Unit signatures are used to implement Staapl "word sets".
+
+- Namespaces & eval, and how they differe from modules
+
+For interactive code upload a namespace approach is used.  This does
+away with all static guarantees in places where it's useful.  More
+deeply, the tension between static code dependencies and dyanamic
+"patching" is central to Forth, and the tension it creates is
+fascinating.
+
+- Partial continuations
+
+While not strictly in the same class as the above, partial
+continuations are and interesting abstraction for turning code into
+data and vice versa.  Together with a "mostly functional" style of
+programming they are a powerful tool.
+
+
+
+Entry: Monad vs. Applicative / Arrow
+Date: Sun Oct 16 15:52:57 EDT 2011
+
+When I started out writing Staapl, I did not know Haskell, so (without
+actually verifying) I assumed monads are any kind of "behind the
+scenes data plumbing" mechanism.
+
+However, it seems that the way the Staapl compiler is constructed is
+more akin to an Arrow approach.
+
+It would be interesting to formalize this a bit: find the natural way
+of mapping a stack composition mechanism to/from Arrow.
+
+
+
+Entry: Released staapl-0.5.11 (PLaneT 1.11)
+Date: Mon Nov  7 12:44:09 EST 2011
+
+As usual, there is a main tarball release which includes example code,
+and a PLaneT Racket module that contains just documentation and
+modules.
+
+Main changes:
+
+- Microchip PicKit 2 support.
+
+Hook up a PK2 to a factory-clean PIC chip and get started.  See
+app/Makefile in the .tar.gz distribution.
+
+
+- Implemented Racket unit support.
+
+It seems that Racket's unit system (pluggable components) is a better
+abstraction for Forth code modules, as opposed to Racket's module
+system.  This release contains a major refactoring of the Coma
+compiler and Forth frontend to support standard wordset signatures.
+
+
+
+Entry: Finite-state Machines (shallow coroutines) and extensible compiler state.
+Date: Wed Nov  9 10:15:18 EST 2011
+
+While it is often useful to work on a "thread" abstraction level where
+each thread of control has a separate execution stack, on a low-RAM
+uC this can be expensive because tasks have to be dimensioned for the
+worst case stack usage.
+
+In practice however, it is often possible to write a solution in terms
+of a Finite-state Machine (FSM).  Doing this manually (without
+language support) can be a bit of a drag, as it involves explicit
+computation of a state variable on FSM exit, and dispatch on FSM
+entry.
+
+It is possible to remove this hassle by generating the state storage
+and state dispatch code as part of a "yield" command, which has the
+same meaning as a true coroutine yield, with the exception that it can
+only be executed from the main thread of control, i.e. it's execution
+stack is only 1 deep, hence the name "shallow coroutine" (SCR).
+
+Implementing this in Staapl requires a (compile time) context that can
+relate control points in the code to allocation of state IDs.  In
+order to make this work, I've added an "ext" field to the compiler
+state which contains a (functional) hash table.
+
+The purpose of this field is to provide local state for macro
+functionality, i,e, "begin-fsm ... end-fsm" in an extensible, modular
+way, meaning that state from different modules will not clash.
+
+An interesting observation is that once this mechanism works for a
+1-SCR, it might be possible to extend it to support n-SCR, which would
+be a coroutine with bounded stack depth.  If all the control points
+are known at compile time it is possible to "flatten" the thread state
+by enumerating it.
+
+
+
+Entry: Staapl niche?
+Date: Wed Nov  9 10:21:41 EST 2011
+
+Looks like I found the niche: low-memory microcontrollers and
+programmable hardware.
+
+Forth is really good for writing compact procedural code while
+retaining good local properties that allow reasoning about a program.
+It gives a lot of bang for the buck concerning RAM usage.
+
+If I look at what I've been doing with Staapl (and what I've been
+enjoying the most) is to find a good balance between extremely
+resource-efficient programs and readable, maintainable programs.
+
+
+
+Entry: Getting started
+Date: Thu May 17 12:34:23 EDT 2012
+
+It's been about half a year since I worked on Staapl.  A good
+opportunity to write a HOWTO.
+
+- Connect PIC18F2550 to PK2.  PK2 will provide power.
+- cd staapl/app/ ; make pk2-2550-48.live
+
+This should give you an OK prompt.  To see if it works, print a Flash
+block dump.  Eeach "x" or "." represents a 64byte Flash block, either
+(partily) used or empty.
+
+
+
+tom@zoo:~/staapl/app$ make pk2-2550-48.live
+mzc -vk pk2-2550-48.fm
+mzc v5.1 [3m], Copyright (c) 2004-2011 PLT Scheme Inc.
+"pk2-2550-48.fm":
+ [already up-to-date at "./compiled/pk2-2550-48_fm.zo"]
+mzscheme -p zwizwa/staapl/staaplc -- -c pickit2 pk2-2550-48.fm
+chmod +x pk2-2550-48.dict
+cat pk2-2550-48.fm | grep '\\ #sh#' | cut -b7- >pk2-2550-48.program
+mzc -vk pk2-2550-48.fm
+mzc v5.1 [3m], Copyright (c) 2004-2011 PLT Scheme Inc.
+"pk2-2550-48.fm":
+ [already up-to-date at "./compiled/pk2-2550-48_fm.zo"]
+mzscheme -p zwizwa/staapl/staaplc -- -c pickit2 pk2-2550-48.fm
+chmod +x pk2-2550-48.hex
+sh pk2-2550-48.program pk2-2550-48.hex
+PICkit 2 Program Report
+17-5-2012, 12:44:19
+Device Type: PIC18F2550
+
+Program Succeeded.
+Device ID = 1240
+Revision  = 0002
+Device Name = PIC18F2550
+
+Operation Succeeded
+mzc -vk ../staapl/live.ss
+mzc v5.1 [3m], Copyright (c) 2004-2011 PLT Scheme Inc.
+"../staapl/live.ss":
+ [already up-to-date at "../staapl/compiled/live_ss.zo"]
+mzscheme pk2-2550-48.dict
+Connecting to PICkit2.
+datfile:  /usr/local/bin/PK2DeviceFile.dat
+iProduct: PICkit 2 Microcontroller Programmer
+Press ctrl-D to quit.
+OK
+4 kb
+x x x x x x x x
+x x x . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+. . . . . . . .
+OK
+
+
+
+Entry: USB
+Date: Sun May 20 09:38:49 EDT 2012
+
+Things have been a bit rough lately.  I'm getting demotivated by my
+lack of success in getting the PIC18F2550 USB to work.
+
+Personal motivation issues set aside, the bottom line is that the USB
+interface is a limiting factor in making Staapl useful for some
+gadgets I'm thinking of building (and selling).  Without USB there is
+basically no product, and I'm too proud to use the Microchip firmware
+for this.
+
+This continuing lack of success has also become somewhat of a crusade.
+I started out Staapl as a tool for debugging.  I find it a bit ironic
+that the problem I'm facing is a debugging problem.  So that's where
+my current focus will be: make the USB problem as visible as possible.
+
+EDIT: USB is moving forward, and focus on debugging is becoming more
+clear.
+
+
+Entry: Smaller PIC chips
+Date: Sun Jun  3 11:32:34 EDT 2012
+
+I think for making this commercially interesting, a move to smaller
+PIC chips is necessary.  This requires a special purpose programmer as
+most of the small chips are not self-programmable.  ( Possibly also a
+debug header == special chip with debug hardware. )
+
+So the roadmap will be something like this:
+- get USB to work on 18F
+- write alternative firmware for PK2
+
+
+
+Entry: Protocol oriented programming
+Date: Wed Jun  6 13:10:47 EDT 2012
+
+There is this nice duality between prefix/postfix that I find hard to
+articulate, but that always comes up.  Stream data is prefix because
+it needs to "announce" the meaning of the data, but parsers are
+postfix so they can "gather" context as the data streams in.
+
+

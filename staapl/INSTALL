@@ -1,0 +1,12 @@
+If you got Staapl from the darcs archive or a tarball snapshot, install using:
+
+        make
+
+This links the project into your user PLT collects directory so the
+(require zwizwa/staapl/...) forms will work, and byte-compiles the
+sources.
+
+To install somewhere else use this as root:
+
+        bin/install <collects-dir>
+

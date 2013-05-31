@@ -1,0 +1,5 @@
+# Remove the dev-log ramblings file in a release.
+LOG=doc/staapl-ramblings.txt
+rm $LOG
+echo "Staapl releases are stripped of $LOG" >LOG
+

@@ -1,0 +1,24 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+provide-all
+
+\ PIC18F2620 @ 40Mhz
+
+\ Chip config.  Look in the data sheet for these.
+#x300000 org-begin
+  #x00 , #x26 , #x0F , #x0E ,  
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xE0 ,   \ no write protect
+  #x0F , #x40 , 
+org-end
+
+load p18f2620.f        \ chip macros
+load monitor-serial.f  \ boot block + serial monitor code
+
+macro
+: fosc 40 MHz ;  \ 4 clock cycles per instruction cycle gives 10 MIPS.
+: baud 230400 ;  \ Max speed with FTDI TTLUSB cable
+forth
+
+\ #sh# pk2cmd -I -M -R -p PIC18F2620 -f $1
+
+  

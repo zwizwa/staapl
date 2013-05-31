@@ -1,0 +1,75 @@
+The BROOD manual, introduction.
+
+
+For a couple of years now I've been studying the problem of
+programming applictions where the computer systems need some form of
+low-level control, for whatever reason. This occurs for example when
+programming 8-bit microcontrollers, or DSP applications.
+
+What I've found is that for people on a budget, there are very little
+tools available that allow the construction of somewhat optimal low
+level code using high level tools, without running into a low hanging
+"abstraction roof".
+
+You've reached the abstraction roof when you are no longer able to
+directly express some solution in source code, but have to compile it
+by hand. The typical example is writing an application in assembly
+code which needs a lookup table of magic values. Then, after a spark
+of genious using a very small Perl script to quickly generate a lookup
+table provided as assembler syntax. In a Unix + C + Perl world this
+approach seems really smart.
+
+People keep re-inventing this..
+
+What the Lisp and Forth communities have known for decades is that
+generating code is the right thing to do in this situation, but
+generating "dumb text" using a different tool is not such a great
+idea. You need to keep such a powerful tool inside the language.
+
+The fundamental insight is: a system with built-in metaprogramming
+makes it possible to move complexity to compile time, where the
+abstraction roof can be much higher: there are no resource constraints
+that prevent the use of higher level abstractions to build templates,
+macros, or things that generate code.
+
+If it's such a good idea, why doesn't Brood already exist? Well, it
+does. Only nobody seems to bother to standardize the approach and
+start a community around it.
+
+
+
+
+  - abstraction roof: no integrated open source tools available to put
+    it higher
+
+  - unix + C + perl: worse is better!
+
+  - lisp + forth -> build metaprogramming into the language  
+
+  - move the roof to compile time
+
+  - why didn't i hear about this?
+
+
+First, this already exists. These ideas have been floating around in
+the Lisp and Forth communities for decades. So why are they covered in
+obscurity? I do not buy the excuse that this is about skill only. The
+Lisp and Forth language communities seem to attract a certain kind of
+do-it-yourselver.
+
+My task is mainly integration of these ideas into a single coherent
+system that can serve as a standard.
+
+I don't think standardizing language is such a good
+idea. Standardizing a language framework might be better. I'm reusing
+PLT Scheme's abilities to do this.
+
+
+
+
+
+
+In large scale applications, companies use massive software systems to
+provide compilation from some highlevel description to cuicuits and
+low-level software. This idea is not new. What is new is an attempt to
+do this on a smaller scale.

@@ -1,0 +1,29 @@
+SCAT language components
+------------------------
+
+   * rpn syntax transformer
+   * state representation (stack + hidden)
+   * prefix namespace management
+   * scheme function snarfing
+   * defining scat compositions
+
+
+Highlevel interface
+-------------------
+
+   (scat: . <src>)
+
+     Create an anonymous SCAT function.
+
+   (compositions <ns> <compiler> . ((<name> . <src>) ...))
+
+     Create a collection of function objects from source code <src>,
+     and bind them to <name> in the namespace <ns>, using the compiler
+     (<compiler> . <src>). The compiler handles the source namespace.
+
+   (snarf <snarfer> <ns> . <spec>)
+
+     Snarf functionality from scheme into namespace <ns> using the
+     <snarfer> transformer.
+
+

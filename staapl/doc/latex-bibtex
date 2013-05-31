@@ -1,0 +1,21 @@
+#!/bin/bash
+
+[ -z "$3" ] && echo "usage $0 <latex> <texfile> <auxname>" && exit 1
+
+LATEX=$1
+TEXFILE=$2
+AUXNAME=$3
+
+# first pass
+$LATEX $TEXFILE
+
+# if there's a bibliography, run other passes
+grep -e '\\bibliography{' $TEXFILE || exit 0
+
+# run bibtech on the auxfile (name without .aux extension!)
+bibtex $AUXNAME
+
+# 2 more passes
+$LATEX $TEXFILE
+$LATEX $TEXFILE
+

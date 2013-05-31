@@ -1,0 +1,64 @@
+#lang planet zwizwa/staapl/pic18  \ -*- forth -*-
+staapl pic18/geo \ FIXME
+provide-all
+
+\  target : PIC18F1220 (or compatible, like 1330)
+\  comm   : PK2 using ICD2 connector
+
+
+\ config bits
+\ internal oscillator, watchdog disabled
+#x300000 org-begin
+ #x00 , #xC8 , #x0F , #x00 ,  \ 0 1 2 3
+ #x00 , #x80 , #x80 , #x00 ,  \ 4 5 6 7
+ #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B  Using PK2, so don't need boot protect
+ #x03 , #x40 ,                \ C D
+org-end
+
+staapl pic18/boot    \ chip init code
+load p18f1220.f      \ chip macros
+load monitor-icsp.f  \ boot block + icsp monitor code
+load synth/synth.f   \ synth core
+load debug.f         \ dump, trace
+
+\ Disable interrupts during PK2 comm.  Note that it might be best to
+\ use a packet approach: write a report to a region of ram and dump it
+\ out periodically using nadump+
+
+: _dump_ cli dup dump sti ;
+
+
+\ Run the engine for a couple of seconds, then return control.  This
+\ needs `init-board' and possibly `param' before it will work.
+
+    
+: runs \ seconds -
+    engine-on
+    for second next
+    engine-off
+    ;
+
+\ 1 second busy delay
+: second for 7 for #x100 for #x100 for next next next next ;
+
+
+\ run a word with engine on
+: 2execute \ lo hi --
+    push TOSH ! TOSL ! ;
+
+    
+: play
+    init-board
+    engine-on
+    2execute
+    engine-off ;
+    
+    
+    
+\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1
+    
+
+
+
+  
+    

@@ -1,0 +1,32 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+provide-all
+
+\ stand-alone BLINK-A-LED for PIC18F452
+\ compile this using "staaplc blink-a-led.f" and upload the blink-a-led.hex
+
+
+load p18f452.f
+
+
+\ config bits (40 MHz XTAL)
+#x300000 org-begin
+  #x00 , #x26 , #x0F , #x0E ,  
+  #x00 , #x01 , #x81 , #x00 ,
+  #x0F , #xC0 , #x0F , #xA0 ,  \ B: boot write protect
+  #x0F , #x40 , 
+org-end
+
+0 org-begin
+
+\ we just start at the head of flash memory
+
+: main     init begin blink busyloop again
+    
+: init     0 LATB ! 0 TRISB ! ;    
+: blink    LATB 0 toggle ;
+
+\ The inner loop takes 3 cycles to execute. [DECF + BNZ]
+: busyloop 100 for 100 for 100 for next next next ;
+
+org-end
+

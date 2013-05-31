@@ -1,0 +1,21 @@
+#lang planet zwizwa/staapl/pic18  \ -*- forth -*-
+provide-all
+
+\  target : PIC18F1220 (or compatible, like 1330)
+\  comm   : PK2 using ICD2 connector
+
+
+\ config bits
+\ internal oscillator, watchdog disabled
+#x300000 org-begin
+ #x00 , #xC8 , #x0F , #x00 ,  \ 0 1 2 3
+ #x00 , #x80 , #x80 , #x00 ,  \ 4 5 6 7
+ #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B  Using PK2, so don't need boot protect
+ #x03 , #x40 ,                \ C D
+org-end
+
+staapl pic18/boot    \ chip init code
+load p18f1220.f      \ chip macros
+load monitor-icsp.f  \ boot block + icsp monitor code
+
+\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1

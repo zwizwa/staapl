@@ -1,0 +1,13 @@
+MACRO language
+--------------
+
+Built on top of SCAT, this is a language that represents purely
+concatenative code generators (macros).
+
+This code is parameterized in target.ss, which provides 2 SCAT
+functions 'compile' and 'literal' that produce postponed target
+function calls and literal data loads.
+
+It can be used all by itself for a purely concatenative Forth-like
+language (The PURRR concatenative macro subset), or extended with
+syntax (parsing words) to represent Forth code.

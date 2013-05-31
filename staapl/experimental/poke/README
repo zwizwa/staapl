@@ -1,0 +1,10 @@
+POKE
+----
+
+A language on top of MACRO, either with flat Forth syntax, or
+s-expression Joy-like syntax.
+
+The main idea is to explore C code generation, and a minimal VM to run
+real-time linear code. Target is 16/32-bit embedded systems and DSP.
+
+The result of a "require" statement should be compilable C code.

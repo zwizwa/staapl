@@ -1,0 +1,35 @@
+; -*- scheme -*-
+
+; This is the default empty state file for the USBPicStamp board by
+; Johannes Taelman. Copy this file to 'monitor.state'.
+
+((forth)
+ (asm)
+ (dict)
+ 
+ (file
+  (prj           "prj/forthtv")      ;; project directory
+  (path          "pic18")            ;; project forth load path (next to local)
+  (state         "monitor.state")    ;; this file
+  (monitor       "stamp-serial.f")   ;; serial port monitor code
+  (hex           "monitor.hex")      ;; intel .hex binary output
+  (port          "/dev/ttyUSB0")     ;; serial port connected to device 
+  (application   "forthtv.f"))       ;; application toplevel source file
+
+
+ ;; the list of interpreters accessible by CTRL-D
+ ;; for the workshop this is disabled: only use files
+ (consoles live-mode
+           compile-mode
+           ; cat-mode
+           )
+
+ ;; cat data stack
+ (stack)
+
+ ;; mode hooks
+ (hook  (enter-compile)
+        (enter-interpret)
+        (enter-dtc-compile)
+        (enter-dtc-interpret)
+        (enter-cat)))

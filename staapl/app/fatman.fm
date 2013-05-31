@@ -1,0 +1,51 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+provide-all
+
+\ PIC18F4550
+
+\ Chip config.  Look in the data sheet for these.
+#x300000 org-begin
+
+#x21 , #x0E , #x3B , #x1E ,
+#x00 , #x81 , #x81 , #x00 ,
+#x0F , #xC0 , #x0F , #xE0 ,
+#x0F , #x40 , 
+
+
+org-end
+
+
+
+
+load p18f2550.f             \ chip macros
+load monitor-serial-core.f  \ boot block + serial monitor code
+
+macro
+: fosc 48 MHz ;
+\ : baud 230400 ;
+: baud 115200 ;
+\ : baud 38400 ;
+\ : baud 19200 ;    
+\ : baud 9600 ;    
+forth
+
+
+: warm
+    ' warm init-boot
+    init-all
+    \ init-board
+
+    \ begin receive transmit again
+    \ begin #xF0 transmit again
+    
+    interpreter ;
+
+: init-board
+    #x0F ADCON1 ! \ analog config : digital in
+    #x07 CMCON !  \ comparator config : digital input
+    #x00 TRISA !  \ all outputs
+    ; 
+
+
+    
+\ #sh# pk2cmd -I -M -R -p PIC18F4550 -f $1

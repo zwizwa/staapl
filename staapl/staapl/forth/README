@@ -1,0 +1,9 @@
+FORTH language
+--------------
+
+An extension to the SCAT language to support Forth-like syntax
+(parsing words). This is combined with the MACRO language to create
+PURRR, but the idea is to keep it separate from the MACRO postponed
+semantics to be able to represent Forth-like syntax on top of
+scheme. The forth/lang folder implements a Forth layer on top of SCAT.
+

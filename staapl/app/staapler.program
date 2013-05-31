@@ -1,0 +1,1 @@
+ pk2cmd -I -M -R -p PIC18F2620 -f $1

@@ -1,0 +1,44 @@
+#lang planet zwizwa/staapl/pic18 \ -*- forth -*-
+staapl pic18/geo  \ scheme extension module
+provide-all
+
+\ Boot file for the synth application.
+\  target : PIC18F1220 (or comapatible, like 1330)
+\  comm   : PK2 using ICD2 connector
+
+
+\ config bits
+\ internal oscillator, watchdog disabled
+#x300000 org-begin
+ #x00 , #xC8 , #x0F , #x00 ,  \ 0 1 2 3
+ #x00 , #x80 , #x80 , #x00 ,  \ 4 5 6 7
+ #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B  Using PK2, so don't need boot protect
+ #x03 , #x40 ,                \ C D
+org-end
+
+load p18f1220.f
+load monitor-serial-core.f
+
+path /home/tom/staapl/app  \ ???
+load synth/synth.f    \ application
+
+: warm
+    ' warm init-boot
+    init-all
+    init-board
+    engine-on
+    debug-serial? if interpreter ; then
+
+\ Run free without console.
+: go
+    engine-on begin param again
+
+\ Setup info.    
+macro
+: fosc 8000000 ; \ internal osc
+: baud 38400 ;  
+forth
+
+
+
+\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1

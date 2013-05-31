@@ -1,0 +1,120 @@
+Note: this needs update in brood-5
+
+
+PURRR18 1.0 boot standard
+-------------------------
+
+* Initial communication with the boot interpreter uses a serial 9600
+  Baud, 8 data bits, 1 stop bit, no parity protocol. There are 16
+  commands. The remaining 240 commands are reserved, and behaviour is
+  currently unspecified. This protocol is designed to work reliably
+  with a 1--byte buffer.
+
+  BASIC:
+
+     0     NOP		( -- )	     Do nothing.
+     1	   RECEIVE	( -- byte)   Transfer a byte from host -> target stack.
+     2	   TRANSMIT	( byte -- )  Transfer a byte from target stack -> host.
+     3	   EXECUTE	( lo hi -- ) Call 16 bit machine word on stack (byte address).
+
+  PIC18 EXTENSIONS:
+
+     4	   LDA		( -- )	     Receive 2 bytes, store in A register.
+     5	   LDF		( -- )	     Receive 2 bytes, sotre in F register.
+     6	   ACK		( -- )	     Transmit a 00 byte.
+     7	   RESET	( -- )	     Reset target.
+
+     8	   N@A+		( n -- )     Transmit a ram block, start at address in A register + increment
+     9	   N@F+		( n -- )     Transmit a flash block, start at address in F register + increment
+     A	   N!A+		( n -- )     Receive a ram block, start at address in A register + increment
+     B	   N!F+		( n -- )     Receive a flash block(*), start at address in F register + increment
+
+     C	   CHKBLK	( -- )       AND all bytes in flash block at F, transmit result.
+     D	   PREPLY	( -- )	     Transmit identification string.
+     E	   FERASE	( -- )	     Erase flash block at F.
+     F	   FPROG	( -- )	     Program flash block at F.
+     
+  
+  (*) This stores the data in an 8 byte flash write buffer. See PIC18 datasheet.
+
+  Given the boot kernel dictionary, the first 3 words commands are
+  sufficient for communication. The other 12 commands are shortcuts
+  that make communication a bit more efficient, and provide an
+  interface that enables programming without access to the dictionary.
+
+
+* The .state file is a single s-expression containing a hierarchical
+  dictionary, which is a list of (name . value) pair for which the
+  value can be a hierarchical dictionary. The value of the toplevel
+  element 'dict' is a dictionary with (name . address) pairs
+  reflecting the absolute word addresses of the Purrr words in the
+  bootloader.
+
+  For example:
+
+   ((dict
+     (here . 288)
+     (warm . 222)
+     (hello . 217)
+     (init-all-but-rs . 207)
+     (f-> . 199)
+     (_route . 193)
+     (_route/e . 190)
+     (chkblk . 177)
+     (ldf . 170)
+     (lda . 163)
+     (preply . 158)
+     (n!a+ . 149)
+     (n@a+ . 140)
+     (n!f+ . 130)
+     (n@f+ . 120)
+     (interpreter . 117)
+     (interpret . 99)
+     (safe . 95)
+     (check . 90)
+     (fprog . 86)
+     (ferase . 82)
+     (ack . 79)
+     (jsr . 71)
+     (transmit . 66)
+     (receive . 52)
+     (program . 46)
+     (erase . 43)
+     (engage . 33)
+     (ram (here . 0))
+     (boot-40 . 32)
+     (boot . 0)
+     (isr-low . 268)
+     (isr-high . 260)
+     (application . 256))
+
+  The other top level elements in the state file contain metadata:
+
+      path  	   A list of strings describing the search path for forth files.
+      port	   The device node of the serial port connecting to the target.
+      config-bits  The PIC18 configuration bits.
+
+      file	Contains a directory of files associated to the project
+      		
+        prj          The toplevel project directory.
+	state	     The project state file.
+	monitor	     Source code for the boot interpreter.
+	hex	     Name of the HEX file to store boot interpreter code.
+	application  Toplevel application source file.
+
+   Example:
+
+    ((path "." "/" "pic18" "prj/CATkit")
+     (port "/dev/ttyUSB0")
+     (file
+      (prj "prj/CATkit")
+      (state "monitor.state")
+      (monitor "monitor.f")
+      (hex "monitor.hex")
+      (application "sheepsint.f"))
+     (config-bits '(3145728 (0 200 15 0 0 128 128 0 3 192 3 224 3 64))))
+
+
+    
+    
+

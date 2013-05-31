@@ -1,0 +1,38 @@
+000000:  d803  rcall	0x8
+000002:  d805  rcall	0xe
+000004:  d806  rcall	0x12
+000006:  d7fd  bra	0x2
+000008:  6a8a  clrf	0x8a, 0
+00000a:  6a93  clrf	0x93, 0
+00000c:  0012  return	0
+00000e:  708a  btg	0x8a, 0, 0
+000010:  0012  return	0
+000012:  6eec  movwf	0xec, 0
+000014:  0e64  movlw	0x64
+000016:  6ee4  movwf	0xe4, 0
+000018:  50ed  movf	0xed, 0, 0
+00001a:  6eec  movwf	0xec, 0
+00001c:  0e64  movlw	0x64
+00001e:  6ee4  movwf	0xe4, 0
+000020:  50ed  movf	0xed, 0, 0
+000022:  6eec  movwf	0xec, 0
+000024:  0e64  movlw	0x64
+000026:  6ee4  movwf	0xe4, 0
+000028:  50ed  movf	0xed, 0, 0
+00002a:  06e7  decf	0xe7, 0x1, 0
+00002c:  e1fe  bnz	0x2a
+00002e:  52e5  movf	0xe5, 0x1, 0
+000030:  06e7  decf	0xe7, 0x1, 0
+000032:  e1f7  bnz	0x22
+000034:  52e5  movf	0xe5, 0x1, 0
+000036:  06e7  decf	0xe7, 0x1, 0
+000038:  e1f0  bnz	0x1a
+00003a:  52e5  movf	0xe5, 0x1, 0
+00003c:  0012  return	0
+60000000:  2600  addwf	0, 0x1, 0
+60000002:  0e0f  movlw	0xf
+60000004:  0100  movlb	0
+60000006:  0081  dw	0x81  ;unknown opcode
+60000008:  c00f  movff	0xf, 0xf
+6000000a:  a00f
+6000000c:  400f  rrncf	0xf, 0, 0
