@@ -62137,3 +62137,19 @@ The advantage here is to be able to encode machine-specific ideoms
 
 
 [1] http://en.wikipedia.org/wiki/Joy_%28programming_language%29
+
+
+
+Entry: Converted to GIT to host a standard Racket package on github
+Date: Thu May 30 21:03:45 EDT 2013
+
+This needs some work.  Currently, it does compile with a lot of
+warnings, but it might pollute the namespace a bit.
+
+I moved these to limit the damage:
+
+
+app -> staapl/app
+
+
+TODO: remove planet links
