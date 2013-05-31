@@ -45,6 +45,11 @@
 
 @title{Staapl}
 
+@verbatim{
+raco pkg install github://github.com/zwizwa/staapl/master
+}
+
+
 @section{Introduction}
 
 Staapl is a Scheme to Forth metaprogramming system.  To illustrate the
