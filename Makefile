@@ -20,7 +20,7 @@ planet-versioned: planet-package
 
 # run after updating plt or on fresh local install of staapl dev tree
 dev:
-	make planet-link
+# 	make planet-link
 	make pic18
 
 install:

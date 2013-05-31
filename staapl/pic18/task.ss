@@ -1,4 +1,4 @@
-#lang planet staapl/pic18 \ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \ This file contains bare bones task switching code, in the form of

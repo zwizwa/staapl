@@ -35,3 +35,17 @@ staapl pic18/route
 
 \ This code requires: handshake, ack, transmit, receive    
 load interpreter.f
+
+
+\ FIXME: Had to add these to make it compile.  Is this module actually
+\ used anywhere?
+macro
+: tx-sync ;
+: tx-end ;
+: rx-sync ;
+: rx-end ;
+: init-warm ;
+: init-abort ;
+: init-quit ;    
+forth
+  

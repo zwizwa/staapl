@@ -1,7 +1,7 @@
 #lang scheme
 
 (provide
- make-target-value-compiler
+ ;; make-target-value-compiler
  tv:)
 
 ;; The target-value compiler uses scat: to construct assembler
