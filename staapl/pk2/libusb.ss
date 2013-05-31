@@ -78,11 +78,12 @@
      (ffi-lib "/System/Libraries/IOKit.framework/IOKit")
      (ffi-lib "/opt/local/lib/libusb") ]
     [(unix)
-     ;; FIXME: This is a generic one + 2 needed for Debian.  Is there a better way?"
+     ;; FIXME: This is a generic one + Debian-specific.  Is there a better way?"
      (find-ffi-lib
       "/lib/libusb-0.1.so"
       "/lib/libusb-0.1.so.4"
       "/lib/x86_64-linux-gnu/libusb-0.1.so.4"
+      "/lib/i386-linux-gnu/libusb-0.1.so.4"
       )]
     [(windows)
      (ffi-lib "libusb0")]))
@@ -184,8 +185,8 @@
    (lambda (ptr)
      (bytes->string/utf-8 
       (cptr->bytes0 ptr n)))))
-(define _path-type (make-cmaxstring-type usb-max-path-len))
 
+(define _path-type (make-cmaxstring-type usb-max-path-len))
 
 
 
@@ -213,12 +214,18 @@
       (bytes-close-converter converter)
       (bytes->string/utf-8 result))))
 
-(define-cpointer-type _struct:usb_string_descriptor
-                      _struct:usb_descriptor_header
-  #f
-  (lambda (ptr)
-    (string-descriptor-buffer->string
-     (cptr->descriptor-buffer ptr))))
+
+;; Not used?  Gives a contract violation.
+;(define-cpointer-type
+;  _struct:usb_string_descriptor
+;  _struct:usb_descriptor_header  ;; ptr-type
+;  #f                             ;; scheme-to-c
+;  (lambda (ptr)                  ;; c-to-scheme
+;    (string-descriptor-buffer->string
+;     (cptr->descriptor-buffer ptr))))
+
+
+
 
 (define _struct:usb_bus/patch _pointer)
 (define-cstruct _struct:usb_device
