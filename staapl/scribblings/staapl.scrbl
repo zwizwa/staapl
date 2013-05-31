@@ -116,7 +116,7 @@ runtime stack and putting back the result.  The second program adds
 the literal value @scheme[1] to the top of the stack using a different
 machine instruction.  The third program doesn't perform any run-time
 computation at all and simply loads the result of the addition that
-was computed at comple-time because both inputs to the addition where
+was computed at comple-time because both inputs to the addition were
 available.
 
 Note that in this last program the result of the compile-time

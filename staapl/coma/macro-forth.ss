@@ -189,6 +189,7 @@
          (datum->syntax #'id `(require ,sexpr))))))
   
   (syntax-case stx (spec file planet staapl)
+    ((_ spec id)   (req #'id))
     ((_ file id)   (req `(file ,(path->string (stx->path #'id)))))
     ((_ planet id) (req `(planet ,#'id)))
     ((_ staapl id) (req  (string->symbol
