@@ -62153,3 +62153,30 @@ app -> staapl/app
 
 
 TODO: remove planet links
+
+
+
+Entry: dsPIC
+Date: Sun Jun  2 15:40:10 EDT 2013
+
+I can't help but thinking about that nice DIP 16bitter.  Especially
+with RAI coming to a point of usability, it would be great to try a
+multi-paradigm approach with firmware written in Forth and a dataflow
+datapath running in the background.
+
+IIRC, the main problem for getting the dsPIC to work is the assembler.
+While the peephole optimizer should be good enough for supporting a
+different syntax, the current ASM syntax in Staapl is too simple.
+
+It might be good to rewrite it from scratch.  How hard can it be?
+This time, I could do it right from the start.
+
+zwasm
+
+The trouble is addressing modes.  Essentially, addressing modes are
+hidden computations, and when mapping them to some functional
+representation, would require nested expressions.
+
+(let ((a (+ (@ x ++))))
+     ....)
+
