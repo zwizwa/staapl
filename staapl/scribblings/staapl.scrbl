@@ -45,18 +45,145 @@
 
 @title{Staapl}
 
+
+@section{Introduction}
+
+Staapl is a @emph{macro assembler on steroids} for PIC18F
+microcontrollers.  It can be used for writing firmware optimized for
+size.  It goes where C can't go, and where assembler would be too
+complicated.  It is based on Racket Scheme (code generator) and Forth
+(low-level language and machine model).
+
+To install, run the following command.  See the Racket
+@hyperlink["http://docs.racket-lang.org/pkg/" "package manager"]
+documentation for more information.
+
 @verbatim{
 raco pkg install github://github.com/zwizwa/staapl/master
 }
 
 
-@section{Introduction}
 
-Staapl is a Scheme to Forth metaprogramming system.  To illustrate the
-general idea we're going to use a concrete application: the Forth
-compiler for the 8-bit Microchip PIC18 microcontroller architecture.
-This section uses REPL interaction with some example code written on
-top of the compiler to demonstrate the code generation process.
+@subsection{Background Ideas}
+
+The Scheme-metaprogrammable PIC18F Forth fits in a larger picture.
+Some loose ideas:
+
+@itemize[
+
+
+@item{Staapl is an extension of the
+  @hyperlink["http://racket-lang.org" "Racket"] programming language,
+  a Scheme dialect with strong support for embedded domain specific
+  languages (EDSL) written in terms of Scheme macros.  A Staapl target
+  language is a collection of target code generator macros.}
+
+@item{The language for the Microchip
+  @hyperlink["http://www.microchip.com/PIC18/" "PIC18"] is a language
+  based on on
+  @hyperlink["http://en.wikipedia.org/wiki/Forth_programming_language"
+  "Forth"], acting as a very thin abstraction layer over the PIC18 architecture.
+  It has an optimizing peephole compiler, and a tethering mechanism
+  with interactive console for running-target code updates through the
+  PicKit2 programmer.}
+
+@item{Unlike traditional Forth which is highly reflective, Staapl is
+  built using
+  @hyperlink["http://www.cs.utah.edu/plt/publications/macromod.pdf"
+  "macros with phase separation"], which breaks the circular
+  reflection into a directed language tower, creating a static
+  semantics.  The basic idea is that the meaning of the language
+  doesn't change inside one module, in contrast with original Forth's
+  approach.  Most of Staapl is organized around a convenient abstract
+  syntax based on a typical
+  @hyperlink["http://en.wikipedia.org/wiki/Concatenative_programming_language"
+  "concatenative"] combinator language like
+  @hyperlink["http://en.wikipedia.org/wiki/Joy_(programming_language)"
+  "Joy"].  This syntax can then be used as a base for different
+  interpretations or as a target for concrete syntax frontends.}
+
+
+
+@item{While the PIC18 language is a stack language, the basic code
+  generator structure could support any kind of "algebraic" language, i.e.
+  @hyperlink["http://en.wikipedia.org/wiki/Tacit_programming"
+  "point-free"] languages without variable bindings.  Note that
+  @emph{point-free} only refers to the basic compoisition mechanism.
+  The core substrate of Staapl is still Scheme, so primitive macros
+  can have local variables if that simplifies programming.  This is
+  used effectively in the Staapl Forth for PIC18.}
+
+
+@item{The basic idea is that point-free languages are easily manipulated
+  on the meta-level which makes them an ideal code generation target.
+  @itemize[
+
+  @item{Such languages have no variables that complicate code
+  generation due to scope issues (hygiene).}
+
+  @item{Thanks to the associativity of the operations of concatenation
+  (syntactically) and function composition (semantically),
+  computations are trivially partitioned in compile time and run
+  time.}
+
+  @item{Reliance on combinators for program structure (as opposed to
+  explicit recursion and loops) allows for the derivation of program
+  transformation laws that can be used for program derivation or
+  compilation to efficient implementations.}
+
+  ]
+  }
+
+]
+
+
+
+@subsection{Status}
+
+@itemize[
+
+@item{The phase I goal - a usable system for PIC18, be it with some rough
+  edges - is reached, and the corresponding code is put in incremental
+  improvement mode.}
+
+@item{This base will serve as the basis for phase II: further
+  experiments with point-free domain specific languages for
+  DSP/control, static verification, and more elaborate compilation
+  techniques to implement them.}
+
+@item{At this time, Staapl is only practical for the PIC18
+  architecture.  While writing other ports should be straightforward,
+  it is a lot of work.  I have some code for the 12 and 14 bit PIC
+  cores, and I've been looking into porting staapl to PIC24/30/33
+  (dsPIC).  The main hurdle is writing a peephole optimizer for the
+  new architecture, and a more general assembler/disassembler
+  architecture.}
+
+]
+
+@subsection{Projects}
+
+The PIC18 Forth language has been used in some art and education
+projects and workshops:
+
+@itemize[
+  @item{The @hyperlink["http://zwizwa.be/staapl/sheep" "Sheep"] sound synthesizer.}
+  @item{The @hyperlink["http://zwizwa.be/staapl/forthtv" "ForthTV"] B/W composite video generator.}
+  @item{The @hyperlink["http://zwizwa.be/staapl/catkit" "CATkit"] and
+            @hyperlink["http://zwizwa.be/staapl/krikit" "KRIkit"] boards.}
+]
+
+
+
+
+@section{Forth Compiler}
+
+
+To illustrate the general idea we're going to use a concrete
+application: the Forth compiler for the 8-bit Microchip PIC18
+microcontroller architecture.  This section uses REPL interaction with
+some example code written on top of the compiler to demonstrate the
+code generation process.
 
 @;defmodule/this-package[pic18/demo]
 @defmodule[pic18/demo]

@@ -87,6 +87,12 @@ all_files:
 	mzc -vk `find staapl -name '*.ss'`
 
 
+%.html: %.scrbl
+	cd $(dir $<) ; raco scribble $(notdir $<)
+
+zwizwa: staapl/scribblings/staapl.html www/index.html
+	cp -av www/*                ~/www/zwizwa.be/staapl/
+	cp -av staapl/scribblings/* ~/www/zwizwa.be/staapl/
 
 # planet
 
