@@ -108,7 +108,7 @@ Some loose ideas:
   generator structure could support any kind of "algebraic" language, i.e.
   @hyperlink["http://en.wikipedia.org/wiki/Tacit_programming"
   "point-free"] languages without variable bindings.  Note that
-  @emph{point-free} only refers to the basic compoisition mechanism.
+  @emph{point-free} only refers to the basic composition mechanism.
   The core substrate of Staapl is still Scheme, so primitive macros
   can have local variables if that simplifies programming.  This is
   used effectively in the Staapl Forth for PIC18.}
@@ -174,6 +174,42 @@ projects and workshops:
 ]
 
 
+@subsection{Links}
+
+Some older documentation links below.  Since this is a
+developer-oriented project with a lot of effort put into clean
+organization, I suggest looking at the source code to pierce through
+the top-layer of workflow glue.  Staapl is structured as a library
+with multiple entry points, not a monolithic application. I encourage
+you to build your own workflow on top of it, and integrate it with
+other tools. (And share that code!).
+
+@itemize[
+
+@item{An overview of
+  the @hyperlink["http://zwizwa.be/archive/pic18-forth.pdf" "PIC18 macro
+  Forth dialect"].}
+
+@item{A practical tutorial about
+  @hyperlink["http://zwizwa.be/archive/pic18-interaction.html"
+  "interactive tethered Forth development"].}
+
+@item{A tutorial about
+  @hyperlink["http://zwizwa.be/archive/pic18-synth.pdf" "writing a
+  low-level Forth DSL"] using bottom up programming with procedures
+  and macros.}
+
+@item{Some background articles on the
+  @hyperlink["http://zwizwa.be/ramblings/staapl-blog" "blog"].}
+
+@item{The excellent @hyperlink["http://racket-lang.org" "Racket"]
+  documentation.}
+
+@item{The
+@hyperlink["http://zwizwa.be/cgi-bin/mailman/listinfo/staapl-list"
+"mailing list"].}
+
+]
 
 
 @section{Forth Compiler}
