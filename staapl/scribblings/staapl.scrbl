@@ -54,13 +54,16 @@ size.  It goes where C can't go, and where assembler would be too
 complicated.  It is based on Racket Scheme (code generator) and Forth
 (low-level language and machine model).
 
-To install, run the following command.  See the Racket
-@hyperlink["http://docs.racket-lang.org/pkg/" "package manager"]
-documentation for more information.
+Staapl is hosted on @hyperlink["http://github.com/zwizwa/staapl"
+"Github"].  To install, install @hyperlink["http://racket-lang.org"
+"Racket"] and run the following command.
 
 @verbatim{
 raco pkg install github://github.com/zwizwa/staapl/master
 }
+
+See the Racket @hyperlink["http://docs.racket-lang.org/pkg/" "package
+manager"] documentation for more information.
 
 
 
