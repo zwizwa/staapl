@@ -52,6 +52,7 @@ macro
 forth
 
 variable OUT1-read
+variable IN1-write
 
 
 \ PIC18 specific (since USB is also PIC specific): use rot<<, indirect
@@ -318,7 +319,7 @@ forth
     \ EP1: Transaction complete.  Leave the IN1 buffer owned by MCU.
     \ See the a/IN1-... words below.  USB will return NAK to the host
     \ in response to an IN token until userspace calls IN1-flush.
-    IN1-init  ;  \ Set BD.CNT = 1
+    IN1-init  ;  \ Set BD.CNT = 0
 
 : transaction.SETUP \ -- : a->packet
     a>  drop \ bmRequestType
@@ -530,7 +531,7 @@ forth
 : a/IN1-begin
     a/IN1-wait    \ wait until IN1's contents is transferred to host.
     buf-IN1 buf-page a!!
-    IN1/CNT bd@ al +! ;
+    IN1-write @ al +! ;
 
 : a/IN1-wait
     a/IN1.STAT a/wait-UOWN ;
@@ -545,7 +546,7 @@ forth
     a/IN1-begin ; \ start a new IN1 buffer write session
     
 : a/IN1-end
-    al @ buf-IN1 - IN1/CNT bd! ;
+    al @ buf-IN1 - IN1-write ! ;
 
 \ When IN1 buffer is filled by UC, "IN1-flush" will transfer ownership
 \ to the USB peripheral.  It will perform an IN transaction with the
@@ -554,8 +555,11 @@ forth
 \ is returned to the UC.  That word will call "IN1-init" to reset the
 \ write count.
     
-: IN1-flush   IN1/CNT bd@ 1 IN/DATA+ ;
-: IN1-init    0 IN1/CNT bd! ;
+: IN1-flush   IN1-write @
+              0 IN1-write !
+              1 IN/DATA+ ;
+    
+: IN1-init    0 IN1-write ! ;
 
 
 \ Just one byte.  This flushes only when necessary.  It is allowed to
@@ -582,7 +586,7 @@ forth
 : a/OUT1-transaction
     \ a/OUT-end    \ not necessary (kept here for symmetry with a/IN1-transaction)
     OUT1-fill      \ transfer OUT1 ownership to USB to collect new data
-    a/OUT1-begin ; \ start new transaction to IN1 buffer
+    a/OUT1-begin ; \ start new transaction to OUT1 buffer
 
 : a/OUT1-end
     al @ buf-OUT1 - OUT1-read ! ;
@@ -601,7 +605,7 @@ forth
 \ request more data from host.
 \ NOTE: It might be good to flush the IN1 buffer to host before
 \ starting a busy wait on OUT1 from host.  
-: OUT1> a>r a/OUT1-begin a/OUT1-read a/OUT1-end r>a ; \ byte --
+: OUT1> a>r a/OUT1-begin a/OUT1-read a/OUT1-end r>a ; \ -- byte
 
 
 
@@ -612,7 +616,8 @@ forth
     
 \ : >debug async.>tx ; \ 10 async.>tx ;    
 \ : init-debug 230400 48000000 init-serial ;
-
+    
+  
 : test-loopback begin OUT1> >IN1 again
     
 : testi

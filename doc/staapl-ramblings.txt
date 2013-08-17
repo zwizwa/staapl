@@ -62319,8 +62319,36 @@ What's next?
 
 
 
+Entry: OUT NAK
+Date: Sat Aug 17 14:57:37 EDT 2013
+
+Starting to see how it works.  Basically, I'm not implementing a
+properly buffered serial stream, but just allow the current OUT packet
+to be read through the `OUT1>` word.  Currently the interrupt handler
+somehow returns EP back to USB controller, but this needs to be done
+elsewhere, i.e. when all data is read, or explicitly.
+
+Som, how to NAK an OUT transaction?
+
+After data is updated, this is what happens:
+
+    UIR TRNIF low    \ ready for next transaction
+    UCON PKTDIS low  \ clear PKTDIS flag (automatically set for SETUP packet)
 
 
+That's not it.  The important flag is UOWN in the STAT register of the
+EP descriptor.
+
+Reading the code, it seems this should really just work, at least on
+the OUT side: buffer is only passed to USB controller when it is read
+completely.
+
+The trouble is probably that IN buffer gets overwritten.  Basically,
+>IN1 should block until buffer is ready to go out.
+
+I cleaned it up a bit to use an explicit IN1-write pointer instead of
+the buffer counter.  Doesn't change behaviour.
 
 
+[1] http://www.microchip.com/forums/m715201.aspx
 
