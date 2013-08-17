@@ -62349,6 +62349,8 @@ The trouble is probably that IN buffer gets overwritten.  Basically,
 I cleaned it up a bit to use an explicit IN1-write pointer instead of
 the buffer counter.  Doesn't change behaviour.
 
+Weird...
+
 
 [1] http://www.microchip.com/forums/m715201.aspx
 

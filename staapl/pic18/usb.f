@@ -186,7 +186,7 @@ forth
     
 : a!OUT0  buf-OUT0 a!buf ;
 : a!IN0   buf-IN0  a!buf ;
-: a!OUT   buf-OUT1 a!buf ;
+: a!OUT1  buf-OUT1 a!buf ;
 : a!IN1   buf-IN1  a!buf ;
 
 forth
@@ -295,12 +295,9 @@ forth
         transaction.OUT1 ;
 
 : transaction.OUT0 ;  \ not used
-: transaction.OUT1
 
-    \ OUT1/CNT bd@ >debug    
-    \ The OUT1 is now owned by UC.  Initialize read pointer.
-    
-    OUT1-init ;
+
+: transaction.OUT1 ;  \ NOP: task polls UOWN
 
 \ UADDR follows address after transaction is finished.    
 : transaction.IN    \ -- : a->packet
@@ -315,11 +312,7 @@ forth
     address @ UADDR ! ;
 
     
-: transaction.IN1   \ -- : a->packet    
-    \ EP1: Transaction complete.  Leave the IN1 buffer owned by MCU.
-    \ See the a/IN1-... words below.  USB will return NAK to the host
-    \ in response to an IN token until userspace calls IN1-flush.
-    IN1-init  ;  \ Set BD.CNT = 0
+: transaction.IN1   \ NOP: task polls UOWN
 
 : transaction.SETUP \ -- : a->packet
     a>  drop \ bmRequestType
@@ -555,10 +548,7 @@ forth
 \ is returned to the UC.  That word will call "IN1-init" to reset the
 \ write count.
     
-: IN1-flush   IN1-write @
-              0 IN1-write !
-              1 IN/DATA+ ;
-    
+: IN1-flush   IN1-write @  IN1-init 1 IN/DATA+ ;
 : IN1-init    0 IN1-write ! ;
 
 
@@ -596,8 +586,7 @@ forth
 \ reset the read count.
 
 macro
-: OUT1-init  0 OUT1-read ! ;
-: OUT1-fill  OUT1-free ;
+: OUT1-fill  0 OUT1-read ! OUT1-free  ;
 forth
 
     
