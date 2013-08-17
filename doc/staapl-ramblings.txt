@@ -62351,6 +62351,40 @@ the buffer counter.  Doesn't change behaviour.
 
 Weird...
 
+After cleanup, still problem.
+
+To see if it's in or out, I tried this, together with feeding it a
+counting range.
+
+
+: testx
+    \ init-debug
+    init-usb-isr
+    0 begin OUT1> drop dup >IN1 1 + again ;
+
+The IN sequence doesn't have any gaps, so it seems something gets lost
+in the OUT part.
+
+Ok, found it: didn't toggle DATAx bit!
+Looks like it got silently ignored, or I didn't check an error condition.
+
+
+Yep, it's in the data sheet: ignored *BUT* ack is sent to host!
+
+  17.4.1.2 BDnSTAT Register (CPU Mode)
+
+
+  The Data Toggle Sync Enable bit, DTSEN (BDnSTAT<3>), controls data
+  toggle parity checking.  Setting DTSEN enables data toggle
+  synchronization by the SIE; when enabled, it checks the data
+  packet’s par- ity against the value of DTS (BDnSTAT<6>). If a packet
+  arrives with an incorrect synchronization, the data will essentially
+  be ignored; it will not be written to the USB RAM and the USB
+  transfer complete interrupt flag will not be set. The SIE will send
+  an ACK token back to the host to Acknowledge receipt, however. The
+  effects of the DTSEN bit on the SIE are summarized in Table 17-3.
+
+
 
 [1] http://www.microchip.com/forums/m715201.aspx
 

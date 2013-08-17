@@ -111,8 +111,13 @@ forth
 \ --
 : OUT0-free 64 0 OUT/DATA0 ;
 : OUT1-free 64 1 OUT/DATA0 ;
+
+: OUT1-next 64 1 OUT/DATA+ ;
+    
+    
 \ n ep --    
-: OUT/DATA0 OUT DATA0 >usb ;
+: OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
+: OUT/DATA+ OUT DATA+ >usb ;    
 : IN/DATA0  IN  DATA0 >usb ;
 : IN/DATA1  IN  DATA1 >usb ;    
 : IN/DATA+  IN  DATA+ >usb ;    
@@ -586,7 +591,7 @@ forth
 \ reset the read count.
 
 macro
-: OUT1-fill  0 OUT1-read ! OUT1-free  ;
+: OUT1-fill  0 OUT1-read ! OUT1-next  ;
 forth
 
     
@@ -607,12 +612,19 @@ forth
 \ : init-debug 230400 48000000 init-serial ;
     
   
-: test-loopback begin OUT1> >IN1 again
+: test-loopback
+    begin OUT1> >IN1 again
     
 : testi
     \ init-debug
     init-usb-isr
     test-loopback ;
+
+: testx
+    \ init-debug
+    init-usb-isr
+    0 begin OUT1> drop dup >IN1 1 + again ;
+
     
 : test
     init-usb
