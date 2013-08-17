@@ -62180,3 +62180,52 @@ representation, would require nested expressions.
 (let ((a (+ (@ x ++))))
      ....)
 
+
+
+Entry: Assembler
+Date: Mon Jun 10 14:08:23 EDT 2013
+
+http://stackoverflow.com/questions/9060156/insights-for-writing-an-assembler
+
+
+
+Entry: MyHDL
+Date: Sat Aug 17 11:12:44 EDT 2013
+
+It would be nice to actually use it on a project, e.g. a small forth
+processor.  Not for now thouth.
+
+
+Entry: USB
+Date: Sat Aug 17 11:13:26 EDT 2013
+
+Played with USB for work last couple of months, on the AT91SAM7S
+platform, writing firmware for the osmocom SIMtrace.
+
+Found out that my main PC has USB problems.  This took a a long time
+to sink in - 2 years of random errors.  It started to become obvious
+once I ran into hard locks, i.e. "blocked for 120 seconds" errors.
+Switched PC and all is well.
+
+This could mean that previous problems I had with PIC usb firmware are
+also related to that.  Whenever there is a protocol error on USB,
+weird behaviour would pop up.  Same kind of problem.  So let's try
+again!
+
+
+Another thing: now that I have an idea of AT91SAM7 USB and at91lib C
+code, there is little commercial reason for using Staapl / PIC.  Or is
+there?  What's the cheapest PIC USB controller these days?
+
+
+
+Entry: New package manager
+Date: Sat Aug 17 13:28:20 EDT 2013
+
+Using the git repo:
+
+# raco pkg install github://github.com/zwizwa/staapl/master
+
+In the parent directory of the staapl root:
+
+# raco pkg install --link staapl
