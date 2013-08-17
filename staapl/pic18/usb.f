@@ -108,12 +108,12 @@ forth
       a/bd-update
     r>a ;
 
-\ --
-: OUT0-free 64 0 OUT/DATA0 ;
-: OUT1-free 64 1 OUT/DATA0 ;
+\ -- \ ready to receive first packet = DATA0    
+: OUT0-first 64 0 OUT/DATA0 ;  
+: OUT1-first 64 1 OUT/DATA0 ;
 
-: OUT1-next 64 1 OUT/DATA+ ;
-    
+\ -- \ ready to receive next packet = DATAx toggles    
+: OUT1-next 64 1 OUT/DATA+ ;   
     
 \ n ep --    
 : OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
@@ -241,7 +241,7 @@ forth
     0 4 a!! EP0-init f!! 8 f>a
 
     \ EP0 OUT BD ready for SETUP transactions.
-    OUT0-free
+    OUT0-first
 
     0 UADDR !              \ set USB address to 0
     0 UIR !                \ clear all usb interrupt flags    
@@ -352,7 +352,7 @@ forth
     
     IN1-init            \ BD.CNT=0
     #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
-    OUT1-free           \ Prepare receive on OUT1
+    OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
     ; 
 
@@ -398,7 +398,7 @@ forth
 \ data to a GET_ request.  n is the data size or 0 in case of a short
 \ packet i.e. acknowledgment of a SET_ request.
 : setup-reply \ n --
-    OUT0-free    \ make room for next SETUP request on EP0/OUT
+    OUT0-first   \ make room for next SETUP request on EP0/OUT
     0 IN/DATA1 ; \ return packet in EP0/IN is DATA1
 
 \ The device descriptor data is stored in Flash, generated from high
