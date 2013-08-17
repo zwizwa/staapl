@@ -350,7 +350,9 @@ forth
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
     0 setup-reply
     
-    IN1-init            \ BD.CNT=0
+    IN1-init
+    OUT1-init
+    
     #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
     OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
@@ -591,7 +593,8 @@ forth
 \ reset the read count.
 
 macro
-: OUT1-fill  0 OUT1-read ! OUT1-next  ;
+: OUT1-init  0 OUT1-read ! ;
+: OUT1-fill  OUT1-init OUT1-next  ;
 forth
 
     
