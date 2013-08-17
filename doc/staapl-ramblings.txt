@@ -62196,7 +62196,7 @@ It would be nice to actually use it on a project, e.g. a small forth
 processor.  Not for now thouth.
 
 
-Entry: USB
+Entry: TODO: finish USB
 Date: Sat Aug 17 11:13:26 EDT 2013
 
 Played with USB for work last couple of months, on the AT91SAM7S
@@ -62219,6 +62219,8 @@ there?  What's the cheapest PIC USB controller these days?
 
 
 
+
+
 Entry: New package manager
 Date: Sat Aug 17 13:28:20 EDT 2013
 
@@ -62229,3 +62231,96 @@ Using the git repo:
 In the parent directory of the staapl root:
 
 # raco pkg install --link staapl
+
+
+
+Entry: Picking up USB
+Date: Sat Aug 17 13:38:56 EDT 2013
+
+After fixing some packaging stuff and racket upgrade to 5.3.6 (August
+2013) the following seems to work, with a couple of glitches when
+starting up - i.e. PK2 programmer bailing out.
+
+Board has an extra bridge from USB GND to TTL serial GND.  IIRC it had
+some bad connection.
+
+cd ~/staapl/staapl/app
+make pk2-2550-48.dict
+make pk2-2550-48.flash
+mzscheme pk2-2550-48.dict
+
+Connecting to PICkit2.
+datfile:  /usr/local/bin/PK2DeviceFile.dat
+iProduct: PICkit 2 Microcontroller Programmer
+Press ctrl-D to quit.
+OK
+4 kb
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+OK
+test
+
+Aug 17 13:38:25 tx kernel: [615659.022741] usb 4-1.2.2: new full-speed USB device number 106 using ehci_hcd
+Aug 17 13:38:26 tx kernel: [615659.116082] usb 4-1.2.2: New USB device found, idVendor=05f9, idProduct=ffff
+Aug 17 13:38:26 tx kernel: [615659.116094] usb 4-1.2.2: New USB device strings: Mfr=4, Product=3, SerialNumber=2
+Aug 17 13:38:26 tx kernel: [615659.116101] usb 4-1.2.2: Product: Staapl USB Generic Serial
+Aug 17 13:38:26 tx kernel: [615659.116106] usb 4-1.2.2: Manufacturer: Zwizwa
+Aug 17 13:38:26 tx kernel: [615659.116112] usb 4-1.2.2: SerialNumber: ABC123
+Aug 17 13:38:26 tx kernel: [615659.117505] usbserial_generic 4-1.2.2:1.0: generic converter detected
+Aug 17 13:38:26 tx kernel: [615659.118019] usb 4-1.2.2: generic converter now attached to ttyUSB2
+
+
+
+
+
+picocom /dev/ttyUSB2
+
+
+And that's it: no errors, but nothing happens in the terminal.  Now what?
+
+Keyboard echo?  I thought that was working last time?'
+
+Disconnecting terminal works, though after typing some, that no longer
+works.  So we have some trouble going on.  Let's plug in the sniffer.
+
+
+I see.  The correct app to run is "testi" which runs the loopback.
+This one gives proper OUT transactions in the sniffer, though only
+IN-NAK.
+
+Aha.  It's buffered.  IN1-flush is needed to send out, or the whole
+buffer needs to fill up.
+
+It saturates at at 61.3kB/s.  Why so low?
+The sniffer shows 64 byte packets.
+
+Maybe data gets lost, since I'm only measuring what comes out, and I
+see OUT transactions for each IN.
+
+Yes indeed.  In goes 123kB/s
+
+This gives a total payload traffic of 185kB/sec.
+
+Between 2 IN/OUT phases is 1ms, so it seems that's where the limit
+comes from.  Anyways, seems these are scheduling details that can be
+ignored for now.
+
+What's next?
+
+- Send NAK on OUT if buffer is not ready to receive data.
+- Tie something to the serial console.
+- Try on 5V?
+
+
+
+
+
+
+
+
