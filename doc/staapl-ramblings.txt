@@ -62388,3 +62388,78 @@ Yep, it's in the data sheet: ignored *BUT* ack is sent to host!
 
 [1] http://www.microchip.com/forums/m715201.aspx
 
+
+
+Entry: USB works?  Now what?
+Date: Sat Aug 17 18:22:27 EDT 2013
+
+Probably time to use a different approach.  Seem that the PK2 isn't
+really very reliable, so switching to a bootloader approach seems
+best.
+
+Also, all interesting chips and applications I'll be working on will
+have USB, so maybe just build a framework?
+
+The idea is to implement USB classes, and do it in an incremental way.
+The debugger can probably be completely implemented using vendor
+control requests.
+
+For non-USB PIC chips it might be best to reprogram a PK2 circuit.
+
+Maybe that's really the first thing to try!
+
+What would be involved?
+- A look at the schematic
+- Figuring out how to use the charge pump
+- Reading out the configuration bits for the osc
+
+
+
+
+Entry: Reset at 3.33V ?
+Date: Sat Aug 17 18:34:46 EDT 2013
+
+pk2-stat
+with USB power at 5V gives Vpp 3.33
+
+Is that actually connected to reset?  Might be the cause of trouble..
+
+I switched to a real PK2 and it seems to work a bit better.
+
+Actually, no RST=4.7V and VCC=5.0V
+
+
+
+Entry: Application?
+Date: Sat Aug 17 18:44:55 EDT 2013
+
+As for USB, I want to build audio/midi interfaces.  It seems best to
+build the app as an extension, i.e. "subclass" of the basic debug
+console, just as before.  
+
+
+
+Entry: Debug console over USB
+Date: Sat Aug 17 18:47:27 EDT 2013
+
+It might be better to work in an event-driven way instead of the
+blocking console approach of before.  It might also be useful to
+standardize the console such that different systems could use it,
+i.e. not just Staapl.
+
+The first thing to get going is the debug console over USB control
+requests, i.e. working packet based and giving up on serial line
+approach.
+
+The first thing that's necessary is a debug ringbuffer.  It seems
+quite clear now that debug messages that delay execution are not
+useful for debugging real-time systems.  This could be just a linux
+usbserial port.
+
+How many end points are there in the PIC?  Up to 32, so that's not a
+problem.  Let's start there.  Buffer could be emptied at each SOF.
+
+Because of non-blocking request, a double buffering approach would be
+necessary.  Best to get that going first.
+
+
