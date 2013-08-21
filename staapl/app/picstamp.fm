@@ -22,14 +22,23 @@ provide-all
 
 org-end
 
-macro
-: fosc 48 MHz ;  \ 4 clock cycles per instruction cycle gives 12 MIPS.
-: baud 230400 ;
+\ macro
+\ : fosc 48 MHz ;  \ 4 clock cycles per instruction cycle gives 12 MIPS.
+\ : baud 230400 ;
 \ : app-boot #x800 ; \ app's boot block
-forth
+\ forth
 
+staapl pic18/boot     \ chip init code
 load p18f2550.f       \ chip macros
-load monitor-serial.f \ boot block + serial monitor code (UART)
+\ load monitor-serial.f \ boot block + serial monitor code (UART)
+load monitor-usbserial.f \ boot block + icsp comm monitor code
 
     
+load usb.f   \ usb library
+
+\ namespace access  
+staapl pic18/string
+staapl pic18/afregs
+staapl pic18/vector
+
 

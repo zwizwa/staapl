@@ -62462,5 +62462,99 @@ problem.  Let's start there.  Buffer could be emptied at each SOF.
 Because of non-blocking request, a double buffering approach would be
 necessary.  Best to get that going first.
 
+Ok, so that was easy!
+
+Didn't need to change anything in the protocol, just using the sync
+words to flush the comm at the end of a command.
+
+
+
+Entry: Board
+Date: Sat Aug 17 21:05:18 EDT 2013
+
+Got it to run on Johannes' PICstamp[1].
+
+My board is just messed up.  I'm going to throw it out:
+
+Aug 17 21:01:20 tx kernel: [642194.426399] hub 2-1:1.0: connect-debounce failed, port 2 disabled
+
+
+[1] http://www.flickr.com/photos/_-j/1350651639/
+
+
+Entry: Debug over USB?
+Date: Sat Aug 17 21:07:59 EDT 2013
+
+Seems plausible if the device has USB.  Debug can probably co-exist
+with application.  Some things needs to be figured out though, like
+how to reset.
+
+Maybe I should just give up on that.  Physical reset and restarting
+the USB might be enough.
+
+
+Entry: dsPIC + USB
+Date: Sun Aug 18 15:55:51 EDT 2013
+
+dsPIC33EP256MU806
+
+[1] http://www.microchip.com/wwwproducts/Devices.aspx?dDocName=en557404
+[2] http://ww1.microchip.com/downloads/en/DeviceDoc/70616g.pdf
+
+
+
+Entry: USB serial -> libusb packet interface?
+Date: Sun Aug 18 16:24:29 EDT 2013
+
+So, the interface works as a serial port.  However, it would also work
+packet-based using libusb.  This might be more robust in case
+communication gets lost.
+
+
+Entry: Adding application interface
+Date: Sun Aug 18 16:27:12 EDT 2013
+
+In usb-generic-serial.ss : just add a second interface?
+
+So usbserial will make additional bulk endpoints into /dev/ttyXXX.
+Not what we want.
+
+Probably this needs a proper ACM interface, so it can coexist with the
+other interfaces.
+
+Next:
+- fix the interface definition DSL
+- ADC modem interface
+- MIDI interface
+
+
+
+Entry: PK2 schematic
+Date: Sun Aug 18 17:47:51 EDT 2013
+
+Looking at shematics in:
+http://www.modtronix.com/products/prog/pickit2/pickit2%20datasheet.pdf
+
+Some notes:
+
+- if VDD_TGT is off, AUX, ICSPCLK, ICSPDAT are turned off by PNP
+  transistors Q2, Q3, Q5 resp.  (check again!)
+
+- board has two 512kbit eeprom chips: 24LC512
+  http://www.microchip.com/wwwproducts/Devices.aspx?dDocName=en010828
+
+- target voltage is generated with PWM through a 10K / 0.1u filter,
+  followed by 2x gain amp.  this can then be switched to VDD_TGT,
+  which is also fed back to analog in (straight).
+
+- VPP pump is driven by PWM with a 1/3 feedback into ADC.  can be
+  enabled to VPP, or VPP can be pulled down to perform reset.
+
+- there don't seem to be any hazards.
+
+
+Seems like a fun project to try to get this going.
+Maybe together with the non-documented debug modes?
+
 
 

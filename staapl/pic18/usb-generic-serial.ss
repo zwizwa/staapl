@@ -29,9 +29,10 @@
          (b  MaxPower       #x32)    ;; 100 mA
 	 (w  TotalLength    -1)      ;; conf + int + endp
          (l  NumInterfaces
-             
-             (((i Interface         "SI")
-               (b InterfaceNumber   0)     ;; DC
+
+             ;; Debug serial
+             (((i Interface         "Debug Console")
+               (b InterfaceNumber   0)
                (b InterfaceClass    #xFF)  ;; Vendor-specific
                (b InterfaceSubClass 1)     ;; DC
                (b InterfaceProtocol 1)     ;; DC
@@ -44,6 +45,27 @@
                    ((bm Attributes #x02)         ;; BULK
                     (b  EndpointAddress #x01)    ;; OUT 1
                     (w  MaxPacketSize 64)
-                    (b  Interval 0))))))))))))
- 
+                    (b  Interval 0)))))
+
+              ;; Application
+              ;; ((i Interface         "MIDI")
+              ;;  (b InterfaceNumber   1)
+              ;;  (b InterfaceClass    1)     ;; Audio
+              ;;  (b InterfaceSubClass 3)     ;; MIDI Streaming
+              ;;  (b InterfaceProtocol 0)
+              ;;  (b AlternateSetting  0)
+
+              ;;  ;; MIDI descriptors?
+               
+              ;;  (l NumEndpoints             ;; excluding EP0
+              ;;     (((bm Attributes #x02)         ;; BULK
+              ;;       (b  EndpointAddress #x82)    ;; IN 2
+              ;;       (w  MaxPacketSize 64)
+              ;;       (b  Interval 0))
+              ;;      ((bm Attributes #x02)         ;; BULK
+              ;;       (b  EndpointAddress #x02)    ;; OUT 2
+              ;;       (w  MaxPacketSize 64)
+              ;;       (b  Interval 0)))))
+              
+              )))))))
 
