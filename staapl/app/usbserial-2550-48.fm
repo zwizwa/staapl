@@ -1,0 +1,29 @@
+#lang staapl/pic18 \ -*- forth -*-
+
+provide-all
+
+\ config
+#x300000 org-begin
+
+\ no extended instruction set, no wdt, no code protect, 
+
+#x21 , #x0E , #x3A , #x1E ,   \ XT + PLL
+#x00 , #x81 , #x85 , #x00 ,   \ extended instruction set disabled
+#x0F , #xC0 , #x0F , #xE0 ,
+#x0F , #x40 , 
+
+org-end
+
+staapl pic18/boot   \ chip init code
+
+load p18f2550.f          \ chip macros
+load monitor-usbserial.f \ boot block + icsp comm monitor code
+
+load usb.f   \ usb library
+
+staapl pic18/string
+staapl pic18/afregs
+staapl pic18/vector
+
+
+

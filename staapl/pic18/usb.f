@@ -29,8 +29,8 @@ staapl pic18/serial
 \  - packets      (SETUP, DATAx, ACK, STALL, ...)
 \
 \ The PIC transceiver interface operates at the level of transactions.
-\ Each transaction uses a buffer, and data is either read (SETUP,OUT)
-\ or written (IN).
+\ Each transaction uses a buffer, and data is either host->device
+\ (SETUP,OUT) or device->host (IN).
 \
 \ E.g. :
 \
@@ -52,6 +52,7 @@ macro
 forth
 
 variable OUT1-read
+variable IN1-write
 
 
 \ PIC18 specific (since USB is also PIC specific): use rot<<, indirect
@@ -91,7 +92,7 @@ macro
     #x40 and            \ Keep only DATAx, rest was filled by USB
     #x88 or ;           \ UOWN set to USB, DTSEN=1, KEN=0, INCDIS=0, BSTALL=0
 
-: a/bd-update \ n x --  | a:BD
+: a:bd-update \ n x --  | a:BD
     a>       \ STAT @
     stat+ >r
     !a-      \ CNT !
@@ -104,14 +105,19 @@ forth
 : >usb \ n bd x --
     a>r
       >r bd>a r>
-      a/bd-update
+      a:bd-update
     r>a ;
 
-\ --
-: OUT0-free 64 0 OUT/DATA0 ;
-: OUT1-free 64 1 OUT/DATA0 ;
+\ -- \ ready to receive first packet = DATA0    
+: OUT0-first 64 0 OUT/DATA0 ;  
+: OUT1-first 64 1 OUT/DATA0 ;
+
+\ -- \ ready to receive next packet = DATAx toggles    
+: OUT1-next 64 1 OUT/DATA+ ;   
+    
 \ n ep --    
-: OUT/DATA0 OUT DATA0 >usb ;
+: OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
+: OUT/DATA+ OUT DATA+ >usb ;    
 : IN/DATA0  IN  DATA0 >usb ;
 : IN/DATA1  IN  DATA1 >usb ;    
 : IN/DATA+  IN  DATA+ >usb ;    
@@ -173,11 +179,15 @@ macro
 forth
 
 
-  
 
-\ Words that end in ':' set the current object pointer (the `a'
-\ register) to a particular address.  The data can then be streamed
-\ into/out-of the memory using !+ or @+.
+\ It's convenient to use a current object referenced by the "a"
+\ register in the code below.
+  
+\ prefix "a!" indicates a s changed
+\ prefix "a:" indicates a is referenced
+  
+\ For current buffer objects, the data can then be streamed
+\ into/out-of the memory using >a or a>.
     
 \ Load buffer address into `a'.
 : a!buf   buf-page a!! ;
@@ -185,7 +195,7 @@ forth
     
 : a!OUT0  buf-OUT0 a!buf ;
 : a!IN0   buf-IN0  a!buf ;
-: a!OUT   buf-OUT1 a!buf ;
+: a!OUT1  buf-OUT1 a!buf ;
 : a!IN1   buf-IN1  a!buf ;
 
 forth
@@ -235,7 +245,7 @@ forth
     0 4 a!! EP0-init f!! 8 f>a
 
     \ EP0 OUT BD ready for SETUP transactions.
-    OUT0-free
+    OUT0-first
 
     0 UADDR !              \ set USB address to 0
     0 UIR !                \ clear all usb interrupt flags    
@@ -294,12 +304,9 @@ forth
         transaction.OUT1 ;
 
 : transaction.OUT0 ;  \ not used
-: transaction.OUT1
 
-    \ OUT1/CNT bd@ >debug    
-    \ The OUT1 is now owned by UC.  Initialize read pointer.
-    
-    OUT1-init ;
+
+: transaction.OUT1 ;  \ NOP: task polls UOWN
 
 \ UADDR follows address after transaction is finished.    
 : transaction.IN    \ -- : a->packet
@@ -314,11 +321,7 @@ forth
     address @ UADDR ! ;
 
     
-: transaction.IN1   \ -- : a->packet    
-    \ EP1: Transaction complete.  Leave the IN1 buffer owned by MCU.
-    \ See the a/IN1-... words below.  USB will return NAK to the host
-    \ in response to an IN token until userspace calls IN1-flush.
-    IN1-init  ;  \ Set BD.CNT = 1
+: transaction.IN1   \ NOP: task polls UOWN
 
 : transaction.SETUP \ -- : a->packet
     a>  drop \ bmRequestType
@@ -351,9 +354,11 @@ forth
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
     0 setup-reply
     
-    IN1-init            \ BD.CNT=0
+    IN1-init
+    OUT1-init
+    
     #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
-    OUT1-free           \ Prepare receive on OUT1
+    OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
     ; 
 
@@ -399,7 +404,7 @@ forth
 \ data to a GET_ request.  n is the data size or 0 in case of a short
 \ packet i.e. acknowledgment of a SET_ request.
 : setup-reply \ n --
-    OUT0-free    \ make room for next SETUP request on EP0/OUT
+    OUT0-first   \ make room for next SETUP request on EP0/OUT
     0 IN/DATA1 ; \ return packet in EP0/IN is DATA1
 
 \ The device descriptor data is stored in Flash, generated from high
@@ -510,42 +515,41 @@ forth
 \ - BD.STAT.UOWN=0 Owned by UC, we can write to IN1 buffer + descriptor
 
 macro
-: a/IN1.STAT  12 4 a!! ;
-: a/OUT1.STAT  8 4 a!! ;
-: a/STAT.UOWN INDF2 7 ;    
+: a!IN1.STAT  12 4 a!! ;
+: a!OUT1.STAT  8 4 a!! ;
+: a:STAT.UOWN INDF2 7 ;    
 forth
-: a/wait-UOWN begin a/STAT.UOWN low? until ;  
+: a:wait-UOWN begin a:STAT.UOWN low? until ;  
 
 \ Two interfaces are provided:
 \  high level:  >IN1 IN1-flush
-\  low level:   a/IN1-begin a/IN1-write a/IN1-end
+\  low level:   a!IN1-begin a:IN1-write a:IN1-end
 
-\ The" a/IN1-begin" and "a/IN1-end" words define a context in which
-\ the "a/IN1-write" word is valid.  These words use (clobber) the "a"
+\ The" a!IN1-begin" and "a:IN1-end" words define a context in which
+\ the "a:IN1-write" word is valid.  These words use (clobber) the "a"
 \ register to make transferring multiple bytes more efficient.  The
 \ ">IN1" word is a highlevel byte-per-byte write function.  Note that
 \ as long as the data fits in the buffer, it is possible to use just
-\ ">a" instead of "a/IN1-write", which omits the buffer size check.
+\ ">a" instead of "a:IN1-write", which omits the buffer size check.
 
-: a/IN1-begin
-    a/IN1-wait    \ wait until IN1's contents is transferred to host.
+: a!IN1-begin
+    a!IN1-wait \ wait until IN1's contents is transferred to host.
     buf-IN1 buf-page a!!
-    IN1/CNT bd@ al +! ;
+    IN1-write @ al +! ;
 
-: a/IN1-wait
-    a/IN1.STAT a/wait-UOWN ;
+: a!IN1-wait a!IN1.STAT a:wait-UOWN ;
 
-: a/IN1-write >a
+: a:IN1-write >a
     al @ buf-IN1 -
-    BUFSIZE =? if a/IN1-transaction then ;
+    BUFSIZE =? if a:IN1-transaction then ;
 
-: a/IN1-transaction
-    a/IN1-end     \ end IN1 buffer write session
+: a:IN1-transaction
+    a:IN1-end     \ end IN1 buffer write session
     IN1-flush     \ transfer IN1 buffer to USB
-    a/IN1-begin ; \ start a new IN1 buffer write session
+    a!IN1-begin ; \ start a new IN1 buffer write session
     
-: a/IN1-end
-    al @ buf-IN1 - IN1/CNT bd! ;
+: a:IN1-end
+    al @ buf-IN1 - IN1-write ! ;
 
 \ When IN1 buffer is filled by UC, "IN1-flush" will transfer ownership
 \ to the USB peripheral.  It will perform an IN transaction with the
@@ -554,37 +558,36 @@ forth
 \ is returned to the UC.  That word will call "IN1-init" to reset the
 \ write count.
     
-: IN1-flush   IN1/CNT bd@ 1 IN/DATA+ ;
-: IN1-init    0 IN1/CNT bd! ;
+: IN1-flush   IN1-write @  IN1-init 1 IN/DATA+ ;
+: IN1-init    0 IN1-write ! ;
 
 
 \ Just one byte.  This flushes only when necessary.  It is allowed to
 \ call "IN1-flush" after ">IN1" to force a transaction.  The next
 \ ">IN1" will busy-wait until the previous transaction is done.
-: >IN1 a>r a/IN1-begin a/IN1-write a/IN1-end r>a ; \ byte --
+: >IN1 a>r a!IN1-begin a:IN1-write a:IN1-end r>a ; \ byte --
 
 
 \ ** READING FROM OUT1 **  
  
-: a/OUT1-begin
-    a/OUT1-wait  \ wait until OUT1 has data from host
+: a!OUT1-begin
+    a!OUT1-wait  \ wait until OUT1 has data from host
     buf-OUT1 buf-page a!!
     OUT1-read @ al +! ;
     
-: a/OUT1-wait
-    a/OUT1.STAT a/wait-UOWN ;
+: a!OUT1-wait a!OUT1.STAT a:wait-UOWN ;
 
-: a/OUT1-read
+: a:OUT1-read
     al @ OUT1/CNT bd@ -
-    buf-OUT1 =? if a/OUT1-transaction then
+    buf-OUT1 =? if a:OUT1-transaction then
     a> ;
  
-: a/OUT1-transaction
-    \ a/OUT-end    \ not necessary (kept here for symmetry with a/IN1-transaction)
+: a:OUT1-transaction
+    \ a:OUT-end    \ not necessary (kept here for symmetry with a:IN1-transaction)
     OUT1-fill      \ transfer OUT1 ownership to USB to collect new data
-    a/OUT1-begin ; \ start new transaction to IN1 buffer
+    a!OUT1-begin ; \ start new transaction to OUT1 buffer
 
-: a/OUT1-end
+: a:OUT1-end
     al @ buf-OUT1 - OUT1-read ! ;
 
 \ When OUT1 buffer is filled by USB, the UC is notified through the
@@ -593,7 +596,7 @@ forth
 
 macro
 : OUT1-init  0 OUT1-read ! ;
-: OUT1-fill  OUT1-free ;
+: OUT1-fill  OUT1-init OUT1-next  ;
 forth
 
     
@@ -601,9 +604,7 @@ forth
 \ request more data from host.
 \ NOTE: It might be good to flush the IN1 buffer to host before
 \ starting a busy wait on OUT1 from host.  
-: OUT1> a>r a/OUT1-begin a/OUT1-read a/OUT1-end r>a ; \ byte --
-
-
+: OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
 
 
 
@@ -612,13 +613,21 @@ forth
     
 \ : >debug async.>tx ; \ 10 async.>tx ;    
 \ : init-debug 230400 48000000 init-serial ;
-
-: test-loopback begin OUT1> >IN1 again
+    
+  
+: test-loopback
+    begin OUT1> >IN1 again
     
 : testi
     \ init-debug
     init-usb-isr
     test-loopback ;
+
+: testx
+    \ init-debug
+    init-usb-isr
+    0 begin OUT1> drop dup >IN1 1 + again ;
+
     
 : test
     init-usb

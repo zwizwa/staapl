@@ -62186,3 +62186,281 @@ Entry: Assembler
 Date: Mon Jun 10 14:08:23 EDT 2013
 
 http://stackoverflow.com/questions/9060156/insights-for-writing-an-assembler
+
+
+
+Entry: MyHDL
+Date: Sat Aug 17 11:12:44 EDT 2013
+
+It would be nice to actually use it on a project, e.g. a small forth
+processor.  Not for now thouth.
+
+
+Entry: TODO: finish USB
+Date: Sat Aug 17 11:13:26 EDT 2013
+
+Played with USB for work last couple of months, on the AT91SAM7S
+platform, writing firmware for the osmocom SIMtrace.
+
+Found out that my main PC has USB problems.  This took a a long time
+to sink in - 2 years of random errors.  It started to become obvious
+once I ran into hard locks, i.e. "blocked for 120 seconds" errors.
+Switched PC and all is well.
+
+This could mean that previous problems I had with PIC usb firmware are
+also related to that.  Whenever there is a protocol error on USB,
+weird behaviour would pop up.  Same kind of problem.  So let's try
+again!
+
+
+Another thing: now that I have an idea of AT91SAM7 USB and at91lib C
+code, there is little commercial reason for using Staapl / PIC.  Or is
+there?  What's the cheapest PIC USB controller these days?
+
+
+
+
+
+Entry: New package manager
+Date: Sat Aug 17 13:28:20 EDT 2013
+
+Using the git repo:
+
+# raco pkg install github://github.com/zwizwa/staapl/master
+
+In the parent directory of the staapl root:
+
+# raco pkg install --link staapl
+
+
+
+Entry: Picking up USB
+Date: Sat Aug 17 13:38:56 EDT 2013
+
+After fixing some packaging stuff and racket upgrade to 5.3.6 (August
+2013) the following seems to work, with a couple of glitches when
+starting up - i.e. PK2 programmer bailing out.
+
+Board has an extra bridge from USB GND to TTL serial GND.  IIRC it had
+some bad connection.
+
+cd ~/staapl/staapl/app
+make pk2-2550-48.dict
+make pk2-2550-48.flash
+mzscheme pk2-2550-48.dict
+
+Connecting to PICkit2.
+datfile:  /usr/local/bin/PK2DeviceFile.dat
+iProduct: PICkit 2 Microcontroller Programmer
+Press ctrl-D to quit.
+OK
+4 kb
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x x x 
+x x x x x x . . 
+. . . . . . . . 
+. . . . . . . . 
+. . . . . . . . 
+OK
+test
+
+Aug 17 13:38:25 tx kernel: [615659.022741] usb 4-1.2.2: new full-speed USB device number 106 using ehci_hcd
+Aug 17 13:38:26 tx kernel: [615659.116082] usb 4-1.2.2: New USB device found, idVendor=05f9, idProduct=ffff
+Aug 17 13:38:26 tx kernel: [615659.116094] usb 4-1.2.2: New USB device strings: Mfr=4, Product=3, SerialNumber=2
+Aug 17 13:38:26 tx kernel: [615659.116101] usb 4-1.2.2: Product: Staapl USB Generic Serial
+Aug 17 13:38:26 tx kernel: [615659.116106] usb 4-1.2.2: Manufacturer: Zwizwa
+Aug 17 13:38:26 tx kernel: [615659.116112] usb 4-1.2.2: SerialNumber: ABC123
+Aug 17 13:38:26 tx kernel: [615659.117505] usbserial_generic 4-1.2.2:1.0: generic converter detected
+Aug 17 13:38:26 tx kernel: [615659.118019] usb 4-1.2.2: generic converter now attached to ttyUSB2
+
+
+
+
+
+picocom /dev/ttyUSB2
+
+
+And that's it: no errors, but nothing happens in the terminal.  Now what?
+
+Keyboard echo?  I thought that was working last time?'
+
+Disconnecting terminal works, though after typing some, that no longer
+works.  So we have some trouble going on.  Let's plug in the sniffer.
+
+
+I see.  The correct app to run is "testi" which runs the loopback.
+This one gives proper OUT transactions in the sniffer, though only
+IN-NAK.
+
+Aha.  It's buffered.  IN1-flush is needed to send out, or the whole
+buffer needs to fill up.
+
+It saturates at at 61.3kB/s.  Why so low?
+The sniffer shows 64 byte packets.
+
+Maybe data gets lost, since I'm only measuring what comes out, and I
+see OUT transactions for each IN.
+
+Yes indeed.  In goes 123kB/s
+
+This gives a total payload traffic of 185kB/sec.
+
+Between 2 IN/OUT phases is 1ms, so it seems that's where the limit
+comes from.  Anyways, seems these are scheduling details that can be
+ignored for now.
+
+What's next?
+
+- Send NAK on OUT if buffer is not ready to receive data.
+- Tie something to the serial console.
+- Try on 5V?
+
+
+
+Entry: OUT NAK
+Date: Sat Aug 17 14:57:37 EDT 2013
+
+Starting to see how it works.  Basically, I'm not implementing a
+properly buffered serial stream, but just allow the current OUT packet
+to be read through the `OUT1>` word.  Currently the interrupt handler
+somehow returns EP back to USB controller, but this needs to be done
+elsewhere, i.e. when all data is read, or explicitly.
+
+Som, how to NAK an OUT transaction?
+
+After data is updated, this is what happens:
+
+    UIR TRNIF low    \ ready for next transaction
+    UCON PKTDIS low  \ clear PKTDIS flag (automatically set for SETUP packet)
+
+
+That's not it.  The important flag is UOWN in the STAT register of the
+EP descriptor.
+
+Reading the code, it seems this should really just work, at least on
+the OUT side: buffer is only passed to USB controller when it is read
+completely.
+
+The trouble is probably that IN buffer gets overwritten.  Basically,
+>IN1 should block until buffer is ready to go out.
+
+I cleaned it up a bit to use an explicit IN1-write pointer instead of
+the buffer counter.  Doesn't change behaviour.
+
+Weird...
+
+After cleanup, still problem.
+
+To see if it's in or out, I tried this, together with feeding it a
+counting range.
+
+
+: testx
+    \ init-debug
+    init-usb-isr
+    0 begin OUT1> drop dup >IN1 1 + again ;
+
+The IN sequence doesn't have any gaps, so it seems something gets lost
+in the OUT part.
+
+Ok, found it: didn't toggle DATAx bit!
+Looks like it got silently ignored, or I didn't check an error condition.
+
+
+Yep, it's in the data sheet: ignored *BUT* ack is sent to host!
+
+  17.4.1.2 BDnSTAT Register (CPU Mode)
+
+
+  The Data Toggle Sync Enable bit, DTSEN (BDnSTAT<3>), controls data
+  toggle parity checking.  Setting DTSEN enables data toggle
+  synchronization by the SIE; when enabled, it checks the data
+  packet’s par- ity against the value of DTS (BDnSTAT<6>). If a packet
+  arrives with an incorrect synchronization, the data will essentially
+  be ignored; it will not be written to the USB RAM and the USB
+  transfer complete interrupt flag will not be set. The SIE will send
+  an ACK token back to the host to Acknowledge receipt, however. The
+  effects of the DTSEN bit on the SIE are summarized in Table 17-3.
+
+
+
+[1] http://www.microchip.com/forums/m715201.aspx
+
+
+
+Entry: USB works?  Now what?
+Date: Sat Aug 17 18:22:27 EDT 2013
+
+Probably time to use a different approach.  Seem that the PK2 isn't
+really very reliable, so switching to a bootloader approach seems
+best.
+
+Also, all interesting chips and applications I'll be working on will
+have USB, so maybe just build a framework?
+
+The idea is to implement USB classes, and do it in an incremental way.
+The debugger can probably be completely implemented using vendor
+control requests.
+
+For non-USB PIC chips it might be best to reprogram a PK2 circuit.
+
+Maybe that's really the first thing to try!
+
+What would be involved?
+- A look at the schematic
+- Figuring out how to use the charge pump
+- Reading out the configuration bits for the osc
+
+
+
+
+Entry: Reset at 3.33V ?
+Date: Sat Aug 17 18:34:46 EDT 2013
+
+pk2-stat
+with USB power at 5V gives Vpp 3.33
+
+Is that actually connected to reset?  Might be the cause of trouble..
+
+I switched to a real PK2 and it seems to work a bit better.
+
+Actually, no RST=4.7V and VCC=5.0V
+
+
+
+Entry: Application?
+Date: Sat Aug 17 18:44:55 EDT 2013
+
+As for USB, I want to build audio/midi interfaces.  It seems best to
+build the app as an extension, i.e. "subclass" of the basic debug
+console, just as before.  
+
+
+
+Entry: Debug console over USB
+Date: Sat Aug 17 18:47:27 EDT 2013
+
+It might be better to work in an event-driven way instead of the
+blocking console approach of before.  It might also be useful to
+standardize the console such that different systems could use it,
+i.e. not just Staapl.
+
+The first thing to get going is the debug console over USB control
+requests, i.e. working packet based and giving up on serial line
+approach.
+
+The first thing that's necessary is a debug ringbuffer.  It seems
+quite clear now that debug messages that delay execution are not
+useful for debugging real-time systems.  This could be just a linux
+usbserial port.
+
+How many end points are there in the PIC?  Up to 32, so that's not a
+problem.  Let's start there.  Buffer could be emptied at each SOF.
+
+Because of non-blocking request, a double buffering approach would be
+necessary.  Best to get that going first.
+
+
+
