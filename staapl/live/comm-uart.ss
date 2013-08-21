@@ -27,20 +27,42 @@
 (define (comm-uart name baud)
 
   (define (standard-serial-port)
-    (let-values
-        (((i o)
-          (open-input-output-file name #:exists 'append)))
-      (file-stream-buffer-mode o 'none)
-      (stty name baud)
-      
-      (comm-in    (lambda () (d: "uart-in ~x\n"
-                                 ;; (read-byte-timeout i 3)
-                                 (read-byte i)
-                                 )))
-      (comm-out   (lambda (b) (write-byte (d: "uart-out ~x\n" b) o)))
-      (comm-close (lambda () (close-input-port i) (close-output-port o)))
+    (define in #f)
+    (define out #t)
 
-      ))
+    (define (connect)
+      (let-values
+          (((i o)
+            (open-input-output-file name #:exists 'append)))
+        (file-stream-buffer-mode o 'none)
+        (stty name baud)
+        (set! in  i)
+        (set! out o)))
+
+    (comm-in
+     (lambda ()
+       (d: "uart-in ~x\n"
+           ;; (read-byte-timeout i 3)
+           (read-byte in)
+           )))
+    (comm-out
+     (lambda (b)
+       (write-byte (d: "uart-out ~x\n" b) out)))
+    (comm-close
+     (lambda ()
+       (close-output-port out)
+       (close-input-port  in)
+       ))
+    (comm-reconnect
+     (lambda ()
+       ;;(printf "close ~s ~s\n" name baud)
+       ((comm-close))
+       ;;(printf "connect ~s ~s\n" name baud)
+       (connect)))
+
+    (connect)
+    
+    )
 
   
 

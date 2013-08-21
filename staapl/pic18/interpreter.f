@@ -7,10 +7,16 @@ staapl pic18/stdout
 \ stream with explicit sync points to allow for data-ready or
 \ packet buffering.
 \
-\ Currently there are 2 transport layers: serial async (doesn't need
-\ sync points) and PK2 / ICSP synchronous serial protocol with
-\ handshake for bus direction arbitration.  Note that the ICSP variant
-\ has size restrictions for the size of the packets.
+\ Currently there are 3 transport layers:
+
+
+\ - serial async: doesn't need sync points
+\ - USB serial / ACM: needs flush at end
+\ - PK2 / ICSP synchronous serial protocol with
+\   handshake for bus direction arbitration.
+\
+\ Note that the ICSP variant has size restrictions for the size of the
+\ packets.
 \
 \ This protocol can embed arbitrary binary messages sent to different
 \ addresses (!= 0 == us).  If we are the destination, data will be
