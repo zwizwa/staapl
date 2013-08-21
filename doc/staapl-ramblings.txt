@@ -62180,3 +62180,9 @@ representation, would require nested expressions.
 (let ((a (+ (@ x ++))))
      ....)
 
+
+
+Entry: Assembler
+Date: Mon Jun 10 14:08:23 EDT 2013
+
+http://stackoverflow.com/questions/9060156/insights-for-writing-an-assembler
