@@ -62558,3 +62558,19 @@ Maybe together with the non-documented debug modes?
 
 
 
+
+Entry: Bootloader
+Date: Sat Aug 31 10:57:55 EDT 2013
+
+I need a good model to think about what the responsability of the
+bootloader should be, and how functionality is delegated to the
+application(s).
+
+
+What about this:
+
+- Boot record protection (later)
+
+- App detection (app init vector = 0xFFFF means no app so start boot loader)
+
+- USB core handled by bootloader?
