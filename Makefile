@@ -11,7 +11,7 @@ RACO=raco
 
 
 link:
-	cd $(readlink -f .)/.. ; $(RACO) pkg install --link staapl
+	cd $$(readlink -f .)/.. ; $(RACO) pkg install --link staapl
 
 gitbuf:
 	$(RACO) pkg install github://github.com/zwizwa/staapl/master

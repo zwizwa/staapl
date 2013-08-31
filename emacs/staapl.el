@@ -716,14 +716,14 @@ End:\" construct).")
 (eval-when-compile 
   (defmacro forth-save-buffer-state (varlist &rest body)
     "Bind variables according to VARLIST and eval BODY restoring buffer state."
-    (` (let* ((,@ (append varlist
-		   '((modified (buffer-modified-p)) (buffer-undo-list t)
-		     (inhibit-read-only t) (inhibit-point-motion-hooks t)
-		     before-change-functions after-change-functions
-		     deactivate-mark buffer-file-name buffer-file-truename))))
-	 (,@ body)
-	 (when (and (not modified) (buffer-modified-p))
-	   (set-buffer-modified-p nil))))))
+    `(let* (,@ (append varlist
+                       '((modified (buffer-modified-p)) (buffer-undo-list t)
+                         (inhibit-read-only t) (inhibit-point-motion-hooks t)
+                         before-change-functions after-change-functions
+                         deactivate-mark buffer-file-name buffer-file-truename)))
+       ,@ body
+       (when (and (not modified) (buffer-modified-p))
+         (set-buffer-modified-p nil)))))
 
 ;; Function that is added to the `change-functions' hook. Calls 
 ;; `forth-update-properties' and keeps care of disabling undo information

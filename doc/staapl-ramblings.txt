@@ -62573,13 +62573,11 @@ How to detect bootloader / app?
 How to use usb commands to reset device?
 
 
-
-Entry: Bootloader
-Date: Sat Aug 31 10:57:55 EDT 2013
-
 I need a good model to think about what the responsability of the
 bootloader should be, and how functionality is delegated to the
 application(s).
+
+Let's think about the bootloader as the kernel: keep it always there.
 
 
 What about this:
@@ -62589,3 +62587,31 @@ What about this:
 - App detection (app init vector = 0xFFFF means no app so start boot loader)
 
 - USB core handled by bootloader?
+
+
+
+Entry: Kernel or not?
+Date: Sat Aug 31 11:18:48 EDT 2013
+
+Trouble with kernels is that they need an ABI.  Is that really worth
+it?  I'd like Staapl to follow an early binding approach..
+
+Maybe that's the trick: abstract the early/late binding in a vector
+table.
+
+
+\ Kernel Hooks
+
+\ One of the core ideas of Moore-style Forth is early binding:
+\ "Don't set a flag, set the data."  (apparently a Dykstra quote..)
+
+\ However, it makes sense to use some form of indirection when using
+\ an interactive console during development.  E.g. the kernel would
+\ serve USB interrupts, but would delegate some requests to the
+\ application.
+
+\ Is it worth going to separate compilation for kernel and
+\ application?  This requires some form of ABI, which is yet another
+\ thing to maintain or standardize.
+
+
