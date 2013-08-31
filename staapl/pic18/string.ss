@@ -20,9 +20,12 @@ staapl pic18/compose-macro
 \ Emulate quoted symbols by compiling them into Flash and storing the
 \ contents of a Pascal string in the f register.
 macro
+
+: pascal sym>bin dup l:length swap l:cons ;
+  
 : sym \ sym -- lo hi
-    >macro                    \ convert quoted symbol to macro
-    [ >m table-> m> bin, ]    \ macro tail that implements Flash bin word.
-    compile-call-macro/exit ; \ glue together 2 parts, compile + call compiled word
+    >macro                            \ convert quoted symbol to macro
+    [ >m table-> m> pascal ' , bin, ] \ macro tail that implements Flash bin word.
+    compile-call-macro/exit ;         \ glue together 2 parts, compile + call compiled word
 forth
   

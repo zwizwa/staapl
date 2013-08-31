@@ -4511,3 +4511,46 @@ it needs to "announce" the meaning of the data, but parsers are
 postfix so they can "gather" context as the data streams in.
 
 
+
+Entry: Forth and Lisp and quirky abstractions
+Date: Sat Aug 31 15:22:33 EDT 2013
+
+Staapl development spans my "lisp phase", or the infatuation with
+"powerful but quirky" abstractions.  Staapl has a strange mix of low
+and high level programming.  I started calling it a "macro assembler"
+a while ago.
+
+I still like programming this close to the metal, but would probably
+not use the Staapl approach for real work, especially not when other
+people are involved.   
+
+Over the last decade, my appreciation for static typing has grown.
+And I am now wary of quirky abstractions.  
+
+Flat low-level code debugs better because it is simpler.  Debugging is
+such a large part of embedded programming that it sometimes makes
+sense to *not* abstract.
+
+
+
+Entry: Solving Debugging
+Date: Sat Aug 31 18:54:57 EDT 2013
+
+Working on Staapl has been quite a journey.  I first set out writing a
+USB driver 7 years ago, and brought it to a usable point just the
+other week.
+
+What was in the way?  Too much complexity.  Too little visibility.
+
+Exactly what I was trying to solve!
+
+The problem with deep embedded is still debugging.
+
+Debugging is mostly about exposing bad assumptions.
+About *thinking errors*
+
+Each sufficiently advanced bug seems to need a custom approach for
+exposing it.  There is no silver bullet..
+
+
+

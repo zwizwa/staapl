@@ -1,62 +1,42 @@
-;; meta code for generating usb client/server code
+;; meta code for generating USB descriptors
 
-;; usb is an object system with an assymetric client/server
-;; architecture. the host (client) sends request to the device
-;; (server).
+;; USB is an object system with an assymetric client/server
+;; architecture.  The host (client) sends request to the device
+;; a.k.a. function (server).
 
-;; it's implemented as a 'load-usb' function which just defines a
-;; number of functions in a staapl forth file.
-
-
-;; USB CONTROL FLOW, TRANSFER LAYER
-
-;; this is best implemented directly in forth, since it's quite
-;; straightforward.
-
-;; simplified, the general idea is this:
-;; - host sends SETUP/OUT packet
-;; - device usb hardware buffers + sends ack
-;; - usb hardware signals software
-;; - software processes the OUT buffer, and synthesizes an IN (reply)
-;; - usb hardware waits for host to poll reply, sends IN buffer
-
-;; EP0 receives all control and status requests
+;; Forth code implements:
+;;  - low level PIC-specific USB controller driver
+;;  - ISR to service USB requests
+;;  - GET_DESCRIPTOR for Device / Configuration / String
 
 
 ;; DESCRIPTOR RECORDS
 
 ;; http://www.beyondlogic.org/usbnutshell/usb5.htm#DeviceDescriptors
 
+;; This defines the form `define-usb-device', which is a small wrapper
+;; around the binary structures used in USB descriptors.  It abstracts:
 
-;; The most trouble is in the descriptor data. It would be nice to
-;; make a mini-language to generate most of the red tape, and some
-;; small forth wrappers around the data structures.
+;; - string allocation
+;; - descriptor size computation
+;; - low/high words
+;; - number of descriptors
 
-;; only device, configuration and string will be requested during
-;; enumeration. (others can follow?)
 
-;; a configuration request will return configuration, interface and
+;; The following forth words are defined, returning Flash addresses:
+;;   device-descriptor        \ -- lo hi
+;;   configuration-descriptor \ n -- lo hi
+;;   string-descriptor        \ n -- lo hi
+
+
+;; The CONFIGURATION descriptor contains configuration, interface and
 ;; endpoint descriptors: CIEEEIEEEIEEE in a single reply, so we
 ;; compile them in this sequence.
 
+;; Note that the device descriptor has 2 records sharing the same
+;; identifier, but with different type (idProduct and iProduct). the
+;; latter one i'm renaming to iProductName.
 
-
-;; what can be automated?
-
-;; - record length
-;; - string references and management
-;; - low/high words
-;; - number of configurations
-
-;; instead of gluing the type description to the name, it's probably
-;; best to put a space there to avoid parsing. note that the device
-;; descriptor has 2 records sharing the same identifier, but with
-;; different type (idProduct and iProduct). the latter one i'm
-;; renaming to iProductName.
-
-
-;; i don't need to make it too general at first, just make sure the
-;; general approach is not too hard to extend.
 
 ;; links
 ;; http://www.beyondlogic.org/usbnutshell/

@@ -3,6 +3,7 @@
 (require
  scheme/unit
  "../sig.ss"
+;; "../target/rep.ss"
  "macro.ss")
 
 (import comma^)
@@ -10,16 +11,16 @@
 
 (patterns
  (macro)
- (([dw a]  dw>)     ([qw a]))
- 
+ (([dw a]  dw>)            ([qw a]))
 
- ;; Smart-compile a quoted compile-time object to a Pascal string:
- ;; size byte followed by payload bytes.
+ (([qw sym] sym>bin)         ([qw (->byte-list sym)]))
 
- ;; E.g. :   ` ABC  ->  3 , 65 , 66 , 67 ,
+ ;; Compile time list manipulations
+ (([qw car] [qw cdr] l:cons) ([qw (cons car cdr)]))
+ (([qw lst] l:length)        ([qw (length lst)]))
  
- (([qw x] |bin,|)  (list->macro
-                    (macro: |,|) ;; glue
-                    (let ((l (->byte-list x)))
-                      (cons (length l) l))))
- )
+ (([qw tv-list] [qw glue] |bin,|)
+  (list->macro glue tv-list))
+
+)
+

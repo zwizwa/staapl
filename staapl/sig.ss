@@ -95,10 +95,14 @@
 
 ;; Basic stack manip + ALU
 (define-macro-set stack^       (dup swap drop + - * / not))
-(define-macro-set comma-extra^ (dw> "bin,"))
-(define-macro-set comma^       (","))
 (define-macro-set code^        (compose i execute compile nop))
 (define-macro-set rstack^      (for next >r r> swap>r r- +r rdrop rl rh))
+
+;; Compilation and manipulation of binary lists.  Note that `length'
+;; and `cons' might need a rename.
+(define-macro-set comma-extra^ (dw> "bin," sym>bin l:length l:cons))
+(define-macro-set comma^       (","))
+
 
 ;; Machine parameters used to parameterize the CFG compiler.
 (define-macro-set machine^  (code-size address))

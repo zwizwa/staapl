@@ -1,6 +1,11 @@
 staapl pic18/shift
 staapl pic18/route
+
 staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
+
+\ staapl pic18/usb-acm
+
+\ load usb-descr-usbserial.f \ FIXME: needs debug
 
 staapl pic18/serial
 
@@ -376,15 +381,13 @@ forth
         DEVICE        . \ 1
         CONFIGURATION . \ 2
         STRING        . \ 3
-        INTERFACE     . \ 4
-        ENDPOINT      . \ 5
-                      . \ 6  \ Linux 2.6.33.7-rt29 sends this.  WTF?
-                      ; \ 7
+        . . . ;       . \ 4-7
 : DEVICE        device-descriptor                send-desc ;
 : CONFIGURATION index @ configuration-descriptor send-desc ;
 : STRING        index @ string-descriptor        send-desc ;
-: INTERFACE             ;
-: ENDPOINT              ;   
+
+\ INTERFACE and ENDPOINT descriptors cannot be accessed directly: they
+\ are concatenated to the CONFIGURATIOn descriptor.
 
 \ FIXME: Implement when necessary.  Not called during enumeration.    
 : GET_STATUS                ;
@@ -394,11 +397,8 @@ forth
 : GET_CONFIGURATION         ;
 : GET_INTERFACE             ;
 : SET_INTERFACE             ;
-
-
     
-    
-
+   
     
 \ Reply to a SETUP transaction.  The EP0/IN buffer contains the answer
 \ data to a GET_ request.  n is the data size or 0 in case of a short
@@ -407,8 +407,16 @@ forth
     OUT0-first   \ make room for next SETUP request on EP0/OUT
     0 IN/DATA1 ; \ return packet in EP0/IN is DATA1
 
-\ The device descriptor data is stored in Flash, generated from high
-\ level config.  See e.g. usb-cdc.ss
+\ Descriptor data is stored in Flash, prefixed a single byte
+\ containing total length.
+    
+\ Note that we can't use the bLength field to determine the total
+\ length of a transfer, since configuration descriptors will also send
+\ the interface, endpoint and class-specific descriptors.
+
+\ FIXME: This doesn't work if descriptor size >63 bytes!
+\ FIXME: Perform multiple transfers + allow for size in words.    
+
 : copy-desc \ lo hi -- size \ Copy descriptor from Flash to USB RAM.
     a!IN0 f!! f> dup for f> >a next ;
 : send-desc \ lo hi --

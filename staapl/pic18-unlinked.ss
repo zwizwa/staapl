@@ -45,7 +45,7 @@
  "coma/macro-forth-sig.ss"
  "coma/macro-forth-unit.ss"
  "coma/macro-forth.ss"         ;; rpn prefix parsing words bound to macro.ss
- "pic18/forth.ss"              ;; PIC18 specific
+;; "pic18/forth.ss"              ;; PIC18 specific
 
  ;; TARGET CODE HANDLING
  "code.ss"

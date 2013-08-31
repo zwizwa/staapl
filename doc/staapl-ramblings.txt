@@ -62615,3 +62615,34 @@ table.
 \ thing to maintain or standardize.
 
 
+
+
+Entry: Next
+Date: Sat Aug 31 12:02:59 EDT 2013
+
+The indirection story needs an example: have core USB driver in kernel
+and extend it with an application-level driver.
+
+Roadmap:
+
+  - Proper ACM serial port
+
+  - In linux: reclaim driver + perform raw packet IO on ACM endpoints
+    to keep protocol synchronized.  This might allow a proper "reset".
+
+  - Make it run on PK2
+
+
+
+
+Entry: USB descriptors
+Date: Sat Aug 31 12:16:08 EDT 2013
+
+Next is to figure out how to fill in the descriptors.
+The mini language I made before might not really be good for this: too abstract.
+Probably best to stick to a flatter approach that's easy to map to specs.
+
+So I did this in:
+usb-descr-usbserial.f
+
+Doesn't work yet - needs USB sniffer debug.
