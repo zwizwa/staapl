@@ -7,7 +7,7 @@ macro
 \ ref: http://www.beyondlogic.org/usbnutshell/usb5.shtml
 
 
-: w, dup >m #xFF and , m> #x100 / , ;
+: w, dup >m #xFF and , m> 8 >>> , ;
   
 : bLength , ;
 : bDescriptorType , ;    

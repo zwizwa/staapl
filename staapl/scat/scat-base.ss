@@ -207,7 +207,8 @@
 ;;     ((d t)    (dict-find dict-find/false dict-recursive-find))    
 ;;     ((d t i)  (dict-set dict-shadow dict-recursive-mute))
 
-     
+
+     ;; FIXME: something fishy going on with '/'
      ((a b)    (= < > >= <= + - * / modulo <<< >>>
                 eq? eqv? equal?
                 string-append list->table

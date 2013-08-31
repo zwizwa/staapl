@@ -1,11 +1,10 @@
 staapl pic18/shift
 staapl pic18/route
 
-staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
-
+\ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
 
-\ load usb-descr-usbserial.f \ FIXME: needs debug
+load usb-descr-usbserial.f \ FIXME: needs debug
 
 staapl pic18/serial
 
