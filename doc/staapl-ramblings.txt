@@ -62559,6 +62559,21 @@ Maybe together with the non-documented debug modes?
 
 
 
+Entry: Programming with bootloader
+Date: Fri Aug 30 23:32:08 EDT 2013
+
+Programming a new application:
+- move bootloader to top flash / always keep it there?
+- just keep bootloader where it is / load app separately
+
+App slots?
+
+How to detect bootloader / app?
+
+How to use usb commands to reset device?
+
+
+
 Entry: Bootloader
 Date: Sat Aug 31 10:57:55 EDT 2013
 
