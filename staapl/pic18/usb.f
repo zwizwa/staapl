@@ -4,7 +4,8 @@ staapl pic18/route
 \ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
 
-load usb-descr-usbserial.f \ FIXME: needs debug
+\ load usb-descr-usbserial.f 
+load usb-descr-cdcacm.f 
 
 staapl pic18/serial
 
@@ -187,7 +188,7 @@ forth
 \ It's convenient to use a current object referenced by the "a"
 \ register in the code below.
   
-\ prefix "a!" indicates a s changed
+\ prefix "a!" indicates a is changed
 \ prefix "a:" indicates a is referenced
   
 \ For current buffer objects, the data can then be streamed
@@ -318,11 +319,16 @@ forth
         transaction.IN0 .
         transaction.IN1 ;
         
-: transaction.IN0   \ -- : a->packet    
-    \ EP0: For control pipe, this is only used to wait for the end of
-    \ the SET_ADDRESS transaction.  We just continuously update which
-    \ seems to be OK.
-    address @ UADDR ! ;
+: transaction.IN0   \ -- : a->packet
+    \ EP0: Notification of end of IN0 transaction.
+
+    \ This event is used to wait for the end of the SET_ADDRESS
+    \ transaction.  We just continuously update which seems to be OK.
+    address @ UADDR !
+
+    \ If there is any more data to pass to host in response to a
+    \ control request, send it here.
+    ;
 
     
 : transaction.IN1   \ NOP: task polls UOWN

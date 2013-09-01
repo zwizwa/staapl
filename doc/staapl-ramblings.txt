@@ -62646,3 +62646,18 @@ So I did this in:
 usb-descr-usbserial.f
 
 Doesn't work yet - needs USB sniffer debug.
+
+-> Bug was: no size prefix.  (can't use bLength since CONFIGURATION is
+   a concatenation of several descriptors)
+
+
+Entry: Setup requests + multiple packets
+Date: Sun Sep  1 11:44:47 EDT 2013
+
+The CDC ACM configuration descriptor is 67 bytes, so we need to
+implement multiple IN packets first.
+
+Since all control requests are handled from the ISR, this needs a
+different approach.  Solution is a state machine.
+
+First packet: IN/DATA1, next packets: IN/DATAx

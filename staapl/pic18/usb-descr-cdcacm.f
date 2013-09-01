@@ -7,8 +7,8 @@ load usb-fields.f
 \ ease of debugging and specs cross-referencing.
 
 
-\ ref: http://www.beyondlogic.org/usbnutshell/usb5.shtml
-  
+\ http://www.beyondlogic.org/usbnutshell/usb5.shtml
+\ http://www.usb.org/developers/devclass_docs/usbcdc11.pdf  
     
 : device-descriptor \ - lo hi
     table->
