@@ -62660,4 +62660,4 @@ implement multiple IN packets first.
 Since all control requests are handled from the ISR, this needs a
 different approach.  Solution is a state machine.
 
-First packet: IN/DATA1, next packets: IN/DATAx
+First packet: IN/DATA1, next packets: IN/DATA+
