@@ -28,5 +28,13 @@ staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
 
+macro
+: init-board
+    0 TRISA !
+    0 TRISB !
+    0 TRISC !
+    0 TRISD !
+    0 TRISE ! ;
+forth
 
 

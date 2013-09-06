@@ -534,6 +534,7 @@
 ;; position.
 
 (define (erase-block b) 
+  ;; (printf "erase block ~a\n" b)
   (bf! b) (erase))
 
 (define (erase-blocks b n)
@@ -543,6 +544,7 @@
 
 (define (erase-from-block b)
   (define erasing #f)
+  ;; (printf "erase from block ~a\n" b)
   (let next ((b b))
     (if (free-block? b)
         (when erasing
