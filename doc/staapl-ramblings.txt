@@ -62662,5 +62662,181 @@ different approach.  Solution is a state machine.
 
 First packet: IN/DATA1, next packets: IN/DATA+
 
+EDIT: Less than 67 bytes?  Maybe DFU was included?
 
+
+
+
+Entry: New board
+Date: Tue Sep  3 00:10:27 EDT 2013
+
+\ PIC DIP40 MINI KIT - PIC Developmen​t Board kit for DIP40 PIC with 18F4550 + 4Mhz XTAL
+\ http://100mhz.com/pic-dspic-pic32-pic24/development-boards/pic-18f4550-usb-demo-development-board-pic18f4550-microcontroller-1074.html
+
+Support in dip40kit.fm
+
+Doesn't seem to work reliably on 5V.
+3.3V seems fine.
+
+No, something else is going on: touching some of the PORTB pins resets
+the controller.  IOC?
+
+Again: tried at 5V with pins not touching anything and it resets.  On
+3.3V it seems fine.
+
+
+
+Entry: Meander
+Date: Fri Sep  6 00:59:00 EDT 2013
+
+Where to go next?  There have been a lot of entries like this.  Right
+now, I don't know.  Time to make something useful?
+
+The elephant in the room is that after almost a decade of doodling, it
+makes more sense to use a recent ARM Cortex core for the kind of work
+a PIC would have done.  The advantage of the PIC cores is that they
+are simpler.  But really, writing in 8 bit is a pain for real work.
+
+So I guess Staapl is now officially an art project :)
+
+Maybe it's time to work out the 16-bit Forth ideas, and write a
+standard console Forth.  Staapl should probably remain a macro
+assembler.
+
+
+
+Every time I pick this up, I see the beauty in it.  Every time I write
+some real software I wonder if the level of control is just a little
+too much.  Maybe some coding standards should work?  One of the things
+that always comes back is the constants, and the pain of 8 bit.
+
+Maybe it is possible to define the 16bit forth in a separate module,
+with a mechanism to call into 8 bit code?
+
+
+
+Maybe it's time to make a list of all the quirks:
+
+- Limited jump size?
+- Conditionals are weird
+- 8 bit only
+
+
+
+Entry: empty
+Date: Fri Sep  6 01:45:08 EDT 2013
+
+I think I removed `empty' before because it doesn't work well if the
+host-side namespace is not updated in a similar manner.  Since it's
+all `eval', there is no good way to do this except for restarting the
+whole thing.
+
+
+Entry: Console / self-hosted?
+Date: Fri Sep  6 01:51:01 EDT 2013
+
+So, what about adding a hack that allows to start an ASCII console by
+pressing 'enter' i.e. 0x0D ?
+
+This would be in the first byte of the protocol, which is address.
+
+
+Main reason for console is self-hosted, standalone Forth.
+
+Let's not.  There is advantage in keeping the host side smart and the
+protocol simple and binary.  Console is really only necessary for
+debug.
+
+There should be enough flexibility in the Racket module system to just
+manage names properly.
+
+However, the tethering system needs to be switched to 16 bit mode.
+
+
+
+Entry: Other module language
+Date: Fri Sep  6 02:45:11 EDT 2013
+
+Before I'd been thinking a lot about building different languages on
+top of a small 8-bit Staapl kernel.  There is some support for this
+already, but I'm not sure if the approach is right.
+
+Essentially, everything can be handled by Racket namespace and module
+magic.  Maybe the simulation part is a bit too much, or ill-defined?
+
+
+
+Entry: 16bit forth VM
+Date: Fri Sep  6 02:52:32 EDT 2013
+
+- unified address space
+- return stacks in RAM for task switching
+- threading for code density / long jumps
+
+
+
+
+
+
+See pic18/double-math.ss for a starting point on the primitives.
+
+I had a start of an inner interpreter.  Where did it go?  Looks like
+vm-core.f is gone...
+
+\ pic18/direct.f:    
+	
+load vm-core.f        \ 14bit payload virtual machine
+load double-math.f    \ arithmetic: these are straight from the STC library
+load double-pred.f    \ predicates    
+load mul16-global.f   \ multiplier with global temp state
+load vm-mem.f         \ memory model
+load stack-global.f   \ basic stack manips with global temp state
+    
+Ok, I see..  Search for 'vm-core.f' in the blog.  I had pasted the
+exotic code there and started working on dtc.ss which is in
+staapl-exp/experimental/pic18
+
+There are some other interesting experiments, e.g. the mcf
+(metacircular forth interpreter).
+
+
+
+I remember now.  The idea is to make a direct threaded forth where
+primtivies are 8-bit native functions and the inner interpreter is
+
+: continue begin @f+ @f+ execute/b again
+
+This has an extra jump, so is slower, but the compatibility is
+probably more important.
+
+See staapl/staapl-exp/experimental/pic18/dtc*.ss
+
+There seem to be 2 versions: one with on-target immediate words, and
+one using macros.
+
+For now it seems the Staapl-hosted version is more interesting as it
+requires less on-target complexity.
+
+Man, so much over-clever stuff..  Forgot all of it.
+
+
+
+Entry: Huffman coding
+Date: Fri Sep  6 12:13:37 EDT 2013
+
+What is needed most is to simplify, and to define a clear goal.
+
+* The 8-bit PIC18 Forth language is aimed at:
+  - compactness
+  - speed
+  At the expense of:
+  - platform abstraction leakage
+
+
+* A second interpreter should have compactness and platform
+  abstraction at the expense of speed.
+
+
+I'm intrigued by Huffman coding, especially since at least the target
+side looks rather simple to implement, and it is a compiled system.
 

@@ -9,7 +9,9 @@
 \ parmeter stacks to be setup.
 macro
 : init-warm
-    init-chip ;
+    init-chip          \ chip specific, shared
+    init-board         \ defined in board kernel file
+    ;
 : init-quit
     dup                \ init-xs overwrites WREG
     init-xs            \ execution stack

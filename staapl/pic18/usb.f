@@ -1,5 +1,6 @@
 staapl pic18/shift
 staapl pic18/route
+staapl pic18/compose-macro
 
 \ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
@@ -338,19 +339,28 @@ forth
     a>       \ bRequest
     
     #x0F and route
-        GET_STATUS        . \  0
-        CLEAR_FEATURE     . \  1
-                          . \  2
-        SET_FEATURE       . \  3
-                          . \  4
-        SET_ADDRESS       . \  5
-        GET_DESCRIPTOR    . \  6
-        SET_DESCRIPTOR    . \  7
-        GET_CONFIGURATION . \  8
-        SET_CONFIGURATION . \  9
-        GET_INTERFACE     . \ 10
-        SET_INTERFACE     ; \ 11
+        . \ GET_STATUS        . \  0
+        . \ CLEAR_FEATURE     . \  1
+        .                       \  2
+        . \ SET_FEATURE       . \  3
+        .                       \  4
+        SET_ADDRESS           . \  5
+        GET_DESCRIPTOR        . \  6
+        . \ SET_DESCRIPTOR    . \  7
+        . \ GET_CONFIGURATION . \  8
+        SET_CONFIGURATION     . \  9
+        . \ GET_INTERFACE     . \ 10
+        . \ SET_INTERFACE     . \ 11
+        . . . ;                 \ 12-15
 
+\ FIXME: Implement when necessary.  Not called during enumeration.
+\ : GET_STATUS                ;
+\ : CLEAR_FEATURE             ;
+\ : SET_FEATURE               ;
+\ : SET_DESCRIPTOR            ;
+\ : GET_CONFIGURATION         ;
+\ : GET_INTERFACE             ;
+\ : SET_INTERFACE             ;
 
 
 : SET_ADDRESS
@@ -394,14 +404,6 @@ forth
 \ INTERFACE and ENDPOINT descriptors cannot be accessed directly: they
 \ are concatenated to the CONFIGURATIOn descriptor.
 
-\ FIXME: Implement when necessary.  Not called during enumeration.    
-: GET_STATUS                ;
-: CLEAR_FEATURE             ;
-: SET_FEATURE               ;
-: SET_DESCRIPTOR            ;
-: GET_CONFIGURATION         ;
-: GET_INTERFACE             ;
-: SET_INTERFACE             ;
     
    
     
@@ -446,13 +448,6 @@ forth
 \   Maybe IN transaction handler should clear the respective IN size?
 
 
-
-    
-: IN1-demo
-    \ Send some data to IN1
-    a!IN1 32 63 for dup >a 1 + next drop
-    10 >a \ LF
-    64 1 IN/DATA+ ;
     
 
 \ When filling up the buffer, CNT has AL.  Strip off the bits when
@@ -628,41 +623,48 @@ forth
 \ : init-debug 230400 48000000 init-serial ;
     
   
-: test-loopback
-    begin OUT1> >IN1 again
+\ : test-loopback
+\     begin OUT1> >IN1 again
     
-: testi
-    \ init-debug
-    init-usb-isr
-    test-loopback ;
+\ : testi
+\     \ init-debug
+\     init-usb-isr
+\     test-loopback ;
 
-: testx
-    \ init-debug
-    init-usb-isr
-    0 begin OUT1> drop dup >IN1 1 + again ;
+\ : testx
+\     \ init-debug
+\     init-usb-isr
+\     0 begin OUT1> drop dup >IN1 1 + again ;
 
-    
-: test
-    init-usb
-    begin service-usb again
+\ : test
+\     init-usb
+\     begin service-usb again
 
-: testc
-    init-usb
-    begin service-usb usb-configured high? until ;
+\ : testc
+\     init-usb
+\     begin service-usb usb-configured high? until ;
         
-: testl
-    testc
-    IN1-demo
-    begin service-usb again
+\ : testl
+\     testc
+\     IN1-demo
+\     begin service-usb again
     
 \ Service for a bit, then soft-reset PIC.
-: test0
-    init-usb
-    30 for 255 for 255 for service-usb next next next
-    warm ;
+\ : test0
+\     init-usb
+\     30 for 255 for 255 for service-usb next next next
+\     warm ;
+
+
+    
+\ : IN1-demo
+\     \ Send some data to IN1
+\     a!IN1 32 63 for dup >a 1 + next drop
+\     10 >a \ LF
+\     64 1 IN/DATA+ ;
     
 
-load debug.f
+\ load debug.f
 
     
 \ staapl pic18/serial
@@ -674,3 +676,5 @@ load debug.f
 \ forth
 
 
+
+  

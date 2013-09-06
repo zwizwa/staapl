@@ -47,7 +47,6 @@
         baud
         filename
         print-asm
-        output-script
         debug-script
         dict-suffix
         debug-suffix
@@ -72,10 +71,6 @@
 
     [("--print-code") "Print assembly and binary code output."
      (print-asm (lambda () (eval '(code-print))))]
-
-    [("--script") "Don't wrap dictionary as a loadable module."
-     (dict-suffix ".dict-script")
-     (output-script #t)]
 
     [("-c" "--comm") filename "Console port. (default: pickit2)"  (console (string->symbol filename))]
 
@@ -181,49 +176,42 @@
 
     ;; Save symbolic output.
     (let* ((reqs (requirements (filename)))
-           (boot-init  ;; opaque console boot code
-            `(begin
-               ,(console-spec)
-               ;; This will reset the target to a (relatively) known state.
-               (define (empty)
-                 ;; After loading the .fm file the code buffer
-                 ;; contains target code.  Get rid of it.
-                 (code-clear!)
-                 ;; Delete all target scratch buffer code past the
-                 ;; 'code pointer.
-                 (clear-flash)
-                 ;; Load host debug script into toplevel namespace on
-                 ;; a clean target.
-                 (when-file ',(path->string (debug-script)) load))))
            (boot-run
             `(begin
+               ,(console-spec)
                (require readline/rep)
                (param-to-toplevel 'command repl-command-hook)
                (param-to-toplevel 'break   repl-break-hook)
                (forth-begin-prefix '(library "pic18")) ;; add library path
-               (run (lambda () (empty)))))
+               (run
+                (lambda ()
+                  ;; After loading the .fm file the code buffer
+                  ;; contains target code.  Get rid of it.
+                  (code-clear!)
+                  ;; Delete all target scratch buffer code past the
+                  ;; 'code pointer.
+                  (clear-flash)
+                  ;; Load host debug script into toplevel namespace on
+                  ;; a clean target.
+                  (when-file ',(path->string (debug-script)) load)))))
+            
            ;; formatting
-           (save (lambda (text [code #f])
-                   (display text)
-                   (newline)
-                   (when code
-                     (pretty-print code))))
-           (save-exprs
-            (lambda ()
-              (save ";; Language"      reqs)
-              (save ";; Console setup" boot-init)))
+           (save
+            (lambda (text [code #f])
+              (display text)
+              (newline)
+              (when code
+                (pretty-print code))))
            (save-module
             (lambda ()
               (save "#!/usr/bin/env mzscheme")
               (save "#lang scheme/load")  ;; (2)
-              (save-exprs)
-              (save ";; Console run"   boot-run))))
+              (save ";; Language" reqs)
+              (save ";; Console"  boot-run))))
       
       (with-output-to-file/safe
        (output-dict)
-       (if (output-script)
-           save-exprs
-           save-module)))))
+       save-module))))
 
 ;; (1) Saving the addresses is not necessary if source code and target
 ;; are kept in sync.  When the interactive script is started,
