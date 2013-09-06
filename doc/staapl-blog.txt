@@ -4554,3 +4554,21 @@ exposing it.  There is no silver bullet..
 
 
 
+Entry: Deep embedded and abstraction
+Date: Mon Sep  2 17:44:27 EDT 2013
+
+Doesn't work well, ay?
+
+Maybe the thing is that low-level embedded simply is hard because
+there is little to no redundancy.  There is an impedance mismatch
+between the standard CS approach of abstracting, and putting available
+"hardware singletons" to good use.
+
+It seems that every single problem I try to solve requires some
+special case approach that complicates abstraction, which makes
+testing and re-use harder.
+
+It seems that no matter how hard you try to capture all possible
+configurations, in practice there is still this one hardware quirk you
+didn't think of..
+
