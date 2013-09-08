@@ -62920,6 +62920,11 @@ Date: Sun Sep  8 00:16:51 EDT 2013
   guarantees?
 
 
+EDIT: Can't change without breaking.  Building a new abstraction on
+top of Scheme compiler invocation seems best.  However, this requires
+tethered changes.
+
+
 
 Entry: s-expression only?
 Date: Sun Sep  8 00:21:01 EDT 2013
@@ -62964,6 +62969,9 @@ The deja-vu is that I'm not happy with the base language, and the main
 cause of that is the awkwardness of using pointers, and the fidgeting
 with macros.  So it's clear: for real work, a 16-bit forth is necessary.
 
+And to give it an edge, a huffman-threaded interpreter still sounds
+like an interesting challenge.
+
 
 
 Entry: Artificial problem
@@ -62973,11 +62981,28 @@ Another thing: the descriptor thing is artificial.  The only state
 that needs to be maintained is the buffer number.  The rest can just
 be hardcoded as it's known at compile time.
 
+It actually seems easier to just generate the descriptors in C, and
+use a special-purpose code structure to dump multiple buffers.
 
-Entry: 16bit forth
+Another thing is that maybe the host will actually do multiple queries
+if short results are returned?
+
+
+
+
+Entry: ARM forth?
 Date: Sun Sep  8 02:43:54 EDT 2013
 
 So maybe it's time to just let it rest, and switch to another machine
-(ARM thumb).
+(ARM thumb).  Nah...  ARM is for C.  And I'm kind of done with writing
+assemblers..
+
+
+
+Entry: Next?
+Date: Sun Sep  8 03:08:03 EDT 2013
+
+- Try to bypass the SETUP >63 issue?  Or just waste the 3 bytes and
+  make it work?
 
 
