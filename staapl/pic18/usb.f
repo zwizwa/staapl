@@ -47,16 +47,21 @@ staapl pic18/serial
 
 
 
-variable address    \ UADDR after current transaction
-variable endpoint   \ Endpoint of current transaction
-variable index
-variable length     \ FIXME: 8 bit only!
+variable address      \ UADDR after current transaction
+variable endpoint     \ Endpoint of current transaction
+  
+variable desc-index
+variable desc-rem     \ Remaining length of current control transfer
+variable desc-next-lo
+variable desc-next-hi
 
+  
 variable usb-flags
 macro
 : usb-configured usb-flags 0 ;
 forth
 
+\ Cursors into USB buffers for >IN and OUT> words.
 variable OUT1-read
 variable IN1-write
 
@@ -387,11 +392,12 @@ forth
 
 
 : GET_DESCRIPTOR
-    a> index !  \ descriptor index
-    a>          \ descriptor type
+    a> desc-index !  \ descriptor index
+    a>               \ descriptor type
     a> drop
     a> drop
-    a> length ! \ nb bytes to return
+    a> desc-rem !    \ nb bytes to return
+                     \ FIXME: high byte is ignored - only up to 255 byte descr.
 
     \ Numbers come from p187 USB1.1 ref.
     7 and route  \ only 3 bits?
@@ -400,9 +406,9 @@ forth
         CONFIGURATION . \ 2
         STRING        . \ 3
         . . . ;       . \ 4-7
-: DEVICE        device-descriptor                send-desc ;
-: CONFIGURATION index @ configuration-descriptor send-desc ;
-: STRING        index @ string-descriptor        send-desc ;
+: DEVICE        device-descriptor                     send-desc ;
+: CONFIGURATION desc-index @ configuration-descriptor send-desc ;
+: STRING        desc-index @ string-descriptor        send-desc ;
 
 \ INTERFACE and ENDPOINT descriptors cannot be accessed directly: they
 \ are concatenated to the CONFIGURATIOn descriptor.
@@ -418,38 +424,40 @@ forth
     0 IN/DATA1 ; \ return packet in EP0/IN is DATA1
 
 \ Descriptor data is stored in Flash, prefixed a single byte
-\ containing total length.
+\ containing total length.  ( e.g. for configuration descriptor,
+\ bLength is not the size of the full transfer as it includes
+\ interface and endpoint desc. )
+
+macro
+\ : f@! | 2var | fl 2var @! fh 2var 1 + @! ;
+\ : f!@ | 2var | 2var fl @! 2var fl 1 + @! ;
+forth
     
-\ Note that we can't use the bLength field to determine the total
-\ length of a transfer, since configuration descriptors will also send
-\ the interface, endpoint and class-specific descriptors.
 
-\ FIXME: This doesn't work if descriptor size >63 bytes!
-\ FIXME: Perform multiple transfers + allow for size in words.    
+: f>desc-next
+    fl desc-next-lo @!
+    fh desc-next-hi @! ;
 
-variable desc-lo
-variable desc-hi
-variable desc-rem
+: desc-next>f
+    fl desc-next-lo @!
+    fh desc-next-hi @! ;
     
 : send-desc \ lo hi --
     a!IN0 f!! f>
-    length @ min \ Don't send more than requested : FIXME: 8 bit only!
+    desc-rem @ min   \ Don't send more than requested : FIXME: 8 bit only!
     desc-rem !
-    fl @ desc-lo ! 
-    fh @ desc-hi !
+    f>desc-next
     cont-desc
     setup-reply ;
 
 : cont-desc \ -- n
     a!IN0
-    desc-lo @ fl !
-    desc-hi @ fh !
+    desc-next>f
     desc-rem @
-    64 min                \ next packet
+    64 min                \ next packet size
     dup desc-rem -!
     dup for f> >a next
-    fl @ desc-lo !
-    fh @ desc-hi ! ;
+    f>desc-next ;
 
 
 
