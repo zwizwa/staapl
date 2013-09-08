@@ -63038,3 +63038,35 @@ variable desc-rem
     dup for f> >a next
     fl @ desc-lo !
     fh @ desc-hi ! ;
+
+
+So after factoring it looks like this:
+
+macro
+: _@! | src dst |
+    src     dst     @!
+    src 1 + dst 1 + @! ;
+: desc-next>f desc-next-lo fl _@! ;    
+forth
+: f>desc-next fl desc-next-lo _@! ;
+    
+: send-desc \ lo hi --
+    f!!
+    f>               \ Descriptor length on stored on Flash
+    desc-rem @ min   \ Don't send more than requested : FIXME: 8 bit only!
+    desc-rem !
+    f>desc-next
+    cont-desc
+    setup-reply ;
+
+: cont-desc \ -- n
+    desc-next>f
+    desc-rem @
+    64 min           \ next packet size
+    dup desc-rem -!
+    dup a!IN0 f>a
+    f>desc-next ;
+
+
+While still fidgety, the awkward parts (memory moves) are abstracted
+in words, which makes it a bit more legible.

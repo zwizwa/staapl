@@ -50,12 +50,10 @@ staapl pic18/serial
 variable address      \ UADDR after current transaction
 variable endpoint     \ Endpoint of current transaction
   
-variable desc-index
-variable desc-rem     \ Remaining length of current control transfer
-variable desc-next-lo
-variable desc-next-hi
+variable  desc-index
+variable  desc-rem     \ Remaining length of current control transfer
+2variable desc-next
 
-  
 variable usb-flags
 macro
 : usb-configured usb-flags 0 ;
@@ -429,21 +427,16 @@ forth
 \ interface and endpoint desc. )
 
 macro
-\ : f@! | 2var | fl 2var @! fh 2var 1 + @! ;
-\ : f!@ | 2var | 2var fl @! 2var fl 1 + @! ;
+: _@! | src dst |
+    src     dst     @!
+    src 1 + dst 1 + @! ;
+: desc-next>f desc-next fl _@! ;    
 forth
-    
-
-: f>desc-next
-    fl desc-next-lo @!
-    fh desc-next-hi @! ;
-
-: desc-next>f
-    fl desc-next-lo @!
-    fh desc-next-hi @! ;
+: f>desc-next fl desc-next _@! ;
     
 : send-desc \ lo hi --
-    a!IN0 f!! f>
+    f!!
+    f>               \ Descriptor length on stored on Flash
     desc-rem @ min   \ Don't send more than requested : FIXME: 8 bit only!
     desc-rem !
     f>desc-next
@@ -451,12 +444,11 @@ forth
     setup-reply ;
 
 : cont-desc \ -- n
-    a!IN0
     desc-next>f
     desc-rem @
-    64 min                \ next packet size
+    64 min           \ next packet size
     dup desc-rem -!
-    dup for f> >a next
+    dup a!IN0 f>a
     f>desc-next ;
 
 
