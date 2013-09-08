@@ -58,7 +58,14 @@
 
 ;; For debug purposes, the dictionary expression produced by rpn-parse
 ;; is stored in this parameter in quoted form before it is expanded further.
-(define forth-dictionary-log (make-parameter void))
+(require scheme/pretty)
+(define forth-dictionary-log
+  (make-parameter
+   void
+   ;; pretty-print
+   ))
+
+
 
 ;; Toplevel forms.
 (define-syntax (forth-compile-dictionary stx)

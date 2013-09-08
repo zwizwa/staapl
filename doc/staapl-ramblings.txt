@@ -62840,3 +62840,144 @@ What is needed most is to simplify, and to define a clear goal.
 I'm intrigued by Huffman coding, especially since at least the target
 side looks rather simple to implement, and it is a compiled system.
 
+
+
+Entry: USB fix: >63 byte descriptors
+Date: Sat Sep  7 11:32:51 EDT 2013
+
+It looks like this is so hard because I don't really have a good way
+to test it: the system is talking to the hardware in a way that cannot
+be separated/simulated currently.
+
+Maybe the way to go is to split that first?
+
+I feel there is some ground to gain here, but I'm lacking insight..
+
+Next: what can be tested is an interface that sends data incrementally
+from flash.  I.e. the state machines themselves.
+
+
+
+Entry: Test driven development : chunking
+Date: Sat Sep  7 22:12:36 EDT 2013
+
+Send data from Flash, chunking data in 64-byte parts.
+
+This is the kind of code that is ugly to do in Staapl: requires
+address computation and global variables storage.  An object
+abstraction would be nice here..
+
+Similar to the >IN OUT> code..  Ugly..
+
+The thing here is premature optimization (PIC indirect memory access
+is very expensive) and a lack of object system.
+
+Classical forth solves this using "current object" words.
+
+
+Maybe it is time to stop worrying about performance.  The problem I'm
+solving here is not speed bound at all.  Maybe it is better to revive
+the DTC forth first..
+
+The thing is that Staapl as it stands really isn't a nice language to
+do datastructure-intensive tasks.
+
+
+Entry: DTC forth language
+Date: Sat Sep  7 22:57:52 EDT 2013
+
+So what is necessary to make #lang staapl/pic18/dtc work?
+The #lang stuff seems straightforward.
+
+The basic difficulty is to instantiate the macro-forth^ signature,
+which is what defines the `forth-module-begin' form.
+
+Let's try to build it from the ground up.
+
+
+Maybe the whole prefix parser idea should be removed.
+The macros are good, especially when they are in units.
+But the prefix parser is just awkward.
+
+Maybe it's time to translate the whole language into "quoted postfix".
+
+I was working on an s-expression syntax before.  Where did it go?
+
+
+
+
+Entry: Simplification
+Date: Sun Sep  8 00:16:51 EDT 2013
+
+- Forth (prefix) syntax should be on top of a well-define s-expression
+  syntax.  Maybe this should be kept simple: just keep the syntax
+  there is now?
+
+- Scheme code should be able to generate words more easily.
+
+- Maybe functions are not really the right abstraction level.  Maybe
+  it's time to acknowledge that compiled code is just spaghetti: no
+  guarantees?
+
+
+
+Entry: s-expression only?
+Date: Sun Sep  8 00:21:01 EDT 2013
+
+So is it possible to define code as just an s-expression?
+Currently I'm not sure.  It would have to be in the form
+
+(define macro/foo (macro: 1 2 3))
+
+And similar for variables and words, but not sure how it links to the
+compiler.
+
+
+Hmm... the Forth syntax is actually quite complex, i.e. quotations,
+scheme forms, macros with arguments, ...
+
+
+Rewrite is not an option.
+( How many times did I go through this loop ? )
+
+Structure is pretty much stuck.  Lots of features have support that is
+quite intertwined..
+
+See sexp-example.ss for an exploration of s-expression syntax.
+I swear I did this before..
+
+It shouldn't be too hard to define a special-purpose syntax for only
+the DTF forth.  Requrements:
+
+  - parsing words ':' and 'variable', '2variable'
+
+Question is if this is going to be enough.  It looks like the
+conclusion I got to last time (to include on-target compiler) has its
+reasons: non-reflective prefix parsers just feel like a terrible hack.
+
+
+So I guess good news and bad news.  Roadmap is clear, but what's not
+clear where it will end up.  Maybe it is time for an s-expression
+language?
+
+The deja-vu is that I'm not happy with the base language, and the main
+cause of that is the awkwardness of using pointers, and the fidgeting
+with macros.  So it's clear: for real work, a 16-bit forth is necessary.
+
+
+
+Entry: Artificial problem
+Date: Sun Sep  8 02:38:15 EDT 2013
+
+Another thing: the descriptor thing is artificial.  The only state
+that needs to be maintained is the buffer number.  The rest can just
+be hardcoded as it's known at compile time.
+
+
+Entry: 16bit forth
+Date: Sun Sep  8 02:43:54 EDT 2013
+
+So maybe it's time to just let it rest, and switch to another machine
+(ARM thumb).
+
+
