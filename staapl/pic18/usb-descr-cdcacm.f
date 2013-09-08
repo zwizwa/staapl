@@ -50,7 +50,7 @@ load usb-fields.f
     
     5      bNumInterfaces
     1      bConfigurationValue
-    4      iConfiguration
+    0      iConfiguration
     #xA0   bmAttributes \ remote wakeup
     #x32   bMaxPower    \ 100 mA
     
@@ -63,7 +63,7 @@ load usb-fields.f
     #xFF   bInterfaceClass \ Vendor-specific
     0      bInterfaceSubClass
     0      bInterfaceProtocol
-    5      iInterface
+    0      iInterface
 
     \ ENDPOINT
     7      bLength
@@ -93,7 +93,7 @@ load usb-fields.f
     #xFF   bInterfaceClass \ Vendor-specific
     0      bInterfaceSubClass
     0      bInterfaceProtocol
-    5      iInterface
+    0      iInterface
     \ INTERFACE
     9      bLength
     4      bDescriptorType
@@ -103,7 +103,7 @@ load usb-fields.f
     #xFF   bInterfaceClass \ Vendor-specific
     0      bInterfaceSubClass
     0      bInterfaceProtocol
-    5      iInterface
+    0      iInterface
     \ INTERFACE
     9      bLength
     4      bDescriptorType
@@ -113,7 +113,7 @@ load usb-fields.f
     #xFF   bInterfaceClass \ Vendor-specific
     0      bInterfaceSubClass
     0      bInterfaceProtocol
-    5      iInterface
+    0      iInterface
     \ INTERFACE
     9      bLength
     4      bDescriptorType
@@ -123,7 +123,7 @@ load usb-fields.f
     #xFF   bInterfaceClass \ Vendor-specific
     0      bInterfaceSubClass
     0      bInterfaceProtocol
-    5      iInterface
+    0      iInterface
 
     
     
@@ -133,19 +133,13 @@ load usb-fields.f
 
 : string-1 table-> ` Zwizwa s, ;
 : string-2 table-> ` Staapl s, ;
-: string-3 table-> ` ABC123 s, ;    
-: string-4 table-> ` Configuration s, ;
-: string-5 table-> ` Staapl_Serial_Console s, ;
+: string-3 table-> ` um0 s, ;  \ udev maps this to tty-um0
     
 : string-descriptor \ n - lo hi
-    7 and route
+    3 and route
     string-languages .
     string-1 .
     string-2 .
-    string-3 .
-    string-4 .
-    string-5 .
-    snull .
-    snull ;
+    string-3 ;
 
     

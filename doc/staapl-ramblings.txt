@@ -63005,6 +63005,9 @@ Date: Sun Sep  8 03:08:03 EDT 2013
 - Try to bypass the SETUP >63 issue?  Or just waste the 3 bytes and
   make it work?
 
+EDIT: Done.  Looks like I got a bit in dispair last night :)
+
+
 
 Entry: Eval of multi-chunk
 Date: Sun Sep  8 12:03:09 EDT 2013
@@ -63070,3 +63073,6 @@ forth
 
 While still fidgety, the awkward parts (memory moves) are abstracted
 in words, which makes it a bit more legible.
+
+Fussing with global variables is still a pain in Forth..  Maybe it's
+just that the name referral kills the compactness.

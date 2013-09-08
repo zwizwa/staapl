@@ -332,10 +332,9 @@ forth
 
     \ If there is any more data to pass to host in response to a
     \ control request, send it here.
-    desc-rem @ 0= if ; then
-
-    \ This needs testing
-    cont-desc 0 IN/DATA+ ;
+    desc-rem @ 0= not if
+        cont-desc setup-reply-next
+    then ;
 
     
 : transaction.IN1   \ NOP: task polls UOWN
@@ -418,8 +417,10 @@ forth
 \ data to a GET_ request.  n is the data size or 0 in case of a short
 \ packet i.e. acknowledgment of a SET_ request.
 : setup-reply \ n --
-    OUT0-first   \ make room for next SETUP request on EP0/OUT
+    OUT0-first   \ prepare EP0 OUT for reception of next SETUP request
     0 IN/DATA1 ; \ return packet in EP0/IN is DATA1
+: setup-reply-next
+    0 IN/DATA+ ;
 
 \ Descriptor data is stored in Flash, prefixed a single byte
 \ containing total length.  ( e.g. for configuration descriptor,
