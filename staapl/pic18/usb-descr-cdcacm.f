@@ -79,8 +79,8 @@ load usb-fields.f
 
 
 \ -- lo hi
-: string-languages table-> 4 , 3 , #x0409 ,, \ US English
-: snull            table-> 2 , 3 , 
+: string-languages table-> 4 , 4 , 3 , #x0409 w,  \ US English
+: snull            table-> 4 , 2 , 3 , 
 
 : string-1 table-> ` Zwizwa s, ;
 : string-2 table-> ` Staapl s, ;

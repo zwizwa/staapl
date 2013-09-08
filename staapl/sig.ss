@@ -110,7 +110,7 @@
 ;; PIC18 specific.  Move more of these to standard wordsets.
 (define-macro-set stack-extra^ (and or xor pow >>> <<< 1+ 1- min max odd?
                                 toggle neg >> << 2/ over nip))
-(define-macro-set memory-extra^ (1-! 1+! swap! ! @ high low high? low? +!
+(define-macro-set memory-extra^ (1-! 1+! swap! ! @ high low high? low? +! -!
                                  @! or! and! xor!))
 
 

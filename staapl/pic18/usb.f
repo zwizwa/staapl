@@ -424,11 +424,25 @@ forth
 \ FIXME: This doesn't work if descriptor size >63 bytes!
 \ FIXME: Perform multiple transfers + allow for size in words.    
 
-: copy-desc \ lo hi -- size \ Copy descriptor from Flash to USB RAM.
-    a!IN0 f!! f> dup for f> >a next ;
+variable desc-lo
+variable desc-hi
+variable desc-rem
+    
 : send-desc \ lo hi --
-    copy-desc \ n 
-    length @ min \ min \ Don't send more than requested
+    a!IN0 f!! f> desc-rem !
+    fl @ desc-lo ! 
+    fh @ desc-hi ! 
+
+: cont-desc \ --
+    a!IN0
+    desc-lo @ fl !
+    desc-hi @ fh !
+    desc-rem @
+    length @ min \ Don't send more than requested
+    dup for f> >a next
+    dup desc-rem -!
+    fl @ desc-lo !
+    fh @ desc-hi !
     setup-reply ;
 
 
