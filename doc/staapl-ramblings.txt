@@ -63006,3 +63006,35 @@ Date: Sun Sep  8 03:08:03 EDT 2013
   make it work?
 
 
+Entry: Eval of multi-chunk
+Date: Sun Sep  8 12:03:09 EDT 2013
+
+
+The following code works but is ugly.
+The `length' field could be reused.
+The moving between variables and f could be factored out.
+
+
+variable desc-lo
+variable desc-hi
+variable desc-rem
+    
+: send-desc \ lo hi --
+    a!IN0 f!! f>
+    length @ min   \ Don't send more than requested : FIXME: 8 bit only!
+    desc-rem !
+    fl @ desc-lo ! 
+    fh @ desc-hi !
+    cont-desc
+    setup-reply ;
+
+: cont-desc \ -- n
+    a!IN0
+    desc-lo @ fl !
+    desc-hi @ fh !
+    desc-rem @
+    64 min                \ next packet
+    dup desc-rem -!
+    dup for f> >a next
+    fl @ desc-lo !
+    fh @ desc-hi ! ;
