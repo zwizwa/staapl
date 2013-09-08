@@ -50,7 +50,7 @@ staapl pic18/serial
 variable address    \ UADDR after current transaction
 variable endpoint   \ Endpoint of current transaction
 variable index
-variable length
+variable length     \ FIXME: 8 bit only!
 
 variable usb-flags
 macro
@@ -329,7 +329,10 @@ forth
 
     \ If there is any more data to pass to host in response to a
     \ control request, send it here.
-    ;
+    desc-rem @ 0= if ; then
+
+    \ This needs testing
+    cont-desc 0 IN/DATA+ ;
 
     
 : transaction.IN1   \ NOP: task polls UOWN
@@ -429,21 +432,24 @@ variable desc-hi
 variable desc-rem
     
 : send-desc \ lo hi --
-    a!IN0 f!! f> desc-rem !
+    a!IN0 f!! f>
+    length @ min \ Don't send more than requested : FIXME: 8 bit only!
+    desc-rem !
     fl @ desc-lo ! 
-    fh @ desc-hi ! 
+    fh @ desc-hi !
+    cont-desc
+    setup-reply ;
 
-: cont-desc \ --
+: cont-desc \ -- n
     a!IN0
     desc-lo @ fl !
     desc-hi @ fh !
     desc-rem @
-    length @ min \ Don't send more than requested
-    dup for f> >a next
+    64 min                \ next packet
     dup desc-rem -!
+    dup for f> >a next
     fl @ desc-lo !
-    fh @ desc-hi !
-    setup-reply ;
+    fh @ desc-hi ! ;
 
 
 

@@ -35,16 +35,20 @@ load usb-fields.f
     drop \ FIXME: only support one configuration
 
     table->
-    9 9 + 7 + 7 + descriptor-size
+    9 9 + 7 + 7 +
+    36 +
+    descriptor-size
     \ -----------------
     
     \ CONFIGURATION
     9      bLength
     2      bDescriptorType
 
-    9 9 + 7 + 7 + wTotalLength
+    9 9 + 7 + 7 +
+    36 +
+    wTotalLength
     
-    1      bNumInterfaces
+    5      bNumInterfaces
     1      bConfigurationValue
     4      iConfiguration
     #xA0   bmAttributes \ remote wakeup
@@ -78,6 +82,51 @@ load usb-fields.f
     0      bInterval
 
 
+    \ padding: dummy interfaces
+
+    \ INTERFACE
+    9      bLength
+    4      bDescriptorType
+    1      bInterfaceNumber
+    0      bAlternateSetting
+    0      bNumEndpoints
+    #xFF   bInterfaceClass \ Vendor-specific
+    0      bInterfaceSubClass
+    0      bInterfaceProtocol
+    5      iInterface
+    \ INTERFACE
+    9      bLength
+    4      bDescriptorType
+    2      bInterfaceNumber
+    0      bAlternateSetting
+    0      bNumEndpoints
+    #xFF   bInterfaceClass \ Vendor-specific
+    0      bInterfaceSubClass
+    0      bInterfaceProtocol
+    5      iInterface
+    \ INTERFACE
+    9      bLength
+    4      bDescriptorType
+    3      bInterfaceNumber
+    0      bAlternateSetting
+    0      bNumEndpoints
+    #xFF   bInterfaceClass \ Vendor-specific
+    0      bInterfaceSubClass
+    0      bInterfaceProtocol
+    5      iInterface
+    \ INTERFACE
+    9      bLength
+    4      bDescriptorType
+    4      bInterfaceNumber
+    0      bAlternateSetting
+    0      bNumEndpoints
+    #xFF   bInterfaceClass \ Vendor-specific
+    0      bInterfaceSubClass
+    0      bInterfaceProtocol
+    5      iInterface
+
+    
+    
 \ -- lo hi
 : string-languages table-> 4 , 4 , 3 , #x0409 w,  \ US English
 : snull            table-> 4 , 2 , 3 , 

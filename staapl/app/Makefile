@@ -55,7 +55,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 # uploads the binary to the PIC.
 %.flash: %.app
 	rm -f *.flash
-	sh $*.program $*.hex | tee $@
+	sh $*.program $*.hex # | tee $@
 
 # Note: if you're sure the microcontroller's flash memory is
 # consistent with the data in the .dict file, it's OK to just run
