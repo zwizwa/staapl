@@ -63076,3 +63076,13 @@ in words, which makes it a bit more legible.
 
 Fussing with global variables is still a pain in Forth..  Maybe it's
 just that the name referral kills the compactness.
+
+
+
+Entry: S-expression approach
+Date: Sun Sep  8 15:11:35 EDT 2013
+
+Maybe the major problem will go away if "a b c ..." is mapped to
+"(a (b (c ...)))".  That way the left-to-right forth parsing order
+corresponds to the outer-to-inner scheme parsing order, and prefix
+parsers can just be Scheme macros.
