@@ -178,15 +178,13 @@ macro
 \ a register.
 
 : buf-page 5 ;    \ second bank of dual-port USB ram (4-7)
-: buf-OUT0 #x00 ; \ 64 bytes
-: buf-IN0  #x40 ; \ 64 bytes
-: buf-OUT1 #x80 ; \ 64 bytes
-: buf-IN1  #xC0 ; \ 64 bytes
 
 : _buf-OUT0 #x500 ; \ 64 bytes
 : _buf-IN0  #x540 ; \ 64 bytes
 : _buf-OUT1 #x580 ; \ 64 bytes
 : _buf-IN1  #x5C0 ; \ 64 bytes
+: _buf-OUT2 #x600 ; \ 64 bytes
+: _buf-IN2  #x640 ; \ 64 bytes
 
     
 : bd-page  4 ;
@@ -235,7 +233,20 @@ forth
       64       ,  \ BD3CNT
       _buf-IN1 ,, \ BD3ADRL,H
 
+: EP2-init
+    table->
+      \ BD2 : EP1 OUT
+      #x08      ,  \ BD4STAT: set UOWN, MCU can write, DTSEN=1
+      64        ,  \ BD4CNT
+      _buf-OUT2 ,, \ BD4ADRL.H
 
+      \ BD3 : EP1 IN
+      #x08     ,  \ BD5STAT: clear UOWN, MCU can write, DTSEN=1
+      64       ,  \ BD5CNT
+      _buf-IN2 ,, \ BD5ADRL,H
+
+
+    
 \ n -- \ Init RAM from flash.    
 : f>a for f> >a next ;
     
@@ -374,6 +385,11 @@ forth
     \ Enable endpoint 1:
     8 4 a!! EP1-init f!! 8 f>a \ Init EP1 buffer descriptors
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
+
+    \ Enable endpoint 2:
+    \ 12 4 a!! EP2-init f!! 8 f>a \ Init EP1 buffer descriptors
+    \ #x1E UEP2 !  \ IN, OUT, no SETUP, handshake, no stall
+    
     0 setup-reply
     
     IN1-init
@@ -566,7 +582,7 @@ forth
 : a!IN1-wait a!IN1.STAT a:wait-UOWN ;
 
 : a:IN1-write >a
-    al @ buf-IN1 -
+    al @ _buf-IN1 -
     BUFSIZE =? if a:IN1-transaction then ;
 
 : a:IN1-transaction
@@ -575,7 +591,7 @@ forth
     a!IN1-begin ; \ start a new IN1 buffer write session
     
 : a:IN1-end
-    al @ buf-IN1 - IN1-write ! ;
+    al @ _buf-IN1 - IN1-write ! ;
 
 \ When IN1 buffer is filled by UC, "IN1-flush" will transfer ownership
 \ to the USB peripheral.  It will perform an IN transaction with the
@@ -605,7 +621,7 @@ forth
 
 : a:OUT1-read
     al @ OUT1/CNT bd@ -
-    buf-OUT1 =? if a:OUT1-transaction then
+    _buf-OUT1 =? if a:OUT1-transaction then
     a> ;
  
 : a:OUT1-transaction
@@ -614,7 +630,7 @@ forth
     a!OUT1-begin ; \ start new transaction to OUT1 buffer
 
 : a:OUT1-end
-    al @ buf-OUT1 - OUT1-read ! ;
+    al @ _buf-OUT1 - OUT1-read ! ;
 
 \ When OUT1 buffer is filled by USB, the UC is notified through the
 \ transaction.OUT1 word in ISR.  That word will call "OUT1-init" to
