@@ -5,8 +5,8 @@ staapl pic18/compose-macro
 \ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
 
-load usb-descr-usbserial.f 
-\ load usb-descr-cdcacm.f 
+\ load usb-descr-usbserial.f 
+load usb-descr-cdcacm.f 
 
 staapl pic18/serial
 
@@ -345,10 +345,18 @@ forth
     then ;
 
     
-: transaction.IN1   \ NOP: task polls UOWN
+: transaction.IN1 ;  \ NOP: task polls UOWN
 
 : transaction.SETUP \ -- : a->packet
-    a>  drop \ bmRequestType
+    a>  \ bmRequestType
+    swap-nibble >> 3 and \ type
+    route
+        transaction.SETUP_STANDARD .
+        transaction.SETUP_CLASS    .
+        . \ vendor
+        ; \ reserved
+
+: transaction.SETUP_STANDARD
     a>       \ bRequest
     
     #x0F and route
@@ -424,7 +432,9 @@ forth
 \ are concatenated to the CONFIGURATIOn descriptor.
 
     
-   
+: transaction.SETUP_CLASS
+    0 setup-reply ;
+
     
 \ Reply to a SETUP transaction.  The EP0/IN buffer contains the answer
 \ data to a GET_ request.  n is the data size or 0 in case of a short

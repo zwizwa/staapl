@@ -85,7 +85,7 @@ forth
     4      bLength
     #x24   bDescriptorType \ Indicates that a CDC descriptor applies to an interface
     #x02   ,               \ Abstract control management descriptor subtype
-    #x02   ,               \ Device supports the request combination of SetLineCoding, GetLineCoding and SetControlLineState.
+    #x00   ,               \ Don't support any request, FIXME: still get 22,21,22 interface requests!
 
     \ Class-specific union functional descriptor with one slave interfac
     5      bLength

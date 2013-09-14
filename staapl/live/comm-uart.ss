@@ -21,8 +21,7 @@
       (unless fmt
         ;; Fixme: do autodetect using 'uname' or something..
         (set! fmt (cdr (assoc "Linux" fmts))))
-      (unless (zero? baud)
-        (system (format fmt name baud)))
+      (system (format fmt name baud))
       )))
 
 
