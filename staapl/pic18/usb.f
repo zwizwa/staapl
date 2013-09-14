@@ -191,10 +191,6 @@ macro
     
 : bd-page  4 ;
     
-forth
-
-
-
 \ It's convenient to use a current object referenced by the "a"
 \ register in the code below.
   
