@@ -23,7 +23,7 @@ load usb-fields.f
     0      bDeviceProtocol
     64     bMaxPacketSize
     #x05F9 idVendor
-    #xFFFF idProduct
+    #xFFF0 idProduct
     0      bcdDevice
     \ Strings
     1      iManufacturer
@@ -32,7 +32,11 @@ load usb-fields.f
     1      bNumConfigurations
 
 macro
-: cd-size 9 9 + 5 + 5 + 4 + 5 + 7 + 9 + 7 + 7 + ;
+: cd-size
+    9 \ config
+    9 + 5 + 5 + 4 + 5 + 7 + \ control interface
+    9 + 7 + 7 + \ data interface
+    ;
 forth
     
 : configuration-descriptor \ n -- lo hi
@@ -59,8 +63,8 @@ forth
     0      bInterfaceNumber
     0      bAlternateSetting
     1      bNumEndpoints
-    #x0A   bInterfaceClass     \ CDC class
-    #x00   bInterfaceSubClass
+    #x02   bInterfaceClass     \ CDC
+    #x02   bInterfaceSubClass  \ ACM
     0      bInterfaceProtocol
     0      iInterface
 
@@ -99,7 +103,7 @@ forth
     1      bInterfaceNumber
     0      bAlternateSetting
     2      bNumEndpoints
-    #x0A   bInterfaceClass     \ CDC class
+    #x0A   bInterfaceClass     \ CDC data
     #x00   bInterfaceSubClass
     0      bInterfaceProtocol
     0      iInterface
