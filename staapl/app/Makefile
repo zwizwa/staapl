@@ -51,11 +51,13 @@ F_LIB := $(F_APP) $(F_PIC18)
 %.hex:  %.app
 	touch $*.hex
 
-# Note that each .fm file has an associated .program script that
-# uploads the binary to the PIC.
+# The purpose of the .flash file is to carry the time stamp of
+# flashing the PIC chip.  Each .fm file has an associated .program
+# script with instructions to upload the binary.
 %.flash: %.app
 	rm -f *.flash
-	sh $*.program $*.hex # | tee $@
+	sh $*.program $*.hex | tee $@
+	grep 'Operation\ Succeeded' $@
 
 # Note: if you're sure the microcontroller's flash memory is
 # consistent with the data in the .dict file, it's OK to just run
@@ -64,11 +66,11 @@ F_LIB := $(F_APP) $(F_PIC18)
 
 %.live: %.dict %.flash
 	$(COMP) -vk ../live.ss
-	$(INTERP) $*.dict
+	while echo '\nrestarting $@\nhit ctrl-C to quit loop'; do sleep 1; $(INTERP) $*.dict; done
 
 
 clean:
-	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app
+	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app *.flash
 
 # Regression tests for binary code generator.
 
