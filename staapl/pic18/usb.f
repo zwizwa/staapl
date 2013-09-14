@@ -5,8 +5,8 @@ staapl pic18/compose-macro
 \ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
 
-\ load usb-descr-usbserial.f 
-load usb-descr-cdcacm.f 
+load usb-descr-usbserial.f 
+\ load usb-descr-cdcacm.f 
 
 staapl pic18/serial
 

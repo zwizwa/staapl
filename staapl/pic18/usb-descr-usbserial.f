@@ -79,12 +79,12 @@ load usb-fields.f
 
 
 \ -- lo hi
-: string-languages table-> 4 , 4 , 3 , #x09 , #0x4 , \ US English
+: string-languages table-> 4 , 4 , 3 , #x09 , #x4 , \ US English
 : snull            table-> 2 , 2 , 3 , 
 
 : string-1 table-> ` Zwizwa s, ;
 : string-2 table-> ` Staapl s, ;
-: string-3 table-> ` ABC123 s, ;    
+: string-3 table-> ` um0 s, ;    
 : string-4 table-> ` Configuration s, ;
 : string-5 table-> ` Staapl_Serial_Console s, ;
     
