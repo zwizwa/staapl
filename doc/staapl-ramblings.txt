@@ -63086,3 +63086,54 @@ Maybe the major problem will go away if "a b c ..." is mapped to
 "(a (b (c ...)))".  That way the left-to-right forth parsing order
 corresponds to the outer-to-inner scheme parsing order, and prefix
 parsers can just be Scheme macros.
+
+
+
+Entry: Just forth again...
+Date: Sat Sep 14 10:13:12 EDT 2013
+
+Trying to solve "back-patching" of table length.
+
+Seems that code only supports label operations, and labels are 2-word
+aligned, so won't cooperate properly with ","
+
+: foo begin 1 , 2 , 3 , 4 , 5 , begin m> m> - ,, ;
+
+This seems to give the number of words, rounded up.  Let's extend the
+, word with a word that returns 0 or 1 depending on the number of
+slots available.
+
+
+The following works, but the presence of a lable terminates the table.
+So you can't ',' the value coming from table-end.
+
+macro    
+: table-begin begin ;
+: table-end \ -- table-size
+    byte-slots >m m-swap begin m> m> - 2 * m> - ;
+forth
+
+
+I guess I can work around this with several hacks, but the simplest
+approach seems to b to just generate the tables in Scheme, or to patch
+the sizes manually which is a bit silly.
+
+Disappointing that such a simple thing is excluded by the structure
+because it is word-oriented, and byte compilation is a hack.
+
+
+Maybe this just needs an external tool.  I'll be building USB
+descriptors for other languages too..
+
+
+
+
+Entry: Graphs
+Date: Sat Sep 14 10:45:05 EDT 2013
+
+Trying to work with graphs or any kind of circular depensency in a
+non-mutable language is like pulling teeth..
+
+Or I guess the lazy ones are excempt from this..
+
+

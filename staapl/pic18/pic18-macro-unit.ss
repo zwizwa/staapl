@@ -295,6 +295,10 @@
  (([qw lo] |,|)          ([db lo]))   
 
  (([qw w] |,,|)          ([dw w]))
+
+ ;; Number of byte slots available in the current word
+ (([db lo] byte-slots)   ([db lo] [qw 1]))
+ ((        byte-slots)   ([qw 0]))
    
  ;; CONDITIONALS
 

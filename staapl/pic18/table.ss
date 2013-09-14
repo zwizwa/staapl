@@ -1,4 +1,4 @@
-#lang staapl/pic18
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 \ Byte lookup table: works like 'route' but returns a byte.
 
@@ -12,3 +12,9 @@ provide-all
     pop
     @f+ ;
 
+macro    
+: table-begin begin ;
+: table-end \ -- table-size
+    byte-slots >m m-swap begin m> m> - 2 * m> - ;
+forth
+      

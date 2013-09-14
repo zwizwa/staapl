@@ -64,5 +64,24 @@ macro
     m> bLength
     3  bDescriptorType
     m> ' w, bin, ; \ FIXME: do proper unicode translation
-    
+
+\ endpoing descriptor macros
+: mBulkEndpoint | addr |
+    7      bLength
+    5      bDescriptorType
+    addr   bEndpointAddress
+    #x02   bmAttributes     \ BULK
+    64     wMaxPacketSize
+    0      bInterval
+    ;
+: mInterruptEndpoint | addr |
+    7      bLength
+    5      bDescriptorType
+    addr   bEndpointAddress
+    #x03   bmAttributes     \ INTERRUPT
+    64     wMaxPacketSize
+    10     bInterval  \ 10 ms
+    ;   
 forth
+
+  

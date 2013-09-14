@@ -31,99 +31,82 @@ load usb-fields.f
     3      iSerialNumber
     1      bNumConfigurations
 
+macro
+: cd-size 9 9 + 5 + 5 + 4 + 5 + 7 + 9 + 7 + 7 + ;
+forth
+    
 : configuration-descriptor \ n -- lo hi
     drop \ FIXME: only support one configuration
 
-    table->
-    9 9 + 7 + 7 +
-    36 +
-    descriptor-size
+    table-> cd-size descriptor-size
     \ -----------------
     
     \ CONFIGURATION
     9      bLength
     2      bDescriptorType
 
-    9 9 + 7 + 7 +
-    36 +
-    wTotalLength
+    cd-size wTotalLength
     
-    5      bNumInterfaces
+    2      bNumInterfaces
     1      bConfigurationValue
     0      iConfiguration
     #xA0   bmAttributes \ remote wakeup
     #x32   bMaxPower    \ 100 mA
     
-    \ INTERFACE
+    \ INTERFACE: communication
     9      bLength
     4      bDescriptorType
     0      bInterfaceNumber
     0      bAlternateSetting
-    2      bNumEndpoints
-    #xFF   bInterfaceClass \ Vendor-specific
-    0      bInterfaceSubClass
+    1      bNumEndpoints
+    #x0A   bInterfaceClass     \ CDC class
+    #x00   bInterfaceSubClass
     0      bInterfaceProtocol
     0      iInterface
 
-    \ ENDPOINT
-    7      bLength
-    5      bDescriptorType
-    #x81   bEndpointAddress \ IN1
-    #x02   bmAttributes     \ BULK
-    64     wMaxPacketSize
-    0      bInterval
-    
-    \ ENDPOINT
-    7      bLength
-    5      bDescriptorType
-    #x01   bEndpointAddress \ OUT1
-    #x02   bmAttributes     \ BULK
-    64     wMaxPacketSize
-    0      bInterval
+    \ Class-specific header functional descriptor
+    5      bLength
+    #x24   bDescriptorType \ Indicates that a CDC descriptor applies to an interface
+    #x00   ,               \ Header functional descriptor subtype
+    #x0110 w,
 
+    \ Class-specific call management functional descriptor
+    5      bLength
+    #x24   bDescriptorType \ Indicates that a CDC descriptor applies to an interface
+    #x01   ,               \ Call management functional descriptor subtype
+    #x01   ,               \ Device handles call management itself
+    #x00   ,               \ No associated data interface
 
-    \ padding: dummy interfaces
+    \ Class-specific abstract control management functional descriptor
+    4      bLength
+    #x24   bDescriptorType \ Indicates that a CDC descriptor applies to an interface
+    #x02   ,               \ Abstract control management descriptor subtype
+    #x02   ,               \ Device supports the request combination of SetLineCoding, GetLineCoding and SetControlLineState.
 
-    \ INTERFACE
+    \ Class-specific union functional descriptor with one slave interfac
+    5      bLength
+    #x24   bDescriptorType \ Indicates that a CDC descriptor applies to an interface
+    #x06   ,               \ Union descriptor subtype
+    0      ,               \ Number of master interface is #0
+    1      ,               \ First slave interface is #1
+
+    \ Notification endpoint standard descriptor
+    #x82   mInterruptEndpoint \ IN2
+
+    \ INTERFACE: data
     9      bLength
     4      bDescriptorType
     1      bInterfaceNumber
     0      bAlternateSetting
-    0      bNumEndpoints
-    #xFF   bInterfaceClass \ Vendor-specific
-    0      bInterfaceSubClass
+    2      bNumEndpoints
+    #x0A   bInterfaceClass     \ CDC class
+    #x00   bInterfaceSubClass
     0      bInterfaceProtocol
     0      iInterface
-    \ INTERFACE
-    9      bLength
-    4      bDescriptorType
-    2      bInterfaceNumber
-    0      bAlternateSetting
-    0      bNumEndpoints
-    #xFF   bInterfaceClass \ Vendor-specific
-    0      bInterfaceSubClass
-    0      bInterfaceProtocol
-    0      iInterface
-    \ INTERFACE
-    9      bLength
-    4      bDescriptorType
-    3      bInterfaceNumber
-    0      bAlternateSetting
-    0      bNumEndpoints
-    #xFF   bInterfaceClass \ Vendor-specific
-    0      bInterfaceSubClass
-    0      bInterfaceProtocol
-    0      iInterface
-    \ INTERFACE
-    9      bLength
-    4      bDescriptorType
-    4      bInterfaceNumber
-    0      bAlternateSetting
-    0      bNumEndpoints
-    #xFF   bInterfaceClass \ Vendor-specific
-    0      bInterfaceSubClass
-    0      bInterfaceProtocol
-    0      iInterface
+    
+    \ ENDPOINTS
+    #x01   mBulkEndpoint \ OUT1
+    #x81   mBulkEndpoint \ IN1
 
     
     

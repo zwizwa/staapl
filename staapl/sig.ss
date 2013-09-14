@@ -101,7 +101,7 @@
 ;; Compilation and manipulation of binary lists.  Note that `length'
 ;; and `cons' might need a rename.
 (define-macro-set comma-extra^ (dw> "bin," sym>bin l:length l:cons))
-(define-macro-set comma^       (","))
+(define-macro-set comma^       ("," byte-slots))
 
 
 ;; Machine parameters used to parameterize the CFG compiler.
