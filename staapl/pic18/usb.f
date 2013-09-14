@@ -205,13 +205,12 @@ forth
 \ into/out-of the memory using >a or a>.
     
 \ Load buffer address into `a'.
-: a!buf   buf-page a!! ;
-: a!bd    4 a!! ;    
+: a!bd    bd-page a!! ;    
     
-: a!OUT0  buf-OUT0 a!buf ;
-: a!IN0   buf-IN0  a!buf ;
-: a!OUT1  buf-OUT1 a!buf ;
-: a!IN1   buf-IN1  a!buf ;
+: a!OUT0  _buf-OUT0 2 lfsr ;
+: a!IN0   _buf-IN0  2 lfsr ;
+: a!OUT1  _buf-OUT1 2 lfsr ;
+: a!IN1   _buf-IN1  2 lfsr ;
 
 forth
 
@@ -565,7 +564,7 @@ forth
 
 : a!IN1-begin
     a!IN1-wait \ wait until IN1's contents is transferred to host.
-    buf-IN1 buf-page a!!
+    a!IN1
     IN1-write @ al +! ;
 
 : a!IN1-wait a!IN1.STAT a:wait-UOWN ;
@@ -603,7 +602,7 @@ forth
  
 : a!OUT1-begin
     a!OUT1-wait  \ wait until OUT1 has data from host
-    buf-OUT1 buf-page a!!
+    a!OUT1
     OUT1-read @ al +! ;
     
 : a!OUT1-wait a!OUT1.STAT a:wait-UOWN ;
