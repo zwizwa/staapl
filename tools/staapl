@@ -1,6 +1,23 @@
 #!/bin/bash
 
 # Executes a staapl dictionary script.
-# Note that by default, the dictionaries are exported as modules.
+DICT="$1"
+DIR=$HOME/staapl/staapl/app
 
-exec mzscheme -f $1 -e '(require readline/rep)(run)'
+
+if [ -z "$DICT" ]; then
+    # If Take the most recent file in current directory or app dir.
+    DICT=$(ls -t *.dict 2>/dev/null| head -n 1)
+    if [ -z "$DICT" ]; then
+        cd $DIR
+        echo "Trying app dir $DIR"
+        DICT=$(ls -t *.dict | head -n 1)
+        if [ -z "$DICT" ]; then
+            echo "Can't find a .dict file"
+            exit 1
+        fi
+    fi
+    echo Guessing most recent $DICT
+fi
+
+racket $DICT
