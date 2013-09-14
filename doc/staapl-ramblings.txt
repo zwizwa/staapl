@@ -63131,9 +63131,27 @@ descriptors for other languages too..
 Entry: Graphs
 Date: Sat Sep 14 10:45:05 EDT 2013
 
-Trying to work with graphs or any kind of circular depensency in a
+Trying to work with graphs or any kind of circular dependency in a
 non-mutable language is like pulling teeth..
 
 Or I guess the lazy ones are excempt from this..
 
+
+
+
+Entry: USB ACM
+Date: Sat Sep 14 16:47:18 EDT 2013
+
+It works with a bit of hacking:
+
+- Disabled some reuquests in Class-specific abstract control
+  management functional descriptor, but Linux still sends #x22
+  SET_CONTROL_LINE_STATE class request to interface 0.
+
+- Handle the class request handshake by sending an empty IN0
+
+- Interrupt buffer is defined as endpoint #x82 (IN 2) but not actually
+  configured in the USB controller.  Seems ok.
+
+- re-enabled stty on every start since initial setting was not correct
 

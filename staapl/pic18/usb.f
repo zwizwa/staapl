@@ -394,6 +394,8 @@ forth
     8 4 a!! EP1-init f!! 8 f>a \ Init EP1 buffer descriptors
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
 
+    \ EP2 is the ACM interrupt IN.  Not used.
+    
     \ Enable endpoint 2:
     \ 12 4 a!! EP2-init f!! 8 f>a \ Init EP1 buffer descriptors
     \ #x1E UEP2 !  \ IN, OUT, no SETUP, handshake, no stall
@@ -431,7 +433,9 @@ forth
 \ INTERFACE and ENDPOINT descriptors cannot be accessed directly: they
 \ are concatenated to the CONFIGURATIOn descriptor.
 
-    
+
+\ This is required to handle (ignore) the ACD class request on
+\ interface 0 (req=#x22).
 : transaction.SETUP_CLASS
     0 setup-reply ;
 
