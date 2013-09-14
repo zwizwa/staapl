@@ -183,6 +183,12 @@ macro
 : buf-OUT1 #x80 ; \ 64 bytes
 : buf-IN1  #xC0 ; \ 64 bytes
 
+: _buf-OUT0 #x500 ; \ 64 bytes
+: _buf-IN0  #x540 ; \ 64 bytes
+: _buf-OUT1 #x580 ; \ 64 bytes
+: _buf-IN1  #x5C0 ; \ 64 bytes
+
+    
 : bd-page  4 ;
     
 forth
@@ -213,30 +219,26 @@ forth
 : EP0-init
     table->
       \ BD0 : EP0 OUT
-      #x08     ,  \ BD0STAT: set UOWN, MCU can write, DTSEN=1
-      64       ,  \ BD0CNT
-      buf-OUT0 ,  \ BD0ADRL
-      buf-page ,  \ BD0ADRH
+      #x08      ,  \ BD0STAT: set UOWN, MCU can write, DTSEN=1
+      64        ,  \ BD0CNT
+      _buf-OUT0 ,, \ BD0ADRL,H
 
       \ BD1 : EP0 IN
-      #x08     ,  \ BD1STAT: clear UOWN, MCU can write, DTSEN=1
-      64       ,  \ BD1CNT
-      buf-IN0  ,  \ BD1ADRL
-      buf-page ,  \ BD1ADRH
+      #x08     ,   \ BD1STAT: clear UOWN, MCU can write, DTSEN=1
+      64       ,   \ BD1CNT
+      _buf-IN0 ,,  \ BD1ADRL,H
 
 : EP1-init
     table->
       \ BD2 : EP1 OUT
-      #x08     ,  \ BD2STAT: set UOWN, MCU can write, DTSEN=1
-      64       ,  \ BD2CNT
-      buf-OUT1 ,  \ BD2ADRL
-      buf-page ,  \ BD2ADRH
+      #x08      ,  \ BD2STAT: set UOWN, MCU can write, DTSEN=1
+      64        ,  \ BD2CNT
+      _buf-OUT1 ,, \ BD2ADRL.H
 
       \ BD3 : EP1 IN
       #x08     ,  \ BD3STAT: clear UOWN, MCU can write, DTSEN=1
       64       ,  \ BD3CNT
-      buf-IN1  ,  \ BD3ADRL
-      buf-page ,  \ BD3ADRH
+      _buf-IN1 ,, \ BD3ADRL,H
 
 
 \ n -- \ Init RAM from flash.    
