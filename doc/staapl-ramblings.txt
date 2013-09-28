@@ -63155,3 +63155,16 @@ It works with a bit of hacking:
 
 - re-enabled stty on every start since initial setting was not correct
 
+
+
+Entry: 8bit forth + indirection?
+Date: Sun Sep 22 22:36:47 EDT 2013
+
+Trouble with 8-bit forths is:
+
+- words can not span the address space
+- 8 bits is too small for any useful math
+
+Other problems I've run into is:
+- management of use of a and f registers
+- conditionals as macros limits composability
