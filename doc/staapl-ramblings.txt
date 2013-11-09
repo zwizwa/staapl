@@ -63168,3 +63168,61 @@ Trouble with 8-bit forths is:
 Other problems I've run into is:
 - management of use of a and f registers
 - conditionals as macros limits composability
+
+
+
+
+
+Entry: FLUNK presentation prep
+Date: Wed Nov  6 11:44:29 EST 2013
+
+why this is cool:
+
+- two ways of looking:
+  - stacks are stateful, in-place operations are efficient
+  - but they are local -> approaches value-oriented approach
+
+- "thinking functional" is beneficial for many approaches.
+
+- protocol oriented programming
+
+- Scheme Hygienic Macros: building DSLs.  Examples:
+  - pattern matching
+  - the concatenated form
+
+
+
+some necessary honesty:
+
+- I started out as a "Forth fanboy", but I now see the trade-offs
+  better.  Forth is nice if you can design from scratch: it leads to
+  very compact code.  However, this requires extra effort: the size
+  gains which are mostly due to code reuse through aggressive
+  factorization do not come for free.
+
+  Case in point: the USB stack is designed with C in mind.  More
+  specifically, "C structs".  These do not work well in forth.  The
+  alternative is "protocol oriented programming", where data
+  structures are designed to keep the parsers as simple / local as
+  possible.
+
+- This has been my main driver for learning functional programming,
+  Racket in particular.  This means the code is large and hard to
+  modify because it is not uniform.
+
+- A leaky abstraction: Forth's outer interpreter is inherently
+  reflective, while Staapl tries to be compile-time transparent (phase
+  separation).
+
+- The general idea seems OK, the particular factorization of
+  abstractions is not.  Not ready in that I'm pushed into premature
+  optimization when writing code.
+
+- TODO: tasks vs. state machines: automatic compilation of "yield".
+
+
+
+Entry: Demo
+Date: Wed Nov  6 12:17:07 EST 2013
+
+Make a demo based on the new board.
