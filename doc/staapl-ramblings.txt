@@ -63226,3 +63226,40 @@ Entry: Demo
 Date: Wed Nov  6 12:17:07 EST 2013
 
 Make a demo based on the new board.
+
+
+Entry: Presentation: what's the point?
+Date: Mon Nov 11 19:24:54 EST 2013
+
+I need to learn to give better presentations.  Melissa's advice:
+- what do I want to convey to this particular public
+- acknowledge that the totality cannot be conveyed
+- limit to 3 key points
+
+
+
+Key points:
+
+- Macro Assembler
+
+Bottom line = PIC18 assembler expressed as RPN macro language.
+
+- Language towers
+
+Build new languages by building macros on top of macros.  Bottom-up
+abstractions.  Build a language for your problem.  A key element of
+Racket is the module system for macro composition.
+
+(Paper: "Composable and Compilable Macros"  Matthew Flatt)
+
+- Partial evaluation
+
+Makes stacked languages practical by removing some inefficiencies
+inherent to expansion-only macro approaches.  This blurs the line
+between macros and functions.
+
+For a Forth-style stack language this is especially simple to express.
+
+
+
+
