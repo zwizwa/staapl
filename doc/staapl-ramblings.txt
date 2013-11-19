@@ -63263,3 +63263,14 @@ For a Forth-style stack language this is especially simple to express.
 
 
 
+Entry: Rebuilding the demo
+Date: Mon Nov 18 09:41:44 EST 2013
+
+Old stuff in pic18-interaction.scrbl no longer works.
+Probably best to get this going again to illustrate the 3 points:
+- macro assembler (PRIMITIVES)
+- stacked language tower  (COMPOSITION)
+- partial evaluation (OPTIMIZATION)
+
+
+

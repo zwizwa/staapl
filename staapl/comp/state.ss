@@ -157,38 +157,43 @@
                        ))
 
 
+(define (format-chunk chunk)
+  (apply string-append
+         (for/list ((a (reverse chunk)))
+           (format "\t~a\n" (instruction->string a)))))
+
+(define (format-chain chain)
+  (apply string-append
+         (for/list ((word/chunk (reverse chain)))
+           (format "~a~a"
+                   (format-target-word (car word/chunk))
+                   (format-chunk (cadr word/chunk))))))
+(define (format-ctrl ctrl)
+  (apply string-append
+         (for/list ((wd ctrl))
+           (if (target-word? wd)
+               (format "~s\n" (target-word-name wd))
+               (format "~a\n" wd)))))
+
+(define (format-rs rs)
+  (apply string-append
+         (for/list ((mc rs))
+           (match mc
+             ((struct mcont (label refc))
+              (format "~a ~a\n"
+                      (target-word-name label)
+                      refc))))))
+
+(define (format-store store)
+  (apply string-append (map format-chain (reverse store))))
+
 ;; State is "opened up" compared to the structure expected by
 ;; format-target-word, so specific printers are provided.
 
-(define (comp-print-state s)
-  (define (format-chunk chunk)
-    (apply string-append
-           (for/list ((a (reverse chunk)))
-             (format "\t~a\n" (instruction->string a)))))
-  (define (format-chain chain)
-    (apply string-append
-           (for/list ((word/chunk (reverse chain)))
-             (format "~a~a"
-                     (format-target-word (car word/chunk))
-                     (format-chunk (cadr word/chunk))))))
-  (define (format-ctrl ctrl)
-    (apply string-append
-           (for/list ((wd ctrl))
-             (if (target-word? wd)
-                 (format "~s\n" (target-word-name wd))
-                 (format "~a\n" wd)))))
-
-  (define (format-rs rs)
-    (apply string-append
-           (for/list ((mc rs))
-             (match mc
-                    ((struct mcont (label refc))
-                     (format "~a ~a\n"
-                             (target-word-name label)
-                             refc))))))
-
-  (define (format-store store)
-    (apply string-append (map format-chain (reverse store))))
+(define (comp-print-state s options)
+  (define (maybe-display opt str)
+    (when (memq opt options)
+      (display str)))
   (match s
    ((struct compiler (update asm ctrl
                              (struct dict (current chain store))
@@ -199,15 +204,13 @@
                        (printf "print-state error: ~a\n" e)
                        (printf "ASM:~a\nCTRL:~a\nCURRENT:~a\nCHAIN:~a\nSTORE:~a\nRS:~a\n"
                                asm ctrl current chain store rs))))
-      (display
-       (string-append
-        (format ";; store\n~a\n" (format-store store))
-        (format ";; chain\n~a\n" (format-chain chain))
-        (format ";; current\n~a\n" (and (target-word? current) (format-target-word current)))
-        (format ";; asm\n~a\n" (format-chunk asm))
-        (format ";; ctrl\n~a\n" (format-ctrl ctrl))
-        (format ";; rs\n~a\n" (format-rs rs))
-        ))
+      (maybe-display 'store (format ";; store\n~a\n" (format-store store)))
+      (maybe-display 'chain (format ";; chain\n~a\n" (format-chain chain)))
+      (maybe-display 'current (format ";; current\n~a\n"
+                                      (and (target-word? current) (format-target-word current))))
+      (maybe-display 'asm (format ";; asm\n~a\n" (format-chunk asm)))
+      (maybe-display 'ctrl (format ";; ctrl\n~a\n" (format-ctrl ctrl)))
+      (maybe-display 'rs (format ";; rs\n~a\n" (format-rs rs)))
+      ))))
 
-    ))))
 
