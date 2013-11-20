@@ -35,14 +35,14 @@ the compiler.
 Followed by an interactive demo and a Q&A session.
 
 
-@section{What is this?}
+@section{Introduction}
 
 
 Staapl is:
 @itemize{
   @item{A Forth compiler for PIC18}
   @item{An incremental, optimizing, RPN macro assembler}
-  @item{A way to use a high level language to create low level code}
+  @item{A way to use a high level language to generate low level code}
 }
 
 Staapl sounds like "stapel" in Dutch, which means stack.
@@ -129,6 +129,8 @@ The Staapl special form @scheme[macro:] takes as arguments Forth code
 and returns a compilation state transformer function or a @emph{Forth
 Macro}, which is the main representation of Forth code in Staapl.
 
+A major point here is that @emph{composition} of Forth macros
+corresponds to @emph{Concatenation} of words in Forth source code.
 
 
 @section{Incremental Compilation}
@@ -170,42 +172,52 @@ to the programmer.  In this case one often uses the term
 @emph{multi-stage} language as opposed to macro language.
 
 
-@section{So, what's the point, really?}
+@section{RPN Assembler}
 
-@itemize{
-  @item{ This is an experiment.  The purpose is exploration. }
+The partial evaluation mechanism opens up many possibilities.  It
+effectively creates a way to compose code generators.
 
-  @item{ C sucks, C++ sucks plus plus. }
+Consider the Forth macros @scheme[addwf] and @scheme[movff], which map
+directly to PIC18 instructions.  Both can be programmed to take 1
+resp. 2 arguments through the elimination of @scheme[qw] instructions.
 
-  @item{ If you generate code, better keep the generator in touch with
-  the language.  Custom code generation is prone to creating an
-  unmaintainable mess. } }
+@ex[()
+(print-asm> clear)
+(print-asm> 123)
+(print-asm> addwf)
+(print-asm> INDF0)
+(print-asm> INDF1)
+(print-asm> movff)
+]
 
+@section{The big picture}
 
-Staapl's usefulness emerges from the interplay of:
+If you generate code, better keep the generator in touch with the
+language.  Custom code generation is prone to creating an
+unmaintainable mess.
+
+A tool emerges from the interplay of:
 @itemize{
   @item{Scheme Macros}
-  @item{low-level stack machine model}
-  @item{programmable, stack-based partial evaluation}
-  @item{interactive target access + code upload}
+  @item{a low-level stack machine model}
+  @item{a programmable, stack-based partial evaluation}
+  @item{interactive target access + incremental compilation}
 }
 
 
 
-@section{Why two macro systems? }
-
-They serve different purposes.
+@section{Two macro systems}
 
 The Scheme macro system acts as a high level programmer front end.
-This reuses Racket's macro system, which is one of the most advanced
-"programmable compilers".
+This reuses Racket's macro system, which is an advanced "programmable
+compiler".
 
 The Forth macro system acts as an abstraction of the machine back end:
 
 @itemize{
 
   @item{Forth is less abstract than assembly: while quite low-level,
-  Forth is @emph{local} which makes it @emph{composable}.}
+  Forth is @emph{local} which promotes reuse through composition.}
 
   @item{Forth is good enough as a programming language by itself,
   i.e. to write OS and other runtime support code.}
@@ -218,11 +230,12 @@ The Forth macro system acts as an abstraction of the machine back end:
 @section{Pseudo Instructions}
 
 There is a trade-off between flexible machine-specific optimizations
-and ease of writing a certain class of partial evaluators.
+concentrated in a single compilation pass, and ease of writing a
+certain class of partial evaluators.
 
 To find a better sweet spot in this trade-off, some pseudo
 instructions have been added.  These get eliminated in a second pass,
-after all optimizations have executed.
+after all partial evaluations have executed.
 
 An example of this is @scheme[qw], which pushes a number onto the
 stack.  This sequence is very common, but the real PIC18 instruction
@@ -230,30 +243,11 @@ sequence for this is too cumbersome to pattern match.
 
 
 
-@section{Functional Programming}
-
-How does this tie into the idea of Functional Programming ?
-
-@itemize{
-
-  @item{Compilers are a natural target for functional programming: all
-  about pure data transformations.}
-
-  @item{Hygienic Scheme macros are an extension of the idea of name
-  scope in Lambda expressions.  The put a "front end" on lambda
-  abstractions and applications.}
-
-  @item{In Staapl, staged functions are expressed as functions that
-  operate on code and produce code.  Concatenation of code is
-  composition of functions.}
-}
 
 @section{The Core Optimizer}
 
-New partial evaluation and low-level compilation patterns are added
-through the Scheme special form @scheme[patterns].  It allows the
-expression of "clause-gathering" pattern matchers, operating on
-recently compiled opcodes.
+The Scheme special form @scheme[patterns] defines new pattern matchers
+operating on recently compiled opcodes.
 
 @ex[()
 (patterns
@@ -296,7 +290,8 @@ Let's redefine one of the standard @scheme[+] behaviors.
 
   @item{The benefits might be a bit specific to the quirky PIC18
   architecture.  It doesn't map so well to machines with a lot of
-  registers.}
+  registers.  It might map better to a VHDL/Verilog minimal stack
+  machine.}
 
   @item{Forth and Scheme are fringe languages.}
 
@@ -309,14 +304,6 @@ Let's redefine one of the standard @scheme[+] behaviors.
 
 
 
-@section{Other approaches. }
-
-Most modern approach focus on type systems.  ( Staapl is dynamically typed. )
-
-@itemize{
-  @item{Typed embedding: Haskell, MetaOCaml}
-  @item{Typed low-level languages: Rust}
-}
 
 
 @section{Take home points }
@@ -327,7 +314,7 @@ Most modern approach focus on type systems.  ( Staapl is dynamically typed. )
   for tiny machines.}
 
   @item{Code generation is a useful technique.  Acknowledge this by
-  making it an integral part of the system.}
+  making it an integral part of the development system.}
 
   @item{These idea flourish when combined with a Functional
         Programming approach.}  

@@ -63274,3 +63274,7 @@ Probably best to get this going again to illustrate the 3 points:
 
 
 
+Entry: Flunk presentation
+Date: Tue Nov 19 19:16:06 EST 2013
+
+A bit of a jumble.  How to clean that up more?
