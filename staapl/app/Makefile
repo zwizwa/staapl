@@ -25,7 +25,8 @@ COMP=mzc
 # STAAPLC_FLAGS = -c uart -d /dev/tty5V
 # STAAPLC_FLAGS = -c uart -d /dev/ttyUPS
 # STAAPLC_FLAGS = -c uart -c pickit2
-STAAPLC_FLAGS = -c uart -d /dev/tty-um0 --baud 0
+# STAAPLC_FLAGS = -c uart -d /dev/tty-um0 --baud 0
+STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
 # make sure this works without the "staaplc" command line app wrapper installed
 STAAPLC = $(INTERP) -l staapl/staaplc --
 
