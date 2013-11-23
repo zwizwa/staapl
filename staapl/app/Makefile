@@ -24,9 +24,14 @@ COMP=mzc
 # STAAPLC_FLAGS = -c uart -d /dev/tty3V3
 # STAAPLC_FLAGS = -c uart -d /dev/tty5V
 # STAAPLC_FLAGS = -c uart -d /dev/ttyUPS
-# STAAPLC_FLAGS = -c uart -c pickit2
+# STAAPLC_FLAGS = -c pickit2
 # STAAPLC_FLAGS = -c uart -d /dev/tty-um0 --baud 0
-STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
+
+
+## FLUNK hacks
+# STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
+STAAPLC_FLAGS = -c uart -d /dev/tty-FT9FP1Z6 --baud 9600
+
 # make sure this works without the "staaplc" command line app wrapper installed
 STAAPLC = $(INTERP) -l staapl/staaplc --
 
