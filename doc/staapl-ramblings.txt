@@ -63278,3 +63278,92 @@ Entry: Flunk presentation
 Date: Tue Nov 19 19:16:06 EST 2013
 
 A bit of a jumble.  How to clean that up more?
+
+
+
+Entry: Staapl in haskell
+Date: Mon Dec  9 20:00:48 EST 2013
+
+I'd like to start over.  To be honest, this is a bit of a dead end.
+Current implementation can probably be salvaged, but really, it's time
+to fish out the good ideas and make it simpler.
+
+The good ideas are:
+- Minimal code size
+- Better defined semantics
+
+Really, what makes it worth it is "pour in effort, out comes small
+code".
+
+
+
+Entry: Forth on ARM
+Date: Mon Dec  9 20:11:10 EST 2013
+
+It would be nice to find a way to map Forth to the ARM processor.
+What to do with the registers?  Maybe each register should be TOS for
+a different task?  With TOS and A,B registers
+
+http://toddbot.blogspot.com/2012/04/why-forth-still-matters-in-this.html
+
+
+
+Entry: Greenarrays
+Date: Mon Dec  9 20:31:20 EST 2013
+
+Maybe I should just get one of these boards..  It's an amazing chip,
+and as for experience, is going to be quite something..
+
+So let's get started with their dev tools, write an emulator or
+something and just take it serious.  Could be a great platform for a
+synth.
+
+http://www.forth.org/svfig/kk/10-2013-Ruffer.pdf
+
+
+
+Entry: Concurrency, state machines and protocol-oriented programming
+Date: Wed Dec 11 12:00:53 EST 2013
+
+Reading up a bit on the GA144.  The interesting observation is that
+the ability to put multiple threads on multiple machines can simplify
+software.
+
+Putting this back to a single processor design, what you loose is
+speed, but the principle is the same.  To minimize the speed lost,
+make context switches simpler or even deterministic.
+
+This idea has been coming back a over and over again.  How to make it
+work for Staapl?  How to make it work for ARM as well?
+
+
+
+
+Entry: Define protocol-oriented programming
+Date: Wed Dec 11 12:20:41 EST 2013
+
+A way to factor a data processing problem into different tasks or
+state machines such that the overall code complexity is minimized.
+
+Essentially this means tuning the procotols such that the parser
+complexity is minimized.
+
+
+
+Entry: Greenarrays slave labour
+Date: Wed Dec 11 22:34:14 EST 2013
+
+Project leads to app note, spend a week or two, leave with board.
+Free room + contrib on food.
+Incline Village Nevada.
+Company flop house.
+Wondermeat on a smoker.
+
+[1] http://www.youtube.com/watch?v=raFBLEYOBbI
+
+
+Entry: ga144 emulator
+Date: Wed Dec 11 22:45:38 EST 2013
+
+http://arrayfactor.org/textpattern/
+https://groups.google.com/forum/#!topic/comp.lang.forth/twFP0Bub554%5B1-25-false%5D
