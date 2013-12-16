@@ -63369,6 +63369,19 @@ http://arrayfactor.org/textpattern/
 https://groups.google.com/forum/#!topic/comp.lang.forth/twFP0Bub554%5B1-25-false%5D
 
 
+Entry: Staapl next
+Date: Sat Dec 14 11:16:25 EST 2013
+
+Time to simplify.  I'm not happy with the the state of USB.  I don't
+know how to debug it.  I'm a bit stuck.  Still, I'd like to distill
+some core of Staapl to make it to the next version.
+
+- Circular Forth: not possible to unroll into Racket-like module
+  system.
+
+- Forth prefix parsers are very messy.
+
+
 Entry: ARM registers
 Date: Sun Dec 15 23:54:00 EST 2013
 
@@ -63412,4 +63425,7 @@ I wonder if it's not easier to do everything at once:
 - Emulator
 
 If this is made full-circle, what falls out?
+
+
+
 
