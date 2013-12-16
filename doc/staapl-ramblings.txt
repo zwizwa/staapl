@@ -63367,3 +63367,49 @@ Date: Wed Dec 11 22:45:38 EST 2013
 
 http://arrayfactor.org/textpattern/
 https://groups.google.com/forum/#!topic/comp.lang.forth/twFP0Bub554%5B1-25-false%5D
+
+
+Entry: ARM registers
+Date: Sun Dec 15 23:54:00 EST 2013
+
+Forth on ARM : what to do with registers?
+
+Probably best to make machines such that the register set that is used
+in interrupt mode is the same as in user mode.  This gives a natural
+two-machine, non-shared memory approach.
+
+Using R8-R15 for the Forth VM gives "free" context switching between
+main user thread and the FIQ handler.  That's a good start.
+
+Need to look at thumb mode too: apparently upper registers are a bit
+restricted.
+
+
+[1] https://groups.google.com/forum/#!topic/comp.lang.forth/uyzK-ABVum0
+
+Entry: Simple AND Useful
+Date: Mon Dec 16 00:13:00 EST 2013
+
+So it looks like platform-wise, I'm going to focus on cortex-M4F.
+Code generation needs two parts:
+
+- DSP dataflow code, compiled to efficient reg->reg asm.
+
+- System code, maybe forth?  Probably optimized for compactness and
+  easy of bootstrap / debug.
+
+- Cooperative multitasking with fast task switch / state machine pool?
+
+
+
+Entry: Staapl's multi-level approach to the extreme?
+Date: Mon Dec 16 10:31:33 EST 2013
+
+I wonder if it's not easier to do everything at once:
+
+- Macro engine
+- Assembler
+- Emulator
+
+If this is made full-circle, what falls out?
+
