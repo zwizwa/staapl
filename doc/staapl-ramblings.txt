@@ -57702,6 +57702,28 @@ drop be in the interpreter.
 This isn't so hard: reset the return stack and call interpreter.
 
 
+Entry: Parser oriented programming (from busy.txt)
+Date: Sat Apr  9 10:31:19 EDT 2011
+
+The PK2 debugging was interesting.  Harder than expected.  Working
+with buggy hardware is difficult.
+
+The USB is going better.  I found a way to use structs in Forth, by
+turning them into streams, and writing parsers.  The golden rule seems
+to be: don't use datastructures in Forth, use streams, tasks and/or
+state machines.  Parser-oriented programming.
+
+If you think of it, data structures are only postponed execution.
+This is very apparent in a language like Haskell: think of
+deforestation optimization where constructors and pattern matching get
+combined to eliminate the data structure entirely.
+
+On an embedded platform this is even more true since you really are
+more interacted with its relation to IO than for a normal computer,
+which might be data-storage central.
+
+
+
 
 Entry: ICSP on 8MHz
 Date: Sat Apr  9 18:19:35 EDT 2011
@@ -63427,5 +63449,44 @@ I wonder if it's not easier to do everything at once:
 If this is made full-circle, what falls out?
 
 
+
+
+Entry: Guided ASM programming
+Date: Mon Dec 16 21:47:48 EST 2013
+
+What I'm converging to is "guided assembly".  Find a way to do partial
+evaluation of ASM code for testing and validation.
+
+
+
+Entry: Learning from GA144
+Date: Mon Dec 16 22:06:19 EST 2013
+
+Maybe a multicore tiny uC approach isn't such a bad idea?  What is the
+cheapest Flash uC at this point?
+
+PIC10F200
+MASP430G2001[2]
+
+The PIC might be interesting for a statemachine-only approach since
+it's got a 2-word stack (iirc).
+
+[1] http://electronics.stackexchange.com/questions/8676/what-are-the-cheapest-microcontrollers
+[2] http://www.ti.com/product/msp430g2001
+
+
+
+Entry: Any Micro
+Date: Mon Dec 16 22:09:38 EST 2013
+
+How not to tie into a platform..
+
+I have a shitload of boards in my closet.
+
+Is there a way to get a subset of the Staapl ideas to run on any
+micro?  Maybe aiming at volume is a much better approach?
+
+- basic cross-compiled forth / stack machine
+- "guided assembler" for core routines
 
 
