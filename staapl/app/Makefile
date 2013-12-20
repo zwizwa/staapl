@@ -17,6 +17,11 @@ all:
 INTERP=mzscheme
 COMP=mzc
 
+FMS := $(shell ls *.fm)
+APPS := $(FMS:.fm=.app)
+
+apps: $(APPS)
+
 # Console to record in the .dict file
 # If 'baud' is defined as a macro in the .fm it uses uart, else pickit2.
 # STAAPLC_FLAGS = -c uart -d /dev/ttyUSB0
