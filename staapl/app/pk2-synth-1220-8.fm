@@ -54,9 +54,6 @@ load debug.f         \ dump, trace
     engine-off ;
     
     
-    
-\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1
-    
 
 
 

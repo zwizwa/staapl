@@ -23,3 +23,5 @@ load monitor-icsp.f \ boot block + icsp comm monitor code
 
 load usb.f
 
+: init-board ;
+    

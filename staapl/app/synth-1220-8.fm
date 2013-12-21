@@ -17,17 +17,17 @@ provide-all
 org-end
 
 load p18f1220.f
-load monitor-serial-core.f
+load monitor-serial.f
 
 path /home/tom/staapl/app  \ ???
 load synth/synth.f    \ application
 
-: warm
-    ' warm init-boot
-    init-all
-    init-board
-    engine-on
-    debug-serial? if interpreter ; then
+\ : warm
+\    ' warm init-boot
+\    init-all
+\    init-board
+\    engine-on
+\    debug-serial? if interpreter ; then
 
 \ Run free without console.
 : go
@@ -36,9 +36,5 @@ load synth/synth.f    \ application
 \ Setup info.    
 macro
 : fosc 8000000 ; \ internal osc
-: baud 38400 ;  
+: baud 38400 ;
 forth
-
-
-
-\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1

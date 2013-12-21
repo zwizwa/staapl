@@ -21,6 +21,7 @@ load monitor-serial.f \ boot block + serial comm monitor code
 macro
 : fosc 48 MHz ;
 : baud 230400 ;
+: init-board ;
 forth
 
 load usb.f

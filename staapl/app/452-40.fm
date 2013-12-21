@@ -20,6 +20,7 @@ load monitor-serial.f  \ boot block + serial monitor code
 macro
 : fosc 40 MHz ;   \ 4 clock cycles per instruction cycle gives 10 MIPS.
 : baud 230400 ;   \ Highest reliable rate using TTL-USB (no daisychain)
+: init-board ;
 forth
 
 : app interpreter ;

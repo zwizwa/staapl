@@ -27,7 +27,9 @@ macro
     #b11000000 TRISC or!     \ pin config
     baud fosc async.init-brg-16     
     ;
-    
+
+: init-board ;
+
 \ A/D converter
 \ DS39626C p. 224
 

@@ -107,7 +107,8 @@ macro
 forth     
 
 
-: rst ack
-    UCON USBEN low \ turn off USB machinery
-    0 for next
-    reset ;
+\ : rst ack
+\     UCON USBEN low \ turn off USB machinery
+\     0 for next
+\     reset ;
+  

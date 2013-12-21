@@ -37,6 +37,7 @@ macro
 : fosc 40 MHz ;  \ 4 clock cycles per instruction cycle gives 10 MIPS.
 : baud 230400 ;  \ Highest standard rate working with FTDI USB-TTL cable.
 : app-boot boot-size ;  \ default boot protect size
+: init-board ;
 forth
 
 load p18f2620.f        \ chip macros

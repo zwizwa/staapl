@@ -28,3 +28,5 @@ load monitor-icsp.f \ boot block + icsp comm monitor code
 
 
 \ #sh# pk2cmd -I -M -R -p PIC18F2550 -f $1
+
+: init-board ;

@@ -27,3 +27,4 @@ staapl pic18/vector
 
 
 
+: init-board ;

@@ -25,5 +25,6 @@ staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
 
+: init-board ;
 
 

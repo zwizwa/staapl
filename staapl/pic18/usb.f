@@ -1,6 +1,7 @@
 staapl pic18/shift
 staapl pic18/route
 staapl pic18/compose-macro
+staapl pic18/afregs
 
 \ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
 \ staapl pic18/usb-acm
