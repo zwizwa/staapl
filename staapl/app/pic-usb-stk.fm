@@ -17,7 +17,7 @@ provide-all
 
 \ no extended instruction set, no wdt, no code protect, 
 
-#x24 , #x0E , #x3A , #x1E ,   \ 20MHz XT (CPUDIV=divide by 5)
+#x24 , #x0E , #x3F , #x1E ,   \ 20MHz XT (CPUDIV=divide by 5)
 #x00 , #x81 , #x85 , #x00 ,   \ extended instruction set disabled
 #x0F , #xC0 , #x0F , #xE0 ,
 #x0F , #x40 , 

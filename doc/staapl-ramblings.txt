@@ -63490,3 +63490,41 @@ micro?  Maybe aiming at volume is a much better approach?
 - "guided assembler" for core routines
 
 
+Entry: USB board
+Date: Sat Dec 21 14:57:07 EST 2013
+
+So with the Olimex board I still get crashes.  Time to stop blaming it
+on the hardware, I guess :)
+
+I'm left with the same problem: the USB is hard to debug.  Two
+possible avenues:
+
+- look at what's happening on the wire
+- set up dev board with serial console
+
+I've lost a lot of time trying to make something "elegant",
+i.e. running the debug console over USB or PK2.  Conclusion is that it
+doesn't really work very well..  If you can't trust your core I/O
+there's no way to reliably run tests for both the PK2 interface and
+the USB.
+
+Changed CONFIG2L from 3A -> 3F
+
+It reset a couple of times but now seems to be stable.
+
+Nope.  Stable for a bit then issues again.
+khubd blocks..
+
+Maybe it's time to upgrade Linux..
+This is still 3.2
+
+I don't know what this is really..  The device keeps causing a wealth
+of error messages from the kernel.
+
+Maybe it's just time to give up on this USB business.
+
+Or, keep using this as a tough problem to learn a bit.  What I need:
+- A custom Linux kernel for USB debugging
+- A separate (real) PC that can be restarted easily
+
+
