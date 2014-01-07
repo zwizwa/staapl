@@ -63528,3 +63528,4 @@ Or, keep using this as a tough problem to learn a bit.  What I need:
 - A separate (real) PC that can be restarted easily
 
 
+

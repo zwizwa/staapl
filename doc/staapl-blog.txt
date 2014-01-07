@@ -4572,3 +4572,39 @@ It seems that no matter how hard you try to capture all possible
 configurations, in practice there is still this one hardware quirk you
 didn't think of..
 
+
+
+Entry: Interaction or debuggability?
+Date: Mon Jan  6 17:04:27 EST 2014
+
+I started doing this because I thought it was a neat idea, and because
+on the surface it makes a lot of sense.  Scheme is good for
+metaprogramming and embedding domain specific languages.
+
+But then, execution.  How to do this in a way that makes sense in 2014
+as opposed to 30-40 years ago?
+
+The main idea behind Staapl is: workstations are fast so can support
+more complex language systems, but live interaction is still useful.
+How to merry those two ideas?
+
+Two designs:
+- Emulate on-target interpreter
+- Write explicit server-client system
+
+
+After doing a bit more debugging and having a hard time with the
+Staapl setup, I come to one conclusion that is different than my
+original assumption.  What you want to do for tough debugging problems
+is not necessarily interaction, but _inspection_ and _behavioral
+modification__ in general.  Interaction can facilitate inspection, but
+often in control problems the real world doesn't like to be slowed
+down.  You want to: 
+
+1. see what's going on and record it
+2. orchestrate a particular scenario = experiment
+3. iteratively modify the experiment to narrow down scope
+
+
+
+
