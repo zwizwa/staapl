@@ -63532,9 +63532,20 @@ Or, keep using this as a tough problem to learn a bit.  What I need:
 Entry: Powering up PIC-USB-STK using pic-usb-stk.fm
 Date: Sat May  3 12:16:08 EDT 2014
 
-Seems to work.  Have it hooked up through Beagle USB 12.
+6fa581c655cb4a60b01675ecb88c0525a68bff07
 
+* PIC-USB-STK
+Seems to work.  Have it hooked up through Beagle USB 12.
 One detail: setup is grounded, that might have some effect.
+
+Touching any of the pins doesn't seem to be a problem.
+
+
+* PIC DIP40 MINI KIT
+
+Doesn't work on 5V.  Seems to work on 3v3.  Touching pins is a
+problem.
+
 
 
 Entry: Next?

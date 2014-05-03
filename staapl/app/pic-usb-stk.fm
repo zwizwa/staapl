@@ -36,7 +36,8 @@ staapl pic18/afregs
 staapl pic18/vector
 
 macro
-: init-board
+: init-board ; \ FIXME  
+: init-board_
     0 TRISA !
     0 TRISB !
     0 TRISC !
