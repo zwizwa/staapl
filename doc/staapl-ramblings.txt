@@ -63544,7 +63544,8 @@ Touching any of the pins doesn't seem to be a problem.
 * PIC DIP40 MINI KIT
 
 Doesn't work on 5V.  Seems to work on 3v3.  Touching pins is a
-problem.
+problem.  After setting TRIS on all ports, only touching D+ D- gives
+problems.
 
 
 
@@ -63557,3 +63558,6 @@ I'd like to try:
 - develop state machine language (compile to Forth / C)
 
 - audio gadget
+
+- let go of serial before sending command?
+
