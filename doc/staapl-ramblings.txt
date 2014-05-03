@@ -63529,3 +63529,20 @@ Or, keep using this as a tough problem to learn a bit.  What I need:
 
 
 
+Entry: Powering up PIC-USB-STK using pic-usb-stk.fm
+Date: Sat May  3 12:16:08 EDT 2014
+
+Seems to work.  Have it hooked up through Beagle USB 12.
+
+One detail: setup is grounded, that might have some effect.
+
+
+Entry: Next?
+Date: Sat May  3 12:43:17 EDT 2014
+
+If USB is working, that's great.  Means things are wide open.  Stuff
+I'd like to try:
+
+- develop state machine language (compile to Forth / C)
+
+- audio gadget
