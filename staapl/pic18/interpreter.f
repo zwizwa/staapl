@@ -132,6 +132,7 @@ forth
 \ the RPC answer.  Essentially the target->host RPC protocol is the
 \ host->target protocol turned "inside out".  See debug.f
 
+: receive3 receive
 : receive2 receive receive ;
 
 \ Block transfer.  These are "context-free", meaning they do not need
@@ -158,7 +159,7 @@ forth
 
 \ pointer initialization
 : lda  receive2 a!! ack ;
-: ldf  receive2 f!! ack ;
+: ldf  receive3 f!!! ack ;
 
 
 

@@ -160,6 +160,8 @@
   (apply target-send/w args)
   (void/values (target-service/w)))
 
+
+                                    
 ;; Last arg is list.
 (define (target-rpc/b* . args)
   (apply target-rpc/b (apply list* args)))
@@ -186,7 +188,11 @@
 (define (t>* n)          (target-rpc/b 2 n))
 (define (~texec/b addr)  (target-send/w 3 addr))
 (define (a! addr)        (target-rpc/w 4 addr))
-(define (f! addr)        (target-rpc/w 5 addr))
+(define (f! addr)        (target-rpc/b 5
+                                       (band #xFF addr)
+                                       (band #xFF (>>> addr 8))
+                                       (band #xFF (>>> addr 16))
+                                       ))
 (define (target-sync)    (target-rpc/b 0))
 
 

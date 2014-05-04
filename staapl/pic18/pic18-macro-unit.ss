@@ -541,6 +541,7 @@
  (stack-data-ptr FSR0L)
 
  ;; the 'f' register is similar but for flash program memory access
+ (fu TBLPTRU)
  (fh TBLPTRH)
  (fl TBLPTRL)
  
@@ -552,6 +553,8 @@
 
  
  (f!!   fh ! fl !)  ;; ( lo hi -- )
+
+ (f!!!  fu ! fh ! fl !)  ;; ( lo hi u -- )
  
  (@a+  POSTINC2 @)
  (!a+  POSTINC2 !)

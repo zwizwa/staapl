@@ -20,7 +20,7 @@
    @f+ @f @a+ @a 
    !f+ !a+ !a !a-
    @i !i
-   a!! f!! ah al fh fl
+   a!! f!! f!!! ah al fh fl
 
    b@ b! @b !b  ;; banked access
 
