@@ -63561,3 +63561,13 @@ I'd like to try:
 
 - let go of serial before sending command?
 
+- an "OS", i.e. solve some user interface issues
+
+
+
+Entry: OS
+Date: Sun May  4 10:32:23 EDT 2014
+
+
+
+

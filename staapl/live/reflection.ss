@@ -116,7 +116,13 @@
 
 
 ;; start console
-(define (run [startup void])
+;;
+;; `close-after-command` allows robustness against /dev/ttyACMx
+;; disappearing.
+
+(define (run [startup void]
+             [close-after-command #t]
+             )
   (dynamic-wind
     void
     (lambda ()
@@ -127,7 +133,10 @@
                               
         (startup))
       (repl (lambda (cmd)
-              (eval `(forth-command ,cmd)))))
+              (when close-after-command (eval `((comm-reconnect))))
+              (eval `(forth-command ,cmd))
+              (when close-after-command (eval `((comm-close))))
+              )))
     (lambda ()
       ;; (printf "Closing console.\n")
       (eval '((comm-close)))))) ;; pk2 needs proper shutdown
