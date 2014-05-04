@@ -42,7 +42,7 @@
   (with-handlers
       ((void (lambda (ex)
                (printf "Error opening console ~a:\n" type)
-               (display (ex))
+               (display ex)
                (newline))))
     (match type
            ('uart       (comm-uart dev baud))

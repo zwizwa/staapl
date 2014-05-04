@@ -68,6 +68,10 @@
 (define comm-on        (make-parameter (lambda () (display "Target power-on not implemented.\n"))))
 (define comm-off       (make-parameter (lambda () (display "Target power-off not implemented.\n"))))
 
+(define comm-timeout 'timeout)
+(define (comm-timeout? ex) (eq? comm-timeout ex))
+
+
 (define (on) ((comm-on)))
 (define (off) ((comm-off)))
 (define (reconnect) ((comm-reconnect)))
@@ -109,23 +113,9 @@
 ;;   (io-debug (lambda () . expr)))
 
 
-;; How to do this properly?  Current operation needs to be aborted, as
-;; a reconnect places the console back into the initial state.
-(define ((handle-io-error tag) ex)
-  (printf "~s: error: ~s, reconnecting..\n" tag ex)
-  ((comm-reconnect))
-  (raise 'reconnect))
 
-(define (in/b)
-  (with-handlers ((void (handle-io-error 'in/b)))
-    (let ((byte ((comm-in))))
-      ;; (printf "in: ~s\n" byte)
-      byte)))
-
-(define (out/b byte)
-  ; (printf "out: ~s\n" byte)
-  (with-handlers ((void (handle-io-error 'out/b)))
-    ((comm-out) byte)))
+(define (in/b)       ((comm-in)))
+(define (out/b byte) ((comm-out) byte))
 
 ;; word/byte lists
 (define (bytes->words lst) (join-nibble-list  lst 0 8))

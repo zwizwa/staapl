@@ -13,7 +13,8 @@
 (define repl-command-hook
   (make-parameter
    (lambda (interpret str)
-     (interpret str)
+     (unless (equal? "" str)
+       (interpret str))
      (interpret "OK"))))
 
 (define (repl-break-exit command str)

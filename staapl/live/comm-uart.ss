@@ -7,6 +7,10 @@
  comm-uart)
 
 
+(define (comm-uart-timeout? ex) (eq? ex 'timeout))
+
+
+
 
 
 ;; serial port
@@ -28,31 +32,37 @@
 (define (comm-uart name baud)
 
   (define (standard-serial-port)
-    (define in #f)
-    (define out #t)
+    (define in  #f)
+    (define out #f)
+    (define timeout-seconds 1)
 
     (define (connect)
-      (let-values
-          (((i o)
-            (open-input-output-file name #:exists 'append)))
-        (file-stream-buffer-mode o 'none)
-        (stty name baud)
-        (set! in  i)
-        (set! out o)))
+      (unless (and in out)
+        (let-values
+            (((i o)
+              (open-input-output-file name #:exists 'append)))
+          (file-stream-buffer-mode o 'none)
+          (stty name baud)
+          (set! in  i)
+          (set! out o))))
 
     (comm-in
      (lambda ()
        (d: "uart-in ~x\n"
            ;; (read-byte-timeout i 3)
-           (read-byte in)
+           (if (sync/timeout timeout-seconds in)
+               (read-byte in)
+               (begin
+                 ((comm-close))
+                 (raise comm-timeout)))
            )))
     (comm-out
      (lambda (b)
        (write-byte (d: "uart-out ~x\n" b) out)))
     (comm-close
      (lambda ()
-       (close-output-port out)
-       (close-input-port  in)
+       (when out (close-output-port out) (set! out #f))
+       (when in  (close-input-port  in ) (set! in  #f))
        ))
     (comm-reconnect
      (lambda ()
@@ -61,7 +71,7 @@
        ;;(printf "connect ~s ~s\n" name baud)
        (connect)))
 
-    (connect)
+    ;; (connect)
     
     )
 

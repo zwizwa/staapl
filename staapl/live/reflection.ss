@@ -117,29 +117,41 @@
 
 ;; start console
 ;;
-;; `close-after-command` allows robustness against /dev/ttyACMx
 ;; disappearing.
 
-(define (run [startup void]
-             [close-after-command #t]
-             )
-  (dynamic-wind
-    void
-    (lambda ()
-      (with-handlers
-          ((void (lambda (ex)
-                   (printf "Console startup failed:\n~a\n" ex)
-                   (printf "Continuing with REPL anyway:\n"))))
-                              
-        (startup))
-      (repl (lambda (cmd)
-              (when close-after-command (eval `((comm-reconnect))))
-              (eval `(forth-command ,cmd))
-              (when close-after-command (eval `((comm-close))))
-              )))
-    (lambda ()
-      ;; (printf "Closing console.\n")
-      (eval '((comm-close)))))) ;; pk2 needs proper shutdown
+(define (run [startup void])
+  (define (con) (eval `((comm-reconnect))))
+  (define (dis) (eval `((comm-close))))
+
+  (define (with-connection thunk)
+    (with-handlers
+        ((void (lambda (ex)
+                 (let ((ex-pretty
+                        (cond
+                         ((exn:fail:filesystem? ex) "Can't open console device.")
+                         (else (exn-message ex)))))
+                   (printf "ERROR: ~a\n" ex-pretty))
+                 (dis)
+                 #f)))
+      (con)
+      (thunk)
+      (dis)
+      #t))
+  
+  ;; Retry startup code until success.
+  (define (run-startup)
+    (unless (with-connection startup)
+      (sleep 1)
+      (run-startup)))
+  (run-startup)
+  
+  ;; Start mainloop
+  (repl (lambda (cmd)
+          ;; (printf "cmd: ~a\n" cmd)
+          (with-connection
+           (lambda ()
+             (eval `(forth-command ,cmd))))))
+  )
 
 
 ;; Code garbage collection.
