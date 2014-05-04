@@ -204,7 +204,7 @@
                 (pretty-print code))))
            (save-module
             (lambda ()
-              (save "#!/usr/bin/env mzscheme")
+              (save "#!/usr/bin/env racket")
               (save "#lang scheme/load")  ;; (2)
               (save ";; Language" reqs)
               (save ";; Console"  boot-run))))

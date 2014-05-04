@@ -63568,3 +63568,10 @@ I'd like to try:
 Entry: OS
 Date: Sun May  4 10:32:23 EDT 2014
 
+Because of macros, current arch doesn't allow persistence across
+racket starts.  However, it should be possible to place separate apps
+in containers and compile them as a kernel.
+
+Probably not worth the trouble.  What i really want to do is to run
+something in the background while the console is active, so state can
+be manipulated.

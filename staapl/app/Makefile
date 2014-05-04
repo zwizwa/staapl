@@ -78,7 +78,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 
 %.live: %.dict %.flash
 	$(COMP) -vk ../live.ss
-	while echo '\nrestarting $@\nhit ctrl-C to quit loop'; do sleep 1; $(INTERP) $*.dict; done
+	@while echo -ne '\nrestarting $@\nPress ctrl-C to quit'; do sleep 1; echo -ne '\r                    \n'; $(INTERP) $*.dict; done
 
 
 clean:
