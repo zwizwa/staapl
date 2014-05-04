@@ -128,6 +128,7 @@
         ((void (lambda (ex)
                  (let ((ex-pretty
                         (cond
+                         ((not (exn? ex)) ex)
                          ((exn:fail:filesystem? ex) "Can't open console device.")
                          (else (exn-message ex)))))
                    (printf "ERROR: ~a\n" ex-pretty))

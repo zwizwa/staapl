@@ -34,7 +34,6 @@
   (define (standard-serial-port)
     (define in  #f)
     (define out #f)
-    (define timeout-seconds 1)
 
     (define (connect)
       (unless (and in out)
@@ -50,11 +49,11 @@
      (lambda ()
        (d: "uart-in ~x\n"
            ;; (read-byte-timeout i 3)
-           (if (sync/timeout timeout-seconds in)
+           (if (sync/timeout (comm-timeout) in)
                (read-byte in)
                (begin
                  ((comm-close))
-                 (raise comm-timeout)))
+                 (raise 'timeout)))
            )))
     (comm-out
      (lambda (b)
