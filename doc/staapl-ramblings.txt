@@ -63625,7 +63625,32 @@ If it is found to be a forth macro, the macro is compiled and
 executed.  Next time it will be identified as a forth word.
 
 
+So scat is still used internally to implement the macro language, but
+let's remove it from the console.
+
+It's convoluted..  The point to patch seems to be the call to `tsim`
+in rpn-target.ss -- I'm commenting it out.
+
+Trouble is: how to compile a word from that point.  I don't remember
+how it all fits together.  What happens if I type ": + + ;" in the
+console?
 
 
+The arrows are call or macro expand, the eval is explicit.
+
+dip40kit.dict
+------> reflection.ss :: run
+-eval-> rpn-target.ss :: forth-command
+------> forth-lex.ss  :: forth-lex-string/cps
+------> rpn-target.ss :: target>
+------> rpn-target.ss :: target:
+------> rpn-target.ss :: target-parse
+
+
+In order to get view to the string -> sexpr representation I'm adding
+a print statement in `target>`
+
+
+So it +- works, but words defined at the console are not properly compiled.
 
 

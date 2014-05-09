@@ -60,14 +60,17 @@
 ;; Might need to do it differently?
 
 
+
 (define (target-interpret sym)
   (define (dbg dict) '(printf "target-interpret: ~a ~a\n" sym dict))
   (define defined? (make-ns-defined? sym))
+
   (cond
    ((defined? '(host))     => (lambda (x) x))
    ((target-find-code sym) => (lambda (x) (dbg 'code)  (live: ',x texec/b)))
    ((target-find-data sym) => (lambda (x) (dbg 'data)  (live: ',x >t)))
-   ((defined? '(macro))    => (lambda (x) (dbg 'macro) (live: ',x tsim)))
+   ;; ((defined? '(macro)) => (lambda (x) (dbg 'macro) (live: ',x tsim)))
+   ((defined? '(macro))    => (lambda (x) (dbg 'macro) (target-compile-macro sym) (target-interpret sym)))
    (else                                  (dbg 'live)  (live-interpret sym))))
 
 (define-syntax-rule (target id)
@@ -92,7 +95,9 @@
 
 ;; State is not persistent.
 (define-syntax-rule (target> code ...)
-  (void ((target: code ...) (state:stack))))
+  (begin
+    '(printf "(target> . ~s)\n" '(code ...))
+    (void ((target: code ...) (state:stack)))))
 
 (define-syntax-rule (forth-command str)
   (forth-lex-string/cps target> str))

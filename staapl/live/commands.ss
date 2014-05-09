@@ -195,7 +195,7 @@
  ;; terminated with "exit" for convenience and robustness.
  ((code/last (c ...))  (inline-code (: last c ... exit) last))
  ((::) (slurp code/last))
- 
+
  )
 
 ;; Change the meaning of a word by prefixing it with another word.

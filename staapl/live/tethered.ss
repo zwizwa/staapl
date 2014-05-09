@@ -542,7 +542,8 @@
   (let next ((b b))
     (if (free-block? b)
         (when erasing
-          (printf "memory clear.\n"))
+          ;; (printf "memory clear.\n")
+          (printf "\n"))
         (begin
           (unless erasing
             (printf "erasing blocks: ")

@@ -184,3 +184,9 @@
 
 (define (print-tword sym)
   (eval `(print-target-word (ns (target) ,sym))))
+
+
+(define (target-compile-macro sym)
+  (let ((macro (eval `(ns (macro) ,sym))))
+    ;; (printf "macro: ~s ~s\n" sym macro)
+    (eval `(target> : ,sym ',macro compile exit))))

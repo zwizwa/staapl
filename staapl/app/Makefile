@@ -44,8 +44,8 @@ STAAPLC = $(INTERP) -l staapl/staaplc --
 PROGRAM = pk2cmd -I -M -R 
 
 # Hack to include .f dependencies which are not properly handled by staaplc.
-F_APP   := $(shell find .               -name '*.f')
-F_PIC18 := $(shell find ../staapl/pic18 -name '*.f')
+F_APP   := $(shell find .        -name '*.f')
+F_PIC18 := $(shell find ../pic18 -name '*.f')
 F_LIB := $(F_APP) $(F_PIC18)
 
 # Compile the module before instantiating it in staaplc.
