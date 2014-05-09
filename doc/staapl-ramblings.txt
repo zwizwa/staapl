@@ -63575,3 +63575,57 @@ in containers and compile them as a kernel.
 Probably not worth the trouble.  What i really want to do is to run
 something in the background while the console is active, so state can
 be manipulated.
+
+
+
+Entry: Application: synchronous data logger
+Date: Mon May  5 11:33:44 EDT 2014
+
+Should be quite straightforward to do.  Interrupt-driven IOC, USB at
+low-pri.
+
+
+Entry: Data transfer to host
+Date: Fri May  9 12:09:49 EDT 2014
+
+So in order to make the data logger, what is needed is data transfer
+to host.  How to multiplex with console?
+
+It would be nice to be able to do things while console is running.
+Currently the monitor doesn't listen for pic-initiated traffic.
+
+
+
+Entry: Next
+Date: Fri May  9 12:18:53 EDT 2014
+
+Time to reflect.  The problem I keep running into is that the Forth
+dialect is a bit distorted.  How to make that a bit easier to use?
+Things like conditional macros get in the way quite a bit.
+
+So let's write a lib.
+
+
+
+Entry: Compiled macros
+Date: Fri May  9 12:46:22 EDT 2014
+
+Compiled macros only work in the console as interactive command or as
+"load".  This makes little sense.  Maybe all macros should be replaced
+by words once they show up in the console?
+
+What about removing the scat interpretation and replacing it with
+auto-compiled macros?
+
+What is typed at the console is either:
+- a forth word
+- a scheme function
+
+If it is found to be a forth macro, the macro is compiled and
+executed.  Next time it will be identified as a forth word.
+
+
+
+
+
+
