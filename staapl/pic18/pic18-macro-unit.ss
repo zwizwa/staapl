@@ -341,7 +341,7 @@
 
  ;; FIXME: using carry is simpler, since it's not affected by 'drop'
  ;; (([qw l] jw/false)       (macro: ~>z ,(insert `([bpz 0 ,l])))) ;; STUB
- (([qw l] jw/false)       ([decf WREG 0 0] [drop] [bpc 0 l]))
+ (([qw l] jw/false)       ([decf WREG 0 0] [drop] [bpc 1 l]))
 
  ;; The 'not' macro is useful as predicate negation. Note that it's not the
  ;; same as "FF XOR" !

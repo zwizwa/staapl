@@ -30,7 +30,7 @@ staapl pic18/vector
 
 
 macro
-
+: fosc 48000000 ;
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
   

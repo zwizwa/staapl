@@ -8,15 +8,8 @@
 
 \ Some low level libraries.
 
-load ad.f  \ A to D conversion
+load ad.f       \ A to D conversion
+load busyloop.f 
+load debug.f
 
-
-\ more compiled macros
-: init-ad init-ad ;
-
-\ load bitbang-serial.f
-\ load busyloop.f
-
-
-\ staapl afregs
 
