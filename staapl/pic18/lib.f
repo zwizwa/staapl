@@ -9,7 +9,6 @@
 \ Some low level libraries.
 
 load ad.f  \ A to D conversion
-load cm.f  \ compiled macros
 
 
 \ more compiled macros
