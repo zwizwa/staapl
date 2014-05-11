@@ -11,10 +11,11 @@
 
 
 macro
+: spi-ss LATA 5 ;  
 : config-spi-master | CPL CKE SMP |
     TRISC 7 low  \ SDO
     TRISB 1 low  \ SCK
-    TRISA 5 high \ SS
+    TRISA 5 low \ SS
 
     CPL 7 <<<
     CKE 6 <<< or SSPSTAT !
@@ -23,6 +24,18 @@ macro
     ;
 
 : init-spi-master 0 0 0 config-spi-master ;
+
+: mcp4922-init-spi 1 0 0 config-spi-master ;  \ mode 1-1
+
+: mcp4922-tx \ byte --
+    spi-ss low
+    swap-nibble dup
+    #x0F and #x70 or spi-tx \ channel A, not buffered.
+    #xF0 and         spi-tx
+    spi-ss high
+    ;
+    
+    
 
 : test-spi init-spi-master 0 begin dup spi-tx/rx drop 1+ again ;
    
@@ -43,6 +56,7 @@ macro
     spi-wait
     SSPBUF @ ;
 
+: spi-tx spi-tx/rx drop ;
     
     
 forth
