@@ -63654,3 +63654,12 @@ a print statement in `target>`
 So it +- works, but words defined at the console are not properly compiled.
 
 
+Entry: A PIC is a piece of hardware
+Date: Sun May 11 11:20:12 EDT 2014
+
+The key in designing PIC apps is to make the software get out of the
+way of the hardware.  Staapl has been focused so much on the software
+/ language part of things that I forgot about this.  Designing "proper
+circuits" again made me realize that making something work from a
+bunch of not-so-ideal components is what electronics is about...
+
