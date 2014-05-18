@@ -535,7 +535,7 @@ forth
     RCON IPEN high    \ enable priority levels
     INTCON GIEH high  \ high priority ie
     INTCON GIEL high  \ low priority ie
-    PIR2 USBIP low    \ usb low priority
+    IPR2 USBIP low    \ usb low priority
     #x7F UIE !        \ enable all USB interrupts (ORed to produce USBIF)
     PIE2 USBIE high   \ enable USBIF interrupt
     \ Wait for device to be configured
