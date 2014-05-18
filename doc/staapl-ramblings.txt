@@ -63672,6 +63672,7 @@ Date: Sat May 17 01:14:14 EDT 2014
 - SPI isr, USB low pri
 
 
+
 Entry: This is about getting to know the PIC 18F4550.
 Date: Sat May 17 12:14:25 EDT 2014
 
@@ -63683,3 +63684,29 @@ it as art: impose limitation and work with it.
 Let's explicitly take a different approach than apps that have
 economic pressure, where it makes sense to pick the uC architecture
 based on requirements and make it work in C or ASM.
+
+
+
+Entry: Boot block & ISRs.
+Date: Sat May 17 22:17:00 EDT 2014
+
+Working interactively, it's a bit problematic to update the boot
+block.  Especially on USB where the interrupt routine needs to be
+installed.
+
+Maybe there needs to be a routine that erases the boot block and
+restores default?  Alternatively, inspect the USB ISR at boot and
+reinstall if it's not there.
+
+The easy solution is to jump into erasable space.  Though that's not
+desirable in cases where the fast ISR really needs to be fast.
+
+Let's create a .f file that copies the boot block from somewhere else.
+For now it's ok to just reflash or "nop out".
+
+
+Another way is to make the USB isr smart and have it detect a reset.
+This way the first block after the boot block can fall into the USB
+ISR.
+
+Yeah, hacking..
