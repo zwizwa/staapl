@@ -63663,3 +63663,23 @@ way of the hardware.  Staapl has been focused so much on the software
 circuits" again made me realize that making something work from a
 bunch of not-so-ideal components is what electronics is about...
 
+
+
+Entry: Function generator
+Date: Sat May 17 01:14:14 EDT 2014
+
+- SPI at max rate: OK 12MHz
+- SPI isr, USB low pri
+
+
+Entry: This is about getting to know the PIC 18F4550.
+Date: Sat May 17 12:14:25 EDT 2014
+
+All in all it's not such a big problem to be limited to a specific
+architecture in Staapl.  I'd like to continue on the sheepsynth route:
+explore what is possible with this device; get to know it well.  Treat
+it as art: impose limitation and work with it.
+
+Let's explicitly take a different approach than apps that have
+economic pressure, where it makes sense to pick the uC architecture
+based on requirements and make it work in C or ASM.

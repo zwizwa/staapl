@@ -12,20 +12,22 @@
 
 macro
 : spi-ss LATA 5 ;  
-: config-spi-master | CPL CKE SMP |
+: config-spi-master | CPL CKE SMP SSPM |
     TRISC 7 low  \ SDO
     TRISB 1 low  \ SCK
-    TRISA 5 low \ SS
+    TRISA 5 low  \ SS
 
     CPL 7 <<<
     CKE 6 <<< or SSPSTAT !
 
-    CPL 4 <<< #x22 or SSPCON1 !
+    CPL 4 <<<
+    SSPM or
+    #x20 or SSPCON1 !
     ;
 
-: init-spi-master 0 0 0 config-spi-master ;
+: init-spi-master 0 0 0 2 config-spi-master ;
 
-: mcp4922-init-spi 1 0 0 config-spi-master ;  \ mode 1-1
+: mcp4922-init-spi 1 0 0 0 config-spi-master ;  \ mode 1-1
 
 : mcp4922-tx \ byte --
     spi-ss low
@@ -34,7 +36,10 @@ macro
     #xF0 and         spi-tx
     spi-ss high
     ;
-    
+
+: mcp4922-test \
+    mcp4922-init-spi
+    0 begin dup mcp4922-tx 1+ again ;
     
 
 : test-spi init-spi-master 0 begin dup spi-tx/rx drop 1+ again ;

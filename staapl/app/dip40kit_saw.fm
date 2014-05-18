@@ -1,0 +1,49 @@
+#lang staapl/pic18 \ -*- forth -*-
+
+\ PIC DIP40 MINI KIT - PIC Developmen​t Board kit for DIP40 PIC with 18F4550 + 4Mhz XTAL
+\ http://100mhz.com/pic-dspic-pic32-pic24/development-boards/pic-18f4550-usb-demo-development-board-pic18f4550-microcontroller-1074.html
+
+provide-all
+
+\ config
+#x300000 org-begin
+
+\ no extended instruction set, no wdt, no code protect, 
+
+#x20 , #x0E , #x3A , #x1E ,   \ 4MHz XT drives PLL directly
+#x00 , #x81 , #x85 , #x00 ,   \ extended instruction set disabled
+#x0F , #xC0 , #x0F , #xE0 ,
+#x0F , #x40 , 
+
+org-end
+
+staapl pic18/boot   \ chip init code
+
+load p18f4550.f          \ chip macros
+load monitor-usbserial.f \ boot block + icsp comm monitor code
+
+load usb.f   \ usb library
+
+staapl pic18/string
+staapl pic18/afregs
+staapl pic18/vector
+
+
+macro
+: fosc 48000000 ;
+: pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
+: hello 0 LATB ! pause #xF LATB ! ;
+  
+: init-board     \ FIXME
+    #xF0 TRISB ! \ low nibble is LED1-LED4
+    0 TRISA !   \ FIXME: check these
+    0 TRISC !
+    0 TRISD !
+    0 TRISE !
+    hello       \ remove if doesn't fit in bootloader
+    ;
+    
+forth
+
+
+load saw.f
