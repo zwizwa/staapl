@@ -63686,6 +63686,17 @@ economic pressure, where it makes sense to pick the uC architecture
 based on requirements and make it work in C or ASM.
 
 
+Entry: Bug in usb.f : PIR2 USBIP low
+Date: Sat May 17 22:04:42 EDT 2014
+
+This should be
+IPR2 USBIP low   (bit 5)
+
+Bit 5 in PIR2 is USBIF
+
+The default is 1, high pri.
+
+
 
 Entry: Boot block & ISRs.
 Date: Sat May 17 22:17:00 EDT 2014
@@ -63710,3 +63721,27 @@ This way the first block after the boot block can fall into the USB
 ISR.
 
 Yeah, hacking..
+
+
+
+Entry: Siggen with USB?
+Date: Sat May 17 23:20:33 EDT 2014
+
+I'd like to build a signal generator based on MCP4922 SPI DAC.  Max
+SPI on 48MHz is 12MHz.  Chip needs 2 bytes/sample.  Max rate is about
+600kHz.  With PIC running USB this needs to run from a timer
+interrupt.  Problem is saving/restoring context if PIC is also running
+USB interrupt.
+
+Probably this is best done on a chip with DMA which can apparently[1]
+be found on 18F46J11[2] ("Looking closer I see it on few newer
+18FxxJxx devices like: 18FxxJ13, 18FxxJ50, 18FxxJ53")
+
+Data sheet lists it as "1024-byte SPI Direct Memory Access (DMA)".
+
+I think I have some newer 18F46K22 in the box, they don't have it.
+
+
+[1] http://www.microchip.com/forums/m534827.aspx
+[2] http://ww1.microchip.com/downloads/en/DeviceDoc/39932D.pdf
+
