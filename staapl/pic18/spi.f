@@ -11,11 +11,12 @@
 
 
 macro
-: spi-ss LATA 5 ;  
+: spi-ss LATE 0 ; \ LATA 5 ;  
 : config-spi-master | CPL CKE SMP SSPM |
     TRISC 7 low  \ SDO
     TRISB 1 low  \ SCK
-    TRISA 5 low  \ SS
+    \ TRISA 5 low  \ SS
+    TRISE 0 low
 
     CPL 7 <<<
     CKE 6 <<< or SSPSTAT !
@@ -32,7 +33,7 @@ macro
 : mcp4922-tx \ byte --
     spi-ss low
     swap-nibble dup
-    #x0F and #x70 or spi-tx \ channel A, not buffered.
+    #x0F and #x70 or spi-tx \ channel A, buffered, no gain, powered
     #xF0 and         spi-tx
     spi-ss high
     ;
