@@ -30,7 +30,7 @@ macro
 
 : mcp4922-init-spi 1 0 0 0 config-spi-master ;  \ mode 1-1
 
-: mcp4922-tx \ byte --
+: mcp4922-tx-A \ byte --
     spi-ss low
     swap-nibble dup
     #x0F and #x70 or spi-tx \ channel A, buffered, no gain, powered
@@ -38,6 +38,15 @@ macro
     spi-ss high
     ;
 
+: mcp4922-tx-B \ byte --
+    spi-ss low
+    swap-nibble dup
+    #x0F and #xF0 or spi-tx \ channel A, buffered, no gain, powered
+    #xF0 and         spi-tx
+    spi-ss high
+    ;
+
+    
 : mcp4922-test \
     mcp4922-init-spi
     0 begin dup mcp4922-tx 1+ again ;

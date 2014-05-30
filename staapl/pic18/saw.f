@@ -1,5 +1,7 @@
 \ Saw tooth oscillator based on comparator 1
 
+load spi.f
+
 
 macro
 : /DISCHARGE LATD 0 ;
@@ -40,3 +42,11 @@ forth
     org-end
 
 
+
+: init-saw
+    init-comparator
+    mcp4922-init-spi
+    ;
+
+: A mcp4922-tx-A ;
+: B mcp4922-tx-B ;        
