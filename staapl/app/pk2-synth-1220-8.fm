@@ -17,7 +17,6 @@ org-end
 
 staapl pic18/boot    \ chip init code
 load p18f1220.f      \ chip macros
-load monitor-icsp.f  \ boot block + icsp monitor code
 load synth/synth.f   \ synth core
 load debug.f         \ dump, trace
 
@@ -53,9 +52,12 @@ load debug.f         \ dump, trace
     2execute
     engine-off ;
     
+
+load monitor-icsp.f  \ boot block + icsp monitor code
+
+\ FALLTHROUGH
+: application interpreter ;
     
-
-
 
   
     

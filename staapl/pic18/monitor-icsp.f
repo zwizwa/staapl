@@ -18,8 +18,8 @@ macro
 : init-comm ;
 
 \ For staaplc
-: console-type ` pk2 ;    
-    
+: console-type ` pickit2 ;
+
 forth
 
 : forward-msg forward-msg-ignore ;
@@ -34,9 +34,9 @@ load fast-prog.f
 load fast-chkblk.f
 
 
-\ Common init-XYZ code and macros for interpreter and boot.
+\ Common init-* code and macros for interpreter and boot.
 load monitor-init.f    
 
 
-
+\ FALLTHROUGH!
 

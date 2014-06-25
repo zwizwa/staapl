@@ -62,7 +62,7 @@
 ;; oscillator.  It can be set to 3us for 48MHz / 40MHz operation.
 (define icsp-us (make-parameter 15))
 
-(define icsp-debug (make-parameter #f))
+(define icsp-debug (make-parameter #t))
 
 ;; Needs size-tagged message.
 (define (icsp-send bytes

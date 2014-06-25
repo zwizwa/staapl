@@ -63774,3 +63774,45 @@ based on usb uart (no baudrate), real uart (baudrate) and the pk2
 interface.
 
 So if -c is not defined, it should do lookup.
+
+Ok, fixed:
+
+;; Figure out console config
+(define (console-spec)
+
+  ;; Unless overridden by command line arguments, get the console
+  ;; specs from the Forth source files.
+  (define (spec-from-source param id)
+    (unless (param)
+      (let ((v (eval `(macro-constant ',id))))
+        (when v (param v)))))
+
+  (define (device-string x)
+    (if (symbol? x) (symbol->string x) x))
+
+  (spec-from-source console 'console-type)
+  (spec-from-source device  'console-device)
+  (spec-from-source baud    'console-baud)
+  
+  `(console ',(console) ,(device-string (device)) ,(baud)))
+
+
+
+Entry: pk2 driver problem
+Date: Wed Jun 25 12:36:22 EDT 2014
+
+Connecting to PICkit2.
+datfile:  /usr/local/bin/PK2DeviceFile.dat
+iProduct: PICkit 2 Microcontroller Programmer
+ERROR: result arity mismatch;
+ expected number of values not received
+  expected: 1
+  received: 255
+  values...:... [255 total] ...
+
+
+Looks like this needs a whole lot of close examination..
+Assume broken for now.
+
+
+
