@@ -29,8 +29,6 @@ forth
 \ to start the interpreter anyway.
 \ : application interpreter ;  
 
-\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1
-
 : init-board ;
 
 load monitor-serial.f   \ boot block + serial monitor code + startup

@@ -1,6 +1,7 @@
 \ Staapl monitor on top of a synchronous serial protocol over the ICSP
 \ pins, implemented using a PICkit2 programmer/debugger.
 
+staapl pic18/boot
 staapl pic18/prom
 staapl pic18/route
 

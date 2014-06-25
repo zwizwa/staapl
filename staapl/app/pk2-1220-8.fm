@@ -14,10 +14,9 @@ provide-all
  #x03 , #x40 ,                \ C D
 org-end
 
-staapl pic18/boot    \ chip init code
+: init-board ;
+    
 load p18f1220.f      \ chip macros
 load monitor-icsp.f  \ boot block + icsp monitor code
 
-: init-board ;
 
-\ #sh# pk2cmd -I -M -R -p PIC18F1220 -f $1

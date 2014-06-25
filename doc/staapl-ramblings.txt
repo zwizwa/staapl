@@ -63830,3 +63830,15 @@ start bit length = 142 baud.
 Ok, looks like `init-chip` isn't called from init-cold.
 Changing this: FIXME: check that 18f2550 is still ok.
 
+OK, works again.  Checking usb serial for 18f2550
+
+
+
+Entry: icsp level problems 
+Date: Wed Jun 25 14:44:30 EDT 2014
+
+Cecking the icsp lines there are data collisions.  Something's way off..
+
+
+
+

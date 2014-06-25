@@ -38,8 +38,8 @@ forth
 
 : forward-msg forward-msg-ignore ;
 
-load monitor-init.f
 load interpreter.f
+load monitor-init.f
 
 \ first app word comes here.
     
