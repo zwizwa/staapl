@@ -63830,15 +63830,37 @@ start bit length = 142 baud.
 Ok, looks like `init-chip` isn't called from init-cold.
 Changing this: FIXME: check that 18f2550 is still ok.
 
-OK, works again.  Checking usb serial for 18f2550
+OK, works again.  Checking usb serial for 18f2550: ok
+
 
 
 
 Entry: icsp level problems 
 Date: Wed Jun 25 14:44:30 EDT 2014
 
-Cecking the icsp lines there are data collisions.  Something's way off..
+Cecking the icsp lines there are level problems / drive collisions.
+Something's way off..
+
+
+Entry: pk2
+Date: Wed Jun 25 14:52:56 EDT 2014
+
+If I can't get it to work again it's probably time to stop bothering
+and/or implement a programmer from scratch.
 
 
 
+Entry: synth-1220-8.fm
+Date: Wed Jun 25 15:11:38 EDT 2014
+
+engine-on
+100 p0
+50 pwm
+
+
+Entry: next
+Date: Wed Jun 25 15:14:17 EDT 2014
+
+Time to get midi control working for sheepsint.  That would also be
+nice to test the analog synth.
 

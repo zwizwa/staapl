@@ -68,7 +68,7 @@
 (define comm-on        (make-parameter (lambda () (display "Target power-on not implemented.\n"))))
 (define comm-off       (make-parameter (lambda () (display "Target power-off not implemented.\n"))))
 
-(define comm-timeout   (make-parameter 1))
+(define comm-timeout   (make-parameter 1000000))
 
 (define (on) ((comm-on)))
 (define (off) ((comm-off)))

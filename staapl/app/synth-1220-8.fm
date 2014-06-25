@@ -12,25 +12,13 @@ provide-all
 #x300000 org-begin
  #x00 , #xC8 , #x0F , #x00 ,  \ 0 1 2 3
  #x00 , #x80 , #x80 , #x00 ,  \ 4 5 6 7
- #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B  Using PK2, so don't need boot protect
+ #x03 , #xC0 , #x03 , #xE0 ,  \ 8 9 A B
  #x03 , #x40 ,                \ C D
 org-end
 
 load p18f1220.f
 
-path /home/tom/staapl/app  \ ???
-load synth/synth.f    \ application
-
-\ : warm
-\    ' warm init-boot
-\    init-all
-\    init-board
-\    engine-on
-\    debug-serial? if interpreter ; then
-
-\ Run free without console.
-: go
-    engine-on begin param again
+load synth/demo2.f
 
 \ Setup info.    
 macro
@@ -39,5 +27,3 @@ macro
 forth
 
 load monitor-serial.f
-: app interpreter ;  
-  
