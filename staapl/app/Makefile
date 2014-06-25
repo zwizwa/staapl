@@ -34,7 +34,7 @@ apps: $(APPS)
 
 
 ## FLUNK hacks
-STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
+# STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
 # STAAPLC_FLAGS = -c uart -d /dev/tty-FT9FP1Z6 --baud 9600
 
 

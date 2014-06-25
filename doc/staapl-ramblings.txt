@@ -63745,3 +63745,32 @@ I think I have some newer 18F46K22 in the box, they don't have it.
 [1] http://www.microchip.com/forums/m534827.aspx
 [2] http://ww1.microchip.com/downloads/en/DeviceDoc/39932D.pdf
 
+
+
+Entry: Getting sheepsint to run again
+Date: Wed Jun 25 11:54:35 EDT 2014
+
+Changed something in the bootup sequence, not sure what exactly..
+
+dip40kit.fm is working so let's start there.
+
+It only has 'init-board' defined, which is used in init-cold, used in
+_cold = boot vector.
+
+The pk2-synth-1220-8.fm module does not have this word compiled.  Why
+does it work at all?
+
+There's at least one problem: the .dict still uses usb and that's
+talking to the dip40kit I have attached..
+
+First fix the staaplc device selector
+
+
+Entry: staaplc device selector
+Date: Wed Jun 25 12:03:14 EDT 2014
+
+It seems that staaplc should be smart about setting up comm correctly
+based on usb uart (no baudrate), real uart (baudrate) and the pk2
+interface.
+
+So if -c is not defined, it should do lookup.

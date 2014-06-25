@@ -18,6 +18,11 @@ macro
 : interactive? 1 ;
 : init-comm init-usb-isr ;
 
+\ for staaplc
+: console-type   ` uart ;
+: console-device ` /dev/ttyACM0 ;
+: console-baud   0 ;
+    
 forth
 
   

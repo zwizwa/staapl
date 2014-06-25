@@ -17,6 +17,9 @@ macro
 : interactive? icsp-idata low? ;
 : init-comm ;
 
+\ For staaplc
+: console-type ` pk2 ;    
+    
 forth
 
 : forward-msg forward-msg-ignore ;

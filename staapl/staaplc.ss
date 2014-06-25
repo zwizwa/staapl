@@ -132,20 +132,22 @@
 
 ;; Figure out console config
 (define (console-spec)
+
+  ;; Unless overridden by command line arguments, get the console
+  ;; specs from the Forth source files.
+  (define (spec-from-source param id)
+    (unless (param)
+      (let ((v (eval `(macro-constant ',id))))
+        (when v (param v)))))
+
+  (define (device-string x)
+    (if (symbol? x) (symbol->string x) x))
+
+  (spec-from-source console 'console-type)
+  (spec-from-source device  'console-device)
+  (spec-from-source baud    'console-baud)
   
-  ;; Fetch baud rate from monitor source if it's not defined.
-  (unless (baud)
-    (let ((b (eval '(macro-constant 'baud))))
-      (when b (baud b))))
-
-  ;; If baud is defined, infer console and device parameters if necessary.
-  (when (baud)
-    (unless (console) (console 'uart))
-    (unless (device)  (device "/dev/tty-staapl")))
-
-  ;; Default console is PICKIT2
-  (unless (console) (console 'pickit2))
-  `(console ',(console) ,(device) ,(baud)))
+  `(console ',(console) ,(device-string (device)) ,(baud)))
 
 
 (define (instantiate-and-save)
