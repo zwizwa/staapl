@@ -27,6 +27,11 @@ macro
  
 : init-comm
     baud fosc init-serial ; \ init serial port RX/TX logic
+
+\ For staaplc
+: console-type   ` uart ;
+: console-device ` /dev/ttyUSB0 ;
+: console-baud   baud ;
     
 forth
   

@@ -63815,4 +63815,18 @@ Looks like this needs a whole lot of close examination..
 Assume broken for now.
 
 
+Entry: Ordinary serial on 1220
+Date: Wed Jun 25 13:00:59 EDT 2014
+
+Also broken.
+
+It gets a single '0' message.
+Did something change in the protocol?
+
+Seems there's something very wrong with the baud rate..  Measuring 7ms
+start bit length = 142 baud.
+
+
+Ok, looks like `init-chip` isn't called from init-cold.
+Changing this: FIXME: check that 18f2550 is still ok.
 

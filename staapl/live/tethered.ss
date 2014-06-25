@@ -50,7 +50,7 @@
 ;; Debug
 (define-syntax-rule (d: fmt . e)
   (let ((val (begin . e)))
-    ; (printf fmt val)
+    ;; (printf fmt val)
     val))
 
 
@@ -87,7 +87,8 @@
 
 ;; This sends a dummy command through the ring.  Each client will
 ;; decrement the address and forward.
-(define (target-count)
+(define (target-count) 1)
+(define (target-count-disabled)
   (let ((max-id 255))
     (out/b max-id)
     (out/b 0)
@@ -144,7 +145,7 @@
   (define (no-answer? id) (< id 128))
   (let* ((id (in/b))
          (size (in/b)))
-    ;; (printf "id:~s size:~s\n" id size)
+    ;;(printf "id:~s size:~s\n" id size)
     (let ((payload (for/list ((i (in-range size))) (in/b))))
       (when (no-answer? id)
         (target! 0)

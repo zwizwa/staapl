@@ -26,7 +26,7 @@ macro
     
     init-xs    \ return stacks (inline)
     init-abort \ data stacks
-    init-board \ setup outputs and clock
+    init-warm  \ chip & board init
     init-comm  \ serial interpreter comm init
 ;
     
