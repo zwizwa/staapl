@@ -30,9 +30,17 @@
 ;; Universal list -> macro convertor: each element is quoted and
 ;; posprocessed with a glue macro. This can be used to construct
 ;; tables or simple embedded point-free languages.
-(define (list->macro glue lst)
+(define (list->macro m lst)
   (scat-compose
-   (map (lambda (el) (macro: ',el ,glue)) lst)))
+   (map (lambda (el) (macro: ',el ,m)) lst)))
+
+(define (table->macro m rows)
+  (scat-compose
+   (map (lambda (row)
+          (scat-compose
+           (append (map (lambda (el) (macro: ',el)) row)
+                   (list m))))
+        rows)))
 
 ;; Convert a stack of immediates in list form to a macro that can
 ;; recreate the stack.

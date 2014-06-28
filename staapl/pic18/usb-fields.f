@@ -63,7 +63,7 @@ macro
        descriptor-size      \ transport wrapper
     m> bLength
     3  bDescriptorType
-    m> ' w, bin, ; \ FIXME: do proper unicode translation
+    m> ' w, for-list ; \ FIXME: do proper unicode translation
 
 \ endpoing descriptor macros
 : mBulkEndpoint | addr |

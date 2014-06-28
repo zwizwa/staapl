@@ -64003,3 +64003,6 @@ So I'm going to add one there:
 
  ((|'scheme| name) (',name))          ;; lookup in scheme namespace
 
+
+Alright.  So next is a word that iterates a macro over a table (list of lists).
+

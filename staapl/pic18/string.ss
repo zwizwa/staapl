@@ -24,8 +24,8 @@ macro
 : pascal sym>bin dup l:length swap l:cons ;
   
 : sym \ sym -- lo hi
-    >macro                            \ convert quoted symbol to macro
-    [ >m table-> m> pascal ' , bin, ] \ macro tail that implements Flash bin word.
-    compile-call-macro/exit ;         \ glue together 2 parts, compile + call compiled word
+    >macro                                \ convert quoted symbol to macro
+    [ >m table-> m> pascal ' , for-list ] \ macro tail that implements Flash bin word.
+    compile-call-macro/exit ;             \ glue together 2 parts, compile + call compiled word
 forth
   
