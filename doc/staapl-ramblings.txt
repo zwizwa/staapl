@@ -63864,3 +63864,16 @@ Date: Wed Jun 25 15:14:17 EDT 2014
 Time to get midi control working for sheepsint.  That would also be
 nice to test the analog synth.
 
+
+Entry: Hard problems first?
+Date: Sat Jun 28 10:24:44 EDT 2014
+
+USB midi.
+Requires changes to the way the USB state machine is set up.
+Trouble is that will require some deep thought, maybe not the right moment.
+
+Maybe start at revisiting the descriptor specs.  Currently this is
+quite low-level.
+
+
+
