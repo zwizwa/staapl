@@ -1,55 +1,7 @@
 #lang racket/base
-;; High-level specification of USB descriptor structures.
+(require "usb-comp.ss")
 
-;; Compilation buffer
-(define *rbytes* (make-parameter '()))
-(define (bytes) (reverse (*rbytes*)))
-(define (push-byte x) (*rbytes* (cons x (*rbytes*))))
-(define (push-word nb-bytes value)
-  (when (> nb-bytes 0)
-    (push-byte (bitwise-and value #xFF))
-    (push-word (sub1 nb-bytes) (arithmetic-shift value -8))))
-(define (bytes-chunk thunk)
-  (parameterize ((*rbytes* '()))
-    (thunk)
-    (reverse (*rbytes*))))
-(define (push-bytes bs)
-  (when (not (null? bs))
-    (push-byte (car bs))
-    (push-bytes (cdr bs))))
-                 
-
-;; String buffer
-(define *rstrings* (make-parameter '()))
-(define (push-string s)
-  (let ((str (*rstrings*)))
-    (push-byte (length str))
-    (*rstrings* (cons s str))))
-
-;; Types
-(define (byte arg) (push-word 1 arg))
-(define (word arg) (push-word 2 arg))
-(define (istring arg) (push-string arg))
-
-
-;; Structure
-(define (_descriptor thunk)
-  (let* ((chunk (bytes-chunk thunk)))
-    (let ((l1 (length chunk))
-          (l2 (list-ref chunk 0)))
-      (when (not (= l1 l2))
-        (raise `(descriptor-size error ,l1 ,l2)))
-      (push-bytes chunk))))
-  
-(define-syntax-rule (descriptor forms ...)
-  (_descriptor (lambda () forms ...)))
-
-
-
-(define-syntax-rule (define-descriptor-field (name typ) ...)
-  (begin (define name typ) ...))
-
-(define-descriptor-field
+(Fields
 
   (bLength             byte)
   (bDescriptorType     byte)    
@@ -93,8 +45,9 @@
   (bInterval           byte))
 
 
-(define (mBulkEndpoint addr)
-  (descriptor
+(define (BulkEndpoint
+         #:bEndpointAddress [addr #f])
+  (Descriptor
    (bLength 7);; Length is verified
    (bDescriptorType 5)
    (bEndpointAddress addr)
@@ -103,8 +56,9 @@
    (bInterval 0)))
 
 
-(define (mInterruptEndpoint addr)
-  (descriptor
+(define (InterruptEndpoint
+         #:bEndpointAddress [addr #f])
+  (Descriptor
    (bLength 7);; Length is verified
    (bDescriptorType 5)
    (bEndpointAddress addr)
@@ -113,7 +67,7 @@
    (bInterval 10)))
           
            
-(define (mDeviceDescriptor
+(define (DeviceDescriptor
          #:bMaxPacketSize [mps 64]
          #:idVendor       [iv #x05F9]
          #:idProduct      [ip #xFFF0]
@@ -121,7 +75,7 @@
          #:iProduct       [p "Staapl"]
          #:iSerialNumber  [s "um0"]
          )
-  (descriptor
+  (Descriptor
    (bLength 18)
    (bDescriptorType 1)
    (bcdUSB #x110)
@@ -138,4 +92,103 @@
    (bNumConfigurations 1)))
   
   
+  
+(define (ConfigurationDescriptor
+         #:wTotalLength [tl -1]
+         #:bNumInterfaces [ni 2]
+         )
+         
+  (Descriptor
+   (bLength 9)
+   (bDescriptorType 2)
+   (wTotalLength tl)
+   (bNumInterfaces ni)
+   (bConfigurationValue 1)
+   (iConfiguration 0)   ;; Not defined
+   (bmAttributes #xA0)  ;; Remote wakeup
+   (bMaxPower #x32)))   ;; 100mA
+   
+   
+(define (InterfaceDescriptor
+         #:bInterfaceNumber [in 0]
+         #:bNumEndpoints [ne #f]
+         #:bInterfaceClass [ic #x02] ;; CDC
+         #:bInterfaceSubClass [isc #x02] ;; ACM
+         )
+  (Descriptor
+   (bLength 9)
+   (bDescriptorType 4)
+   (bInterfaceNumber in)
+   (bAlternateSetting 0)
+   (bNumEndpoints ne)
+   (bInterfaceClass ic)
+   (bInterfaceSubClass isc)
+   (bInterfaceProtocol 0)
+   (iInterface 0)
+   ))
+   
+
+
+(define (ConfigurationDescriptorCDC)
+  (TotalLength (nb_bytes)
+
+     (ConfigurationDescriptor
+      #:wTotalLength nb_bytes)
+
+     ;; INTERFACE: communication
+     (InterfaceDescriptor
+      #:bInterfaceNumber   0
+      #:bInterfaceClass    #x02  ;; CDC
+      #:bInterfaceSubClass #x02  ;; ACM
+      #:bNumEndpoints      1)
+
+     ;; Class-specific header functional descriptor
+     (Descriptor 
+      (bLength 5)
+      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+      (byte #x00)            ;; Header functional descriptor subtype
+      (word #x0110))
+
+     ;; Class-specific call management functional descriptor
+     (Descriptor
+      (bLength 5)
+      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+      (byte #x01)            ;; Call management functional descriptor subtype
+      (byte #x01)            ;; Device handles call management itself
+      (byte #x00))           ;; No associated data iterface
+      
+     ;; Class-specific abstract control management functional descriptor
+     (Descriptor
+      (bLength 4)
+      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+      (byte #x02)            ;; Abstract control management descriptor subtype
+      (byte #x00))           ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
+
+     ;; Class-specific union functional descriptor with one slave interfac
+     (Descriptor
+      (bLength 5)
+      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+      (byte #x06)            ;; Union descriptor subtype
+      (byte 0)               ;; Number of master interface is #0
+      (byte 1))              ;; First slave interface is #1
+
+     (InterruptEndpoint
+      #:bEndpointAddress #x82)
+
+     ;; INTERFACE: communication
+     (InterfaceDescriptor
+      #:bInterfaceNumber   1
+      #:bInterfaceClass    #x0A  ;; CDC data
+      #:bInterfaceSubClass #x00
+      #:bNumEndpoints      2)
+     (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
+     (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
+     ))
+     
+     
+ 
+     
+      
+      
+      
   
