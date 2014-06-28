@@ -63876,4 +63876,130 @@ Maybe start at revisiting the descriptor specs.  Currently this is
 quite low-level.
 
 
+Entry: USB descriptors
+Date: Sat Jun 28 12:35:13 EDT 2014
+
+Boring problems first!
+So I got a basic specification language for USB
+= a byte compiler + some size checks and 2-pass size propagation.
+
+Next: couple it to Staapl.
+Essentially, make a simple way to patch scheme sequence generators to
+staapl macro iteration.  I.g. feed a list of lists to a macro.
+
+There are already Scheme quotation marks.  How do they work again?
+
+: foo { + }
+
+That doesn't seem to do anything.  It just executes a toplevel Scheme
+expression at compilation time.
+
+: foo { display 123 }
+123OK
+: foo { display macro/foo }
+#state->stateOK
+
+So next: how to access the compilation stack from toplevel scheme?
+
+Well let's see.  If this structure isn't really used, why not turn it
+into something useful.  E.g. evaluate the expression and push the
+return values to the compilation stack?
+
+{ ->
+rpn-curly-brace-transformer ->
+rpn-compile-toplevel ->
+d-insert ->
+sos-stash
+
+Let's see how it is actually transformed.
+Enable dictionary debug.
+
+
+(define forth-dictionary-log
+  (make-parameter
+   void
+   ;; pretty-print
+   ))
+
+Re-discovering the '::' word (temp code compile and run).
+
+:: { display 123 }
+123.OK
+
+It can be used to enter scheme:
+
+:: { forth-dictionary-log pretty-print }
+.OK
+: foo 123 ;
+((forth-word mf:reg mf:wrap-word "#f" rpn-lambda)
+ (forth-word
+  mf:reg
+  mf:wrap-word
+  foo
+  rpn-lambda
+  (macro-push 123)
+  (scat-apply (macro |;|))))
+..OK
+
+
+So the scheme inserted by { . } really has nothing to do with forth code:
+
+: foo { display 123 }
+((forth-word mf:reg mf:wrap-word "#f" rpn-lambda)
+ (display 123)
+ (forth-word mf:reg mf:wrap-word foo rpn-lambda))
+123OK
+
+
+
+Two approaches:
+
+- Define a macro/ word in Scheme.  This requires a glue module,
+  meaning we can't just import Scheme modules in a Forth module.
+
+- Decouple the Scheme part completely.  I.e. no Staapl deps in the
+  module that implements a data structure generator.
+
+
+Let's see if it's possible to just import a scheme module, then go
+from there.
+
+So there is a `file` import word, it just wasn't patched through to
+live mode in commands.ss
+
+So this all works:
+
+;; foo.ss:
+#lang racket
+(provide macro/foo)
+(define macro/foo 123)
+
+
+require-file foo.ss
+OK
+: bar ' foo ;
+.OK
+sea bar
+bar:	0400 0800 6EEC [movwf PREINC0 0]
+	0401 0802 0C7B [retlw 123]
+
+
+Maybe add a scheme name quoter?
+
+Going into the depths here:
+
+rpn/parse.ss:
+   ;; Quote supports unquote as a way to introduce
+   ;; arbitrary scheme values into s-expressions.
+
+But the forth layer doesn't seem to support that.
+
+In macro-forth.ss:
+
+ ((|'| name)       (',(macro name)))
+ ((|`| name)       ('name))
+
+So I'm going to add one there:
+
+ ((|'scheme| name) (',name))          ;; lookup in scheme namespace
 

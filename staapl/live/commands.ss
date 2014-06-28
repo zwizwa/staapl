@@ -208,7 +208,7 @@
 ;; the result is passed to the compiler.
 (prefix-parsers-wrapped
  (target) declare:
- (variable 2variable load require planet staapl))
+ (variable 2variable load require planet staapl require-file))
 
 ;; If any of these words are encountered, the entire line is parsed
 ;; and passed to the compiler.

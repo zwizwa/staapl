@@ -115,10 +115,11 @@
  (macro)
 ;; ((provide-all) (|{| provide (all-defined-out) |}|))
 
- ((|'| name)       (',(macro name)))
- ((|`| name)       ('name))
+ ((|'| name)       (',(macro name)))  ;; lookup in macro namespace
+ ((|`| name)       ('name))           ;; literal symbol
+ ((|'scheme| name) (',name))          ;; lookup in scheme namespace
 
- ((provide w)       (|{| provide-words w |}| ))
+ ((provide w)      (|{| provide-words w |}| ))
  
 
 
