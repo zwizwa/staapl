@@ -64020,7 +64020,65 @@ Trying to build a "flat" compiler for a state machine language,
 meaning no stacks, only global variables.
 
 
-Entry: Menage..
+Entry: USB descriptor code -> dip40kit.fm
 Date: Sun Jun 29 13:43:08 EDT 2014
 
-Let's continue swapping in the new USB descriptor code.
+Got it working with manual Forth glue code.
+Next is to automate.
+
+: device-descriptor        \   -- lo hi
+    table-> 'scheme desc-device ' , for-list ;
+
+: configuration-descriptor \ n -- lo hi
+    drop \ Single configuration
+    table-> 'scheme desc-config ' , for-list ;
+
+: string0 table-> 'scheme desc-string0 ' , for-list ;
+: string1 table-> 'scheme desc-string1 ' , for-list ;
+: string2 table-> 'scheme desc-string2 ' , for-list ;
+: string3 table-> 'scheme desc-string3 ' , for-list ;
+    
+: string-descriptor        \ n -- lo hi
+    3 and route
+        string0 .
+        string1 .
+        string2 .
+        string3 ;
+
+
+(define-values
+  (desc-device
+   desc-config
+   desc-string0
+   desc-string1
+   desc-string2
+   desc-string3
+   ;;desc-string
+  )
+  (DescriptorContext
+   (let ((descriptors
+          (list
+           (chunk (DeviceDescriptor #:iSerialNumber "dip40kit-desc.rkt"))
+           (chunk (ConfigurationDescriptorCDC))
+           (string-descriptor 0)
+           (string-descriptor 1)
+           (string-descriptor 2)
+           (string-descriptor 3))))
+     ;; (pretty-print descriptors)
+     (apply values
+            (map prefix-length descriptors))
+     )))
+
+
+
+Entry: Compiling tables
+Date: Sun Jun 29 15:37:27 EDT 2014
+
+Forgot how to compile a macro "in the background" and return its
+address.
+
+compile-macro/raw
+
+So of course this was done before:
+
+compose-macro.rkt: i/c

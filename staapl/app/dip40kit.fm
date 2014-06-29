@@ -26,6 +26,8 @@ load monitor-usbserial.f \ boot block + icsp comm monitor code
 
 \ USB descriptors
 
+staapl pic18/compose-macro
+
 : device-descriptor        \   -- lo hi
     table-> 'scheme desc-device ' , for-list ;
 
@@ -33,17 +35,13 @@ load monitor-usbserial.f \ boot block + icsp comm monitor code
     drop \ Single configuration
     table-> 'scheme desc-config ' , for-list ;
 
-: string0 table-> 'scheme desc-string0 ' , for-list ;
-: string1 table-> 'scheme desc-string1 ' , for-list ;
-: string2 table-> 'scheme desc-string2 ' , for-list ;
-: string3 table-> 'scheme desc-string3 ' , for-list ;
-    
 : string-descriptor        \ n -- lo hi
-    3 and route
-        string0 .
-        string1 .
-        string2 .
-        string3 ;
+    route \ FIXME: no bounds checking
+        'scheme desc-strings
+        [ [ table-> ] swap >macro compose-macro
+          [ ' , for-list ]        compose-macro
+          i/c . ]
+        for-list
 
 require-file dip40kit-desc.rkt
 

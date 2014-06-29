@@ -10,8 +10,7 @@
  TotalLength
  chunk
  prefix-length
- nb-string-descriptors
- string-descriptor
+ string-descriptors
  )
 
 (define-syntax-rule (Fields (name typ) ...)
@@ -47,9 +46,10 @@
 (define (push-string s)
   (if (not (string? s))
       (push-byte s)
-      (let ((str (*rstrings*)))
-        (push-byte (length str))
-        (*rstrings* (cons s str)))))
+      (let ((strs (*rstrings*)))
+        (push-byte (add1 (length strs)))
+        (*rstrings* (cons s strs)))))
+        
 
 ;; String to UTF-16
 (define convert-UTF-16 (bytes-open-converter "UTF-8" "UTF-16"))
@@ -106,16 +106,10 @@
                   (length bytes))
             bytes)))
 
-(define (nb-string-descriptors)
-  (add1 (length (*rstrings*))))
-(define (string-descriptor n)
-  (if (zero? n)
-      (list 4 3 #x04 #x09)     ;; US English
-      (let ((desc
-             (StringDescriptor
-              (list-ref (strings) (sub1 n)))))
-        ;; (pretty-print desc)
-        desc)))
+
+(define (string-descriptors)
+  (cons (list 4 3 #x04 #x09)  ;; US English
+        (map StringDescriptor (strings))))
 
     
     

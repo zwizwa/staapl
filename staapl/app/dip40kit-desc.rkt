@@ -10,24 +10,16 @@
 (define-values
   (desc-device
    desc-config
-   desc-string0
-   desc-string1
-   desc-string2
-   desc-string3
-   ;;desc-string
-  )
+   desc-strings)
   (DescriptorContext
    (let ((descriptors
           (list
-           (chunk (DeviceDescriptor #:iSerialNumber "dip40kit-desc.rkt"))
-           (chunk (ConfigurationDescriptorCDC))
-           (string-descriptor 0)
-           (string-descriptor 1)
-           (string-descriptor 2)
-           (string-descriptor 3))))
-     ;; (pretty-print descriptors)
-     (apply values
-            (map prefix-length descriptors))
+           (prefix-length (chunk (DeviceDescriptor #:iSerialNumber "dip40kit-desc.rkt")))
+           (prefix-length (chunk (ConfigurationDescriptorCDC)))
+           (string-descriptors)
+           ;;(map prefix-length (string-descriptors))
+           )))
+     (apply values descriptors)
      )))
 
 
