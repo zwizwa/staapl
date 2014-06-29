@@ -1,5 +1,11 @@
-
 #lang racket/base
+
+;; High-level specification of USB descriptor structures.
+;; Provides management for:
+;;   - Symbolic field names
+;;   - Descriptor size checks
+;;   - String management
+
 (require
  racket/pretty)
 (provide
@@ -17,7 +23,6 @@
   (begin (define name typ) ...))
 
 
-;; High-level specification of USB descriptor structures.
 
 ;; Compilation buffer
 (define *rbytes* (make-parameter '()))

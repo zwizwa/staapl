@@ -1,3 +1,5 @@
+\ FIXME: convert to new usb support
+
 staapl pic18/string
 staapl pic18/route
 load usb-fields.f

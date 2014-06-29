@@ -2,6 +2,15 @@
 
 staapl pic18/compose-macro
 
+macro
+: compile-descriptors
+    >m ' route compile m>
+        [ [ table-> ] swap >macro compose-macro
+          [ ' , for-list ]        compose-macro
+          i/c . ]
+        for-list ;    
+forth
+
 : device-descriptor        \   -- lo hi
     table-> 'scheme desc-device ' , for-list ;
 
@@ -10,9 +19,5 @@ staapl pic18/compose-macro
     table-> 'scheme desc-config ' , for-list ;
 
 : string-descriptor        \ n -- lo hi
-    route \ FIXME: no bounds checking
-        'scheme desc-strings
-        [ [ table-> ] swap >macro compose-macro
-          [ ' , for-list ]        compose-macro
-          i/c . ]
-        for-list
+    'scheme desc-strings
+    compile-descriptors
