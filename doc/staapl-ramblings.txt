@@ -64013,3 +64013,14 @@ passes them to the macro.
 
 
 
+Entry: Flat code
+Date: Sun Jun 29 12:46:36 EDT 2014
+
+Trying to build a "flat" compiler for a state machine language,
+meaning no stacks, only global variables.
+
+
+Entry: Menage..
+Date: Sun Jun 29 13:43:08 EDT 2014
+
+Let's continue swapping in the new USB descriptor code.
