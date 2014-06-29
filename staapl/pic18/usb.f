@@ -1,3 +1,10 @@
+\ USB driver
+\ depends on Flash tables with descriptors:
+\    device-descriptor        \   -- lo hi
+\    configuration-descriptor \ n -- lo hi
+\    string-descriptor        \ n -- lo hi
+
+
 staapl pic18/shift
 staapl pic18/route
 staapl pic18/compose-macro
@@ -7,7 +14,7 @@ staapl pic18/afregs
 \ staapl pic18/usb-acm
 
 \ load usb-descr-usbserial.f 
-load usb-descr-cdcacm.f 
+\ load usb-descr-cdcacm.f 
 
 staapl pic18/serial
 
@@ -561,6 +568,7 @@ forth
     STATUS!
     0 retfie ;
 
+\ USB is fixed at low priority interrupt.    
 ' lo-isr init-isr-lo
 
  

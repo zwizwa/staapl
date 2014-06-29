@@ -22,7 +22,8 @@ staapl pic18/boot   \ chip init code
 load p18f4550.f          \ chip macros
 load monitor-usbserial.f \ boot block + icsp comm monitor code
 
-load usb.f   \ usb library
+load usb-descr-cdcacm.f  \ USB descriptors
+load usb.f               \ USB library
 
 staapl pic18/string
 staapl pic18/afregs
