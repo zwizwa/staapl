@@ -64004,5 +64004,12 @@ So I'm going to add one there:
  ((|'scheme| name) (',name))          ;; lookup in scheme namespace
 
 
-Alright.  So next is a word that iterates a macro over a table (list of lists).
+Alright.  So next is a word that iterates a macro over a table (list
+of lists).
+
+There was "bin," which is now renamed to "for-list" and I also added a
+"for-table" which does the same but loads rows onto the stacks and
+passes them to the macro.
+
+
 
