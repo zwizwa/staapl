@@ -44,7 +44,7 @@ macro
     0 TRISC !
     0 TRISD !
     0 TRISE !
-    \ hello       \ remove if doesn't fit in bootloader
+    hello       \ remove if doesn't fit in bootloader
     ;
     
 forth
