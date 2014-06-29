@@ -17,6 +17,7 @@
  chunk
  prefix-length
  string-descriptors
+ usb-device
  )
 
 (define-syntax-rule (Fields (name typ) ...)
@@ -119,3 +120,16 @@
 
     
     
+;; For usage see dip40kit-desc.rkt
+(define-syntax-rule
+  (usb-device device configuration ...)
+  (DescriptorContext
+   (let ((descriptors
+          (list
+           (prefix-length (chunk device))
+           (list (prefix-length (chunk configuration)) ...)
+           (map prefix-length (string-descriptors))
+           )))
+     ;; (pretty-print descriptors)
+     (apply values descriptors)
+     )))

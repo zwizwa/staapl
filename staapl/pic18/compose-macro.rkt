@@ -22,6 +22,10 @@ macro
 \ For normal uses this is probably what's most useful.  Like i, but
 \ compile as call, e.g. for jump tables.
 : i/c [ exit ] compile-call-macro/exit ;
+
+\ Same but without exit
+: i/c* macro->label/raw cw ;
+    
     
 forth
   

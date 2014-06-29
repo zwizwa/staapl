@@ -734,4 +734,25 @@ forth
 
 
 
-  
+\ Compilers for USB descriptors defined as raw byte tables
+\ (e.g. gathered using 'scheme from a Scheme file)
+    
+staapl pic18/compose-macro
+
+macro
+: descriptor-compiler \ list -- table-compiler
+    [ table-> ] swap >macro compose-macro
+    [ ' , for-list ]        compose-macro ;
+
+\ These compile to Flash a single descriptor: -- lo hi    
+: usb-descriptor
+    descriptor-compiler compile ;    
+\ or an array of descriptors: n -- lo hi
+: usb-descriptors
+    \ FIXME: no bounds check
+    >m ' route compile m>
+        [ descriptor-compiler i/c* . ]
+        for-list ;
+
+\ see dip40kit.fm for example
+forth
