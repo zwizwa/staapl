@@ -102,8 +102,9 @@
 ;; Convert native string to descriptor.
 (define (StringDescriptor str)
   (let ((bytes (bytes->list (string->bytes/utf-16 str))))
-    (append (list 4 ;; bDescriptorType
-                  (length bytes))
+    (append (list 
+             (+ 2 (length bytes)) ;; bLength
+             4)                   ;; bDescriptorType
             bytes)))
 
 

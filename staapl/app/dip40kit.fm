@@ -22,30 +22,9 @@ staapl pic18/boot   \ chip init code
 load p18f4550.f          \ chip macros
 load monitor-usbserial.f \ boot block + icsp comm monitor code
 
-\ load usb-descr-cdcacm.f  \ USB descriptors
-
-\ USB descriptors
-
-staapl pic18/compose-macro
-
-: device-descriptor        \   -- lo hi
-    table-> 'scheme desc-device ' , for-list ;
-
-: configuration-descriptor \ n -- lo hi
-    drop \ Single configuration
-    table-> 'scheme desc-config ' , for-list ;
-
-: string-descriptor        \ n -- lo hi
-    route \ FIXME: no bounds checking
-        'scheme desc-strings
-        [ [ table-> ] swap >macro compose-macro
-          [ ' , for-list ]        compose-macro
-          i/c . ]
-        for-list
-
-require-file dip40kit-desc.rkt
-
-load usb.f               \ USB library
+load usb.f                     \ USB library
+load usb-descr-scheme.f        \ descriptor forth<->scheme glue
+require-file dip40kit-desc.rkt \ scheme file with descriptor tables       
 
 staapl pic18/string
 staapl pic18/afregs

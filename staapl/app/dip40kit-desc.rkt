@@ -16,8 +16,7 @@
           (list
            (prefix-length (chunk (DeviceDescriptor #:iSerialNumber "dip40kit-desc.rkt")))
            (prefix-length (chunk (ConfigurationDescriptorCDC)))
-           (string-descriptors)
-           ;;(map prefix-length (string-descriptors))
+           (map prefix-length (string-descriptors))
            )))
      (apply values descriptors)
      )))

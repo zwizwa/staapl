@@ -3,6 +3,7 @@
 ;; Bundles lowlevel macro code and adds some convenience functions.
 
 (require
+ racket/pretty
  "../tools.rkt")
 (provide
  (all-from-out "../tools.rkt"))
@@ -31,6 +32,7 @@
 ;; posprocessed with a glue macro. This can be used to construct
 ;; tables or simple embedded point-free languages.
 (define (list->macro m lst)
+  ;;(pretty-print `(list->macro ,m ,lst))
   (scat-compose
    (map (lambda (el) (macro: ',el ,m)) lst)))
 
