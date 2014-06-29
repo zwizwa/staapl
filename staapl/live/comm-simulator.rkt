@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 (require
- "tethered.ss"
- "../tools.ss")
+ "tethered.rkt"
+ "../tools.rkt")
 
 (provide comm-simulator)
 

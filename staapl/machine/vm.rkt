@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- (for-syntax "vm-stx.ss"
-             scheme/base))
+ (for-syntax "vm-stx.rkt"
+             racket/base))
 
 (provide (all-defined-out))
 

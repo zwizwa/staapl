@@ -1,18 +1,18 @@
-#lang scheme/base
-(require scheme/unit
-         "macro-forth.ss"
-         "../rpn/main.ss"
-         "../tools/signature-forms.ss"
-         "../rpn/rpn-signature-forms.ss"
-         "../forth/forth-lex.ss"
+#lang racket/base
+(require racket/unit
+         "macro-forth.rkt"
+         "../rpn/main.rkt"
+         "../tools/signature-forms.rkt"
+         "../rpn/rpn-signature-forms.rkt"
+         "../forth/forth-lex.rkt"
          (for-syntax
-          "macro-forth-tx.ss"
-          "../tools/stx.ss"
-          "../tools/grabbag.ss"
-          "../forth/lexer-tx.ss"
-          "../rpn.ss"
-          "../forth/forth-tx.ss"
-          scheme/base))
+          "macro-forth-tx.rkt"
+          "../tools/stx.rkt"
+          "../tools/grabbag.rkt"
+          "../forth/lexer-tx.rkt"
+          "../rpn.rkt"
+          "../forth/forth-tx.rkt"
+          racket/base))
 
 (provide
  macro-forth^
@@ -40,7 +40,7 @@
 )
 
 ;; This creates some prefix parsing words and the `forth-begin' form
-;; in terms of non-parameterized macros in macro-forth.ss and some
+;; in terms of non-parameterized macros in macro-forth.rkt and some
 ;; parameterized behaviour captured by the mf: words below.
 
 (define-signature macro-forth^

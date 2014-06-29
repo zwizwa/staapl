@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/stxparam
- scheme/pretty
+ racket/stxparam
+ racket/pretty
  (for-syntax
-  scheme/pretty
-  scheme/base
+  racket/pretty
+  racket/base
   "debug-tx.ss"
   "statespace-tx.ss"))
 

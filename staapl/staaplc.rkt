@@ -1,5 +1,5 @@
-#!/usr/bin/env mzscheme
-#lang scheme/base
+#!/usr/bin/env racket
+#lang racket/base
 
 ;; The 'Staapl Compiler' command line tool.
 ;;
@@ -33,8 +33,8 @@
 
 
 
-(require scheme/pretty
-         scheme/cmdline
+(require scheme/pretty  ;; racket/pretty prints quotes!
+         racket/cmdline
          staapl/tools)
 
 (define-syntax-rule (flags: name ...)
@@ -57,7 +57,7 @@
 (baud #f)
 (print-asm void)
 (dict-suffix ".dict")
-(debug-suffix ".ss")
+(debug-suffix ".rkt")
 
 (define (get-arguments)
   (filename

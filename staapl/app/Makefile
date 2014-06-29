@@ -77,7 +77,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 # the device before connecting.
 
 %.live: %.dict %.flash
-	$(COMP) -vk ../live.ss
+	$(COMP) -vk ../live.rkt
 	@while echo -ne '\nrestarting $@\nPress ctrl-C to quit'; do sleep 1; echo -ne '\r                    \n'; $(INTERP) $*.dict; done
 
 

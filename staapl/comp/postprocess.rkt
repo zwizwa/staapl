@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; POSTPROCESSING and OPTIMIZATION
 
@@ -10,14 +10,14 @@
 ;;    constructued by linking the labels back to code.
 
 (require
- "../target.ss"
- "../tools.ss"
- "../ns.ss"
- "../scat.ss"
- "../coma/macro.ss"
- "../control/2stack.ss"
- scheme/pretty
- scheme/match)
+ "../target.rkt"
+ "../tools.rkt"
+ "../ns.rkt"
+ "../scat.rkt"
+ "../coma/macro.rkt"
+ "../control/2stack.rkt"
+ racket/pretty
+ racket/match)
 
 (provide
  words->cfg!

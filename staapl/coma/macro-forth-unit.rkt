@@ -1,9 +1,9 @@
-#lang scheme/unit
+#lang racket/unit
 (require
- "../macro.ss"
- "macro-forth-sig.ss"
- "../sig.ss"
- "../label-sig.ss")
+ "../macro.rkt"
+ "macro-forth-sig.rkt"
+ "../sig.rkt"
+ "../label-sig.rkt")
 
 ;; Here we just piggyback on top of the label^ signature.  Eventually
 ;; the forth expander should also expand in terms of the `words',

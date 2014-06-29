@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; This module provides a non-hygienic macro that links the pic18
 ;; module with chip-specific information and exposes all the signature
@@ -17,38 +17,38 @@
 ;; other sigs is that this one has macros.
 
 (provide pic18-invoke)
-(require (for-syntax scheme/base))
+(require (for-syntax racket/base))
 
 (require
 ; (for-template
-;  "../label-sig.ss"
-;  "sig.ss")
+;  "../label-sig.rkt"
+;  "sig.rkt")
   
  
- "../tools.ss"
+ "../tools.rkt"
  
  ;; ASSEMBLER
-; "../asm.ss"
-; "asm.ss"
+; "../asm.rkt"
+; "asm.rkt"
  
  
  ;; LANGUAGE/COMPILER
 
  ;; Generic interfaces + implementations
- "sig.ss"                      ;; pic18 language
- "../sig.ss"                   ;; generic language
+ "sig.rkt"                      ;; pic18 language
+ "../sig.rkt"                   ;; generic language
  
- "../coma/comma-unit.ss"       ;; comma^
- "../coma/code-unit.ss"        ;; code^
- "../control/control-unit.ss"  ;; control^ 
- "../comp/compiler-unit.ss"    ;; jump^
- "../label-sig.ss"   
- "../label-unit.ss"
+ "../coma/comma-unit.rkt"       ;; comma^
+ "../coma/code-unit.rkt"        ;; code^
+ "../control/control-unit.rkt"  ;; control^ 
+ "../comp/compiler-unit.rkt"    ;; jump^
+ "../label-sig.rkt"   
+ "../label-unit.rkt"
  
  ;; PIC18 interfaces + implementations
- "sig.ss"
- "pic18-macro-unit.ss"
- "pic18-control-unit.ss")
+ "sig.rkt"
+ "pic18-macro-unit.rkt"
+ "pic18-control-unit.rkt")
           
 
 (define-syntax pic18-invoke
@@ -109,5 +109,5 @@
                  ))))))))
 
 ;;test
-;(require "pic18-const-unit.ss")
+;(require "pic18-const-unit.rkt")
 ;(pic18-invoke pic18-const@)

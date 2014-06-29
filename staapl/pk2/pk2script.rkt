@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
 ;; The PICkit2 v2.x scripting and command languages with Lisp syntax.
 
 ;; For more information see the PICkit2 Interface Guide.
 
-(require "interpreter.ss")
+(require "interpreter.rkt")
 (provide (all-defined-out))
 
 ;; For maximum convenience, both the script and command namespacesas

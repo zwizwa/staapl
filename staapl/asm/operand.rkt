@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Operand processing for assembler and disassembler.
 
@@ -19,8 +19,8 @@
 
 (provide (all-defined-out))
 
-(require "../tools.ss"
-         "environ.ss")
+(require "../tools.rkt"
+         "environ.rkt")
 
 
 ;; Instruction assemblers get expanded to a nested construct which

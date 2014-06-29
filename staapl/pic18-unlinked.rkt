@@ -1,64 +1,64 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Provide all shared PIC18 code, with units not linked.
 
 
 (require
- "tools.ss")
+ "tools.rkt")
 
 (require/provide
- "tools.ss"
+ "tools.rkt"
 
  ;; Concatenative macro languge.
- "coma/macro.ss"
+ "coma/macro.rkt"
  
  
  ;; ASSEMBLER
- "asm.ss"
- "pic18/asm.ss"
+ "asm.rkt"
+ "pic18/asm.rkt"
 
 
 
  ;; LANGUAGE
 
  ;; Generic interfaces + implementations
- "sig.ss"                   ;; generic language
+ "sig.rkt"                   ;; generic language
  
- "coma/comma-unit.ss"       ;; comma^
- "coma/code-unit.ss"        ;; code^
- "control/control-unit.ss"  ;; control^ 
- "comp/compiler-unit.ss"    ;; jump^
- "label-sig.ss"   
- "label-unit.ss"
+ "coma/comma-unit.rkt"       ;; comma^
+ "coma/code-unit.rkt"        ;; code^
+ "control/control-unit.rkt"  ;; control^ 
+ "comp/compiler-unit.rkt"    ;; jump^
+ "label-sig.rkt"   
+ "label-unit.rkt"
  
  ;; PIC18 interfaces + implementations
- "pic18/pic18-macro-unit.ss"
- "pic18/pic18-control-unit.ss"
- "pic18/sig.ss"             ;; pic18 language
+ "pic18/pic18-macro-unit.rkt"
+ "pic18/pic18-control-unit.rkt"
+ "pic18/sig.rkt"             ;; pic18 language
 
 
  ;; COMPILER + ASSEMBLER
- "pic18/pic18-compiler-unit.ss"
+ "pic18/pic18-compiler-unit.rkt"
  
 
  ;; FORTH SYNTAX
- "coma/macro-forth-sig.ss"
- "coma/macro-forth-unit.ss"
- "coma/macro-forth.ss"         ;; rpn prefix parsing words bound to macro.ss
-;; "pic18/forth.ss"              ;; PIC18 specific
+ "coma/macro-forth-sig.rkt"
+ "coma/macro-forth-unit.rkt"
+ "coma/macro-forth.rkt"         ;; rpn prefix parsing words bound to macro.ss
+;; "pic18/forth.rkt"              ;; PIC18 specific
 
  ;; TARGET CODE HANDLING
- "code.ss"
+ "code.rkt"
 
  ;; SHALLOW COROUTINES
- "pic18/scr-unit.ss"
+ "pic18/scr-unit.rkt"
  
  )
 
 (require
  (for-syntax
-  scheme/base
-  scheme/unit))
+  racket/base
+  racket/unit))
 
 
 ;; The full pic18 dictionary.

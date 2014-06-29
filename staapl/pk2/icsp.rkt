@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/match
- "util.ss"
- "pk2script.ss")
+ racket/match
+ "util.rkt"
+ "pk2script.rkt")
 
 (provide (all-defined-out))
 

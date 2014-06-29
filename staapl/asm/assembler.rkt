@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; The assembler is a destructive operation on a source code tree,
 ;; which:
@@ -16,17 +16,17 @@
 ;;   * meta evaluation struct (to evaluate delayed expressions)
 
 (require
- scheme/control
- scheme/match
+ racket/control
+ racket/match
 
- "../target.ss"
- "../tools.ss"
- "../op.ss"
- "../ns.ss"
+ "../target.rkt"
+ "../tools.rkt"
+ "../op.rkt"
+ "../ns.rkt"
 
  ;; dynamic environment for assembler:
- "pointers.ss"
- "environ.ss"
+ "pointers.rkt"
+ "environ.rkt"
 )
 
 (provide

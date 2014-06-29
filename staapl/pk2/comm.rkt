@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Provide the staapl comm interface.
 
@@ -7,12 +7,12 @@
 ;; inefficient to do without an output buffer.
 
 (require
- scheme/pretty
- "util.ss"
- "pk2.ss"
- "pk2script.ss"
- "cmd.ss"
- "icsp.ss")
+ racket/pretty
+ "util.rkt"
+ "pk2.rkt"
+ "pk2script.rkt"
+ "cmd.rkt"
+ "icsp.rkt")
 
 (provide
  pk2-stat

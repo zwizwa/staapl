@@ -4,7 +4,7 @@
 (define blurb
   '("A collection of abstractions for metaprogramming microcontrollers."))
 (define repositories '("4.x"))
-(define primary-file '("pic18.ss" "staaplc.ss" "live.ss"))
+(define primary-file '("pic18.rkt" "staaplc.rkt" "live.rkt"))
 (define homepage "http://zwizwa.be/staapl")
 (define categories '(devtools metaprogramming))
 (define scribblings '(("scribblings/staapl.scrbl" ())))

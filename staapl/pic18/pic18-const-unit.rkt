@@ -1,8 +1,8 @@
-#lang scheme/unit
-(require "../macro.ss"
-         "../target.ss"
-         "../sig.ss"
-         "sig.ss")
+#lang racket/unit
+(require "../macro.rkt"
+         "../target.rkt"
+         "../sig.rkt"
+         "sig.rkt")
 
 (import)
 (export pic18-const^

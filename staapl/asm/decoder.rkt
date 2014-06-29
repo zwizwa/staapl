@@ -1,9 +1,9 @@
 ;; binary tree instruction decoder
 
-#lang scheme/base
+#lang racket/base
 
 (require
- "../tools.ss")
+ "../tools.rkt")
 
 (provide
  decoder-index

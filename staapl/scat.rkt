@@ -1,20 +1,20 @@
 ;; Interface to the scat language. This contains main language
 ;; components as well as transformers.
 
-#lang scheme/base
+#lang racket/base
 
 (require
- "rpn.ss"
- "tools.ss")
+ "rpn.rkt"
+ "tools.rkt")
 
 (require/provide
- "scat/rep.ss"
- "scat/scat-syntax.ss"
- "scat/scat-base.ss"
- "scat/scat-control.ss"
- "scat/stack.ss"
- "scat/print.ss"
- "scat/rpn-scat.ss"
+ "scat/rep.rkt"
+ "scat/scat-syntax.rkt"
+ "scat/scat-base.rkt"
+ "scat/scat-control.rkt"
+ "scat/stack.rkt"
+ "scat/print.rkt"
+ "scat/rpn-scat.rkt"
  )
 
 

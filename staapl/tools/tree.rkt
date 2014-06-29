@@ -1,10 +1,10 @@
 ;; processing trees represented as nested s-expressions (not binary
 ;; trees: using 'list?' instead of 'pair?').
 
-#lang scheme/base
+#lang racket/base
 (require
- "list.ss"
- (lib "match.ss"))
+ "list.rkt"
+ (lib "match.rkt"))
 
 (provide (all-defined-out))
 

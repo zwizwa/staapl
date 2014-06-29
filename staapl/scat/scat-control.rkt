@@ -1,26 +1,26 @@
-#lang scheme/base
+#lang racket/base
 
 (provide
  (all-defined-out))
 
 (require
- "rpn-scat.ss"
- "scat-base.ss"
- "stack.ss"
- "../ns.ss"
- "rep.ss"
+ "rpn-scat.rkt"
+ "scat-base.rkt"
+ "stack.rkt"
+ "../ns.rkt"
+ "rep.rkt"
  
- "base-utils.ss"
+ "base-utils.rkt"
 
- "../tools.ss"
- "scat-syntax.ss"
+ "../tools.rkt"
+ "scat-syntax.rkt"
 
- scheme/match
- scheme/control
+ racket/match
+ racket/control
 
  (for-syntax
   syntax/stx
-  scheme/base)
+  racket/base)
  
  )
 

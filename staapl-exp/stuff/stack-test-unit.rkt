@@ -1,7 +1,7 @@
-#lang scheme/unit
+#lang racket/unit
 
 (require
- scheme/unit
+ racket/unit
  "../sig.ss"
  "macro.ss")
 

@@ -1,5 +1,5 @@
-#lang scheme/base
-(require "pk2.ss")
+#lang racket/base
+(require "pk2.rkt")
 (pk2-boot)
 (pk2-program
  '(0 1 2 3 4 5 6 7)

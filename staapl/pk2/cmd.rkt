@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
 (require
- "util.ss"
- "pk2script.ss"
- "driver.ss"
+ "util.rkt"
+ "pk2script.rkt"
+ "driver.rkt"
  )
 ;; Commands in terms of pk2script.ss
 
@@ -18,7 +18,7 @@
   (EXECUTE_SCRIPT (VDD_OFF)        ;; disconnect VDD from V_target
                   (VDD_GND_ON)))   ;; connect VDD to ground
 
-(require scheme/match)
+(require racket/match)
 (define (log-status bits . strs)
   (if (null? strs)
       '()

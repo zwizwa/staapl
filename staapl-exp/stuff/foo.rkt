@@ -1,5 +1,5 @@
-#lang scheme/base
-(require scheme/foreign)
+#lang racket/base
+(require racket/foreign)
 
 (unsafe!)
 

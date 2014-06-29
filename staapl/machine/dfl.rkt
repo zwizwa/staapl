@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 (provide (all-defined-out))
-(require scheme/pretty)
-(require scheme/match)
+(require racket/pretty)
+(require racket/match)
 
 ;; DataFlowLanguage
 

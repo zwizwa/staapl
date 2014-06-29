@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 (require
- "tethered.ss"
- scheme/system)
+ "tethered.rkt"
+ racket/system)
 
 (provide
  comm-uart)
@@ -25,7 +25,8 @@
       (unless fmt
         ;; Fixme: do autodetect using 'uname' or something..
         (set! fmt (cdr (assoc "Linux" fmts))))
-      (system (format fmt name baud))
+      (when (and fmt name baud)
+          (system (format fmt name baud)))
       )))
 
 

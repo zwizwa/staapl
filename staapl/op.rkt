@@ -1,6 +1,6 @@
-#lang scheme/base
-(require "tools.ss")
-(require/provide "op/static.ss"
-                 "op/semantics.ss"
-                 "op/op.ss")
+#lang racket/base
+(require "tools.rkt")
+(require/provide "op/static.rkt"
+                 "op/semantics.rkt"
+                 "op/op.rkt")
 

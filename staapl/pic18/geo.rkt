@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 ;; FIXME: this is add-on library, not core.
 
 ;; (require staapl/pic18)
-(require "../macro.ss"
-         "../target.ss"
-         "../scat.ss")
+(require "../macro.rkt"
+         "../target.rkt"
+         "../scat.rkt")
 (provide (all-defined-out))
 
 

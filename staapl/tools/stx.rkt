@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 (provide
  (all-defined-out)
  (all-from-out syntax/stx))
 (require
- "grabbag.ss"
- scheme/struct-info
+ "grabbag.rkt"
+ racket/struct-info
  syntax/stx)
 
 
@@ -137,17 +137,17 @@
 (define (ids hash) (for/list (((k v) hash)) k))
 
 
-(require (for-template scheme/base))
+(require (for-template racket/base))
 
 ;; Staged macros: safe syntax evaluation at compile time.
-;; (require (for-syntax scheme/base))
+;; (require (for-syntax racket/base))
 (define-syntax-rule (let-staged ((n v) ...) body ...)
   #`(let-syntax
         ((m (lambda (stx)
               (let ((n v) ...) body ...))))
       (m)))
 
-;; (provide (for-template (all-from-out scheme/base)))
+;; (provide (for-template (all-from-out racket/base)))
 
     
 

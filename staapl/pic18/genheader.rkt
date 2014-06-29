@@ -1,6 +1,6 @@
-#lang scheme/base
-(require scheme/match
-         scheme/dict)
+#lang racket/base
+(require racket/match
+         racket/dict)
 
 ; Parse an MPASM INC file and spit out the constants as a Scheme
 ; module.
@@ -41,7 +41,7 @@
 
 
 (define (print-dict dict)
-  (printf "#lang scheme/base\n")
+  (printf "#lang racket/base\n")
   (printf "(require staapl/pic18/define-constants)\n")
   (printf "(provide (all-defined-out))\n")
   (printf "(define-pic18-const-unit\n")

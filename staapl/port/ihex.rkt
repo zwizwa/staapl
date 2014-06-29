@@ -2,12 +2,12 @@
 
 ;; 16 bytes per line, each line has a checksum.
 
-#lang scheme/base
+#lang racket/base
 
 
 (require
- (lib "match.ss")
- "../tools.ss")
+ (lib "match.rkt")
+ "../tools.rkt")
 
 (provide
  ;; (all-defined-out)

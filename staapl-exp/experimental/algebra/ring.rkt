@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 (require
 
  ;; interfaces
@@ -66,7 +66,7 @@
 (define a (matrix '((a 0) (0 b))))
 (define b (matrix '((b 0) (d a))))
 
-(require scheme/pretty)
+(require racket/pretty)
 (define (print-mat m)
   (pretty-print (unpack (mat->list m))))
 
@@ -114,7 +114,7 @@
   (unpack (add (pack 'X) (pack 'X)))
 ; )
 
-(require (for-syntax scheme/base))
+(require (for-syntax racket/base))
 
 (define-syntax (id=? stx)
   (syntax-case stx ()

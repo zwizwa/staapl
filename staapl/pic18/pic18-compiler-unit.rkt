@@ -1,11 +1,11 @@
-#lang scheme/unit
+#lang racket/unit
 
 (require
- "../sig.ss"
- "asm.ss"
- "../asm/assembler.ss"
- "../asm.ss"
- "../code.ss")
+ "../sig.rkt"
+ "asm.rkt"
+ "../asm/assembler.rkt"
+ "../asm.rkt"
+ "../code.rkt")
 
 (import instantiate^ postproc^)
 (export compiler^)

@@ -1,15 +1,15 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Target code registry.
 
 ;; During instantiation of a Forth module, postponed code can be
 ;; registered for later compilation/assembly.
 
-(require "tools.ss"
-         "target.ss"
-         "sig.ss"
-         "comp/postprocess.ss"
-         scheme/pretty)
+(require "tools.rkt"
+         "target.rkt"
+         "sig.rkt"
+         "comp/postprocess.rkt"
+         racket/pretty)
 
 
 ;; CODE REGISTRY

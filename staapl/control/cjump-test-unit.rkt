@@ -1,11 +1,11 @@
-#lang scheme/unit
+#lang racket/unit
 
 (require
- "op.ss"
- "../coma/op.ss"
- "../tools.ss" 
- "../sig.ss"
- "../coma/pattern.ss")
+ "op.rkt"
+ "../coma/op.rkt"
+ "../tools.rkt" 
+ "../sig.rkt"
+ "../coma/pattern.rkt")
 
 (import)
 ;; (import op-quote^ op-jump^)  ;; FIXME: later

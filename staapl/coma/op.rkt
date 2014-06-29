@@ -1,15 +1,15 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- (for-syntax scheme/base)
- "../op.ss"
- "../ns.ss"
- "../tools.ss"
- "../scat.ss"
- "pattern.ss"
- "macro-utils.ss"
+ (for-syntax racket/base)
+ "../op.rkt"
+ "../ns.rkt"
+ "../tools.rkt"
+ "../scat.rkt"
+ "pattern.rkt"
+ "macro-utils.rkt"
 
- "../asm/directives.ss"
+ "../asm/directives.rkt"
 
  )
 
@@ -44,7 +44,7 @@
 
 ;; These are words that most certainly need to be redefined at some
 ;; point when mapping to a target architecture. They are used in
-;; target-rep.ss to implement the core of macro/forth/variable.
+;; target-rep.rkt to implement the core of macro/forth/variable.
 
 (compositions
  (scat) scat:
@@ -53,5 +53,5 @@
  (compile ',(asm: cw) >tag))
 
 
-;; Used in macro-tx.ss : macro-immedate
+;; Used in macro-tx.rkt : macro-immedate
 (define (lit datum) (macro-prim: ',datum literal))

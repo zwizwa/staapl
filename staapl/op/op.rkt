@@ -1,17 +1,17 @@
-#lang scheme/base
+#lang racket/base
 
 
 (require
- "../tools.ss"
- "../ns.ss"
+ "../tools.rkt"
+ "../ns.rkt"
  (for-syntax
-  ;; "../tools.ss"
-  "../tools/stx.ss"
-  "../ns-tx.ss"
-  scheme/base
-  "static.ss")
-  scheme/provide-syntax
-  "../ns.ss")
+  ;; "../tools.rkt"
+  "../tools/stx.rkt"
+  "../ns-tx.rkt"
+  racket/base
+  "static.rkt")
+  racket/provide-syntax
+  "../ns.rkt")
 
 (provide op-combine-out
          define-op-signature

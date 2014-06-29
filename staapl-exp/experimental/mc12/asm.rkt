@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Baseline Flash 8-bit PIC Microcontroller with 12 bit instruction word.
 ;; This includes PIC10, PIC12 and PIC16 chips.

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Syntax transformers for defining machines (small-step operational semantics).
 
@@ -9,12 +9,12 @@
 ;; reads easier than positionally encoded struct matches.
 
 (require
- scheme/match
- scheme/control
- scheme/struct-info
- (for-template scheme/base
-               scheme/match)
- (for-syntax   scheme/base))
+ racket/match
+ racket/control
+ racket/struct-info
+ (for-template racket/base
+               racket/match)
+ (for-syntax   racket/base))
 
 (provide (all-defined-out))
 

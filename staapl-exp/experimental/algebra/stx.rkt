@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
 (define-syntax-rule (op? op)
   (lambda (stx)
@@ -16,7 +16,7 @@
 (define (map-stx fn)
   (lambda (stx) (map fn (syntax->list stx))))
 
-(require scheme/dict)
+(require racket/dict)
 (define (make-stx-hash)
   (make-custom-hash
    (lambda (a b)

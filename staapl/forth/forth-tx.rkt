@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Generic tools for implementing Forth syntax for macro/target based
 ;; languages as rpn parser extensions (struct rpn-transformer).
 
-(require "../rpn.ss"
-         ;; "../tools.ss"
-         "../tools/io.ss"
-         "../tools/stx.ss"
+(require "../rpn.rkt"
+         ;; "../tools.rkt"
+         "../tools/io.rkt"
+         "../tools/stx.rkt"
          )
 
 (provide (all-defined-out))

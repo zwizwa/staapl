@@ -84,7 +84,7 @@
 
 (define (StringTable n)
   (let ((strs (strings)))
-    (if (> n (len strs))
+    (if (> n (length strs))
         #f
         (prefix-length (list-ref strs n)))))
 

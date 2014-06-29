@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 (require
  "../scat.ss"
  (for-syntax
-  scheme/base))
+  racket/base))
 
 (provide (all-defined-out))
 

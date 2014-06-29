@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../ns.ss"
+ "../ns.rkt"
  (for-syntax
-  scheme/base
-  scheme/pretty
-  "../ns-tx.ss"
-  "parse-tx.ss"))
+  racket/base
+  racket/pretty
+  "../ns-tx.rkt"
+  "parse-tx.rkt"))
 
 (provide (all-defined-out))
 

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Implements a dynamical system as a self-modifying module
 ;; expression. The module body serves as state + storage for all the
@@ -9,11 +9,11 @@
 
 (provide
  (rename-out (module-begin #%module-begin))
- (except-out (all-from-out scheme/base) #%module-begin))
+ (except-out (all-from-out racket/base) #%module-begin))
 
 (require
  (for-syntax
-  scheme/base))
+  racket/base))
 
 (define-syntax (module-begin stx)
   (syntax-case stx ()

@@ -3460,7 +3460,7 @@ game outside this realm.
 
 so, again:
 - high priority linear RT core (forth)
-- pre-emptable nonlinear metaprogrammer (scheme/cat)
+- pre-emptable nonlinear metaprogrammer (racket/cat)
 
 the linear part contains only STACKS + STORE. the nonlinear part can
 contain the code for the linear part. the compiler runs in the
@@ -4276,7 +4276,7 @@ closing. i think i need to read about how ports get garbage collected,
 or not.. indeed. they are not, need explicit close or make an
 abstraction:
 
-http://list.cs.brown.edu/pipermail/plt-scheme/2004-November/007247.html
+http://list.cs.brown.edu/pipermail/plt-racket/2004-November/007247.html
 
 
 
@@ -9272,7 +9272,7 @@ Ok, if i change the quoting mechanism above to:
 It does work. Now i'm really confused.
 I found this on the plt list:
 
-http://groups.google.com/group/plt-scheme/browse_thread/thread/327013d5c6f61017/9a12e93d683a5f94?lnk=gst&rnum=2#9a12e93d683a5f94
+http://groups.google.com/group/plt-racket/browse_thread/thread/327013d5c6f61017/9a12e93d683a5f94?lnk=gst&rnum=2#9a12e93d683a5f94
 
   (require-for-template mzscheme)
 
@@ -11852,7 +11852,7 @@ it would indeed be strange if this were not somehow standardized..
 (require (lib "40.ss" "srfi"))
 
 but, 40 has problems:
-http://groups.google.com/group/plt-scheme/browse_thread/thread/637cc74047a7ada9
+http://groups.google.com/group/plt-racket/browse_thread/thread/637cc74047a7ada9
 
 anyway: thing to remember: streams can be ODD or EVEN
 http://citeseer.ist.psu.edu/102172.html
@@ -19955,7 +19955,7 @@ Date: Tue Dec 18 17:54:50 CET 2007
 
 from
 
-http://download.plt-scheme.org/doc/371/html/mzscheme/mzscheme-Z-H-12.html#node_chap_12
+http://download.plt-scheme.org/doc/371/html/mzracket/mzscheme-Z-H-12.html#node_chap_12
 
   (datum->syntax-object
    ctxt-stx v [src-stx-or-list prop-stx cert-stx])
@@ -21072,9 +21072,9 @@ Date: Fri Feb 15 10:27:21 CET 2008
 
 yeah, reading docs can bring clarity ;)
 
-  doc/release-notes/mzscheme/MzScheme_4.txt
+  doc/release-notes/mzracket/MzScheme_4.txt
 
-i got a bit confused about the whole scheme and scheme/base thing
+i got a bit confused about the whole scheme and racket/base thing
 while reading some web server docs. the biggest change seems to be the
 use of optional and keyword arguments in lambda expressions.
 
@@ -21212,7 +21212,7 @@ tree-structured?
 Entry: expression problem
 Date: Thu Feb 21 23:23:46 CET 2008
 
-http://groups.google.com/group/plt-scheme/browse_thread/thread/3aaacdc5169e5889
+http://groups.google.com/group/plt-racket/browse_thread/thread/3aaacdc5169e5889
 
 Mark's reply was pretty clear, and this:
 
@@ -21311,7 +21311,7 @@ Welcome to MzScheme v3.99.0.13 [3m], Copyright (c) 2004-2008 PLT Scheme Inc.
 > (require errortrace)
 > (enter! (file "/tmp/test.ss"))
  [loading /tmp/test.ss]
- [loading /usr/local/mz-3.99.0.13/collects/scheme/base/lang/compiled/reader_ss.zo]
+ [loading /usr/local/mz-3.99.0.13/collects/racket/base/lang/compiled/reader_ss.zo]
  [loading /usr/local/mz-3.99.0.13/collects/syntax/compiled/module-reader_ss.zo]
 > (a)
 error: bla
@@ -21322,11 +21322,11 @@ error: bla
  === context ===
 /tmp/test.ss:7:0: b
 /tmp/test.ss:6:0: a
-/usr/local/mz-3.99.0.13/collects/scheme/private/misc.ss:63:7
+/usr/local/mz-3.99.0.13/collects/racket/private/misc.ss:63:7
 
 the file /tmp/test.ss is:
 
-#lang scheme/base
+#lang racket/base
 (provide a)
 (define (x) #f)
 (define (a) (b) (x))
@@ -21405,7 +21405,7 @@ mean that an exception can jump past any arbitrary prompt.
 
 question: how does this work in sandbox? apparenlty sandbox re-raises
 exceptions: see the internal function 'user-eval' in 'make-evaluator*'
-in scheme/sandbox.ss : the value that comes from the channel is raised
+in racket/sandbox.ss : the value that comes from the channel is raised
 if it's an exception.
 
 something is still don't understand about mixing of prompts and
@@ -21626,7 +21626,7 @@ also.. why not use real objects for the rpn-tx.ss plugin behaviour?
 maybe it is overkill.
 
 
-Entry: for-template and scheme/base
+Entry: for-template and racket/base
 Date: Wed Mar  5 16:44:26 CET 2008
 
 setting: 2 modules
@@ -21634,47 +21634,47 @@ setting: 2 modules
   rpn-tx.ss (require (for-template mzscheme))
 
 when test.ss is #lang mzscheme, or #lang scheme, this works. however,
-for #lang scheme/base i get an error:
+for #lang racket/base i get an error:
 
 /home/tom/scat/scat/rpn/test.ss:8:2: compile: bad syntax; function application is not allowed, because no #%app syntax transformer is bound in: (lambda (stx) (syntax-case stx () ((_ . code) ((rpn-represent) (syntax code)))))
 
-after adding a 'for-syntax mzscheme' or 'for-syntax scheme/base' in
+after adding a 'for-syntax mzscheme' or 'for-syntax racket/base' in
 test.ss it works.
 
-what works is to add (for-template scheme/base) in rep-tx.ss and
-(for-syntax scheme/base) in test.ss
+what works is to add (for-template racket/base) in rep-tx.ss and
+(for-syntax racket/base) in test.ss
 
 looks like there's different phase 1 bindings for mzscheme and
-scheme/base.. or something.. i don't really understand.
+racket/base.. or something.. i don't really understand.
 
 i try to explain:
 
 tom@del:~/phase-test$ cat tx.ss
-#lang scheme/base
+#lang racket/base
 (provide gen-code)
-(require (for-template scheme/base))
+(require (for-template racket/base))
 (define (gen-code) #'(+ 1 2))
 
 tom@del:~/phase-test$ cat use.ss
-#lang scheme/base
-(require (for-syntax "tx.ss" scheme/base))
+#lang racket/base
+(require (for-syntax "tx.ss" racket/base))
 (define-syntax gen
   (lambda (stx) (gen-code)))
 
-why are both requires of scheme/base needed?
+why are both requires of racket/base needed?
 
 EDIT: take a look at these expands:
 
-box> (expand-syntax #'(module broem scheme/base (define foo 123)))
-(module broem scheme/base
+box> (expand-syntax #'(module broem racket/base (define foo 123)))
+(module broem racket/base
   (#%module-begin (define-values (foo) '123) (#%app void)))
 box> (expand-syntax #'(module broem mzscheme (define foo 123)))
 (module broem mzscheme
   (#%plain-module-begin
-   (#%require (for-syntax scheme/mzscheme))
+   (#%require (for-syntax racket/mzscheme))
    (define-values (foo) '123)))
 
-mzscheme has mzscheme included in phase +1, while scheme/base does
+mzscheme has mzscheme included in phase +1, while racket/base does
 not. (what's the difference between %plain-module-begin and
 %module-begin ?
 
@@ -21884,17 +21884,17 @@ the name created here 'mapped' is not recognized as a module-local one.
 
 
 ----------- broem.ss
-#lang scheme/base
+#lang racket/base
 (require
  (for-syntax
-  scheme/base
+  racket/base
   "broem-tx.ss"))
 (provide foo)
 (define-syntax (foo stx)
   (foo-tx stx))
 
 ----------- broem-tx.ss
-#lang scheme/base
+#lang racket/base
 (provide foo-tx)
 (define (foo-tx stx)
   #`(+ 1 2))
@@ -21907,24 +21907,24 @@ box> (foo)
 broem-tx.ss:4:4: compile: bad syntax; function application is not allowed, because no #%app syntax transformer is bound in: (+ 1 2)
 
  === context ===
-/usr/local/plt-3.99.0.12/collects/scheme/sandbox.ss:445:4: loop
+/usr/local/plt-3.99.0.12/collects/racket/sandbox.ss:445:4: loop
 
 
 the thing that's missing here is the (require (for-template
-scheme/base)) in broem-tx.ss
+racket/base)) in broem-tx.ss
 
 
 OK..
 so it seems that now the remaining problems are because some names are
 expanded to toplevel form because they are not visible somehow?
-#lang scheme/base
+#lang racket/base
 
 
 
 ------- lala.ss
 
 (require
- (for-syntax scheme/base))
+ (for-syntax racket/base))
 
 (define foo 123)
 
@@ -21955,7 +21955,7 @@ is #t.. so we have the connection:
 
 current-module-name-resolver -> current-load/use-compiled
 
-EDIT: also look at 'expand-import' from scheme/require-transform 12.4.1
+EDIT: also look at 'expand-import' from racket/require-transform 12.4.1
 
 
 Entry: the problem
@@ -22009,9 +22009,9 @@ in module level:
 Entry: defining names from macro
 Date: Thu Mar 13 12:27:21 EDT 2008
 
-#lang scheme/base
+#lang racket/base
 (require
- (for-syntax scheme/base))
+ (for-syntax racket/base))
 
 (define-syntax (foo stx)
   #`(define bar 123))
@@ -22094,10 +22094,10 @@ EDIT:
 
 ----- test.ss:
 
-#lang scheme/base
+#lang racket/base
 (require
  (for-syntax
-  scheme/base))
+  racket/base))
 
 (define-syntax (foo stx)
   (printf "~a\n"
@@ -23029,7 +23029,7 @@ this requires some level shifting voodoo i don't see how to perform..
 
 (define-syntax transformer (lift tx-fun))  ?? too simple to see ??
 
-EDIT: looking at plt/src/mzscheme/src/env.c -> now_transforming
+EDIT: looking at plt/src/mzracket/src/env.c -> now_transforming
 (syntax-transforming?), this predicate is derived from the presence of
 a scheme_current_thread->current_local_env value.
 
@@ -24268,17 +24268,17 @@ i guess now it's time to see how to compute code instances?
 i tried this:
 
 tom@del:/tmp$ cat A.ss
-#lang scheme/base
+#lang racket/base
 (require "B.ss" "C.ss")
 (printf "A\n")
 
 tom@del:/tmp$ cat B.ss
-#lang scheme/base
+#lang racket/base
 (require "C.ss")
 (printf "B\n")
 
 tom@del:/tmp$ cat C.ss
-#lang scheme/base
+#lang racket/base
 (printf "C\n")
 
 box> (require "A.ss")
@@ -25709,7 +25709,7 @@ something standard.
 Entry: serialization
 Date: Fri Apr 18 21:44:26 EDT 2008
 
-using scheme/serialize and define-serializable-struct should give
+using racket/serialize and define-serializable-struct should give
 serializable object code if the target-value structs are
 evaluated. maybe some annotation should be left instead of the value?
 
@@ -26989,7 +26989,7 @@ comments are attached to an expression.
 maybe it's best to avoid column comments entirely?
 
 
-http://groups.google.com/group/plt-scheme/browse_thread/thread/1e2cae24ec84b70a/b59b55e3990da368?lnk=gst&q=scribble#b59b55e3990da368
+http://groups.google.com/group/plt-racket/browse_thread/thread/1e2cae24ec84b70a/b59b55e3990da368?lnk=gst&q=scribble#b59b55e3990da368
 
 That thread has an interesting comment on source code documentation:
 you need BOTH reference (per function doc) and general overview /
@@ -28415,7 +28415,7 @@ as in scheme. -> look into how this expansion stuff works.
 
 This works fine in scheme:
 
-     #lang scheme/base
+     #lang racket/base
 
      (define broem (bla))
 
@@ -28762,7 +28762,7 @@ file:///plt/doc/guide/reflection.html
 
   Modules not attached to a new namespace will be loaded and
   instantiated afresh if they are demanded by evaluation. For example,
-  scheme/base does not include scheme/class, and loading scheme/class
+  racket/base does not include racket/class, and loading racket/class
   again will create a distinct class datatype:
 
 This is important for the global registery used for recording Forth
@@ -30772,8 +30772,8 @@ namespace in which it is required.
 
 A toy example:
 
-(module A scheme/base (printf "instantiating A\n"))
-(module B scheme/base (require 'A) (printf "instantiating B\n"))
+(module A racket/base (printf "instantiating A\n"))
+(module B racket/base (require 'A) (printf "instantiating B\n"))
 
 box> (require 'A)
 instantiating A
@@ -30984,7 +30984,7 @@ I tried it with vectors:
 
 ;; ----
 
-#lang scheme/base
+#lang racket/base
 (require "list.ss")
 
 
@@ -31066,7 +31066,7 @@ Date: Mon Jun 23 08:14:22 CEST 2008
 Looks like a nice alternative to lazy lists. Screams for coroutines,
 so might want to add some abstraction to it.
 
-http://groups.google.com/group/plt-scheme/browse_thread/thread/d0ff99391f9ac53f/f5de867c296afcbe?lnk=gst&q=yield#f5de867c296afcbe
+http://groups.google.com/group/plt-racket/browse_thread/thread/d0ff99391f9ac53f/f5de867c296afcbe?lnk=gst&q=yield#f5de867c296afcbe
 
 (define (in-yielder f)
   (define end (list 1))
@@ -32345,7 +32345,7 @@ non-null-compilation-stack:  ((23) qw (qw 123))
 /home/tom/darcs/staapl-coma/macro/instantiate.ss:218:0: compile-forth
 /home/tom/darcs/staapl-coma/macro/instantiate.ss:384:0: target-compile-1
 /home/tom/darcs/staapl-coma/macro.ss:35:0: target-compile
-/usr/local/plt-3.99.0.26/collects/scheme/sandbox.ss:459:4: loop
+/usr/local/plt-3.99.0.26/collects/racket/sandbox.ss:459:4: loop
 
 
 while (macro> 123 23) works fine..
@@ -35882,7 +35882,7 @@ nested lambda expression representation.
 Entry: abstracting over names
 Date: Sat Aug 23 11:19:47 CEST 2008
 
-#lang scheme/base
+#lang racket/base
 
 ;; An attempt to find a standard mechanism for parameterizable
 ;; modules.  This consists of:
@@ -36148,7 +36148,7 @@ Next step: understand the FFI.  I got the Barzilay/Orlovsky paper in
 front of me.
 
 There's a thread about libusb and some code by Jakub Piotr Cłapa here:
-http://list.cs.brown.edu/pipermail/plt-scheme/2007-March/016671.html
+http://list.cs.brown.edu/pipermail/plt-racket/2007-March/016671.html
 
 
 Entry: USB / model based design?
@@ -38394,7 +38394,7 @@ the way pattern matching on algebraic datatypes works.
 Entry: type classes in scheme
 Date: Sat Sep 20 19:56:24 CEST 2008
 
-http://groups.google.com/group/comp.lang.scheme/msg/ad9df65985068c16
+http://groups.google.com/group/comp.lang.racket/msg/ad9df65985068c16
 
 cool.
 
@@ -41380,7 +41380,7 @@ mzc v4.1.0.3 [3m], Copyright (c) 2004-2008 PLT Scheme Inc.
 compile: unbound identifier in module in: macro/device-descriptor
 
 tom@zzz:/tmp$ cat broem.ss
-#lang scheme/base
+#lang racket/base
 broem
 tom@zzz:/tmp$ mzc -k broem.ss
 mzc v4.1.0.3 [3m], Copyright (c) 2004-2008 PLT Scheme Inc.
@@ -42916,7 +42916,7 @@ word-ref: expects type <struct:word> as 1st argument, given: #<procedure>; other
 /data/safe/tom/darcs/brood-5/staapl/asm/assembler.ss:276:0: nop
 core
 /data/safe/tom/darcs/brood-5/staapl/live/state.ss:56:0: assemble-chains
-/usr/local/plt/collects/scheme/private/map.ss:44:11: for-each
+/usr/local/plt/collects/racket/private/map.ss:44:11: for-each
 
 
 Apparently, asm procedures are wrapped in a struct that contains meta
@@ -44589,24 +44589,24 @@ The following example shows otherwise: values are properly shared, the
 module is instantiated only once.  (eq? it1 it2) => #t
 
 ;; it.ss
-#lang scheme/base
+#lang racket/base
 (provide it)
 (printf "instantiating it\n")
 (define it "it")
 
 ;; sig.ss
-#lang scheme/base
-(require scheme/unit)
+#lang racket/base
+(require racket/unit)
 (provide sig1^ sig2^)
 (define-signature sig1^ (it1))
 (define-signature sig2^ (it2))
 
 ;; top.ss
-#lang scheme/base
+#lang racket/base
 (require "unit1.ss"
          "unit2.ss"
          "sig.ss"
-         scheme/unit)
+         racket/unit)
 (define-syntax-rule (define/invoke (sig ...) (unit ...))
   (begin
     (define-compound-unit/infer combined@
@@ -44619,14 +44619,14 @@ module is instantiated only once.  (eq? it1 it2) => #t
 (define/invoke (sig1^ sig2^) (unit1@ unit2@))
 
 ;; unit1.ss
-#lang scheme/unit
+#lang racket/unit
 (require "sig.ss" "it.ss")
 (import)
 (export sig1^)
 (define it1 it)
 
 ;; unit2.ss
-#lang scheme/unit
+#lang racket/unit
 (require "sig.ss" "it.ss")
 (import)
 (export sig2^)
@@ -45783,12 +45783,12 @@ not one of mine.
 In the PLT code i find this:
 
 tom@zzz:/plt/collects$ grep -Ire 'new-lambda' *
-scheme/private/kw.ss:  (#%provide new-lambda new-λ
-scheme/private/kw.ss:  (define-syntaxes (new-lambda new-λ)
-scheme/private/kw.ss:    (let ([new-lambda
-scheme/private/kw.ss:      (values new-lambda new-lambda)))
-scheme/private/kw.ss:                  (normalize-definition stx #'new-lambda #t #t)])
-scheme/private/pre-base.ss:             (rename new-lambda lambda)
+racket/private/kw.ss:  (#%provide new-lambda new-λ
+racket/private/kw.ss:  (define-syntaxes (new-lambda new-λ)
+racket/private/kw.ss:    (let ([new-lambda
+racket/private/kw.ss:      (values new-lambda new-lambda)))
+racket/private/kw.ss:                  (normalize-definition stx #'new-lambda #t #t)])
+racket/private/pre-base.ss:             (rename new-lambda lambda)
 
 
 Ok. After restoring the old ns-tx all works fine.
@@ -45797,7 +45797,7 @@ Ok. After restoring the old ns-tx all works fine.
 Entry: local
 Date: Fri May  1 13:02:03 CEST 2009
 
-A small tangent.  With (require scheme/local) :
+A small tangent.  With (require racket/local) :
 
 box> (local [(pic18-begin : abc 123)] foo)
 coma/macro-forth.ss:50:7: local: not a definition at: (register! inline) in: (local ((pic18-begin : abc 123)) foo)
@@ -46203,7 +46203,7 @@ registers.
 
 
 So what's next?  Make this work on structure fields.  How does
-scheme/match do this?  It uses syntax certifiers to access the stuct
+racket/match do this?  It uses syntax certifiers to access the stuct
 type.
 
 Now, it doesn't look like the original field names are preserved, only
@@ -46614,7 +46614,7 @@ describe terms instead of being terms (machine code) [5].
 
 [1] http://lukepalmer.wordpress.com/2009/05/04/lazy-partial-evaluation/
 [2] http://lambda-the-ultimate.org/node/3217
-[3] http://list.cs.brown.edu/pipermail/plt-scheme/2009-February/030354.html
+[3] http://list.cs.brown.edu/pipermail/plt-racket/2009-February/030354.html
 [4] http://en.wikipedia.org/wiki/Supercombinator
 [5] http://en.wikipedia.org/wiki/Higher-order_abstract_syntax
 
@@ -47098,7 +47098,7 @@ Date: Thu May 14 02:23:53 CEST 2009
 Apparently check syntax uses the 'disappeared-use syntax property.
 Find this in the manual.  (Got it from Typed Scheme paper [1])
 
-[1] http://www.ccs.neu.edu/scheme/pubs/scheme2007-ctf.pdf
+[1] http://www.ccs.neu.edu/racket/pubs/scheme2007-ctf.pdf
 
 
 
@@ -47365,7 +47365,7 @@ Date: Sun May 17 17:15:21 CEST 2009
 Currently the "planet-fileinject" is the best way to test the planet
 package before upload.
 
- ~/.plt-scheme/planet/300/4.1.5.5/cache/zwizwa/staapl.plt/1/8/planet-docs/
+ ~/.plt-racket/planet/300/4.1.5.5/cache/zwizwa/staapl.plt/1/8/planet-docs/
 
 
 Entry: fruit
@@ -50829,22 +50829,22 @@ Date: Tue Jun 30 11:53:43 CEST 2009
 It's high time this gets automated..
 
 setup-plt: WARNING: duplicate tag: (mod-path "(planet zwizwa/staapl/macro)")
-setup-plt:  in: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
-setup-plt:  and: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
+setup-plt:  in: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
+setup-plt:  and: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
 setup-plt: WARNING: duplicate tag: (mod-path "(planet zwizwa/staapl/pic18/demo)")
-setup-plt:  in: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
-setup-plt:  and: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
+setup-plt:  in: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
+setup-plt:  and: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
 setup-plt: WARNING: duplicate tag: (index-entry (mod-path "(planet zwizwa/staapl/macro)"))
-setup-plt:  in: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
-setup-plt:  and: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
+setup-plt:  in: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
+setup-plt:  and: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
 setup-plt: WARNING: duplicate tag: (index-entry (mod-path "(planet zwizwa/staapl/pic18/demo)"))
-setup-plt:  in: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
-setup-plt:  and: /home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
+setup-plt:  in: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
+setup-plt:  and: /home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/9/scribblings/staapl.scrbl
 setup-plt: rendering: <planet>/zwizwa/staapl.plt/1/10/scribblings/staapl.scrbl
 setup-plt: error: during making for <planet>/zwizwa/staapl.plt/1/10/comp
 setup-plt:   define-unit: undefined export macro/address in: (define-unit machine-test@ (import) (export machine^) (compositions (macro) macro: (code-size 1)))
 setup-plt: error: during making for <planet>/zwizwa/staapl.plt/1/10/pic18
-setup-plt:   default-load-handler: cannot open input file: "/home/tom/.plt-scheme/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/pic18/dtc.ss" (No such file or directory; errno=2)
+setup-plt:   default-load-handler: cannot open input file: "/home/tom/.plt-racket/planet/300/4.2.0.5/cache/zwizwa/staapl.plt/1/10/pic18/dtc.ss" (No such file or directory; errno=2)
 
 Ok.. added a 'allss' target which compiles all .ss files in staapl/
 tree.  This should make it easier to create a garbage-free dir.
@@ -53602,7 +53602,7 @@ important as a final view.  Memoization can be kept out of the picture
 for all transformations.
 
 
-[1] http://docs.plt-scheme.org/reference/dicts.html#%28def._%28%28lib._scheme/dict..ss%29._make-custom-hash%29%29
+[1] http://docs.plt-scheme.org/reference/dicts.html#%28def._%28%28lib._racket/dict..ss%29._make-custom-hash%29%29
 
 
 Entry: Linearization
@@ -55423,15 +55423,15 @@ And let's just stick with one interface:
    ))
 
 
-Next problem: the .ss files use #lang scheme/unit
+Next problem: the .ss files use #lang racket/unit
 How to expose these to Staapl?
 
-I've added pic18-unit/lang.ss based on scheme/unit instead of
-scheme/base but I run into trouble that indicates I don't know what
+I've added pic18-unit/lang.ss based on racket/unit instead of
+racket/base but I run into trouble that indicates I don't know what
 I'm doing.
 
 To investigate: how does the lang/reader.ss mechanism work again?  It
-expands to a "module" form, but the scheme/unit/lang/reader.ss might
+expands to a "module" form, but the racket/unit/lang/reader.ss might
 do something else.
 
 
@@ -55506,7 +55506,7 @@ Date: Sat Nov 20 16:13:05 EST 2010
 
 - Fix units -> define a proper s-expression based module format for
   macros and target code.  Then units are "automatically" fixed on top
-  of the scheme/unit language.
+  of the racket/unit language.
 
   This involves refactoring the Forth parser.  Soothing words: the
   current Forth syntax isn't standard anyway, and is maybe more a
@@ -56667,8 +56667,8 @@ Another one (damn!) is mf:alloc.  Tried for a bit to see what's going
 on but I'm running out of steam.  This is horrible.
 
 
-[1] http://osdir.com/ml/plt-scheme/2010-03/msg00245.html
-[2] http://osdir.com/ml/plt-scheme/2010-03/msg00247.html
+[1] http://osdir.com/ml/plt-racket/2010-03/msg00245.html
+[2] http://osdir.com/ml/plt-racket/2010-03/msg00247.html
 [3] http://lists.racket-lang.org/users/archive/2010-March/038586.html
 
 
@@ -59781,7 +59781,7 @@ More general: send "string tokens" to the host.
 Entry: Printing racket backtrace
 Date: Sun May 20 11:51:34 EDT 2012
 
-[1] https://groups.google.com/group/plt-scheme/browse_thread/thread/231bb68fbc8093eb
+[1] https://groups.google.com/group/plt-racket/browse_thread/thread/231bb68fbc8093eb
 [2] https://groups.google.com/group/racket-users/tree/browse_frm/month/2010-06/090316a2a81df3a4?rnum=91&_done=%2Fgroup%2Fracket-users%2Fbrowse_frm%2Fmonth%2F2010-06%3F
 
 

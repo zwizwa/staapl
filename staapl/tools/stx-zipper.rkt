@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require scheme/base)
+(require racket/base)
 
 ;; Special purpose zipper for building lambda/let expressions:
 ;; (state ((lambda (state) #f))) :: <node <<siblings> <path>>>

@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Compiler state
 (require
- scheme/match
- "../tools.ss"
- "../target.ss"
- "../control/2stack.ss"
- "../machine/vm.ss")  ;; // for mu-lambda-struct
+ racket/match
+ "../tools.rkt"
+ "../target.rkt"
+ "../control/2stack.rkt"
+ "../machine/vm.rkt")  ;; // for mu-lambda-struct
 
 
 (provide

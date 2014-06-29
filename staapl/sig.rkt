@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; This module exports signatures used to interface all components in
 ;; the Staapl language.
@@ -21,9 +21,9 @@
 
 
 
-(require scheme/unit
-         "op.ss"
-         "ns.ss")
+(require racket/unit
+         "op.rkt"
+         "ns.rkt")
 (provide (all-defined-out))
 
 (define-syntax define-macro-set

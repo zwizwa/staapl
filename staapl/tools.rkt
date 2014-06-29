@@ -1,29 +1,29 @@
 ;; Utilities imported from elsewhere that extend the (mzscheme) base
 ;; language with functionality needed in the project.  This together
-;; with scheme/base serves as the base language for the staapl
+;; with racket/base serves as the base language for the staapl
 ;; project.
 
-#lang scheme/base
+#lang racket/base
 
-(require "tools/base.ss")
+(require "tools/base.rkt")
 
 (require/provide
- "tools/base.ss"
- "tools/list.ss"
- "tools/seq-tools.ss"
- "tools/tree.ss"
- "tools/io.ss"
- "tools/binary.ss"
- "tools/binchunk.ss"
- "tools/logger.ss"
- "tools/print.ss"
- "tools/unit.ss"
- "tools/grabbag.ss"
-;; "tools/stx.ss"
- "tools/eval.ss"
+ "tools/base.rkt"
+ "tools/list.rkt"
+ "tools/seq-tools.rkt"
+ "tools/tree.rkt"
+ "tools/io.rkt"
+ "tools/binary.rkt"
+ "tools/binchunk.rkt"
+ "tools/logger.rkt"
+ "tools/print.rkt"
+ "tools/unit.rkt"
+ "tools/grabbag.rkt"
+;; "tools/stx.rkt"
+ "tools/eval.rkt"
 ;; syntax/stx
- (lib "78.ss" "srfi")
- "tools/sigdict.ss"
+ (lib "78.rkt" "srfi")
+ "tools/sigdict.rkt"
  )
 
 

@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
 (require
  "mem.ss"
  "eforth-tools.ss"
- scheme/control
- (for-syntax scheme/base))
+ racket/control
+ (for-syntax racket/base))
 
 ;; Dr. C.H. Ting's eForth, a highly portable forth, written in terms
 ;; of the primitives:

@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
 
-(require (for-syntax scheme/base))
+(require (for-syntax racket/base))
 
 ;; Workaround to fish something from the transformer environment in an
 ;; interactive session.  There has to be another way..

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; The interactive code is decoupled from the compiler using a
 ;; namespace interface.  This module provides reflective operations on
@@ -10,15 +10,15 @@
 ;; + interaction functions.
 
 (require
- scheme/pretty
- scheme/control
- scheme/match
- "../tools.ss"
- "../code.ss"
- "repl.ss"
- "../ns.ss"
- "../scat.ss"
- "../target.ss")
+ racket/pretty
+ racket/control
+ racket/match
+ "../tools.rkt"
+ "../code.rkt"
+ "repl.rkt"
+ "../ns.rkt"
+ "../scat.rkt"
+ "../target.rkt")
 
 (provide (all-defined-out))
 
@@ -157,7 +157,7 @@
 
 ;; Code garbage collection.
 
-;; Instead of the incremental, 'dump all' model used in incremental.ss
+;; Instead of the incremental, 'dump all' model used in incremental.rkt
 ;; it is also possible to perform whole-program reachability analysis
 ;; by constructing a serialized code graph from a number of entry
 ;; nodes (in case of a microcontroller: the reset + interrupt
@@ -167,7 +167,7 @@
 ;; names.
 
 
-;; Load a dictionary file.  See staaplc.ss for an explanation of the
+;; Load a dictionary file.  See staaplc.rkt for an explanation of the
 ;; structure.
 
 (define (read-dictionary [port (current-input-port)])

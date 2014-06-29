@@ -1,19 +1,19 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../target.ss"
- "../scat.ss"
- "../ns.ss"
- "../rpn.ss"
- "../macro.ss"
- "tethered.ss"
- "commands.ss"
- "../forth/forth-lex.ss"
- "rpn-live.ss"
- "reflection.ss"
+ "../target.rkt"
+ "../scat.rkt"
+ "../ns.rkt"
+ "../rpn.rkt"
+ "../macro.rkt"
+ "tethered.rkt"
+ "commands.rkt"
+ "../forth/forth-lex.rkt"
+ "rpn-live.rkt"
+ "reflection.rkt"
  (for-syntax
-  "../ns-tx.ss"
-  scheme/base))
+  "../ns-tx.rkt"
+  racket/base))
 
 (provide (all-defined-out))
 
@@ -30,7 +30,7 @@
 ;;
 ;;   - prefix parsing macros defined in the (target) dictionary,
 ;;   escaping the default semantics of `target-interpret' (see
-;;   commands.ss)
+;;   commands.rkt)
 ;;
 ;;   - commands defined in the (host) dictionary
 ;;

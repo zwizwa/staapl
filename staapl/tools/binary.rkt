@@ -1,15 +1,15 @@
 ;; Utilities for manipulation of binary words and buffers.
 
-#lang scheme/base
+#lang racket/base
 
 (require
- (lib "match.ss")
- "list.ss"
- "tree.ss")
+ (lib "match.rkt")
+ "list.rkt"
+ "tree.rkt")
 
 
 ;; Tests really are a cheap form of documentation :)
-(require  (lib "78.ss" "srfi"))
+(require  (lib "78.rkt" "srfi"))
 (check-set-mode! 'report-failed)
 
 (provide

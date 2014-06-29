@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Some convenience routines to make it easier to move macros from
 ;; ordinary module code to signatures.
@@ -6,10 +6,10 @@
 ;; Note that a sig-form-id is in the same namespace as ordinary
 ;; macros, so this doesn't mix with normal use.
 
-(require scheme/unit
+(require racket/unit
          (for-syntax
-          scheme/base
-          "../ns-tx.ss"
+          racket/base
+          "../ns-tx.rkt"
           ))
 (provide (all-defined-out))
          

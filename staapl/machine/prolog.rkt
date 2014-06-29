@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
-(require "choice.ss"
-         "unify.ss"
-         "database.ss"
-         "enum.ss"
-         "fail.ss"
+(require "choice.rkt"
+         "unify.rkt"
+         "database.rkt"
+         "enum.rkt"
+         "fail.rkt"
          (for-syntax
-          scheme/base))
+          racket/base))
 
 
 ;; Naive variable renaming to prevent name clashes.

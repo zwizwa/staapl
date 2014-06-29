@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../tools.ss")
+(require "../tools.rkt")
 
 (require
- "../coma/macro-forth-sig.ss"
- "dtc-forth-unit.ss")
+ "../coma/macro-forth-sig.rkt"
+ "dtc-forth-unit.rkt")
 
 (define/invoke (macro-forth^) (dtc-forth@))
 
@@ -16,4 +16,4 @@
 
 (provide
  (rename-out (dtc-module-begin #%module-begin))
- (except-out (all-from-out scheme/base) #%module-begin))
+ (except-out (all-from-out racket/base) #%module-begin))

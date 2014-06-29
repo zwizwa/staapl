@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; C code generator
 ;; generates a small subset of C language constructs
@@ -31,7 +31,7 @@
 
 (require
  "../tools/stx.ss"
- scheme/control
+ racket/control
  )
 
 (provide

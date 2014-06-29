@@ -1,4 +1,4 @@
-#lang scheme/unit
+#lang racket/unit
 
 ;; PIC18 code generator for control flow
 
@@ -7,11 +7,11 @@
 ;; mechanism.
 
 (require
- "../sig.ss"
- "sig.ss"
- "../coma/macro.ss"
- "../control/op.ss"
- "asm.ss"
+ "../sig.rkt"
+ "sig.rkt"
+ "../coma/macro.rkt"
+ "../control/op.rkt"
+ "asm.rkt"
  )
 
 (import control^

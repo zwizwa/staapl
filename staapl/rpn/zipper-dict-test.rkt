@@ -1,6 +1,6 @@
-#lang scheme/base
-(require scheme/pretty
-         "zipper-dict.ss")
+#lang racket/base
+(require racket/pretty
+         "zipper-dict.rkt")
 
 ;; Test
 

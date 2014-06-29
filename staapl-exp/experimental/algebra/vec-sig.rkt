@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Matrix/vector representation
 
 (provide (all-defined-out))
-(require scheme/unit)
+(require racket/unit)
 
 (define-signature vec^
   (;; matrix algebra can represent linear algebra. 

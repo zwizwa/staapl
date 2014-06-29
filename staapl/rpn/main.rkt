@@ -1,23 +1,23 @@
-#lang scheme/base
+#lang racket/base
 
 
 
 
-(require "parse.ss"
-         "../ns.ss"
-         "parse-tx.ss"
+(require "parse.rkt"
+         "../ns.rkt"
+         "parse-tx.rkt"
          (for-template
-          scheme/base)
+          racket/base)
          (for-syntax
-          "../tools/io.ss"
-          "../tools/stx.ss"
-          "parse-tx.ss"
-          scheme/base))
+          "../tools/io.rkt"
+          "../tools/stx.rkt"
+          "parse-tx.rkt"
+          racket/base))
 
 (provide
  (all-defined-out)
- (all-from-out "parse.ss")
- (all-from-out "parse-tx.ss"))
+ (all-from-out "parse.rkt")
+ (all-from-out "parse-tx.rkt"))
 
 
 

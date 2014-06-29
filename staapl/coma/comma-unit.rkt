@@ -1,10 +1,10 @@
-#lang scheme/unit
+#lang racket/unit
 
 (require
- scheme/unit
- "../sig.ss"
-;; "../target/rep.ss"
- "macro.ss")
+ racket/unit
+ "../sig.rkt"
+;; "../target/rep.rkt"
+ "macro.rkt")
 
 (import comma^)
 (export comma-extra^)

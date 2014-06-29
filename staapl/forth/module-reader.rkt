@@ -1,16 +1,16 @@
 ;; from syntax/module-reader
 
-(module module-reader scheme/base
+(module module-reader racket/base
   (provide
    (rename-out
     [provide-module-reader #%module-begin]
     [wrap wrap-read-all]))
 
   (require
-   scheme/runtime-path
-   scheme/pretty
-   "../tools.ss"
-   "lexer-tx.ss")
+   racket/runtime-path
+   racket/pretty
+   "../tools.rkt"
+   "lexer-tx.rkt")
    
   
   (define-syntax provide-module-reader

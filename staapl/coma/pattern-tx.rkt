@@ -1,23 +1,23 @@
-#lang scheme/base
-;; Syntax transformer utilities for pattern.ss
+#lang racket/base
+;; Syntax transformer utilities for pattern.rkt
 
 
 (require
- "../ns-tx.ss"
-;; "../tools.ss"
- "../tools/list.ss"
- "../op/static.ss"
- scheme/pretty
+ "../ns-tx.rkt"
+;; "../tools.rkt"
+ "../tools/list.rkt"
+ "../op/static.rkt"
+ racket/pretty
  (for-template
-  scheme/base
-  "../op.ss"
-  "../tools.ss"
-  "../scat.ss"
-  "../ns.ss"
-  "pattern-runtime.ss"
-  "rep.ss"
-  scheme/match
-  ;; (lib "match.ss")
+  racket/base
+  "../op.rkt"
+  "../tools.rkt"
+  "../scat.rkt"
+  "../ns.rkt"
+  "pattern-runtime.rkt"
+  "rep.rkt"
+  racket/match
+  ;; (lib "match.rkt")
   ))
 
 

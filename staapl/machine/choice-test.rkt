@@ -1,8 +1,8 @@
-#lang scheme/base
-(require "choice.ss"
+#lang racket/base
+(require "choice.rkt"
          srfi/41
-         "fail.ss"
-         "enum.ss")
+         "fail.rkt"
+         "enum.rkt")
 
 (define (choice/seq seq mark?) (choice/enum (seq->enum seq) mark?))
 (define (choice/range a b) (choice/seq (in-range a b) #f))

@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Current assembly pointers
 (require
- "../tools.ss")
+ "../tools.rkt")
 (provide
  pointer-get
  pointer-set!

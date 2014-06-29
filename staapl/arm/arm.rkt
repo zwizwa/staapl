@@ -1,4 +1,4 @@
-#lang scheme
+#lang racket
 
 ;; Getting to know the ARM architecture.
 ;; Best place to start is to write a small frontend for the assembler.

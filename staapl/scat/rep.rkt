@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../tools.ss"
+(require "../tools.rkt"
          (for-syntax
-          scheme/base
+          racket/base
           syntax/stx))
 
 ;; Interface
@@ -60,7 +60,7 @@
 
 ;; Ordinary words just apply the procedure.
 
-(require scheme/pretty)
+(require racket/pretty)
 (define (make-word fn [prop #f])
   ;; (when prop (pretty-print prop))
   (make-word-internal

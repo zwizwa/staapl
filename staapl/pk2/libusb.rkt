@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; FFI bindings for libusb.
 
@@ -21,13 +21,13 @@
 ;;
 ;;
 ;; Adapted from code posted by Jakub Piotr Cłapa
-;; http://list.cs.brown.edu/pipermail/plt-scheme/2007-March/016671.html
+;; http://list.cs.brown.edu/pipermail/plt-racket/2007-March/016671.html
 
 
 (require
- (lib "foreign.ss")
- (lib "etc.ss")
- "usbconst.ss"
+ (lib "foreign.rkt")
+ (lib "etc.rkt")
+ "usbconst.rkt"
  )
 
 (unsafe!)

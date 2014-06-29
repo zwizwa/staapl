@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 
 ;; ******** UART **********
 
 (require
- "pk2script.ss"
- "util.ss"
- "cmd.ss")
+ "pk2script.rkt"
+ "util.rkt"
+ "cmd.rkt")
 
 
 (provide
@@ -20,7 +20,7 @@
 ;; Async channels used to throttle IO data: we need to poll the input
 ;; in time, and don't send too fast.
 
-(require scheme/async-channel)
+(require racket/async-channel)
 (define ->target (make-channel))        ;; Block sender if target can't keep up.
 (define target-> (make-async-channel))  ;; We can't stop target, so we keep collecting.
 

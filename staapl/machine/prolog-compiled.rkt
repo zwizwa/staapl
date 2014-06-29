@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 
 (require mzlib/match
-         "choice.ss"
-         "unify.ss"
-         "database.ss"
-         "enum.ss"
-         "fail.ss"
+         "choice.rkt"
+         "unify.rkt"
+         "database.rkt"
+         "enum.rkt"
+         "fail.rkt"
          (for-syntax
-          scheme/base
-          "unify.ss"))
+          racket/base
+          "unify.rkt"))
 
 ;; FIXME: this doesn't extend frames when necessary.
 

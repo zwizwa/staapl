@@ -1,5 +1,5 @@
-#lang scheme/base
-(require "usb.ss")
+#lang racket/base
+(require "usb.rkt")
 (provide (all-defined-out))
 
 ;; USB descriptor for a serial device handled by the Linux USB Generic

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Database query language with pattern matching as a precursor to
 ;; Prolog & resolution.
@@ -7,10 +7,10 @@
 ;; form of identifier bindings.  In first iteration, use only `?' as a
 ;; wildcard.  Later, add bindings.
 
-(require "choice.ss"
-         "unify.ss"
-         "fail.ss"
-         "enum.ss")
+(require "choice.rkt"
+         "unify.rkt"
+         "fail.rkt"
+         "enum.rkt")
 
 ;; using `quote' to separate literal symbols from variables
 ;(define (variable? sym)

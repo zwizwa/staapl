@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 (provide sum=0 prod=1 constraints test)
 
 ;; Macro frontend for the net/prim compilers.
 (require
- (for-syntax scheme/base
-             "cpl-prim.ss"
-             "cpl-net.ss"))
+ (for-syntax racket/base
+             "cpl-prim.rkt"
+             "cpl-net.rkt"))
 
 (define-syntax sum=0  rule:sum=0)
 (define-syntax prod=1 rule:prod=1)
@@ -23,7 +23,7 @@
        (spec->sequence inputs outputs internal rules params)))))
 
 ;; TEST
-(require scheme/pretty)
+(require racket/pretty)
 
 (define (test)
   (pretty-print

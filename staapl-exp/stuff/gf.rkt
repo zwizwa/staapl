@@ -1,5 +1,5 @@
-#lang scheme/base
-(require scheme/promise)
+#lang racket/base
+(require racket/promise)
 
 ;; Galois fields and drum patterns..  The crazy idea is that there
 ;; might be some interesting way to turn the structure of Galois

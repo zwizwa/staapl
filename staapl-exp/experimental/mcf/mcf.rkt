@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; The RPN parser is used to "unroll" a metacircular Forth
 ;; description, reconstructing a part of the compiler in terms of Scat
@@ -23,11 +23,11 @@
          "../ns.ss"
          "../macro.ss"
          "../forth/forth-lex.ss"
-         scheme/stxparam
-         scheme/splicing
-         scheme/pretty
-         (for-syntax scheme/base
-                     scheme/pretty
+         racket/stxparam
+         racket/splicing
+         racket/pretty
+         (for-syntax racket/base
+                     racket/pretty
                      ;; "../tools.ss"
                      "../tools/stx.ss"
                      "../tools/grabbag.ss"

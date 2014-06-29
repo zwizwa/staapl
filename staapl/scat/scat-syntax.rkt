@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; This combines syntax transformers from rpn-*.ss with namespace
 ;; tools from ns-*.ss into a single interface, together with scheme
@@ -14,13 +14,13 @@
  as-push)
 
 (require
- "../tools.ss"
- "../ns.ss"
- "snarf.ss" 
+ "../tools.rkt"
+ "../ns.rkt"
+ "snarf.rkt" 
  (for-syntax
-  "../ns-tx.ss"
-;;  "../tools.ss"
-  scheme/base))
+  "../ns-tx.rkt"
+;;  "../tools.rkt"
+  racket/base))
 
 
 ;; The 'compositions' macro is the entry point to the expansion and

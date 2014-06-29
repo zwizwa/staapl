@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../coma/macro.ss"
- "../forth/forth-lex.ss"
- "state.ss")
+ "../coma/macro.rkt"
+ "../forth/forth-lex.rkt"
+ "state.rkt")
 
 (provide macro> print-asm> forth-compile clear-state
          (ns-out (macro) clear))

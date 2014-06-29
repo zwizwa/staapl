@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Minimalistic REPL for a string evaluator like 'forth-command.
 
 (require
- scheme/control  ;; for 'prompt so errors don't kill the REPL
+ racket/control  ;; for 'prompt so errors don't kill the REPL
  ;; readline/rep ;; readline command line editing (not standard on XP, so commented out)
 )
 (provide repl

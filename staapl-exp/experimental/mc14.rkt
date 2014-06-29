@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/control
-;; scheme/runtime-path
+ racket/control
+;; racket/runtime-path
  "tools.ss"
  "target.ss"
  "forth/lexer.ss")

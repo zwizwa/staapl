@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Staging of algebraic expressions.
 
@@ -11,8 +11,8 @@
 ;; graph (in which case it is a representative of an equivalence class
 ;; of `let*' forms).
 
-(require scheme/match
-         scheme/contract)
+(require racket/match
+         racket/contract)
 
 ;; (provide (all-defined-out))
 

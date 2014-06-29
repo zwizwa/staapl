@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "pattern.ss"
+ "pattern.rkt"
  (for-template
-  scheme/base)
+  racket/base)
  (for-syntax
-  scheme/base
-  ;; "../tools.ss"
+  racket/base
+  ;; "../tools.rkt"
   ))
 (provide
  patterns-class

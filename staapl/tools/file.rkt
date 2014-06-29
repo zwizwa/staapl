@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require scheme/file)
+(require racket/file)
 
 (provide with-file
          file->string/utf-8)

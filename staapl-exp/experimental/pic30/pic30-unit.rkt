@@ -1,5 +1,5 @@
 ;; PIC30 code generator
-#lang scheme/unit
+#lang racket/unit
 (require
  "../sig.ss"
  "../coma/macro.ss"

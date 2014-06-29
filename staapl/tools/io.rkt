@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
-(require (lib "pretty.ss")
-         (lib "match.ss")
-         (lib "process.ss") ;; system
+(require (lib "pretty.rkt")
+         (lib "match.rkt")
+         (lib "process.rkt") ;; system
          )
 (provide
  read-byte-timeout

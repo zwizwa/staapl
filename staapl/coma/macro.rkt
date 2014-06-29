@@ -1,27 +1,27 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Bundles lowlevel macro code and adds some convenience functions.
 
 (require
- "../tools.ss")
+ "../tools.rkt")
 (provide
- (all-from-out "../tools.ss"))
+ (all-from-out "../tools.rkt"))
 
 (require/provide
- "../ns.ss"
- "../scat.ss"
- "../sig.ss"
- "../op.ss"
- "pattern.ss"
- "pattern-meta.ss"
- "pattern-runtime.ss"
- "macro-utils.ss"
- "rpn-macro.ss"
- "macro-eval.ss"
- "op.ss"       ;; compile + literal
- "../target.ss"
- "target-scat.ss"  ;; target:
-;; "../asm/directives.ss"
+ "../ns.rkt"
+ "../scat.rkt"
+ "../sig.rkt"
+ "../op.rkt"
+ "pattern.rkt"
+ "pattern-meta.rkt"
+ "pattern-runtime.rkt"
+ "macro-utils.rkt"
+ "rpn-macro.rkt"
+ "macro-eval.rkt"
+ "op.rkt"       ;; compile + literal
+ "../target.rkt"
+ "target-scat.rkt"  ;; target:
+;; "../asm/directives.rkt"
  )
 
 (provide (all-defined-out))

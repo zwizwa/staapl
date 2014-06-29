@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
 (define current-fail (make-parameter (lambda (arg) (error 'fail "~a" arg))))
 (define (fail . a) ((current-fail) a))

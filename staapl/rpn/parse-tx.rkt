@@ -1,18 +1,18 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Compile time tools for rpn-parse.ss
 
 (require
- "../tools/list.ss"
- "../ns.ss"
- "../ns-tx.ss"
- "../tools/stx.ss"
- scheme/match
+ "../tools/list.rkt"
+ "../ns.rkt"
+ "../ns-tx.rkt"
+ "../tools/stx.rkt"
+ racket/match
  (for-template
-  "../ns.ss"
-  scheme/base)
+  "../ns.rkt"
+  racket/base)
  (for-syntax
-  scheme/base))
+  racket/base))
 
 (provide (all-defined-out))
 

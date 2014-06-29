@@ -27,13 +27,13 @@ install:
 # setup-plt does, and is a quick way to prevent problems when packaging.
 
 all-modules: planet-version.txt
-	cd staapl && mzc -vk `find -name '*.ss'` 
+	cd staapl && mzc -vk `find -name '*.rkt'` 
 	cd app && mzc -vk `find -name '*.fm'` 
 
 pic18:
-	mzc -vk staapl/pic18.ss
-	mzc -vk staapl/staaplc.ss
-	mzc -vk staapl/live.ss
+	mzc -vk staapl/pic18.rkt
+	mzc -vk staapl/staaplc.rkt
+	mzc -vk staapl/live.rkt
 
 # use planet instead
 install-collects:
@@ -42,7 +42,7 @@ install-collects:
 clean:
 	find -name 'compiled' -exec rm -rf '{}' ';'  || echo -n
 	find -name '*~' -exec rm -rf '{}' ';' || echo -n
-	rm -rf .*~ *.plt *.tar.gz *version.txt staapl/prj/version.ss
+	rm -rf .*~ *.plt *.tar.gz *version.txt staapl/prj/version.rkt
 	make -C doc clean
 	make -C app clean
 
@@ -69,7 +69,9 @@ unsafe_test:
 # files, not just those that are actually used, and is much faster
 # than the package compiler.
 all_files:
-	mzc -vk `find staapl -name '*.ss'`
+	mzc -vk `find staapl -name '*.rkt'`
+all_exp_files:
+	mzc -vk `find staapl-exp -name '*.rkt'`
 
 
 %.html: %.scrbl

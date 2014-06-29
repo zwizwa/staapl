@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; CPL: A local Constraint Propagation Language with staged control
 ;; flow, viewed as a generalization of a (directional) data flow
@@ -50,7 +50,7 @@
 (define (ppush! param val)
   (param (cons val (param))))
 
-(require "choice.ss")
+(require "choice.rkt")
 
 
 
@@ -172,7 +172,7 @@
 ;; Evaluate network -> sequential code.
 
 (require srfi/41
-         "enum.ss")
+         "enum.rkt")
 
 
 (define (net-eval net inputs)

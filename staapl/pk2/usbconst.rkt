@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 (provide (all-defined-out))
 ;; USB constants definitions, verbatim from USB 1.1 spec document.

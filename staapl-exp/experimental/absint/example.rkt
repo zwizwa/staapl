@@ -1,6 +1,6 @@
-#lang scheme/base
-(require scheme/unit
-         scheme/pretty
+#lang racket/base
+(require racket/unit
+         racket/pretty
          "num.ss")
 
 

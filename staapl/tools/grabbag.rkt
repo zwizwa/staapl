@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 
 
@@ -75,12 +75,12 @@
 (define-syntax-rule (quasiquote* . a) (quasiquote a))
 
 
-(require scheme/runtime-path)
+(require racket/runtime-path)
 (define-runtime-path home-dir "..")
 (define (home) (simplify-path home-dir))
 
-(require scheme/match)
-(require scheme/pretty)
+(require racket/match)
+(require racket/pretty)
 (define (pretty-expand form [expand expand])
   (let ((expr (syntax->datum (expand form))))
     (pretty-print
@@ -105,8 +105,8 @@
 ;; Dictionary is specified in terms of a function.
 
 ;; http://blog.plt-scheme.org/2008/02/dirty-looking-hygiene.html
-(require scheme/stxparam
-         (for-syntax scheme/base))
+(require racket/stxparam
+         (for-syntax racket/base))
 (define-syntax-parameter it
   (lambda (stx)
     (raise-syntax-error #f "can only be used inside `if*'" stx)))
@@ -138,7 +138,7 @@
 
 ;; Add support for a collection of easier to read define-syntax-rule
 ;; forms implemented in terms of the `define-syntaxes' signature form.
-(require scheme/unit)
+(require racket/unit)
 (define-syntax define-signature+
   (syntax-rules (define-syntax-rule_)
     ((_ sig^ (sig-expr ...) ;; standard define-signature forms

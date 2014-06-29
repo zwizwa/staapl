@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 (require
- "../pk2/icsp.ss"
- "../pk2/pk2.ss"
- "../pk2/comm.ss"
- "../pk2/cmd.ss"
- "tethered.ss"
- scheme/system)
+ "../pk2/icsp.rkt"
+ "../pk2/pk2.rkt"
+ "../pk2/comm.rkt"
+ "../pk2/cmd.rkt"
+ "tethered.rkt"
+ racket/system)
 
 (provide
- (all-from-out "../pk2/comm.ss"))
+ (all-from-out "../pk2/comm.rkt"))
 
 (provide comm-pickit2)
 

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; In [1][2] enumerators in the form of left folds with premature
 ;; termination are presented as the superior traversal interface.
@@ -22,8 +22,8 @@
 ;; [4] http://srfi.schemers.org/srfi-45/srfi-45.html
 ;; [5] http://www.eros-os.org/pipermail/e-lang/2004-March/009643.html
 
-(require scheme/base)
-(require scheme/control)
+(require racket/base)
+(require racket/control)
 (require srfi/45)
 (require srfi/41)
 

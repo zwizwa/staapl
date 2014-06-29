@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "tools.ss")
+ "tools.rkt")
 (require/provide
- "op.ss"
- "asm/operand.ss"
- "asm/assembler.ss"
- "asm/dasm.ss"
- "asm/directives.ss"
- "asm/pointers.ss"
- "asm/instruction-set.ss")   ;; highlevel language for instruction set definition
+ "op.rkt"
+ "asm/operand.rkt"
+ "asm/assembler.rkt"
+ "asm/dasm.rkt"
+ "asm/directives.rkt"
+ "asm/pointers.rkt"
+ "asm/instruction-set.rkt")   ;; highlevel language for instruction set definition
 
 ;; (loading "asm")

@@ -55,9 +55,9 @@ make -C ~/pk2
 make: Entering directory `/home/tom/pub/darcs/pk2'
 mzc -v -k pk2.ss
 mzc v4.2.4.5 [3m], Copyright (c) 2004-2010 PLT Scheme Inc.
-"pk2.ss":
-  making "/home/tom/pub/darcs/pk2/pk2.ss"
-  making "/home/tom/pub/darcs/pk2/libusb.ss"
+"pk2.rkt":
+  making "/home/tom/pub/darcs/pk2/pk2.rkt"
+  making "/home/tom/pub/darcs/pk2/libusb.rkt"
 libusb.ss:155:16: module: duplicate definition for identifier at: usb-device-descriptor in: (define-values (_usb-device _usb-device-pointer _usb-device-pointer/null usb-device? usb-device-tag make-usb-device usb-device-next usb-device-prev usb-device-filename usb-device-bus usb-device-descriptor usb-device-config usb-device-dev usb-device-devnum usb-device-num_children usb-device-children set-usb-device-next! set-usb-device-prev! set-usb-device-filename! set-usb-device-bus! set-usb-device-descriptor! set-usb-device-config! set-usb-device-dev! set-usb-device-devnum! set-usb-device-num_children! ...
 make: *** [pk2] Error 1
 make: Leaving directory `/home/tom/pub/darcs/pk2'

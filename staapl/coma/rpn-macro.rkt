@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../rpn.ss"
- "../ns.ss"
- "../scat.ss"
- "op.ss")
+ "../rpn.rkt"
+ "../ns.rkt"
+ "../scat.rkt"
+ "op.rkt")
 
 (provide macro
          macro:

@@ -1,8 +1,8 @@
 #lang scribble/doc
 
 @(require 
-   scheme/sandbox
-   scheme/enter
+   racket/sandbox
+   racket/enter
    scribble/manual
    scribble/eval)
 

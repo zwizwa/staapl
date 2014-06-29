@@ -42,18 +42,18 @@
 ;; http://www.beyondlogic.org/usbnutshell/
 ;; http://www.beyondlogic.org/usbnutshell/usb3.htm
 
-#lang scheme/base
+#lang racket/base
 
 (require
- "../pic18.ss"
- "../pic18/string.ss"
- "../pic18/route.ss"
+ "../pic18.rkt"
+ "../pic18/string.rkt"
+ "../pic18/route.rkt"
  (for-syntax
-  scheme/base
-  "../tools.ss"
-  "usb-device.ss"
-  scheme/pretty
-  scheme/match))
+  racket/base
+  "../tools.rkt"
+  "usb-device.rkt"
+  racket/pretty
+  racket/match))
 
 (provide define-usb-device)
 

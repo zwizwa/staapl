@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Code representation is independent of the compiler.
 (require
- scheme/control
- scheme/serialize
- scheme/match
- "../op.ss"
- "../tools.ss")
+ racket/control
+ racket/serialize
+ racket/match
+ "../op.rkt"
+ "../tools.rkt")
 
 
 (provide
@@ -30,7 +30,7 @@
  target-value-eval
  target-value-source
  
- target-value-abort   ;; used in constants.ss to indicate undefined values
+ target-value-abort   ;; used in constants.rkt to indicate undefined values
  
  (struct-out target-value)
 

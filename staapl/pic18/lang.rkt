@@ -1,16 +1,16 @@
-#lang scheme/base
+#lang racket/base
 
 ;; PLT module language for the pic18 Forth dialect.
-;;  = scheme/base
+;;  = racket/base
 ;;  + staapl/pic18
  
-(require "../tools.ss")
+(require "../tools.rkt")
 
 (provide
  (rename-out (pic18-module-begin #%module-begin))
- (except-out (all-from-out scheme/base) #%module-begin))
+ (except-out (all-from-out racket/base) #%module-begin))
 
-(require/provide "../pic18.ss")
+(require/provide "../pic18.rkt")
 
 ;; PIC18 Forth use the normal Forth module compiler with a library
 ;; path set to find the appropriate .f files.

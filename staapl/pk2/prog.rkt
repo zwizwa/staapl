@@ -1,13 +1,13 @@
-#lang scheme/base
+#lang racket/base
 
 ;; PK2 device programming
 (provide (all-defined-out))
 (require
- "util.ss"
- "pk2const.ss"     ;; PICkit2 bits
- "pk2script.ss"    ;; command and scripting languages
- "device-file.ss"  ;; Reader for Microchip's programming scripts
- "cmd.ss")
+ "util.rkt"
+ "pk2const.rkt"     ;; PICkit2 bits
+ "pk2script.rkt"    ;; command and scripting languages
+ "device-file.rkt"  ;; Reader for Microchip's programming scripts
+ "cmd.rkt")
 
 
 ;; INTERFACE

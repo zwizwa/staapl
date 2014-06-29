@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../coma/macro.ss"
- "../target.ss")
+ "../coma/macro.rkt"
+ "../target.rkt")
 
 ;; Compiler tools independent of target macros.
 

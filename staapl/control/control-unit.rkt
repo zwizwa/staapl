@@ -1,4 +1,4 @@
-#lang scheme/unit
+#lang racket/unit
 
 ;; Primitives for the control stack extension. This supports Forth's
 ;; control flow words, which are implemented in terms of jumps and
@@ -9,13 +9,13 @@
 ;; control flow analysis mechanism.
 
 (require
- "../sig.ss"
- "../ns.ss"
- "../tools.ss"
- "../scat.ss"
- "2stack.ss"
- "../coma/macro.ss"
- "../asm/directives.ss")
+ "../sig.rkt"
+ "../ns.rkt"
+ "../tools.rkt"
+ "../scat.rkt"
+ "2stack.rkt"
+ "../coma/macro.rkt"
+ "../asm/directives.rkt")
 
 (import jump^ cjump^ stack^ comp-debug^)
 (export control^)

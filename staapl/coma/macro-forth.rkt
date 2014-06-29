@@ -1,13 +1,13 @@
-#lang scheme/base
-(require "../rpn.ss"
-         "../macro.ss"
-         "../tools.ss"
-         (for-syntax scheme/base
-                     "../tools.ss"
-                     "../tools/stx.ss"
-                     "../forth/lexer-tx.ss"
-                     "../rpn.ss"
-                     "../forth/forth-tx.ss"))
+#lang racket/base
+(require "../rpn.rkt"
+         "../macro.rkt"
+         "../tools.rkt"
+         (for-syntax racket/base
+                     "../tools.rkt"
+                     "../tools/stx.rkt"
+                     "../forth/lexer-tx.rkt"
+                     "../rpn.rkt"
+                     "../forth/forth-tx.rkt"))
 
 ;; Toplevel forms for dictionary construction and compilation for the
 ;; Staapl macro forth.
@@ -58,7 +58,7 @@
 
 ;; For debug purposes, the dictionary expression produced by rpn-parse
 ;; is stored in this parameter in quoted form before it is expanded further.
-(require scheme/pretty)
+(require racket/pretty)
 (define forth-dictionary-log
   (make-parameter
    void
@@ -127,7 +127,7 @@
 
 
 ;; This doesn't work for some bizarre reason..
-(require (for-syntax "macro-forth-tx.ss"))
+(require (for-syntax "macro-forth-tx.rkt"))
 
 (ns (macro)
     (define-syntax provide-all
@@ -164,8 +164,8 @@
 
     
 ;; Local lexical variables.
-(require scheme/match)
-(require "../comp/state.ss")
+(require racket/match)
+(require "../comp/state.rkt")
 (define (macro-pop state n)
   (let-values (((state+ popped) (state-pop state n (ns (op ? qw)))))
     (apply values (cons state+ popped))))

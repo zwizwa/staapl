@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../tools.ss"
- "../target.ss"
- "../scat.ss"
- ;; "../asm/dictionary.ss"
- "../op.ss"
+ "../tools.rkt"
+ "../target.rkt"
+ "../scat.rkt"
+ ;; "../asm/dictionary.rkt"
+ "../op.rkt"
  
- ;; scheme/pretty
- scheme/match)
+ ;; racket/pretty
+ racket/match)
 
 (provide
  (all-defined-out))

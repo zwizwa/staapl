@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Macro Forth for PIC18.
 
-(require "tools.ss")
+(require "tools.rkt")
 (require/provide
- "pic18-unlinked.ss"         ;; All PIC18 code, not linked.
- "pic18/pic18-const-unit.ss" ;; Chip-specific config.
+ "pic18-unlinked.rkt"         ;; All PIC18 code, not linked.
+ "pic18/pic18-const-unit.rkt" ;; Chip-specific config.
 )
 
 (provide (all-defined-out))

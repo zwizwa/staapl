@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../op.ss")
+(require "../op.rkt")
 
 (provide (all-defined-out))
 

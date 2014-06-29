@@ -1,15 +1,15 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "list.ss"
-;; "seq.ss"
- "seq-tools.ss"
- "grabbag.ss"
- "binary.ss"
- (lib "match.ss"))
+ "list.rkt"
+;; "seq.rkt"
+ "seq-tools.rkt"
+ "grabbag.rkt"
+ "binary.rkt"
+ (lib "match.rkt"))
 (provide (all-defined-out))
 
-(require  (lib "78.ss" "srfi"))
+(require  (lib "78.rkt" "srfi"))
 (check-set-mode! 'report-failed)
 
 ;; CHUNKS

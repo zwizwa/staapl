@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require (lib "process.ss")) ;; system
+(require (lib "process.rkt")) ;; system
 
 ;; Interface to piklab-prog
 (provide (all-defined-out))

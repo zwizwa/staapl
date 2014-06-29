@@ -1,4 +1,4 @@
-#lang scheme/unit
+#lang racket/unit
 
 ;; Shallow Co-routines (SCR).
 ;;
@@ -11,10 +11,10 @@
 ;; of SCRs to exist on a single low-memory uC.
 
 (require
- scheme/match
- "../op.ss"
- "../coma/macro.ss"
- "../sig.ss")
+ racket/match
+ "../op.rkt"
+ "../coma/macro.rkt"
+ "../sig.rkt")
 
 (import stack^ jump^ state-tag^ memory-extra^ cfg^ control^ rstack^)
 (export scr^)

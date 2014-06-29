@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Tools for accessing the code stack useful for macro evaluation.
 
 (require
- "../op.ss"
- "../ns.ss"
- "../scat.ss"
- "../target/rep.ss"
- "op.ss"
- scheme/match)
+ "../op.rkt"
+ "../ns.rkt"
+ "../scat.rkt"
+ "../target/rep.rkt"
+ "op.rkt"
+ racket/match)
 
 (provide
 

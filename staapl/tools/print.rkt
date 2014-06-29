@@ -1,13 +1,13 @@
-#lang scheme/base
+#lang racket/base
 ;; FORMATTING
 
 (provide (all-defined-out))
 
 (require
- "binary.ss"
- "seq-tools.ss")
+ "binary.rkt"
+ "seq-tools.rkt")
 
-(require  (lib "78.ss" "srfi"))
+(require  (lib "78.rkt" "srfi"))
 (check-set-mode! 'report-failed)
 
 

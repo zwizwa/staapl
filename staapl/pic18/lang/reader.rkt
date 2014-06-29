@@ -1,1 +1,1 @@
-(module reader (file "../../forth/module-reader.ss") "pic18/lang.ss")
+(module reader (file "../../forth/module-reader.rkt") "pic18/lang.rkt")

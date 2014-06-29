@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../ns-tx.ss")
+(require "../ns-tx.rkt")
 (provide (all-defined-out))
 
 ;; This module contains compile-time information associated to the 'op

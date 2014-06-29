@@ -1,6 +1,6 @@
-#lang scheme/unit
-(require  "../coma/macro-forth-sig.ss"
-          scheme/pretty)
+#lang racket/unit
+(require  "../coma/macro-forth-sig.rkt"
+          racket/pretty)
 (import)
 (export macro-forth^)
 

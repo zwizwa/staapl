@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Transformer routines for the asm/dasm syntax.
 
@@ -7,12 +7,12 @@
 
 
 (require
- "../op/static.ss"  ;; make-op-static 
+ "../op/static.rkt"  ;; make-op-static 
   
  (for-template
-  "../op.ss"    ;; make-asm
-  "operand.ss"      ;; asm+ 
-  scheme/base))
+  "../op.rkt"    ;; make-asm
+  "operand.rkt"      ;; asm+ 
+  racket/base))
 
 ;; Parameter classes.
 

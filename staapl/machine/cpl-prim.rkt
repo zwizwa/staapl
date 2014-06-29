@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
 (provide rule:sum=0
          rule:prod=1
          rule:>0)
 
-(require "cpl-net.ss")
+(require "cpl-net.rkt")
 
 ;; RULE CLASSES
 

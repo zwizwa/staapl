@@ -1,5 +1,5 @@
-#lang scheme/base
-(require scheme/promise scheme/control)
+#lang racket/base
+(require racket/promise racket/control)
 (provide (all-defined-out))
 
 ;; The code in this file connects traversal functions (map), generator

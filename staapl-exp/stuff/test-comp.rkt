@@ -1,6 +1,6 @@
 ;; Forth compiler core.
 
-#lang scheme/base
+#lang racket/base
 (require
  "../sig.ss"
  "../tools.ss"

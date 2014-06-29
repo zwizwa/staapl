@@ -1,2 +1,2 @@
-(require scheme/system)
+(require racket/system)
 (void (system "mzc -k all.ss"))

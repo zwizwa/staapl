@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Coma units linked to partial-evaluation only.  This is an
 ;; intermediate module mainly for testing the core signature

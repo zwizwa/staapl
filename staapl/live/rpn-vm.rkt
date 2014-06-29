@@ -1,21 +1,21 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "reflection.ss"
- "rpn-target.ss"
- "../target.ss"
- "../scat.ss"
- "../ns.ss"
- "../rpn.ss"
- "../macro.ss"
- "tethered.ss"
- "commands.ss"
- "../forth/forth-lex.ss"
- "rpn-live.ss"
+ "reflection.rkt"
+ "rpn-target.rkt"
+ "../target.rkt"
+ "../scat.rkt"
+ "../ns.rkt"
+ "../rpn.rkt"
+ "../macro.rkt"
+ "tethered.rkt"
+ "commands.rkt"
+ "../forth/forth-lex.rkt"
+ "rpn-live.rkt"
  (for-syntax
-  "../forth/forth-tx.ss"
-  "../ns-tx.ss"
-  scheme/base))
+  "../forth/forth-tx.rkt"
+  "../ns-tx.rkt"
+  racket/base))
 
 (provide (all-defined-out))
 

@@ -1,5 +1,5 @@
 #lang racket/base
-(require "usb-comp.ss")
+(require "usb-comp.rkt")
 
 (Fields
 

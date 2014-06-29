@@ -1,8 +1,8 @@
-#lang scheme/unit
+#lang racket/unit
 
 (require
- "../sig.ss"
- "../coma/macro.ss")
+ "../sig.rkt"
+ "../coma/macro.rkt")
 
 (import)
 (export code^)

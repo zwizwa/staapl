@@ -1,8 +1,8 @@
-#lang scheme/unit
-(require "sig.ss"
-         "label-sig.ss"
-         "ns.ss"
-         "code.ss")
+#lang racket/unit
+(require "sig.rkt"
+         "label-sig.rkt"
+         "ns.rkt"
+         "code.rkt")
 
 ;; Translate a bunch of interfaces into one that is used to implement
 ;; the macros.

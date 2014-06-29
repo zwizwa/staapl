@@ -1,5 +1,5 @@
-#lang scheme/base
-(require "../pic18.ss")
+#lang racket/base
+(require "../pic18.rkt")
 (provide (all-defined-out))
 
 ;; Bypass the Forth syntax.

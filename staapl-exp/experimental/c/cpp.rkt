@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 
 ;; File moved to libprim.  This version is a snapshot
 ;; Tue Oct  6 17:56:40 CEST 2009
 
 (require "../tools/mfile.ss"
-         scheme/system
-         scheme/runtime-path)
+         racket/system
+         racket/runtime-path)
 
 (define-runtime-path gnuc.h "gnuc.h")
 

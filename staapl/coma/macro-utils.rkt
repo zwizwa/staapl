@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 (provide
  (all-defined-out))
 (require
- "../scat.ss")
+ "../scat.rkt")
 
 ;; SCAT uitilities for forth macro compilation.
 

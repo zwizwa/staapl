@@ -1,9 +1,9 @@
-#lang scheme/unit
+#lang racket/unit
 (require "ring-sig.ss"
          "vec-sig.ss"
          "staged-ops.ss"
          "combinators.ss"
-         scheme/match)
+         racket/match)
 
 (import vec^)
 (export ring^)

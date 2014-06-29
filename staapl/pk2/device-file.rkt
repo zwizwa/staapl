@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "interpreter.ss"
- scheme/promise)
+ "interpreter.rkt"
+ racket/promise)
 
 (provide
  load-device-file  ;; populate DB

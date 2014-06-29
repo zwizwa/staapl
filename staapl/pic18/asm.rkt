@@ -1,17 +1,17 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- (lib "match.ss")
- (lib "pretty.ss")
- "../ns.ss"    ;; namespaces
-;; "../live.ss"  ;; reflection
- "../asm.ss"
- "../tools.ss"
+ (lib "match.rkt")
+ (lib "pretty.rkt")
+ "../ns.rkt"    ;; namespaces
+;; "../live.rkt"  ;; reflection
+ "../asm.rkt"
+ "../tools.rkt"
 
  ;; These need to be here to make sure we don't redefine virtual
  ;; instructions in the concrete assembler.
  
- "../coma/macro.ss"
+ "../coma/macro.rkt"
  )
 
 

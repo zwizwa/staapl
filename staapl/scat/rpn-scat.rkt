@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../rpn.ss"
- "../ns.ss"
- "rep.ss"
- "stack.ss")
+ "../rpn.rkt"
+ "../ns.rkt"
+ "rep.rkt"
+ "stack.rkt")
 
 (provide scat
          scat:

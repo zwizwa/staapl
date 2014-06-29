@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 ;; http://okmij.org/ftp/Scheme/zipper-in-scheme.txt
 
-(require scheme/control)
+(require racket/control)
 
 ; deterministic, left-to-right map
 (define (map* f l)

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Simple interface on top of forth-lex.ss using CPS macros.  This
 ;; allows the lexer to be used without having to resort to lowlevel
@@ -9,8 +9,8 @@
 
 (require
  (for-syntax
-  scheme/base
-  "lexer-tx.ss"))
+  racket/base
+  "lexer-tx.rkt"))
 
 (provide (all-defined-out))
 

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; TETHERED INTERPRETER / COMPILER
 
@@ -9,19 +9,26 @@
 (provide (all-defined-out))
 
 (require
- "../op.ss"
- "../tools.ss"
- "../ns.ss"
- "../scat.ss"
- "../target.ss"
- "../asm.ss"
- "../coma/macro.ss"
- "reflection.ss"
- "../comp/state.ss" ;; state for macro eval
- "../code.ss"
+ "../op.rkt"
+ "../tools.rkt"
+ "../ns.rkt"
+ "../scat.rkt"
+ "../target.rkt"
+ "../asm.rkt"
+ "../coma/macro.rkt"
+ "reflection.rkt"
+ "../comp/state.rkt" ;; state for macro eval
+ "../code.rkt"
 
- scheme/system
- scheme/match)
+ racket/system
+ racket/match)
+
+
+;; Debug
+(define-syntax-rule (d: fmt . e)
+  (let ((val (begin . e)))
+    ;;(printf fmt val)
+    val))
 
 
 ;; Commands for interaction mode.
@@ -47,11 +54,6 @@
 (datastack pic18-datastack)
 
 
-;; Debug
-(define-syntax-rule (d: fmt . e)
-  (let ((val (begin . e)))
-    ;; (printf fmt val)
-    val))
 
 
 ;; CONNECTION
@@ -176,7 +178,7 @@
 (define (tnop)           (target-send/b))         ;; nop = empty message
 (define (tstart/b addr)  (target-send/w 3 addr)) 
 
-;; (*) The command 'start in live/commands.ss uses this. Because the
+;; (*) The command 'start in live/commands.rkt uses this. Because the
 ;; console closes the serial port after every command, running 'start
 ;; on a word that DOES return an ack byte is ok: the ack byte is just
 ;; ignored.
@@ -588,7 +590,7 @@
 
 ;; Upload line-aligned bytes obtained from flattened code chunks.
 ;; Default is from PIC18, which uses 8 bytes per write line.
-;; (require scheme/pretty)
+;; (require racket/pretty)
 (define (upload-bytes bin [align-bits 3])
   ;; (pretty-print bin)
   (for ((chunk (bin-flatten bin)))
@@ -649,7 +651,7 @@
       (or (print-line-fast)
           (print-line)))))
 
-;; Read raw bytes from input and print.  See tools/print.ss for args.
+;; Read raw bytes from input and print.  See tools/print.rkt for args.
 (define (hex-dump sequence . args)
   (for ((s sequence)
         (p (apply in-hex-printer args)))

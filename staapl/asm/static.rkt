@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../scat.ss")
+(require "../scat.rkt")
 
 ;; Static data type for assembler.  The pattern matching and
 ;; construction look like:
@@ -34,7 +34,7 @@
 
 (define-struct base-asm (semantics))
 
-(require (for-syntax scheme/base))
+(require (for-syntax racket/base))
 
 (define-syntax (define-assembler stx)
   (syntax-case stx ()

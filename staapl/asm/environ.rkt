@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Assembler/disassembler functions need extra context information.
 (provide (all-defined-out))
 
 ;; Note that the pointers for current code and data location +
 ;; operations are defined separately in pointers.ss
-(require "pointers.ss")
+(require "pointers.rkt")
 
 ;; Current assembler phase.  In phase 0 most errors are suppressed to
 ;; allow the first pass to succeed.

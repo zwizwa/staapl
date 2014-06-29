@@ -2,20 +2,20 @@
 ;; 'instruction-set' which generates generates symbolic <-> binary
 ;; translators from an instruction set specification.
 
-#lang scheme/base
+#lang racket/base
 
 
 (require
- "../ns.ss"
- "pointers.ss"
- "../tools.ss"
-;; "asm-lambda.ss"
- "../op.ss"
- "directives.ss"
- (for-syntax scheme/base
-             "asm-lambda-tx.ss")
+ "../ns.rkt"
+ "pointers.rkt"
+ "../tools.rkt"
+;; "asm-lambda.rkt"
+ "../op.rkt"
+ "directives.rkt"
+ (for-syntax racket/base
+             "asm-lambda-tx.rkt")
  (for-template
-  "../ns.ss"
+  "../ns.rkt"
   ))
 
 (provide

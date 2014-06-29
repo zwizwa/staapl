@@ -1,26 +1,26 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/match
- "tools.ss")
+ racket/match
+ "tools.rkt")
 (require/provide
- "live/tethered.ss"    ;; Scat code for host<->target interaction.
+ "live/tethered.rkt"    ;; Scat code for host<->target interaction.
  
- "live/comm-uart.ss" 
- "live/comm-pk2.ss"
- "live/comm-simulator.ss"  ;; monitor transports and reference implementation
+ "live/comm-uart.rkt" 
+ "live/comm-pk2.rkt"
+ "live/comm-simulator.rkt"  ;; monitor transports and reference implementation
   
- "live/commands.ss"    ;; A target-local view to the above.
- "live/rpn-target.ss"  ;; Base implementation of the target command language.
- "live/reflection.ss"  ;; Namespace operations.
- "live/repl.ss"        ;; repl functionality
+ "live/commands.rkt"    ;; A target-local view to the above.
+ "live/rpn-target.rkt"  ;; Base implementation of the target command language.
+ "live/reflection.rkt"  ;; Namespace operations.
+ "live/repl.rkt"        ;; repl functionality
 
- "live/rpn-live.ss"    ;; for 'live>'
+ "live/rpn-live.rkt"    ;; for 'live>'
  
  ;; necessary for reflective operations to work:
-; "target.ss"
-; "ns.ss"
-; "scat.ss"
- "macro.ss"
+; "target.rkt"
+; "ns.rkt"
+; "scat.rkt"
+ "macro.rkt"
  )
 
 (provide (all-defined-out))
@@ -35,7 +35,7 @@
 
 ;; LIVE CONNECTION
 
-;; (require "pk2/icsp.ss") (define (debug) (icsp-debug #t))
+;; (require "pk2/icsp.rkt") (define (debug) (icsp-debug #t))
   
 
 (define (console type dev baud)

@@ -1,6 +1,6 @@
-#lang scheme/base
-(require "rep.ss"
-         scheme/pretty)
+#lang racket/base
+(require "rep.rkt"
+         racket/pretty)
   
 (provide
  stack-print

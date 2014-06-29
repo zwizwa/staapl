@@ -2,7 +2,7 @@
 
 ;; This module is used in the documentation.
 
-#lang scheme/base
+#lang racket/base
 (require
  "../tools.ss")
 (require/provide

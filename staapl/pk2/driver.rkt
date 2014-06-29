@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 ; (provide (all-defined-out))
 (provide pk2  ;; from 
          pk2-close
@@ -9,14 +9,14 @@
 ;; connection and device database.
 
 (require
- "util.ss"
- "libusb.ss"       ;; FFI + tools
- "usbconst.ss"     ;; standard USB bits
- "pk2const.ss"     ;; PICkit2 bits
- "pk2script.ss"    ;; command and scripting languages
- "interpreter.ss"  ;; interpreter (for send/receive dep inject)
- "device-file.ss"  ;; Reader for Microchip's programming scripts
- scheme/pretty)
+ "util.rkt"
+ "libusb.rkt"       ;; FFI + tools
+ "usbconst.rkt"     ;; standard USB bits
+ "pk2const.rkt"     ;; PICkit2 bits
+ "pk2script.rkt"    ;; command and scripting languages
+ "interpreter.rkt"  ;; interpreter (for send/receive dep inject)
+ "device-file.rkt"  ;; Reader for Microchip's programming scripts
+ racket/pretty)
 
 
 ;(define (reboot)

@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 
 (require launcher/launcher
-         scheme/cmdline)
+         racket/cmdline)
 
 
 (define prefix-bin (make-parameter "/usr/local/bin"))

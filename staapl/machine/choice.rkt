@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Backtracking (relational programming) with the following features:
 
@@ -13,11 +13,11 @@
          choice/fail
          cut)
 
-(require "enum.ss"
-         "fail.ss"
+(require "enum.rkt"
+         "fail.rkt"
          srfi/41
-         scheme/control
-         scheme/match)
+         racket/control
+         racket/match)
 
 ;; SHIFT + PARAMETER SAVE / RESTORE
 

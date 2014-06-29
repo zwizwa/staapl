@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 
-(require "main.ss"
-         "../ns.ss"
+(require "main.rkt"
+         "../ns.rkt"
          (for-syntax
-          scheme/base
-          "parse-tx.ss"))
+          racket/base
+          "parse-tx.rkt"))
           
 (provide (all-defined-out))
 ;; Defining multiple prefix subsitution patterns.

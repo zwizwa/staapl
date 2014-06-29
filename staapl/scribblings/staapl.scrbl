@@ -1,22 +1,22 @@
 #lang scribble/doc
 @(require scribble/manual
           scribble/eval
-          scheme/runtime-path
+          racket/runtime-path
           (planet cce/scheme:4:1/planet)
 )
 
 @;Removed these as they seem to just give broken links, underlined in red.
-@;(for-label scheme/base "../macro.ss")
+@;(for-label racket/base "../macro.rkt")
 
 
-@; @(define-runtime-path demo "../pic18/demo.ss")
+@; @(define-runtime-path demo "../pic18/demo.rkt")
 @(define box-eval
    (let ((eval (make-base-eval)))
      (eval
       `(begin
          ;; (require (file ,(path->string (simplify-path demo))))
          (require staapl/pic18/demo)
-         (require scheme/pretty)
+         (require racket/pretty)
          (pretty-print-columns
           (- (pretty-print-columns) 10))))
      eval))

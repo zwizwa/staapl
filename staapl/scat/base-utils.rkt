@@ -1,13 +1,13 @@
-#lang scheme/base
+#lang racket/base
 
 ;; These are basic utility functions to be used in base.ss, but not to
 ;; be re-exported: base.ss should only export base.* names.
 
 (provide (all-defined-out))
 
-(require "rep.ss"
-         "../ns.ss"
-         "stack.ss"
+(require "rep.rkt"
+         "../ns.rkt"
+         "stack.rkt"
          )
 
 ;; Convenience macro for primitive definitions.

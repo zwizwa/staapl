@@ -1,7 +1,7 @@
-#lang scheme/base
+#lang racket/base
 (require "stx.ss"
          "normalform.ss")
-(require scheme/dict)
+(require racket/dict)
 (provide (all-defined-out))
 
 ;; Normal form for algebraic expressions with a delay operator.

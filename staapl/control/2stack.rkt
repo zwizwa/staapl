@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; The 2-stack model extends the 1-stack Coma language with a stack to
 ;; implement Forth-style control words. Coma together with higher
@@ -32,10 +32,10 @@
 )
 
 (require
- "../ns.ss"
- "../tools.ss"
- "../scat.ss"
- scheme/match
+ "../ns.rkt"
+ "../tools.rkt"
+ "../scat.rkt"
+ racket/match
  )
 
 ;; The second stack is the control stack for the Forth style control

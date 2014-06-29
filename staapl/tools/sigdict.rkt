@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
-(require scheme/unit
+(require racket/unit
          (for-syntax
-          scheme/base))
+          racket/base))
 
 ;; A sigdict is a collection of signatures.
 (define-syntax (define-sigdict stx)

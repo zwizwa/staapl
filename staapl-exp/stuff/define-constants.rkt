@@ -1,13 +1,13 @@
-#lang scheme/base
+#lang racket/base
 (provide define-pic18-const-unit)
-(require scheme/pretty
-         scheme/unit
+(require racket/pretty
+         racket/unit
          "sig.ss"
          "../pic18.ss"
          (for-syntax
-          scheme/pretty
-          scheme/unit-exptime
-          scheme/base))
+          racket/pretty
+          racket/unit-exptime
+          racket/base))
 
 ;; Constants are defined prefixed as target macros and as ordinary
 ;; values in the scheme namespace.  The are exposed as (an extension

@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 ;; Small shared utilities.
 (require
- "../tools.ss")
+ "../tools.rkt")
 (provide
  (all-defined-out)
- (all-from-out "../tools.ss"))
+ (all-from-out "../tools.rkt"))
 
 (define (->int x) (inexact->exact (floor x)))
 (define (equal-head? a b)

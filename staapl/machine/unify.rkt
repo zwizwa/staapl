@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Unfication on s-expressions using a single assignment store.
 ;; See CTM[1] section 2.8.2 p.98-
@@ -18,8 +18,8 @@
 
          )
 
-(require scheme/match "fail.ss"
-         (for-syntax scheme/base))
+(require racket/match "fail.rkt"
+         (for-syntax racket/base))
 ;; The store is a collection of variable bindings, where each variable
 ;; can be bound to a partial value.
 

@@ -1,6 +1,6 @@
-#lang scheme/base
+#lang racket/base
 
-(require "../scat.ss")
+(require "../scat.rkt")
 
 ;; Macros have a slightly different representation over Scat words:
 ;; primitive macros contain type annotations and composite ones are
@@ -8,7 +8,7 @@
 
 (provide (all-defined-out))
 
-(require scheme/pretty)
+(require racket/pretty)
 (define (make-primitive-macro fn clauses)
   ;; (pretty-print clauses)
   (make-word fn clauses))

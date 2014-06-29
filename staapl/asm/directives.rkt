@@ -1,17 +1,17 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Operations interracting with the assembler context (address allocation).
 
 
 (require
- "../op.ss"
- "../ns.ss"
- "../tools.ss"
- "pointers.ss"
- "dasm.ss"
+ "../op.rkt"
+ "../ns.rkt"
+ "../tools.rkt"
+ "pointers.rkt"
+ "dasm.rkt"
  (for-syntax
-  "../op/static.ss"
-  scheme/base)
+  "../op/static.rkt"
+  racket/base)
 
  )
 

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Target code produced during compilation (comp.ss) is registered
 ;; in-order, to implement Forth's allot-stack model for incremental
@@ -22,7 +22,7 @@
 ;;   instantiation process and perform necessary operations.
 
 (require
- "rep.ss")
+ "rep.rkt")
 
 (provide
  register-code

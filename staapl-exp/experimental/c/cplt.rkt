@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Simplified wrapper around c.plt for C code analysis and synthesis.
 
@@ -6,9 +6,9 @@
 ;; FIXME: There is another variant of this file in libprim.
 
 (require (planet dherman/c:3:2)
-         scheme/control
-         scheme/pretty
-         scheme/match
+         racket/control
+         racket/pretty
+         racket/match
          "cpp.ss")
 
 (define (parse-cpp . args)
@@ -16,7 +16,7 @@
 
 
 
-(require (for-syntax scheme/base))
+(require (for-syntax racket/base))
 
 ;; Some simplified pattern matching syntax, ignoring the source
 ;; location, with implicit `struct' and one level of parens removed.

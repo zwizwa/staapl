@@ -1,6 +1,6 @@
-#lang scheme/base
-(require scheme/match
-         scheme/pretty)
+#lang racket/base
+(require racket/match
+         racket/pretty)
 
 ;; Zipper dictionary for one-pass compilation where the main action is
 ;; to "add the next instruction".  In addition it provides means to

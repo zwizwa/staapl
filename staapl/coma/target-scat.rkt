@@ -1,14 +1,14 @@
-#lang scheme/base
+#lang racket/base
 
 (require
- "../target.ss"
- "../scat.ss"
- scheme/match
+ "../target.rkt"
+ "../scat.rkt"
+ racket/match
  (for-syntax
-  ;; "../tools.ss"
-  "../tools/stx.ss"
-  scheme/pretty
-  scheme/base))
+  ;; "../tools.rkt"
+  "../tools/stx.rkt"
+  racket/pretty
+  racket/base))
   
 (provide
  make-target-value-compiler
@@ -18,7 +18,7 @@
 ;; expressions.  (FIXME: this sould later be full parameterization of
 ;; which assembler to use).
 
-;; FIXME: this was moved from pic18-macro-unit.ss
+;; FIXME: this was moved from pic18-macro-unit.rkt
 
 ;; Why?  Probably because it's special-case?
 

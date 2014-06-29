@@ -8,16 +8,16 @@
 ;; subset language mapping [qw] -> [qw], acting as a compile time
 ;; evaluator.
 
-#lang scheme/base
+#lang racket/base
 
 
 (require
- ;; scheme/match
- "../scat.ss"
- "pattern-runtime.ss"
+ ;; racket/match
+ "../scat.rkt"
+ "pattern-runtime.rkt"
  (for-syntax
-  scheme/base
-  "pattern-tx.ss"))
+  racket/base
+  "pattern-tx.rkt"))
 
 (provide
  asm-pattern

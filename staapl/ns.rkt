@@ -1,19 +1,19 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Abstract the global name space mechanism.
 
 (require
-;; "tools.ss"
- "ns-tx.ss"      ;; for reflection
- scheme/shared
- scheme/provide-syntax
- scheme/require-syntax
+;; "tools.rkt"
+ "ns-tx.rkt"      ;; for reflection
+ racket/shared
+ racket/provide-syntax
+ racket/require-syntax
  (for-template
-  scheme/base)
+  racket/base)
  (for-syntax
-  scheme/base
+  racket/base
   syntax/stx
-  "ns-tx.ss"
+  "ns-tx.rkt"
   ))
 
 (provide

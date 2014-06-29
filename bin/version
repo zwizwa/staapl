@@ -21,7 +21,7 @@
 
 ;; -----------------------------------------------------------------
 
-(require scheme/pretty)
+(require racket/pretty)
 
 (define staapl-version
   (format "0.~a.~a"

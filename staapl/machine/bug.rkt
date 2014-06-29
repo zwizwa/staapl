@@ -1,10 +1,10 @@
-#lang scheme/base
-(require scheme/sandbox)
+#lang racket/base
+(require racket/sandbox)
 
 (define e
   (make-module-evaluator
-   '(module bug scheme/base
-      (require scheme/control)
+   '(module bug racket/base
+      (require racket/control)
       (define foop (make-parameter #f))
       (define (doop)
         (reset

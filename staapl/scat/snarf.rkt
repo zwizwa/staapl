@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Pprimitive snarfing. These macros are syntax only: they do not
 ;; depend on name space representation.
@@ -6,12 +6,12 @@
 
 
 (require
- "stack.ss"
- "rep.ss")
+ "stack.rkt"
+ "rep.rkt")
 (require
  (for-syntax
-  scheme/base
-  "../tools/stx.ss"))
+  racket/base
+  "../tools/stx.rkt"))
 
 (provide
  as-push as-void     ;; wrap scheme function -> rpn primitive

@@ -1,5 +1,5 @@
-#lang scheme/unit
-(require "../sig.ss")
+#lang racket/unit
+(require "../sig.rkt")
 
 ;; For testing Forth
 

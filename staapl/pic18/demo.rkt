@@ -1,8 +1,8 @@
-#lang scheme/base
-(require "../tools.ss")
+#lang racket/base
+(require "../tools.rkt")
 (require/provide
- "../rpn.ss"
- "../pic18.ss")
+ "../rpn.rkt"
+ "../pic18.rkt")
 (provide (all-defined-out))
 
 

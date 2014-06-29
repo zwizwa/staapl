@@ -1,6 +1,6 @@
 ;; PIC18 compiler core test without Forth syntax.
 
-#lang scheme/base
+#lang racket/base
 (require
  "../sig.ss"
  "../target.ss"

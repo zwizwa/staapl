@@ -1,8 +1,8 @@
-#lang scheme/base
+#lang racket/base
 
 
 (provide (all-defined-out))
-(require scheme/unit)
+(require racket/unit)
 
 (define-signature ring^
   (add  neg  zero

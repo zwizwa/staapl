@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/stxparam
- scheme/pretty
+ racket/stxparam
+ racket/pretty
  (for-syntax
   "statespace-tx.ss"
-  scheme/pretty
-  scheme/base))
+  racket/pretty
+  racket/base))
 
 (provide model-lambda
          model-update)

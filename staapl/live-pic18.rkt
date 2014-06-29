@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/match
- "tools.ss")
+ racket/match
+ "tools.rkt")
 (require/provide
- "tools.ss"         ;; misc tools
- "live.ss"          ;; toplevel interaction
- "code.ss"          ;; target code registry
- "port/ihex.ss"     ;; write-ihex
- "pic18.ss"         ;; base language
+ "tools.rkt"         ;; misc tools
+ "live.rkt"          ;; toplevel interaction
+ "code.rkt"          ;; target code registry
+ "port/ihex.rkt"     ;; write-ihex
+ "pic18.rkt"         ;; base language
  )
  

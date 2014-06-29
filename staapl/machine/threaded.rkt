@@ -1,5 +1,5 @@
-#lang scheme/base
-(require scheme/control)
+#lang racket/base
+(require racket/control)
 (provide make-counter state)
 (define state (make-parameter #f))
 

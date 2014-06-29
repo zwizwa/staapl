@@ -3,10 +3,10 @@
 ;; host.
 
 
-#lang scheme
-(require "../tools.ss"
+#lang racket
+(require "../tools.rkt"
          rnrs/bytevectors-6
-         scheme/match)
+         racket/match)
 (provide (struct-out usb-device)
          usb-device-compile)
 

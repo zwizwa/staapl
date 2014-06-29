@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; All identifier mapping (prefix) code is hidden behind ns.ss and
 ;; ns-tx.ss code.
@@ -9,11 +9,11 @@
  name->identifier)
 
 (require
- scheme/pretty
- "tools/stx.ss"
+ racket/pretty
+ "tools/stx.rkt"
  (for-template
-  scheme/unit
-  scheme/base))
+  racket/unit
+  racket/base))
 
     
 

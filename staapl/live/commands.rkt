@@ -1,26 +1,26 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Live interaction and parsing words.  This glues together target
 ;; word execution, macro simulation and scat/scheme procedure
 ;; execution.
 
 (require
- scheme/match
- scheme/control
- "../tools.ss"
- "../scat.ss"
- "../rpn.ss"
- "../ns.ss"
+ racket/match
+ racket/control
+ "../tools.rkt"
+ "../scat.rkt"
+ "../rpn.rkt"
+ "../ns.rkt"
 
- "reflection.ss"
- "tethered.ss"
- "../target.ss"
- "../code.ss"
- "rpn-live.ss"
+ "reflection.rkt"
+ "tethered.rkt"
+ "../target.rkt"
+ "../code.rkt"
+ "rpn-live.rkt"
  
  (for-syntax
-  "../forth/forth-tx.ss"
-  scheme/base))
+  "../forth/forth-tx.rkt"
+  racket/base))
 
 (provide (all-defined-out))
 
@@ -160,7 +160,7 @@
       
 ;; We use the forth-begin macro forth parser, but allow our user to
 ;; specify an init string, i.e. '(library "pic18").  Currently this is
-;; attached to the .dict file by staaplc.ss
+;; attached to the .dict file by staaplc.rkt
 (define forth-begin-prefix (make-parameter '()))
 
 (define (eval-forth forth-expr [log #t])

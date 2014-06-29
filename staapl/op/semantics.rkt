@@ -1,18 +1,18 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Run-time objects representing assembler/disassembler.  Also used in
 ;; pattern matching rules.
 
 (require
- "../tools.ss"
- "op.ss"
+ "../tools.rkt"
+ "op.rkt"
  (for-syntax
-  ;; "../tools.ss"
-  "../ns-tx.ss"
-  scheme/base
-  "static.ss")
-  scheme/provide-syntax
-  "../ns.ss")
+  ;; "../tools.rkt"
+  "../ns-tx.rkt"
+  racket/base
+  "static.rkt")
+  racket/provide-syntax
+  "../ns.rkt")
 
 (provide
  ;; asm/dasm function tags

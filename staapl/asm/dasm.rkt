@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Assembler dictionary.
 
@@ -10,18 +10,18 @@
 
 
 (require
- scheme/promise
- scheme/pretty
- ;; "decoder.ss"
- "../op.ss"
- "../scat.ss"
- "pointers.ss"
- "../tools.ss"
- "../target.ss"
- "../ns.ss"
+ racket/promise
+ racket/pretty
+ ;; "decoder.rkt"
+ "../op.rkt"
+ "../scat.rkt"
+ "pointers.rkt"
+ "../tools.rkt"
+ "../target.rkt"
+ "../ns.rkt"
  (for-syntax
-  scheme/base
-  "../ns.ss"))
+  racket/base
+  "../ns.rkt"))
 
 (provide
  dasm-parse

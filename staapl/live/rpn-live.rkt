@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; A late-bound dialect of the scat: language.  Identifiers are
 ;; translated using the (live ...) mapper macro into code that
@@ -8,13 +8,13 @@
 ;; similar late-bound semantics.
 
 (require
- "../tools.ss"
- "../scat.ss"
- "../rpn.ss"
- "../ns.ss"
+ "../tools.rkt"
+ "../scat.rkt"
+ "../rpn.rkt"
+ "../ns.rkt"
  (for-syntax
-  "../ns-tx.ss"
-  scheme/base))
+  "../ns-tx.rkt"
+  racket/base))
 
 (provide (all-defined-out))
 

@@ -2,7 +2,7 @@
 @(require
    scribble/manual
    scribble/eval
-   scheme/sandbox)
+   racket/sandbox)
 
 @(define stdout (current-output-port))
 
@@ -292,7 +292,7 @@ be adapted to:
 Beyond the first level of deconstruction that @scheme[patterns]
 performs, enforcing primitives to process lists of opcode . operands
 pairs locally as a stack, the pattern matching syntax is PLT Scheme's
-@scheme[match] from @scheme[scheme/match] and can be used to further
+@scheme[match] from @scheme[racket/match] and can be used to further
 deconstructs operands. This allows the processing of arbitrary data
 structures in intermediate code and is the substrate of compile time
 computation in Staapl.  One creates primitive code generators and

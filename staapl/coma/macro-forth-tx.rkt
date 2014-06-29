@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 (provide (all-defined-out))
 (require
- (for-template "../rpn.ss")
- "../tools/stx.ss"
- "../forth/lexer-tx.ss"
- "../rpn.ss"
- "../forth/forth-tx.ss")
+ (for-template "../rpn.rkt")
+ "../tools/stx.rkt"
+ "../forth/lexer-tx.rkt"
+ "../rpn.rkt"
+ "../forth/forth-tx.rkt")
 
 
 (define (stx->path it)

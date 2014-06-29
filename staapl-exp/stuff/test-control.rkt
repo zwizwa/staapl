@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Test module linking control unit to jump^ implemented in terms of
 ;; flat assembler output, and stack^ with partial evaluation only.

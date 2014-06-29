@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 (require staapl/pic18)
 
 ;; Code for the USBPicStamp by Johannes Taelman.
@@ -20,7 +20,7 @@
 (require
  ; target code and macros
  staapl/pic18/shift
- staapl/pic18/interpreter
+ ;staapl/pic18/interpreter
  staapl/pic18/route
  staapl/pic18/ramblock
  staapl/pic18/template

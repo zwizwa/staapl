@@ -1,5 +1,5 @@
-#lang scheme/base
-(require "../sig.ss")
+#lang racket/base
+(require "../sig.rkt")
 (provide (all-defined-out))
 
 ;; PIC18 specific wordsets
@@ -44,7 +44,7 @@
    ))
 
 
-(require scheme/unit)
+(require racket/unit)
 (define-syntax-rule (define-macro/id-set macro^ id^ words)
   (begin
     (define-macro-set macro^ words)
@@ -90,7 +90,7 @@
 
 
 
-;; (require "../rpn/rpn-signature-forms.ss")
+;; (require "../rpn/rpn-signature-forms.rkt")
 ;; (define-signature prefix-test^
 ;;   (macro/plus
 ;;    (prefix-parsers

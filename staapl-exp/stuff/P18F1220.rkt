@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 (require staapl/pic18/define-constants)
 (provide (all-defined-out))
 (define-pic18-const-unit

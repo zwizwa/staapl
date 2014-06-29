@@ -1,9 +1,9 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Code emission / variable creation for abstract interpretation of
 ;; algebraic expressions.
 
-(require scheme/match)
+(require racket/match)
 (provide (all-defined-out))
 
 

@@ -26,14 +26,14 @@
 ;; system should be extensible to allow low-level forth parsing
 ;; extensions.
 
-#lang scheme/base
+#lang racket/base
 
 (require
- (for-syntax scheme/base)
- (lib "match.ss")
- "../tools/stx.ss"
- "../tools/list.ss"
- "../tools/grabbag.ss"
+ (for-syntax racket/base)
+ (lib "match.rkt")
+ "../tools/stx.rkt"
+ "../tools/list.rkt"
+ "../tools/grabbag.rkt"
  )
 
 (provide read-forth-syntax

@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; Primitives for the base SCAT language. This should bring the
 ;; language up to a point where it is useful to start writing
@@ -6,22 +6,22 @@
 
 
 (require
- "rpn-scat.ss"   ;; scat: macro
+ "rpn-scat.rkt"   ;; scat: macro
  ;; use SCAT rpn syntax + namespace tools..
- "scat-syntax.ss"
- "../ns.ss"
+ "scat-syntax.rkt"
+ "../ns.rkt"
 
  ;; ..to define/snarf functionality from
- "rep.ss"
- "../tools.ss"
- "print.ss"
+ "rep.rkt"
+ "../tools.rkt"
+ "print.rkt"
 
- (lib "pretty.ss")
+ (lib "pretty.rkt")
 
  ;; with names not to be exported tucked away here, so a simple
  ;; provide statement can be used.
- "base-utils.ss"
-;;  (for-syntax  scheme/base)
+ "base-utils.rkt"
+;;  (for-syntax  racket/base)
 
  )
 
@@ -180,7 +180,7 @@
   ;; the code stream, so won't violate this.
 
 
-  (require scheme/control)
+  (require racket/control)
 
   ;; Use a specific prompt tag so scat code has no access to the
   ;; scheme driver code that sets up the state threading.

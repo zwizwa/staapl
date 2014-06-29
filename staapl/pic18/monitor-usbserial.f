@@ -21,7 +21,6 @@ macro
 \ for staaplc
 : console-type   ` uart ;
 : console-device ` /dev/ttyACM0 ;
-: console-baud   0 ;
     
 forth
 

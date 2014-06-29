@@ -1,4 +1,4 @@
-#lang scheme/unit
+#lang racket/unit
 
 ;; Build structured assembly code graph from forth code. This uses an
 ;; extension to scat's 2-stack model to represent concatenative macros
@@ -31,19 +31,19 @@
 
 
 (require
- "state.ss"
- scheme/match
- "../op.ss"
- "../asm/directives.ss"
- "../tools.ss"
- "../control/2stack.ss" 
- "../scat.ss"      ;; for make-word
- "../target.ss"
- "../coma/macro.ss"
+ "state.rkt"
+ racket/match
+ "../op.rkt"
+ "../asm/directives.rkt"
+ "../tools.rkt"
+ "../control/2stack.rkt" 
+ "../scat.rkt"      ;; for make-word
+ "../target.rkt"
+ "../coma/macro.rkt"
  
- "postprocess.ss"
- "../machine/vm.ss"
- scheme/pretty
+ "postprocess.rkt"
+ "../machine/vm.rkt"
+ racket/pretty
  )
 
 

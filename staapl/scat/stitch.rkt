@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; State threading extensions based on prompt tags and reset/shift.
 
@@ -7,8 +7,8 @@
 ;;  * mix function
 
 (require
- "../tools.ss"
- scheme/control)
+ "../tools.rkt"
+ racket/control)
 
 (provide
  tag/pack/unpack->open/close

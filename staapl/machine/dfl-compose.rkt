@@ -1,11 +1,11 @@
-#lang scheme/base
+#lang racket/base
 
 (provide dfl-compose)
-(require "dfl.ss"
-         (for-syntax scheme/base
-                     scheme/match
-                     "../tools/stx.ss" ;; let-staged
-                     "dfl.ss"))
+(require "dfl.rkt"
+         (for-syntax racket/base
+                     racket/match
+                     "../tools/stx.rkt" ;; let-staged
+                     "dfl.rkt"))
 
 ;; Compile DFL by first evaluating the syntax to a dependency graph
 ;; using the `dfl-graph' and passing this data structure and the

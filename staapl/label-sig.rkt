@@ -1,7 +1,7 @@
-#lang scheme/base
-(require scheme/unit
-          "tools/signature-forms.ss"
-         "macro.ss")
+#lang racket/base
+(require racket/unit
+         "tools/signature-forms.rkt"
+         "macro.rkt")
 (provide label^)
 
 ;; FLAT TARGET CODE LABELS
@@ -39,7 +39,7 @@
 ;; 1) a signature is defined that exports the macros, and references
 ;;    a separate collection of identifiers in the signature
 ;;
-;; 2) a binding unit label-unit.ss is defined that exports these
+;; 2) a binding unit label-unit.rkt is defined that exports these
 ;;    identifiers from directly importing them from other signatures.
 ;;
 ;; Some renaming using a `label:' prefix is necessary in order to not

@@ -1,12 +1,12 @@
-#lang scheme/base
+#lang racket/base
 ;; Syntax transformers for statespace DSL.
 
 (require
- scheme/dict
- scheme/match
- scheme/pretty
+ racket/dict
+ racket/match
+ racket/pretty
  (for-template
-  scheme/base))
+  racket/base))
 (provide
  eqs-flat-lambda
  eqs-vector-lambda

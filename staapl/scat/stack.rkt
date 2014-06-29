@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; For the base SCAT language, the running state is a stack,
 ;; implemented as a list wrapped in a structure type.
@@ -26,13 +26,13 @@
  )
 
 (require
- "../rpn.ss"
- scheme/match
- scheme/stxparam
+ "../rpn.rkt"
+ racket/match
+ racket/stxparam
  (for-syntax
-  "../ns-tx.ss"
-  scheme/pretty
-  scheme/base))
+  "../ns-tx.rkt"
+  racket/pretty
+  racket/base))
 
 ;; STATE Inheritance & functional update.
 

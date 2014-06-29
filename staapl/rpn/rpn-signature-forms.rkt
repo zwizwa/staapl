@@ -1,10 +1,10 @@
-#lang scheme/base
+#lang racket/base
 (require
- scheme/unit
+ racket/unit
  (for-syntax
-  scheme/base
-  "../rpn/parse-tx.ss"
-  "../ns-tx.ss"))
+  racket/base
+  "../rpn/parse-tx.rkt"
+  "../ns-tx.rkt"))
 
 (provide (all-defined-out))
 

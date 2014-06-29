@@ -531,7 +531,7 @@ NOTES
     data types, but limited to stacks: next to deconstruction it
     provides a single level of construction (the "qw" instructions on
     the right hand side are interpreted as constructors).  On top of
-    that, the pattern matching is from the scheme/match PLT module.
+    that, the pattern matching is from the racket/match PLT module.
 
 [3] Instead of a stack of instructions, the RHS of a "patterns" rule
     can contain arbitrary scheme code if it is a list that starts with
@@ -1033,7 +1033,7 @@ command line version (MzScheme)
 To try it out in batch mode, create a file test.ss with the following
 contents:
 
- #lang scheme/base
+ #lang racket/base
  (require (planet zwizwa/staapl/prj/pic18))
  (forth-compile ": inc 1 + ;")
  (save-ihex "test.hex")
@@ -3271,7 +3271,7 @@ Date: Thu Jul 23 08:13:23 CEST 2009
 http://lambda-the-ultimate.org/node/2934
 http://concatenative.org/wiki/view/Staapl
 http://planet.plt-scheme.org/display.ss?package=staapl.plt&owner=zwizwa
-http://groups.google.com/group/comp.lang.scheme/browse_thread/thread/62255a0e90bc483e
+http://groups.google.com/group/comp.lang.racket/browse_thread/thread/62255a0e90bc483e
 http://playpower.org/blog/2008/08/programming-the-nes-in-basic/#comment-8
 http://www.qooiii.com/blog/?p=502
 http://delicious.com/doelie/staapl

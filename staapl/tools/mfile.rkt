@@ -1,4 +1,4 @@
-#lang scheme/base
+#lang racket/base
 
 ;; mfile.ss
 
@@ -31,9 +31,9 @@
 
          )
 
-(require "file.ss"
+(require "file.rkt"
          scheme/foreign
-         scheme/file)
+         racket/file)
 
 
 

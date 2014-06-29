@@ -1,4 +1,4 @@
-#lang scheme/unit
+#lang racket/unit
 
 ;; This contains the base coma language and support code.
 
@@ -7,9 +7,9 @@
 ;;  * basic Forth control macros
 
 (require
- scheme/unit
- "../sig.ss"
- "../coma/macro.ss")
+ racket/unit
+ "../sig.rkt"
+ "../coma/macro.rkt")
 
 
 (import)

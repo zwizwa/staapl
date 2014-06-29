@@ -1,5 +1,5 @@
-#lang scheme/base
-(require (for-syntax scheme/base) "stx.ss"
+#lang racket/base
+(require (for-syntax racket/base) "stx.ss"
          srfi/1)
 
 ;; Produce normal forms for several types of expressions using
