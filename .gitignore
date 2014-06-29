@@ -1,0 +1,10 @@
+compiled
+*~
+*.dict
+*.app
+*.flash
+*.hex
+*.log
+*.js
+*.css
+*.html

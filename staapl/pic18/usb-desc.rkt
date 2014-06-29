@@ -1,6 +1,7 @@
 #lang racket/base
 (require "usb-comp.rkt")
-
+(provide (all-defined-out))
+;; Standard USB spec descriptor field names.
 (Fields
 
   (bLength             byte)

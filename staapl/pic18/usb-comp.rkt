@@ -1,12 +1,18 @@
 
 #lang racket/base
+(require
+ racket/pretty)
 (provide
  Fields
  byte word istring
+ DescriptorContext
  Descriptor
  TotalLength
- Table
- StringTable)
+ chunk
+ prefix-length
+ nb-string-descriptors
+ string-descriptor
+ )
 
 (define-syntax-rule (Fields (name typ) ...)
   (begin (define name typ) ...))
@@ -32,9 +38,12 @@
     (push-bytes (cdr bs))))
                  
 
+(define-syntax-rule (chunk forms ...)
+  (bytes-chunk (lambda () forms ...)))
+
 ;; String buffer
 (define *rstrings* (make-parameter '()))
-(define (strings) (reverse *rstrings*))
+(define (strings) (reverse (*rstrings*)))
 (define (push-string s)
   (if (not (string? s))
       (push-byte s)
@@ -42,11 +51,25 @@
         (push-byte (length str))
         (*rstrings* (cons s str)))))
 
+;; String to UTF-16
+(define convert-UTF-16 (bytes-open-converter "UTF-8" "UTF-16"))
+(define (string->bytes/utf-16 str)
+  (let-values (((rv n status)
+                (bytes-convert convert-UTF-16 (string->bytes/utf-8 str))))
+    rv))
+
+
 ;; Types
 (define (byte arg) (push-word 1 arg))
 (define (word arg) (push-word 2 arg))
 (define (istring arg) (push-string arg))
 
+
+;; Context
+(define-syntax-rule (DescriptorContext body ...)
+  (parameterize ((*rstrings* '())
+                 (*rbytes*   '()))
+    body ...))
 
 ;; Structure
 
@@ -75,16 +98,24 @@
 
 ;; Prefix table length
 (define (prefix-length x) (cons (length x) x))
-(define (_table thunk)
-  (let ((chunk (bytes-chunk thunk)))
-    (prefix-length chunk)))
-(define-syntax-rule (Table forms ...)
-  (_table (lambda () forms ...)))
 
+;; Convert native string to descriptor.
+(define (StringDescriptor str)
+  (let ((bytes (bytes->list (string->bytes/utf-16 str))))
+    (append (list 4 ;; bDescriptorType
+                  (length bytes))
+            bytes)))
 
-(define (StringTable n)
-  (let ((strs (strings)))
-    (if (> n (length strs))
-        #f
-        (prefix-length (list-ref strs n)))))
+(define (nb-string-descriptors)
+  (add1 (length (*rstrings*))))
+(define (string-descriptor n)
+  (if (zero? n)
+      (list 4 3 #x04 #x09)     ;; US English
+      (let ((desc
+             (StringDescriptor
+              (list-ref (strings) (sub1 n)))))
+        ;; (pretty-print desc)
+        desc)))
 
+    
+    
