@@ -6,9 +6,16 @@
 (define-values (device configs strings)
   (usb-device
    (DeviceDescriptor
-    #:bNumConfigurations 2
     #:iSerialNumber "dip40kit-desc.rkt")
-   (ConfigurationDescriptorCDC)
-   (ConfigurationDescriptorMIDI
-    #:bConfigurationValue 2)
-   ))
+   (configuration
+    (InterfaceDescriptorCDC
+     #:bInterfaceNumber 0
+     #:bEndpointAddress #x82)
+    (InterfaceDescriptorCDCdata
+     #:bInterfaceNumber 1
+     #:bEndpointAddressIN  #x81
+     #:bEndpointAddressOUT #x01)
+    (InterfaceDescriptorMIDI
+     #:bInterfaceNumber 2)
+    )))
+

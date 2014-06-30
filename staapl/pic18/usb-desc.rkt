@@ -160,63 +160,75 @@
    (bInterfaceProtocol 0)
    (iInterface 0)
    ))
-   
 
-(define (ConfigurationDescriptorCDC)
+(define (InterfaceDescriptorCDC
+         #:bEndpointAddress [ea #x82]
+         #:bInterfaceNumber [in 0])
+
+  ;; INTERFACE: communication
+  (InterfaceDescriptor
+   #:bInterfaceNumber   in
+   #:bInterfaceClass    #x02  ;; CDC
+   #:bInterfaceSubClass #x02  ;; ACM
+   #:bNumEndpoints      1)
+  
+  ;; Class-specific header functional descriptor
+  (Descriptor 
+   (bLength 5)
+   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorSubtype #x00)  ;; Header functional descriptor subtype
+   (word #x0110))
+  
+  ;; Class-specific call management functional descriptor
+  (Descriptor
+   (bLength 5)
+   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorSubtype #x01) ;; Call management functional descriptor subtype
+   (byte #x01)            ;; Device handles call management itself
+   (byte #x00))           ;; No associated data iterface
+  
+  ;; Class-specific abstract control management functional descriptor
+  (Descriptor
+   (bLength 4)
+   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorSubtype #x02) ;; Abstract control management descriptor subtype
+   (byte #x00))           ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
+  
+  ;; Class-specific union functional descriptor with one slave interfac
+  (Descriptor
+   (bLength 5)
+   (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorSubtype #x06) ;; Union descriptor subtype
+   (byte 0)               ;; Number of master interface is #0
+   (byte 1))              ;; First slave interface is #1
+  
+  (InterruptEndpoint
+   #:bEndpointAddress ea))
+
+(define (InterfaceDescriptorCDCdata
+         #:bEndpointAddressIN  [eaIN  #x81] ;; IN1
+         #:bEndpointAddressOUT [eaOUT #x01] ;; OUT1
+         #:bInterfaceNumber [in 1])
+
+  ;; INTERFACE: communication
+  (InterfaceDescriptor
+   #:bInterfaceNumber   in
+   #:bInterfaceClass    #x0A  ;; CDC data
+   #:bInterfaceSubClass #x00
+   #:bNumEndpoints      2)
+  (BulkEndpoint #:bEndpointAddress eaOUT)
+  (BulkEndpoint #:bEndpointAddress eaIN)
+  )
+
+
+(define-syntax-rule (configuration interface ...)
   (TotalLength (nb_bytes)
+    (ConfigurationDescriptor
+     #:wTotalLength nb_bytes
+     #:bNumInterfaces (length '(interface ...)))
+    interface ...))
+  
 
-     (ConfigurationDescriptor
-      #:wTotalLength nb_bytes)
-
-     ;; INTERFACE: communication
-     (InterfaceDescriptor
-      #:bInterfaceNumber   0
-      #:bInterfaceClass    #x02  ;; CDC
-      #:bInterfaceSubClass #x02  ;; ACM
-      #:bNumEndpoints      1)
-
-     ;; Class-specific header functional descriptor
-     (Descriptor 
-      (bLength 5)
-      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
-      (bDescriptorSubtype #x00)  ;; Header functional descriptor subtype
-      (word #x0110))
-
-     ;; Class-specific call management functional descriptor
-     (Descriptor
-      (bLength 5)
-      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
-      (bDescriptorSubtype #x01) ;; Call management functional descriptor subtype
-      (byte #x01)            ;; Device handles call management itself
-      (byte #x00))           ;; No associated data iterface
-      
-     ;; Class-specific abstract control management functional descriptor
-     (Descriptor
-      (bLength 4)
-      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
-      (bDescriptorSubtype #x02) ;; Abstract control management descriptor subtype
-      (byte #x00))           ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
-
-     ;; Class-specific union functional descriptor with one slave interfac
-     (Descriptor
-      (bLength 5)
-      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
-      (bDescriptorSubtype #x06) ;; Union descriptor subtype
-      (byte 0)               ;; Number of master interface is #0
-      (byte 1))              ;; First slave interface is #1
-
-     (InterruptEndpoint
-      #:bEndpointAddress #x82)
-
-     ;; INTERFACE: communication
-     (InterfaceDescriptor
-      #:bInterfaceNumber   1
-      #:bInterfaceClass    #x0A  ;; CDC data
-      #:bInterfaceSubClass #x00
-      #:bNumEndpoints      2)
-     (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
-     (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
-     ))
      
      
 
@@ -289,45 +301,41 @@
    
 
 
-(define (ConfigurationDescriptorMIDI
-         #:bConfigurationValue [cv 1])
-  (TotalLength (nb_bytes)
+(define (InterfaceDescriptorMIDI
+         #:bInterfaceNumber [in 0])
 
-   (ConfigurationDescriptor
-    #:bConfigurationValue cv
-    #:wTotalLength nb_bytes)
 
-   ;; INTERFACE: communication
-   (InterfaceDescriptor
-    #:bInterfaceNumber   0
-    #:bInterfaceClass    #x01  ;; AUDIO
-    #:bInterfaceSubClass #x03  ;; MIDISTREAMING
-    #:bNumEndpoints      1)
+  ;; INTERFACE: communication
+  (InterfaceDescriptor
+   #:bInterfaceNumber   in
+   #:bInterfaceClass    #x01  ;; AUDIO
+   #:bInterfaceSubClass #x03  ;; MIDISTREAMING
+   #:bNumEndpoints      1)
+  
+  ;; Class-specific MS Interface Header Descriptor
+  (TotalLength (nb_bytes_midi)
+   (Descriptor 
+    (bLength 7)
+    (bDescriptorType    #x24)     ;; CS_INTERFACE
+    (bDescriptorSubtype #x01)     ;; MS_HEADER
+    (bcdMSC #x0100)               ;; release number
+    (wTotalLength nb_bytes_midi)) ;; class-specific MIDIStreaming interface desc
    
-   ;; Class-specific MS Interface Header Descriptor
-   (TotalLength (nb_bytes_midi)
-    (Descriptor 
-     (bLength 7)
-     (bDescriptorType    #x24)     ;; CS_INTERFACE
-     (bDescriptorSubtype #x01)     ;; MS_HEADER
-     (bcdMSC #x0100)               ;; release number
-     (wTotalLength nb_bytes_midi)) ;; class-specific MIDIStreaming interface desc
-
-    (MIDI-IN-Jack-Descriptor
-     #:bJackID   #x02) ;; ???
-    (MIDI-OUT-Jack-Descriptor
-     #:bJackID   #x03  ;; ???
-     #:bJackType #x01) ;; EMBEDDED
-    (MIDI-OUT-Jack-Descriptor
-     #:bJackID   #x04  ;; ???
-     #:bJackType #x01) ;; EMBEDDED
-    
-    (InterruptEndpoint
-     #:bEndpointAddress #x82)
-
-    (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
-    (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
-    )))
+   (MIDI-IN-Jack-Descriptor
+    #:bJackID   #x02) ;; ???
+   (MIDI-OUT-Jack-Descriptor
+    #:bJackID   #x03  ;; ???
+    #:bJackType #x01) ;; EMBEDDED
+   (MIDI-OUT-Jack-Descriptor
+    #:bJackID   #x04  ;; ???
+    #:bJackType #x01) ;; EMBEDDED
+   
+   (InterruptEndpoint
+    #:bEndpointAddress #x82)
+   
+   (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
+   (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
+   ))
 
 
      
