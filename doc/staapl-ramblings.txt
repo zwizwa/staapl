@@ -64108,7 +64108,4 @@ sudo lsusb -v -d
 
 Next: implement endpoint.
 
-
-
-
 [1] http://www.usb.org/developers/devclass_docs/midi10.pdf
