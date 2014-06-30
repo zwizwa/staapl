@@ -1,4 +1,7 @@
 #lang racket/base
+
+;; USB burocracy hoop-jumping
+
 (require "usb-comp.rkt")
 (provide
  usb-device
@@ -11,6 +14,7 @@
 
   (bLength             byte)
   (bDescriptorType     byte)    
+  (bDescriptorSubtype  byte)    
   
   ;; DEVICE descriptor fields
   
@@ -48,7 +52,25 @@
   ;; ENDPOINT
   (bEndpointAddress    byte)
   (wMaxPacketSize      word)
-  (bInterval           byte))
+  (bInterval           byte)
+
+  ;; MIDI
+  (bcdMSC              word)
+  (bJackType           byte)
+  (bJackID             byte)
+  (BaSourceID          byte)
+  (BaSourcePin         byte)
+  (iJack               byte)
+  (bElementID          byte)
+  (bNrInputPins        byte)
+  (bNrOutputPins       byte)
+  (bInTerminalLink     byte)
+  (bOutTerminalLink    byte)
+  (bElCapSize          byte)
+  (bmElementCaps       byte)
+  (iElement            byte)
+
+  )
 
 
 (define (BulkEndpoint
@@ -126,6 +148,7 @@
    (bDescriptorType 4)
    (bInterfaceNumber in)
    (bAlternateSetting 0)
+
    (bNumEndpoints ne)
    (bInterfaceClass ic)
    (bInterfaceSubClass isc)
@@ -133,7 +156,6 @@
    (iInterface 0)
    ))
    
-
 
 (define (ConfigurationDescriptorCDC)
   (TotalLength (nb_bytes)
@@ -151,35 +173,37 @@
      ;; Class-specific header functional descriptor
      (Descriptor 
       (bLength 5)
-      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
-      (byte #x00)            ;; Header functional descriptor subtype
+      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+      (bDescriptorSubtype #x00)  ;; Header functional descriptor subtype
       (word #x0110))
 
      ;; Class-specific call management functional descriptor
      (Descriptor
       (bLength 5)
-      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
-      (byte #x01)            ;; Call management functional descriptor subtype
+      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+      (bDescriptorSubtype #x01) ;; Call management functional descriptor subtype
       (byte #x01)            ;; Device handles call management itself
       (byte #x00))           ;; No associated data iterface
       
      ;; Class-specific abstract control management functional descriptor
      (Descriptor
       (bLength 4)
-      (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
-      (byte #x02)            ;; Abstract control management descriptor subtype
+      (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+      (bDescriptorSubtype #x02) ;; Abstract control management descriptor subtype
       (byte #x00))           ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
 
      ;; Class-specific union functional descriptor with one slave interfac
      (Descriptor
       (bLength 5)
       (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
-      (byte #x06)            ;; Union descriptor subtype
+      (bDescriptorSubtype #x06) ;; Union descriptor subtype
       (byte 0)               ;; Number of master interface is #0
       (byte 1))              ;; First slave interface is #1
 
      (InterruptEndpoint
       #:bEndpointAddress #x82)
+
+     (ElementDescriptor)
 
      ;; INTERFACE: communication
      (InterfaceDescriptor
@@ -191,6 +215,116 @@
      (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
      ))
      
+     
+
+;; http://www.usb.org/developers/devclass_docs/audio10.pdf
+;; http://www.usb.org/developers/devclass_docs/midi10.pdf
+
+;; Of course this is way more complicated than it needs to be.  If
+;; anything, the below is optimized for single input / output - we'll
+;; see after that when needed.  Terms:
+;;   - entity = jack or element
+;;   - element: midi <-> audio conversion (1 or more)
+;;   - jack: midi source / sink  (identified by JackID)
+;;   - embedded / external
+;;   - cable number linked to embedded midi jack
+;;   - terminal
+;; Entities can be wired together through I/O pins
+;; There are specific USB requests:
+;;   In principle, all requests are optional. If a USB-MIDI function
+;;   does not support a certain request, it must indicate this by
+;;   stalling the control pipe when that request is issued to the
+;;   function. However, if a certain Set request is supported, the
+;;   associated Get request must also be supported.
+;; Endpoint descriptors have 2 extra bytes.
+
+
+
+(define (MIDI-OUT-Jack-Descriptor
+         #:bJackID   [jid 1]
+         #:bJackType [jt 1])
+  (Descriptor
+   (bLength 7)  ;; + 2 * nr_inputs
+   (bDescriptorType    #x24)     ;; CS_INTERFACE
+   (bDescriptorSubtype #x03)     ;; MIDI_OUT_JACK
+   (bJackType          jt)       ;; #x01:EMBEDDED / #0x02:EXTERNAL
+   (bJackID            jid)      ;; ID of this Jack
+   (bNrInputPins       #x00)     ;; Number of Input Pins of this Jack
+   ;; For each pin:
+   ;; (BaSourceID         #x02)     ;; ID of the Entity to which this pin is connected
+   ;; (BaSourcePin        #x01)     ;; Output Pin numbere of the Entity to which this Input Pin is connected
+   (iJack              #x00)))    ;; Unused
+
+(define (MIDI-IN-Jack-Descriptor
+         #:bJackID   [jid 1])
+  (Descriptor
+   (bLength 6)
+   (bDescriptorType    #x24)     ;; CS_INTERFACE
+   (bDescriptorSubtype #x02)     ;; MIDI_IN_JACK
+   (bJackType          #x02)     ;; EXTERNAL
+   (bJackID            jid)     ;; ID of this Jack
+   (iJack              #x00)))   ;; unused
+
+(define (ElementDescriptor
+         #:bmElementCaps    [ec #x01] ;; D0: CUSTOM UNDEFINED
+         #:bInTerminalLink  [bi #x00] ;; no link
+         #:bOutTerminalLink [bo #x00] ;; no link
+         #:bElementID       [eid 1]
+         )
+  (Descriptor
+   (bLength 11)
+   (bDescriptorType #x24)     ;; CS_INTERFACE
+   (bDescriptorSubtype #x04)  ;; ELEMENT
+   (bElementID eid)           ;; Midi OUT jack
+   (bNrInputPins 0)
+   (bNrOutputPins 0)
+   (bInTerminalLink bi)
+   (bOutTerminalLink bo)
+   (bElCapSize 1)
+   (bmElementCaps ec)
+   (iElement 0)))
+   
+
+
+(define (ConfigurationDescriptorMIDI)
+  (TotalLength (nb_bytes)
+
+   (ConfigurationDescriptor
+    #:wTotalLength nb_bytes)
+
+   ;; INTERFACE: communication
+   (InterfaceDescriptor
+    #:bInterfaceNumber   0
+    #:bInterfaceClass    #x01  ;; AUDIO
+    #:bInterfaceSubClass #x03  ;; MIDISTREAMING
+    #:bNumEndpoints      1)
+   
+   ;; Class-specific MS Interface Header Descriptor
+   (TotalLength (nb_bytes_midi)
+    (Descriptor 
+     (bLength 7)
+     (bDescriptorType    #x24)     ;; CS_INTERFACE
+     (bDescriptorSubtype #x01)     ;; MS_HEADER
+     (bcdMSC #x0100)               ;; release number
+     (wTotalLength nb_bytes_midi)) ;; class-specific MIDIStreaming interface desc
+
+    (MIDI-IN-Jack-Descriptor
+     #:bJackID   #x02) ;; ???
+    (MIDI-OUT-Jack-Descriptor
+     #:bJackID   #x03  ;; ???
+     #:bJackType #x01) ;; EMBEDDED
+    (MIDI-OUT-Jack-Descriptor
+     #:bJackID   #x04  ;; ???
+     #:bJackType #x01) ;; EMBEDDED
+    
+    (InterruptEndpoint
+     #:bEndpointAddress #x82)
+
+    (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
+    (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
+    )))
+
+
      
 
       

@@ -64082,3 +64082,22 @@ compile-macro/raw
 So of course this was done before:
 
 compose-macro.rkt: i/c
+
+
+Entry: Making USB more generic
+Date: Sun Jun 29 20:19:58 EDT 2014
+
+Birds eye view there are only two problems:
+- get the descriptors set up
+- perform endpoint I/O
+
+There are other problems such as device-specific requests, but we can
+probably leave that until later.
+
+Use case: support both ACM for monitor and midi/audio for application.
+
+
+Entry: MIDI
+Date: Sun Jun 29 20:22:30 EDT 2014
+
+[1] http://www.usb.org/developers/devclass_docs/midi10.pdf
