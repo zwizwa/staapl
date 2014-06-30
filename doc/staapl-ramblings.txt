@@ -64100,4 +64100,15 @@ Use case: support both ACM for monitor and midi/audio for application.
 Entry: MIDI
 Date: Sun Jun 29 20:22:30 EDT 2014
 
+So I got something working: single configuration, CDC + MIDI
+interface.  CDC still works for console, and MIDI gives meaningful
+result using:
+
+sudo lsusb -v -d 
+
+Next: implement endpoint.
+
+
+
+
 [1] http://www.usb.org/developers/devclass_docs/midi10.pdf

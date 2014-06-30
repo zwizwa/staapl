@@ -50,7 +50,7 @@
   (bInterfaceClass     byte)
   (bInterfaceSubClass  byte)
   (bInterfaceProtocol  byte)
-  (iInterface          byte)
+  (iInterface          istring)
 
   ;; ENDPOINT
   (bEndpointAddress    byte)
@@ -147,6 +147,7 @@
          #:bNumEndpoints [ne #f]
          #:bInterfaceClass [ic #x02] ;; CDC
          #:bInterfaceSubClass [isc #x02] ;; ACM
+         #:iInterface [ii 0]
          )
   (Descriptor
    (bLength 9)
@@ -158,7 +159,7 @@
    (bInterfaceClass ic)
    (bInterfaceSubClass isc)
    (bInterfaceProtocol 0)
-   (iInterface 0)
+   (iInterface ii)
    ))
 
 (define (InterfaceDescriptorCDC
@@ -208,7 +209,7 @@
 (define (InterfaceDescriptorCDCdata
          #:bEndpointAddressIN  [eaIN  #x81] ;; IN1
          #:bEndpointAddressOUT [eaOUT #x01] ;; OUT1
-         #:bInterfaceNumber [in 1])
+         #:bInterfaceNumber    [in    1])
 
   ;; INTERFACE: communication
   (InterfaceDescriptor
@@ -256,18 +257,22 @@
 
 
 (define (MIDI-OUT-Jack-Descriptor
+         #:ID/PIN-list [ipl '([#x02    ;; ID of the Entity to which this pin is connected
+                               #x01])] ;; Output Pin numbere of the Entity to which this Input Pin is connected
          #:bJackID   [jid 1]
          #:bJackType [jt 1])
+  (define p (length ipl))
   (Descriptor
-   (bLength (+ 2 7))  ;; 7 + 2 * nr_inputs
-   (bDescriptorType    #x24)     ;; CS_INTERFACE
-   (bDescriptorSubtype #x03)     ;; MIDI_OUT_JACK
-   (bJackType          jt)       ;; #x01:EMBEDDED / #0x02:EXTERNAL
-   (bJackID            jid)      ;; ID of this Jack
-   (bNrInputPins       #x01)     ;; Number of Input Pins of this Jack  (at least one?)
-   ;; For each pin:
-   (BaSourceID         #x02)     ;; ID of the Entity to which this pin is connected
-   (BaSourcePin        #x01)     ;; Output Pin numbere of the Entity to which this Input Pin is connected
+   (bLength (+ (* 2 p) 7))        ;; 7 + 2 * nr_inputs
+   (bDescriptorType    #x24)      ;; CS_INTERFACE
+   (bDescriptorSubtype #x03)      ;; MIDI_OUT_JACK
+   (bJackType          jt)        ;; #x01:EMBEDDED / #0x02:EXTERNAL
+   (bJackID            jid)       ;; ID of this Jack
+   (bNrInputPins       p)         ;; Number of Input Pins of this Jack  (at least one?)
+   (for ((ID/PIN ipl))
+     (let-values (((ID PIN) (apply values ID/PIN)))
+       (BaSourceID     ID)
+       (BaSourcePin    PIN)))
    (iJack              #x00)))    ;; Unused
 
 (define (MIDI-IN-Jack-Descriptor
@@ -307,6 +312,7 @@
 
   ;; INTERFACE: communication
   (InterfaceDescriptor
+   #:iInterface         "MIDI"
    #:bInterfaceNumber   in
    #:bInterfaceClass    #x01  ;; AUDIO
    #:bInterfaceSubClass #x03  ;; MIDISTREAMING
@@ -321,20 +327,12 @@
     (bcdMSC #x0100)               ;; release number
     (wTotalLength nb_bytes_midi)) ;; class-specific MIDIStreaming interface desc
    
-   (MIDI-IN-Jack-Descriptor
-    #:bJackID   #x02) ;; ???
    (MIDI-OUT-Jack-Descriptor
-    #:bJackID   #x03  ;; ???
+    #:bJackID   #x01
     #:bJackType #x01) ;; EMBEDDED
-   (MIDI-OUT-Jack-Descriptor
-    #:bJackID   #x04  ;; ???
-    #:bJackType #x01) ;; EMBEDDED
-   
-   (InterruptEndpoint
-    #:bEndpointAddress #x82)
-   
-   (BulkEndpoint #:bEndpointAddress #x01) ;; OUT1
-   (BulkEndpoint #:bEndpointAddress #x81) ;; IN1
+;   (MIDI-IN-Jack-Descriptor
+;    #:bJackID   #x02) ;; ???
+   (BulkEndpoint #:bEndpointAddress #x03) ;; OUT1
    ))
 
 
