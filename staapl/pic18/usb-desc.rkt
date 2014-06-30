@@ -2,6 +2,9 @@
 
 ;; USB burocracy hoop-jumping
 
+;; Some limitations:
+;; - one configuration, possibly multiple interfaces
+
 (require "usb-comp.rkt")
 (provide
  usb-device
@@ -102,6 +105,7 @@
          #:iManufacturer  [m "Zwizwa"]
          #:iProduct       [p "Staapl"]
          #:iSerialNumber  [s "um0"]
+         #:bNumConfigurations [nc 1]
          )
   (Descriptor
    (bLength 18)
@@ -117,13 +121,14 @@
    (iManufacturer m)
    (iProduct p)
    (iSerialNumber s)
-   (bNumConfigurations 1)))
+   (bNumConfigurations nc)))
   
   
   
 (define (ConfigurationDescriptor
          #:wTotalLength [tl -1]
          #:bNumInterfaces [ni 2]
+         #:bConfigurationValue [cv 1]
          )
          
   (Descriptor
@@ -131,7 +136,7 @@
    (bDescriptorType 2)
    (wTotalLength tl)
    (bNumInterfaces ni)
-   (bConfigurationValue 1)
+   (bConfigurationValue cv)
    (iConfiguration 0)   ;; Not defined
    (bmAttributes #xA0)  ;; Remote wakeup
    (bMaxPower #x32)))   ;; 100mA
@@ -203,8 +208,6 @@
      (InterruptEndpoint
       #:bEndpointAddress #x82)
 
-     (ElementDescriptor)
-
      ;; INTERFACE: communication
      (InterfaceDescriptor
       #:bInterfaceNumber   1
@@ -244,15 +247,15 @@
          #:bJackID   [jid 1]
          #:bJackType [jt 1])
   (Descriptor
-   (bLength 7)  ;; + 2 * nr_inputs
+   (bLength (+ 2 7))  ;; 7 + 2 * nr_inputs
    (bDescriptorType    #x24)     ;; CS_INTERFACE
    (bDescriptorSubtype #x03)     ;; MIDI_OUT_JACK
    (bJackType          jt)       ;; #x01:EMBEDDED / #0x02:EXTERNAL
    (bJackID            jid)      ;; ID of this Jack
-   (bNrInputPins       #x00)     ;; Number of Input Pins of this Jack
+   (bNrInputPins       #x01)     ;; Number of Input Pins of this Jack  (at least one?)
    ;; For each pin:
-   ;; (BaSourceID         #x02)     ;; ID of the Entity to which this pin is connected
-   ;; (BaSourcePin        #x01)     ;; Output Pin numbere of the Entity to which this Input Pin is connected
+   (BaSourceID         #x02)     ;; ID of the Entity to which this pin is connected
+   (BaSourcePin        #x01)     ;; Output Pin numbere of the Entity to which this Input Pin is connected
    (iJack              #x00)))    ;; Unused
 
 (define (MIDI-IN-Jack-Descriptor
@@ -286,10 +289,12 @@
    
 
 
-(define (ConfigurationDescriptorMIDI)
+(define (ConfigurationDescriptorMIDI
+         #:bConfigurationValue [cv 1])
   (TotalLength (nb_bytes)
 
    (ConfigurationDescriptor
+    #:bConfigurationValue cv
     #:wTotalLength nb_bytes)
 
    ;; INTERFACE: communication

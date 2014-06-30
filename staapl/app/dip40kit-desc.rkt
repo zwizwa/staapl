@@ -5,5 +5,10 @@
 ;; Define descriptors in quoted using 'scheme in dip40kit.fm
 (define-values (device configs strings)
   (usb-device
-   (DeviceDescriptor #:iSerialNumber "dip40kit-desc.rkt")
-   (ConfigurationDescriptorCDC)))
+   (DeviceDescriptor
+    #:bNumConfigurations 2
+    #:iSerialNumber "dip40kit-desc.rkt")
+   (ConfigurationDescriptorCDC)
+   (ConfigurationDescriptorMIDI
+    #:bConfigurationValue 2)
+   ))
