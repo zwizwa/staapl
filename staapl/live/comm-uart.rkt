@@ -40,7 +40,9 @@
       (unless (and in out)
         (let-values
             (((i o)
-              (open-input-output-file name #:exists 'append)))
+              (open-input-output-file
+               (d: "open-input-output-file ~s" name)
+               #:exists 'append)))
           (file-stream-buffer-mode o 'none)
           (stty name baud)
           (set! in  i)
@@ -48,6 +50,7 @@
 
     (comm-in
      (lambda ()
+       ;; (printf "in:~s\n" in)
        (d: "uart-in ~x\n"
            ;; (read-byte-timeout i 3)
            (if (sync/timeout (comm-timeout) in)
@@ -58,11 +61,12 @@
            )))
     (comm-out
      (lambda (b)
+       ;; (printf "out:~s\n" out)
        (write-byte (d: "uart-out ~x\n" b) out)))
     (comm-close
      (lambda ()
-       (when out (close-output-port out) (set! out #f))
-       (when in  (close-input-port  in ) (set! in  #f))
+       (when out (close-output-port (d: "close-output-port ~s" out)) (set! out #f))
+       (when in  (close-input-port  (d: "close-output-port ~s" in))  (set! in  #f))
        ))
     (comm-reconnect
      (lambda ()

@@ -19,10 +19,6 @@
 (provide (all-defined-out))
 
 
-(define (make-ns-defined? sym)
-  (lambda (ns)
-    (namespace-variable-value
-     (ns-name ns sym) #t (lambda () #f))))
 
 (define (live-interpret sym)
   (define (dbg dict) '(printf "live-interpret: ~a ~a\n" sym dict))

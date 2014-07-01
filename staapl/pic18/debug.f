@@ -82,9 +82,10 @@ forth
 \ For sending log data from target to host, it seems simplest to just
 \ send a "pull" command to host and let it control the data transfer,
 \ instead of pushing the data in a single packet and calling a host
-\ word.
+\ word.  Dictionaries scanned are: host, scat, and scheme
     
-\ Some wrapped host commands.  These operate on the host stack.
+    
+ 
 : pb ` pb host ;
 : ph ` ph host ;
 : >h ` t> host ;  \ Byte to host stack

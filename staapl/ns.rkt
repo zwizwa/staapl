@@ -69,3 +69,7 @@
      (namespace-mapped-symbols))))
 
 
+(define (make-ns-defined? sym)
+  (lambda (ns)
+    (namespace-variable-value
+     (ns-name ns sym) #t (lambda () #f))))

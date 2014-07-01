@@ -19,6 +19,7 @@
  "reflection.rkt"
  "../comp/state.rkt" ;; state for macro eval
  "../code.rkt"
+ "../ns.rkt"
 
  racket/system
  racket/match)
@@ -346,6 +347,7 @@
 ;; Note that this is isolated from all other (temporary) stacks used
 ;; by console commands.
 (define host-stack (make-parameter (state:stack)))
+
 (define (update-host-stack fn)
   (let ((s (host-stack)))
     (let ((s_ (fn s)))
@@ -359,8 +361,15 @@
 (define (host-rpc-cmd reply)
   (define sym (list->symbol reply))
   ;; (printf "host-rpc-cmd ~s ~s" reply sym)
-  ;; (update-host-stack (eval `(live: ,sym)))
-  (update-host-stack (eval `(target: ,sym))))
+
+  ;; This is a bit tricky.  The following are both wrong:
+  ;;   (update-host-stack (eval `(live: ,sym)))
+  ;;   (update-host-stack (eval `(target: ,sym))
+  
+  ;; This should _not_ look up target words or macros, so only (host)
+  ;; dictionary followed by live-interpret (scat and scheme respectively).
+  (update-host-stack (host-interpret sym)))
+  
   
 
 (define (host-rpc id msg)

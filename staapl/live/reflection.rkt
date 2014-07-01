@@ -190,3 +190,12 @@
   (let ((macro (eval `(ns (macro) ,sym))))
     ;; (printf "macro: ~s ~s\n" sym macro)
     (eval `(target> : ,sym ',macro compile exit))))
+
+;; Used for target->host RPN.  Like target-interpret but without all
+;; the target dictionaries.  FIXME: this should not be here but in
+;; reflection.
+
+(define (host-interpret sym)
+  (define defined? (make-ns-defined? sym))
+  (cond ((defined? '(host)) => (lambda (x) x))
+        (else (eval `(live: ,sym)))))

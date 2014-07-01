@@ -59,8 +59,6 @@
 ;; FIXME: this prefers code over data, instead of the first one found.
 ;; Might need to do it differently?
 
-
-
 (define (target-interpret sym)
   (define (dbg dict) '(printf "target-interpret: ~a ~a\n" sym dict))
   (define defined? (make-ns-defined? sym))
@@ -72,6 +70,10 @@
    ;; ((defined? '(macro)) => (lambda (x) (dbg 'macro) (live: ',x tsim)))
    ((defined? '(macro))    => (lambda (x) (dbg 'macro) (target-compile-macro sym) (target-interpret sym)))
    (else                                  (dbg 'live)  (live-interpret sym))))
+
+
+
+
 
 (define-syntax-rule (target id)
   (target-interpret 'id))
