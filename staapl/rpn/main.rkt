@@ -124,7 +124,9 @@
 ;; Note: this function performs reasonable guesses.  It's a dwim
 ;; feature.
 (define (rpn-wrap-dynamic fn)
+  ;; (printf "rpn-wrap-dynamic: ~s ~s\n" fn (procedure-arity fn))
   (lambda stack
+    ;; (printf "(rpn-wrap-dynamic) stack = ~s" stack)
     (define (go n stack [optional '()])
       (let-values (((args stack+) (rpn-take-reversed n stack)))
         (append

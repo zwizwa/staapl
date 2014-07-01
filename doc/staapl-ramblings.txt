@@ -64162,3 +64162,116 @@ hard to write properly isolated code without named indirection / late
 binding (i.e. "structs" or "objects").
 
 [1] http://www.forthfreak.net/thinking-forth.pdf
+
+
+Entry: live interaction
+Date: Tue Jul  1 11:19:44 EDT 2014
+
+is a bit of a mess..
+
+How to simplify?
+
+Really, there is all the "scat" stuff that I don't use.  I use:
+
+- .fm / .f files with macros / forth code
+- .rkt files to define table data in scheme
+- 0-arg scheme words for live interaction
+
+It is important to be able to use live words both at the console and
+in compilation.  There is a lot of wrapping going on making all the
+namespaces work together...
+
+
+
+Basically, a host command uses `live:' which uses `live-interpret' in
+rpn-live.rkt:
+
+(define (live-interpret sym)
+  (define (dbg dict) '(printf "live-interpret: ~a ~a\n" sym dict))
+  (define defined? (make-ns-defined? sym))
+  (cond
+   ((defined? '(scat)) => (lambda (x) (dbg 'scat)   x))
+   ((defined? '())     => (lambda (x) (dbg 'scheme) (scat-wrap-dynamic x)))
+   (else (error 'undefined "~s" sym))))
+
+
+It gets a bit confusing in `scat-wrap-dynamic' which is essentially
+`rpn-wrap-dynamic'.
+
+
+Entry: rpn-wrap-dynamic bug
+Date: Tue Jul  1 11:45:10 EDT 2014
+
+using _px wich calls word->string
+
+: foo ` _px host ;
+
+foo
+rpn-wrap-dynamic: #<procedure:texec/b> 1
+(rpn-wrap-dynamic) stack = (2396)rpn-wrap-dynamic: #<procedure:word->string> 1
+(rpn-wrap-dynamic) stack = ()ERROR: word->string: arity mismatch;
+ the expected number of arguments does not match the given number
+  expected: 1
+  given: 0
+rpn-wrap-dynamic: #<procedure:OK> 0
+(rpn-wrap-dynamic) stack = ()OK
+
+
+_px
+
+_px
+rpn-wrap-dynamic: #<procedure:t>> 0
+(rpn-wrap-dynamic) stack = ()rpn-wrap-dynamic: #<procedure:t>> 0
+(rpn-wrap-dynamic) stack = (2)rpn-wrap-dynamic: #<procedure:word->string> 1
+(rpn-wrap-dynamic) stack = (513)0201 rpn-wrap-dynamic: #<procedure:OK> 0
+(rpn-wrap-dynamic) stack = ()OK
+
+
+
+
+They don't behave the same.
+Maybe because it is wrapped as a prefix command?
+
+If so: new design rule: only use prefix commands when absolutely necessary.
+
+OK I see: the `host` dictionary is not scanned!
+Maybe the rpc mechanism should look into (host) instead of (scat) ?
+
+Can it be removed or at least moved to live-interpret?
+
+In rpn-target:
+
+(define (target-interpret sym)
+  (define (dbg dict) '(printf "target-interpret: ~a ~a\n" sym dict))
+  (define defined? (make-ns-defined? sym))
+
+  (cond
+   ((defined? '(host))     => (lambda (x) x))
+   ((target-find-code sym) => (lambda (x) (dbg 'code)  (live: ',x texec/b)))
+   ((target-find-data sym) => (lambda (x) (dbg 'data)  (live: ',x >t)))
+   ;; ((defined? '(macro)) => (lambda (x) (dbg 'macro) (live: ',x tsim)))
+   ((defined? '(macro))    => (lambda (x) (dbg 'macro) (target-compile-macro sym) (target-interpret sym)))
+   (else                                  (dbg 'live)  (live-interpret sym))))
+
+
+The host language is what the user sees on the command line, so the
+RPC command should really go to host dictionary instead of live.
+
+Looks like this is the fix:
+
+
+ (define (host-rpc-cmd reply)
+   (define sym (list->symbol reply))
+   (printf "host-rpc-cmd ~s ~s" reply sym)
+-  (update-host-stack (eval `(live: ,sym)))
++  (update-host-stack (eval `(target: ,sym))))
+  
+Entry: (live) vs. (host)
+Date: Tue Jul  1 11:54:11 EDT 2014
+
+live:  Separate rpn machine with target interaction words like t> t> texec
+host:  Extension of target word set, including host commands.
+
+The host language is what the user sees on the command line.
+
+

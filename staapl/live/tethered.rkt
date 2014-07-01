@@ -357,7 +357,11 @@
 ;; Evaluate a single symbolic host command.   
 
 (define (host-rpc-cmd reply)
-  (update-host-stack (eval `(live: ,(list->symbol reply)))))
+  (define sym (list->symbol reply))
+  ;; (printf "host-rpc-cmd ~s ~s" reply sym)
+  ;; (update-host-stack (eval `(live: ,sym)))
+  (update-host-stack (eval `(target: ,sym))))
+  
 
 (define (host-rpc id msg)
   (case id

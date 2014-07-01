@@ -21,7 +21,7 @@ variable buf
 \ access through a register using >a a> etc..
 
 
-: a!bd   bd-page buf @ << << *a!! ;  \ buffer descriptor
+: a!bd   buf @ << << bd-page *a!! ;  \ buffer descriptor
 : a!buf  buf @ buf-addr *a!! ;       \ buffer start
 : a!iptr 4 #xF0 a!! buf @ al +! ;    \ index register address
 

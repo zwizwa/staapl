@@ -45,7 +45,7 @@ staapl pic18/vector
 : fcmd \ lo hi --
     af>r       \ Let host clobber a&f during execution of command.
     fstring>i  \ Pascal string from flash
-    1 rpc
+    1 rpc      \ see host-rpc / host-rpc-cmd in tethered.rkt  (uses `live:')
     r>af ;
 
 : fstring>i \ lo hi -- n
@@ -89,7 +89,7 @@ forth
 : ph ` ph host ;
 : >h ` t> host ;  \ Byte to host stack
 : ts ` ts host ;    
-    
+
 : emit     1dump pb ;
 : hd       1dump ph ;
 : .fstring fstring pb ;   

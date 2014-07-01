@@ -10,7 +10,7 @@ staapl pic18/vector
 : f>i  stdin -> @f+ ;    
 : d>i  stdin -> ;        \ data stack
 
-    \ Save/restore stding
+\ Save/restore stdin
 
 : stdin>r
     stdin @ >r

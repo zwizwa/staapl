@@ -226,16 +226,17 @@ forth
 \ Note that code to do the address manip is a pita on a 8bit machine.
 \ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
 
-: buf-addr \ n -- hi lo | address of buffer
-    dup 3 and
-    rot>> rot>>      >r
-    >> >> buf-page + r> ;
+: buf-addr \ n -- lo hi | address of buffer
+    dup >r
+    3 and rot>> rot>>
+    r>
+    >> >> buf-page + ;
 
 : BD-init>a \ ep 0/1 -- | a:BD
     >r
     #x08    >a    
     64      >a
-    << r> +  buf-addr >a >a ;
+    << r> +  buf-addr >r >a r> >a ;
     
 : EP-BD-init \ ep --
     a>r
