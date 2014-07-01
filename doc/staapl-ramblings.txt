@@ -64109,3 +64109,27 @@ sudo lsusb -v -d
 Next: implement endpoint.
 
 [1] http://www.usb.org/developers/devclass_docs/midi10.pdf
+
+
+Entry: Application endpoint access
+Date: Mon Jun 30 20:16:44 EDT 2014
+
+So there's a couple of macros to set up IN1 / OUT1 specifically.  Make
+this generic so an INx/OUTx writer/reader can be instantiated in the app.
+
+There are only 2 cases:
+  - single byte:                >INx  OUTx>
+  - block transfer: read/write
+  
+
+Let's just try to do this in a dumb way.
+The app currently only uses >IN1 and >OUT1
+
+
+Maybe keep the core as is.  It's a bit hairy, and it seems that the
+transaction handlers for the endpoints are not necessary.
+
+Aim first at:
+  - defining a generic OUTx> instantiator.
+  - abstracting endpoint initialization
+

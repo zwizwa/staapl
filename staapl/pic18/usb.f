@@ -217,17 +217,18 @@ macro
 forth
 
 
-: EP0-init
+macro
+\ TWO BDs per endpoint (OUT,IN)
+: EPx-init | addr len |
     table->
-      \ BD0 : EP0 OUT
-      #x08      ,  \ BD0STAT: set UOWN, MCU can write, DTSEN=1
-      64        ,  \ BD0CNT
-      _buf-OUT0 ,, \ BD0ADRL,H
+    #x08 , len , addr ,,
+    #x08 , len , addr len + ,,
+    ;
+forth
+  
 
-      \ BD1 : EP0 IN
-      #x08     ,   \ BD1STAT: clear UOWN, MCU can write, DTSEN=1
-      64       ,   \ BD1CNT
-      _buf-IN0 ,,  \ BD1ADRL,H
+: EP0-init _buf-OUT0 64 EPx-init ;
+  
 
 : EP1-init
     table->
