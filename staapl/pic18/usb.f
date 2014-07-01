@@ -217,15 +217,7 @@ macro
 forth
 
 
-macro
-\ TWO BDs per endpoint (OUT,IN)
-: EPx-init | addr len |
-    table->
-    #x08 , len , addr ,,
-    #x08 , len , addr len + ,,
-    ;
-
-\ It might be simpler to use a default map for all endpoints.
+\ Use a default map with 64 byte buffers for all endpoints.
 \ EP0  500 540
 \ EP1  580 5C0
 \ EP2  600 640
@@ -234,30 +226,32 @@ macro
 \ Note that code to do the address manip is a pita on a 8bit machine.
 \ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
 
+macro
 : blockaddr>a \ n --
     dup 3 and
-    rot>> rot>> >a
-    >> >> 5 +   >a ;
+    rot>> rot>>      >a
+    >> >> buf-page + >a ;
+forth
+: BD-init>a \ ep 0/1 -- | a:BD
+    >r
+    #x08    >a    
+    64      >a
+    << r> + blockaddr>a ;
     
 : EP-init \ ep --
     a>r
     dup << << << al !  \ 8 bytes per ep
     bd-page      ah !
-    #x08 >a            \ BD+0
-    64   >a
-    dup << blockaddr>a
-    #x08 >a            \ BD+1
-    64   >a
-    << 1 + blockaddr>a
+
+    dup 0 BD-init>a
+        1 BD-init>a
     r>a ;
     
-    
-forth
   
 
-: EP0-init _buf-OUT0 64 EPx-init ;
-: EP1-init _buf-OUT1 64 EPx-init ;
-: EP2-init _buf-OUT2 64 EPx-init ;
+\ : EP0-init _buf-OUT0 64 EPx-init ;
+\ : EP1-init _buf-OUT1 64 EPx-init ;
+\ : EP2-init _buf-OUT2 64 EPx-init ;
   
 
     
@@ -406,7 +400,10 @@ forth
 : SET_CONFIGURATION
     
     \ Enable endpoint 1:
-    8 4 a!! EP1-init f!! 8 f>a \ Init EP1 buffer descriptors
+    \ 8 4 a!! EP1-init f!! 8 f>a \ Init EP1 buffer descriptors
+    1 EP-init
+
+    
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
 
     \ EP2 is the ACM interrupt IN.  Not used.
