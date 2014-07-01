@@ -224,36 +224,41 @@ macro
     #x08 , len , addr ,,
     #x08 , len , addr len + ,,
     ;
+
+\ It might be simpler to use a default map for all endpoints.
+\ EP0  500 540
+\ EP1  580 5C0
+\ EP2  600 640
+\ EP3  680 6C0    
+
+\ Note that code to do the address manip is a pita on a 8bit machine.
+\ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
+
+: blockaddr>a \ n --
+    dup 3 and
+    rot>> rot>> >a
+    >> >> 5 +   >a ;
+    
+: EP-init \ ep --
+    a>r
+    dup << << << al !  \ 8 bytes per ep
+    bd-page      ah !
+    #x08 >a            \ BD+0
+    64   >a
+    dup << blockaddr>a
+    #x08 >a            \ BD+1
+    64   >a
+    << 1 + blockaddr>a
+    r>a ;
+    
+    
 forth
   
 
 : EP0-init _buf-OUT0 64 EPx-init ;
+: EP1-init _buf-OUT1 64 EPx-init ;
+: EP2-init _buf-OUT2 64 EPx-init ;
   
-
-: EP1-init
-    table->
-      \ BD2 : EP1 OUT
-      #x08      ,  \ BD2STAT: set UOWN, MCU can write, DTSEN=1
-      64        ,  \ BD2CNT
-      _buf-OUT1 ,, \ BD2ADRL.H
-
-      \ BD3 : EP1 IN
-      #x08     ,  \ BD3STAT: clear UOWN, MCU can write, DTSEN=1
-      64       ,  \ BD3CNT
-      _buf-IN1 ,, \ BD3ADRL,H
-
-: EP2-init
-    table->
-      \ BD2 : EP1 OUT
-      #x08      ,  \ BD4STAT: set UOWN, MCU can write, DTSEN=1
-      64        ,  \ BD4CNT
-      _buf-OUT2 ,, \ BD4ADRL.H
-
-      \ BD3 : EP1 IN
-      #x08     ,  \ BD5STAT: clear UOWN, MCU can write, DTSEN=1
-      64       ,  \ BD5CNT
-      _buf-IN2 ,, \ BD5ADRL,H
-
 
     
 \ n -- \ Init RAM from flash.    
@@ -268,7 +273,8 @@ forth
     UEP0 #x0F a!! 16 for 0 >a next \ clear EP control regs
 
     \ Initialize buffer descriptors.
-    0 4 a!! EP0-init f!! 8 f>a
+    \ 0 4 a!! EP0-init f!! 8 f>a
+    0 EP-init
 
     \ EP0 OUT BD ready for SETUP transactions.
     OUT0-first
