@@ -226,19 +226,18 @@ forth
 \ Note that code to do the address manip is a pita on a 8bit machine.
 \ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
 
-macro
-: blockaddr>a \ n --
+: buf-addr \ n -- hi lo | address of buffer
     dup 3 and
-    rot>> rot>>      >a
-    >> >> buf-page + >a ;
-forth
+    rot>> rot>>      >r
+    >> >> buf-page + r> ;
+
 : BD-init>a \ ep 0/1 -- | a:BD
     >r
     #x08    >a    
     64      >a
-    << r> + blockaddr>a ;
+    << r> +  buf-addr >a >a ;
     
-: EP-init \ ep --
+: EP-BD-init \ ep --
     a>r
     dup << << << al !  \ 8 bytes per ep
     bd-page      ah !
@@ -247,12 +246,7 @@ forth
         1 BD-init>a
     r>a ;
     
-  
 
-\ : EP0-init _buf-OUT0 64 EPx-init ;
-\ : EP1-init _buf-OUT1 64 EPx-init ;
-\ : EP2-init _buf-OUT2 64 EPx-init ;
-  
 
     
 \ n -- \ Init RAM from flash.    
@@ -267,8 +261,7 @@ forth
     UEP0 #x0F a!! 16 for 0 >a next \ clear EP control regs
 
     \ Initialize buffer descriptors.
-    \ 0 4 a!! EP0-init f!! 8 f>a
-    0 EP-init
+    0 EP-BD-init
 
     \ EP0 OUT BD ready for SETUP transactions.
     OUT0-first
@@ -400,8 +393,7 @@ forth
 : SET_CONFIGURATION
     
     \ Enable endpoint 1:
-    \ 8 4 a!! EP1-init f!! 8 f>a \ Init EP1 buffer descriptors
-    1 EP-init
+    1 EP-BD-init
 
     
     #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
@@ -409,7 +401,7 @@ forth
     \ EP2 is the ACM interrupt IN.  Not used.
     
     \ Enable endpoint 2:
-    \ 12 4 a!! EP2-init f!! 8 f>a \ Init EP1 buffer descriptors
+    \ 2 EP-BD-init
     \ #x1E UEP2 !  \ IN, OUT, no SETUP, handshake, no stall
     
     0 setup-reply
@@ -676,6 +668,11 @@ forth
 : OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
 
 
+
+\ load usb-generic.f
+    
+    
+    
 
 \ ** TEST **
 

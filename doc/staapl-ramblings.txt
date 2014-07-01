@@ -64133,3 +64133,32 @@ Aim first at:
   - defining a generic OUTx> instantiator.
   - abstracting endpoint initialization
 
+Seems that doing this with macros is not the right approach.  It might
+be simpler to set a "current endpoint" and require non-reentrant
+access.
+
+
+
+
+Entry: Forth and shallow binding
+Date: Mon Jun 30 21:33:57 EDT 2014
+
+A typical way to work around limitation of forth is to use a bunch of
+"current" objects.  This is actively encouraged in Thinking Forth[1].
+
+The interesting part here is that shallow binding or dynamic variables
+are actively discouraged in languages like Scheme and basically
+anything that came later.  I can only recall emacs lisp as a shallow
+binding language that has actually survived into modern times...
+
+Basically this is "state machine oriented" programming: rely on
+non-reentrant code to configure a global state machine and have it do
+a trick.  The stack is then in practice only used to perform "very
+intermediate" state, not all intermediate state (as it is too hard to
+access deep, old intermediates).
+
+I guess I just need to embrace it when writing Staapl code.  It's too
+hard to write properly isolated code without named indirection / late
+binding (i.e. "structs" or "objects").
+
+[1] http://www.forthfreak.net/thinking-forth.pdf
