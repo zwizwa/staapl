@@ -36,19 +36,25 @@ variable buf
 
 : iptr-reset a!iptr 0 >a ;
 
-: cnt      a!bufdes a> drop a> ;
+: bd-len   a!bufdes a> drop a> ;
     
 : flush-OUT 64 ep OUT/DATA+  iptr-reset ;
 : flush-IN  ` flush-IN  .sym iptr-reset ;
     
-: pump-OUT idx cnt  =? if flush-OUT bd-wait then ;
+: pump-OUT idx bd-len =? if flush-OUT bd-wait then ;
 \ : pump-IN  idx #x40 =? if flush-IN  then ;
 
   
 : bd-wait a!bufdes a:wait-UOWN ;    \ wait until we own the bd
 
 
-: OUT>  <<      buf ! bd-wait pump-OUT a>r a!box+ a>          r>a ;
+: OUT> \ ep -- val
+    << buf ! a>r
+      bd-wait
+      pump-OUT
+      a!box+ a>
+    r>a ;
+
 \ : >IN   << 1 +  buf !                  a>r a!box+ >a pump-IN  r>a ;
     
 
