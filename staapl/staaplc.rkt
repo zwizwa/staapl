@@ -35,7 +35,8 @@
 
 (require scheme/pretty  ;; racket/pretty prints quotes!
          racket/cmdline
-         staapl/tools)
+         "tools.rkt" ;; staapl/tools
+         )
 
 (define-syntax-rule (flags: name ...)
   (begin (define name (make-parameter #f)) ...))

@@ -11,7 +11,7 @@ RACO=raco
 
 
 link:
-	cd $$(readlink -f .)/.. ; $(RACO) pkg install --link staapl
+	$(RACO) pkg install --link staapl
 
 gitbuf:
 	$(RACO) pkg install github://github.com/zwizwa/staapl/master
@@ -32,8 +32,8 @@ all-modules: planet-version.txt
 
 pic18:
 	mzc -vk staapl/pic18.rkt
-	mzc -vk staapl/staaplc.rkt
 	mzc -vk staapl/live.rkt
+	mzc -vk staapl/staaplc.rkt
 
 # use planet instead
 install-collects:
