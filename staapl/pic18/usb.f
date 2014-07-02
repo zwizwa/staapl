@@ -392,11 +392,10 @@ forth
     init-usb-user  
     
     \ Enable all endpoints
-    UEP1 2 lfsr \ a = UEP1
     1 OUT!
     total-EP 1 - for
         dup EP-BD-init \ init buffer descriptor
-        #x1E >a        \ UEPx: IN, OUT, no SETUP, handshake, no stall
+        a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
         2 buf +!       \ next output buffer
     next
     drop
