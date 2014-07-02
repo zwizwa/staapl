@@ -391,10 +391,13 @@ forth
         \ init INx buffer descriptor
         bufdes-rst
         a!bufdes #x48 >a \ set DATA1. next transactions are DATA0,1,0,...
+        64 ep OUT/DATA0  \ prepare to receive on OUT0
 
         \ EPx
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
         1 buf +!
+
+        
     next
 
     
@@ -402,7 +405,7 @@ forth
 
     \ FIXME:
     \ #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
-    OUT1-first          \ Prepare receive on OUT1
+    \ OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
     ; 
 
