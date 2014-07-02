@@ -9,13 +9,6 @@ staapl pic18/shift
 staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/afregs
-
-\ staapl pic18/usb-generic-serial \ Descriptors for Linux Generic serial driver
-\ staapl pic18/usb-acm
-
-\ load usb-descr-usbserial.f 
-\ load usb-descr-cdcacm.f 
-
 staapl pic18/serial
 
 \ --------------- DRIVER --------------
@@ -74,6 +67,12 @@ macro
 : a!IN0        #x540 2 lfsr ;
     
 forth
+  
+: buf-addr-lo 3 and rot>> rot>> ; \ n -- lo
+: buf-addr-hi >> >> buf-page +  ; \ n -- hi
+: buf-addr \ n -- lo hi | address of buffer
+    dup >r buf-addr-lo
+        r> buf-addr-hi ;
 
 variable address      \ UADDR after current transaction
 variable endpoint     \ Endpoint of current transaction
@@ -87,10 +86,31 @@ macro
 : usb-configured usb-flags 0 ;
 forth
 
-\ Cursors into USB buffers for >IN and OUT> words.
-variable OUT1-read
-variable IN1-write
 
+\ Lowlevel.  Not used in user code, but convenient to use the buf
+\ variable to access buffer descriptors in boot / isr code.
+
+\ Used by kernel during enumeration.  After that it's user owned only.    
+variable buf
+
+: OUT! << buf ! ;
+: IN!  << 1 + buf ! ;    
+
+: a!UEP
+    UEP0 2 lfsr ep al +! ;
+    
+: bufdes-rst
+    a!bufdes
+    #x08 >a
+    64   >a
+    buf @ buf-addr-lo >a ;
+    buf @ buf-addr-hi >a ;
+    
+: EP-BD-init \ ep --
+    dup OUT! bufdes-rst
+        IN!  bufdes-rst ;
+    
+  
 
 \ PIC18 specific (since USB is also PIC specific): use rot<<, indirect
 \ addressing using a register, and assumption that >r and r> can span
@@ -103,6 +123,7 @@ macro
 : a> @a+ ;
 : >a !a+ ;
 : f> @f+ ;
+: =? - nfdrop z? ; \ a b -- ?
 forth
   
 
@@ -203,26 +224,8 @@ forth
     
 
 
-\ Use a default map with 64 byte buffers for all endpoints.
-\ EP0  500 540
-\ EP1  580 5C0
-\ EP2  600 640
-\ EP3  680 6C0    
 
-\ Note that code to do the address manip is a pita on a 8bit machine.
-\ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
-
-: buf-addr-lo 3 and rot>> rot>> ; \ n -- lo
-: buf-addr-hi >> >> buf-page +  ; \ n -- hi
-  
-: buf-addr \ n -- lo hi | address of buffer
-    dup >r buf-addr-lo
-        r> buf-addr-hi ;
  
-: EP-BD-init \ ep --
-    dup OUT! bufdes-rst
-        IN!  bufdes-rst ;
-    
 
 
     
@@ -457,47 +460,93 @@ forth
 
 \ --------------- USER --------------
 
-\ To avoid delays, double buffering should be used.  However, delays
+\ To avoid delays, double buffering could be used.  However, delays
 \ should be less than 1 ms, until the next IN token arrives.
 \
-\ - If EP1/IN BD is owned by USB, we have to busy-wait until
-\   transaction completes.
-\ - If EP/IN BD is owned by USB we can incrementally add bytes and
-\   keep counter in BD.
-\ - Needs disambiguation for un-initialized BD count when TX finishes.
-\   Maybe IN transaction handler should clear the respective IN size?
+
+\ Main routines:
+\   OUT>     \ ep -- val  |  read from EP OUT
+\   >IN      \ ep val --  |  write to  EP IN
+\   IN-flush \ ep --      |  flush write on EP IN
+
+\ Note that OUT/IN names are from the perspective of the host.
 
 
+\ Implementation: use idiomatic "current object" Forth approach.
+\ This uses busy polling (BD:UOWN)
+\ For ISR access, hook into transaction.OUTx/INx
+\ Buffer can be in one of two states:
+\ - BD.STAT.UOWN=1 Owned by USB: a transaction is ongoing and we're not allowed to write
+\ - BD.STAT.UOWN=0 Owned by UC, we can read or write buffer + descriptor
+
+
+
+\ Generic access needs:
+\  - current buffer          #x500, #x540, ...
+\  - index variables         #x4F0, #x4F1, ...
+\  - USB buffer descriptors  #x400, #x404, ...  (OUT0, IN0, OUT1, IN1, ...)
+
+
+   
+
+\ 16-bit pointer chasing on the stack is a bit of a pain in an 8 bit
+\ Forth, so use the a register.  Use address loading words a!xxx in
+\ conjunction with >a a> etc..
+
+: ep       buf @ >> ;
+: a!bufdes buf @ << << bd-page a!! ;       \ buffer descriptor
+: a!buf    buf @ buf-addr a!! ;            \ buffer start
+: a!iptr   a!iptr-array buf @ al +! ;      \ index register address
+
+: idx      a!iptr a> ;                     \ -- i | just get index
+: idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable
+: a!box+   idx+ #x3F and a!buf al +! ;     \ a points to "box", index is incremented
+
+: iptr-rst a!iptr 0 >a ;
+
+: bd-len   a!bufdes a> drop a> ;
+
+
+: bd-wait  a!bufdes begin INDF2 7 low? until ; \ poll UOWN until we own the bd
     
 
-\ When filling up the buffer, CNT has AL.  Strip off the bits when
-\ sending it out.  We can just use the >a and a> words to access the
-\ buffer.
+\ pump: do IN / OUT transaction if necessary    
+: pump-OUT
+    idx bd-len =? not if ; then
+    64 ep OUT/DATA+
+    iptr-rst bd-wait ;
 
-\ Since the location of the buffer is known, these are implemented as
-\ macros to make the other code a bit more readable, and to have a
-\ more efficient implementation.  Indirect addressing is inefficient
-\ since we're already using all 3 pointer registers.
-
-macro
-: IN>BD    OUT>BD 4 + ;          \ EP -- BD
-: OUT>BD   8 * ;                 \ EP -- BD
-: CNT      1 + ;                 \ BD -- BD.CNT
-: IN1/STAT 1 IN>BD ;             \ -- BD.IN1.STAT    
-: IN1/CNT  1 IN>BD CNT ;         \ -- BD.IN1.CNT
-: OUT1/CNT 1 OUT>BD CNT ;        \ -- BD.OUT1.CNT
-: bd@      >m bd-page b! m> @b ; \ addr -- value (fetch in BD page)
-: bd!      >m bd-page b! m> !b ; \ value addr -- (store in BD page)
-
-: BUFSIZE  64 ;
-: OUT>BUF  BUFSIZE * 2 * ;
-: IN>BUF   OUT>BUF BUFSIZE + ;
+: pump-IN
+    idx #x40 =? not if ; then
+: force-pump-IN
+    idx ep IN/DATA+
+    iptr-rst bd-wait ;
     
-forth
 
-macro
-: =? - nfdrop z? ; \ a b -- ?
-forth
+: OUT> \ ep -- val
+    OUT! a>r
+      bd-wait     \ make sure buffer is ready
+      pump-OUT    \ if fully read, ack buffer and wait for more data from host
+      a!box+ a>   \ read, advancing index
+    r>a ;
+
+: >IN  \ val ep --
+    IN! a>r
+      bd-wait     \ make sure buffer is ready
+      pump-IN     \ if buffer is full, send it to host and wait until we can write more
+      a!box+ >a   \ write, advancing index
+    r>a ;
+
+: IN-flush \ ep --
+    IN! force-pump-IN ;
+    
+
+
+\ debug
+\ : pa al @ ah @ ` _px host ;
+\ : pbuf a!buf 64 for a> ` px host next ;
+
+  
 
 \ ** ISR **
  
@@ -536,13 +585,29 @@ forth
 ' lo-isr init-isr-lo
 
 
-
-load usb-user.f
-\ : OUT1>     1 OUT> ;
-\ : >IN1      1 >IN ;
-\ : IN1-flush 1 IN-flush ;
-
+\ Compilers for USB descriptors defined as raw byte tables
+\ (e.g. gathered using 'scheme from a Scheme file)
     
+
+macro
+: descriptor-compiler \ list -- table-compiler
+    [ table-> ] swap >macro compose-macro
+    [ ' , for-list ]        compose-macro ;
+
+\ These compile to Flash a single descriptor: -- lo hi    
+: usb-descriptor
+    descriptor-compiler compile ;    
+\ or an array of descriptors: n -- lo hi
+: usb-descriptors
+    \ FIXME: no bounds check
+    >m ' route compile m>
+        [ descriptor-compiler i/c* . ]
+        for-list ;
+
+\ see dip40kit.fm for example
+forth
+
+  
     
     
 
@@ -607,25 +672,3 @@ load usb-user.f
 
 
 
-\ Compilers for USB descriptors defined as raw byte tables
-\ (e.g. gathered using 'scheme from a Scheme file)
-    
-staapl pic18/compose-macro
-
-macro
-: descriptor-compiler \ list -- table-compiler
-    [ table-> ] swap >macro compose-macro
-    [ ' , for-list ]        compose-macro ;
-
-\ These compile to Flash a single descriptor: -- lo hi    
-: usb-descriptor
-    descriptor-compiler compile ;    
-\ or an array of descriptors: n -- lo hi
-: usb-descriptors
-    \ FIXME: no bounds check
-    >m ' route compile m>
-        [ descriptor-compiler i/c* . ]
-        for-list ;
-
-\ see dip40kit.fm for example
-forth
