@@ -84,7 +84,13 @@ variable buf
 : IN-flush \ ep --
     IN! force-pump-IN ;
     
-   
+
+\ Lowlevel.  Not used in user code, but convenient to use the buf
+\ variable to access buffer descriptors in boot / isr code.
+
+: a!UEP  UEP0 2 lfsr ep al +! ;    
+
+    
 
 \ debug
 \ : pa al @ ah @ ` _px host ;

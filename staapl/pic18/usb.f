@@ -387,25 +387,24 @@ forth
     0 setup-reply ;
 
 : SET_CONFIGURATION
-    
-    \ Enable endpoint 1:
-    1 EP-BD-init
 
+    \ initialize index pointers 
+    init-usb-user  
     
-    #x1E UEP1 !  \ IN, OUT, no SETUP, handshake, no stall
+    \ Enable all endpoints
+    UEP1 2 lfsr \ a = UEP1
+    1 OUT!
+    total-EP 1 - for
+        dup EP-BD-init \ init buffer descriptor
+        #x1E >a        \ UEPx: IN, OUT, no SETUP, handshake, no stall
+        2 buf +!       \ next output buffer
+    next
+    drop
 
-    \ EP2 is the ACM interrupt IN.  Not used.
-    
-    \ Enable endpoint 2:
-    \ 2 EP-BD-init
-    \ #x1E UEP2 !  \ IN, OUT, no SETUP, handshake, no stall
     
     0 setup-reply
 
-    \ FIXME: should this reset pointers as before?
-    \ IN1-init
-    \ OUT1-init
-    
+    \ FIXME:
     #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
     OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
