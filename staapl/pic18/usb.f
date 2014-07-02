@@ -54,6 +54,24 @@ staapl pic18/serial
 \  OUT   txn = OUT   pkt(h->d), DATA1 pkt(h->d), ACK pkt(d->h)
 
 
+\ --- LOWLEVEL
+
+\ It's convenient to use a current object referenced by the "a"
+\ register in the code below.  For current buffer objects, the data
+\ can then be streamed into/out-of the memory using >a or a>.
+  
+\ prefix "a!" indicates a is changed and valid upon return
+\ prefix "a:" indicates a is referenced in a word
+
+macro
+\ dual port USB ram:
+\ 400-... buffer descriptors, 4 bytes per buffer
+\ 4F0-4FF buffer current user read/write pointers (can go in normal ram)
+\ 500-7FF 64 byte buffers for 6 endpoints
+: bd-page  4 ;
+: buf-page 5 ;
+: index-array #x4F0 ;
+forth
 
 variable address      \ UADDR after current transaction
 variable endpoint     \ Endpoint of current transaction
@@ -127,10 +145,10 @@ forth
 
 \ -- \ ready to receive first packet = DATA0    
 : OUT0-first 64 0 OUT/DATA0 ;  
-: OUT1-first 64 1 OUT/DATA0 ;
+\ : OUT1-first 64 1 OUT/DATA0 ;
 
 \ -- \ ready to receive next packet = DATAx toggles    
-: OUT1-next 64 1 OUT/DATA+ ;   
+\ : OUT1-next 64 1 OUT/DATA+ ;   
     
 \ n ep --    
 : OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
@@ -144,8 +162,6 @@ forth
   
 : init-usb
 
-    init-usb-user
-    
     0 UCON !
     #xFF for next
 
@@ -182,41 +198,15 @@ forth
 : stall    UIR STALLIF low ;                    \ STALL handshake sent
 
 
-macro
-\ Implemented as macros so we can use the fast LFSR instruction.  
 
-\ These will load the address of the endpoint register window into the
-\ a register.
-
-: buf-page 5 ;    \ second bank of dual-port USB ram (4-7)
-
-: _buf-OUT0 #x500 ; \ 64 bytes
-: _buf-IN0  #x540 ; \ 64 bytes
-: _buf-OUT1 #x580 ; \ 64 bytes
-: _buf-IN1  #x5C0 ; \ 64 bytes
-: _buf-OUT2 #x600 ; \ 64 bytes
-: _buf-IN2  #x640 ; \ 64 bytes
-
-    
-: bd-page  4 ;
-    
-\ It's convenient to use a current object referenced by the "a"
-\ register in the code below.
   
-\ prefix "a!" indicates a is changed
-\ prefix "a:" indicates a is referenced
+    
   
-\ For current buffer objects, the data can then be streamed
-\ into/out-of the memory using >a or a>.
     
 \ Load buffer address into `a'.
-: a!bd    bd-page a!! ;    
-    
-: a!OUT0  _buf-OUT0 2 lfsr ;
-: a!IN0   _buf-IN0  2 lfsr ;
-: a!OUT1  _buf-OUT1 2 lfsr ;
-: a!IN1   _buf-IN1  2 lfsr ;
-
+\ : a!bd    bd-page a!! ;
+macro  
+: a!IN0     #x540 2 lfsr ;
 forth
 
 
@@ -378,26 +368,22 @@ forth
 
 : SET_CONFIGURATION
 
-    \ initialize index pointers 
-    init-usb-user  
-    
-    \ Enable all endpoints
+    \ Enable user endpoints starting at EP1
     1 OUT!
     total-EP 1 - for
-        \ init OUTx buffer descriptor
-        bufdes-rst
+        \ init OUTx
+        bufdes-rst iptr-rst
+        64 ep OUT/DATA0  \ prepare to receive on OUT0
         1 buf +!
         
-        \ init INx buffer descriptor
-        bufdes-rst
+        \ init INx
+        bufdes-rst iptr-rst
         a!bufdes #x48 >a \ set DATA1. next transactions are DATA0,1,0,...
-        64 ep OUT/DATA0  \ prepare to receive on OUT0
 
         \ EPx
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
         1 buf +!
     next
-
     
     0 setup-reply
     usb-configured high ;  \ Userspace waits for this

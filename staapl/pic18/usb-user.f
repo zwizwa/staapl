@@ -10,8 +10,6 @@
 
 staapl pic18/afregs
 
-\ Compiled macros  
-: *a!! a!! ;
 
 
 \ USER ACCESS: Buffered polling only.
@@ -27,7 +25,6 @@ staapl pic18/afregs
 
     
 variable buf
-: init-usb-user #xF0 4 *a!! 16 for 0 >a next ;
     
 
 \ 16-bit pointer chasing is a bit of a pain in an 8 bit Forth, so use
@@ -35,9 +32,9 @@ variable buf
 \ access through a register using >a a> etc..
 
 : ep       buf @ >> ;
-: a!bufdes buf @ << << bd-page *a!! ;  \ buffer descriptor
-: a!buf    buf @ buf-addr *a!! ;       \ buffer start
-: a!iptr   #xF0 4 *a!! buf @ al +! ;    \ index register address
+: a!bufdes buf @ << << bd-page a!! ;        \ buffer descriptor
+: a!buf    buf @ buf-addr a!! ;             \ buffer start
+: a!iptr   index-array 2 lfsr buf @ al +! ; \ index register address
 
 : idx      a!iptr a> ;                     \ -- i | just get index
 : idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable
