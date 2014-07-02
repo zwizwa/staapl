@@ -623,14 +623,15 @@ forth
 \ is returned to the UC.  That word will call "IN1-init" to reset the
 \ write count.
     
-: IN1-flush   IN1-write @  IN1-init 1 IN/DATA+ ;
+\ : IN1-flush   IN1-write @  IN1-init 1 IN/DATA+ ;
 : IN1-init    0 IN1-write ! ;
 
 
 \ Just one byte.  This flushes only when necessary.  It is allowed to
 \ call "IN1-flush" after ">IN1" to force a transaction.  The next
 \ ">IN1" will busy-wait until the previous transaction is done.
-: >IN1 a>r a!IN1-begin a:IN1-write a:IN1-end r>a ; \ byte --
+
+\ : >IN1 a>r a!IN1-begin a:IN1-write a:IN1-end r>a ; \ byte --
 
 
 \ ** READING FROM OUT1 **  
@@ -673,7 +674,8 @@ forth
 
 load usb-user.f
 : OUT1> 1 OUT> ;
-    
+: >IN1  1 >IN ;
+: IN1-flush 3 buf ! flush-IN ;    
 
 \ load usb-generic.f
     
