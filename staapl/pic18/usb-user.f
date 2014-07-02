@@ -88,8 +88,13 @@ variable buf
 \ Lowlevel.  Not used in user code, but convenient to use the buf
 \ variable to access buffer descriptors in boot / isr code.
 
-: a!UEP  UEP0 2 lfsr ep al +! ;    
-
+: a!UEP      UEP0 2 lfsr ep al +! ;    
+: bufdes-rst
+    a!bufdes
+    #x08 >a
+    64   >a
+    buf @ buf-addr-lo >a ;
+    buf @ buf-addr-hi >a ;
     
 
 \ debug

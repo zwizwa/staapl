@@ -229,25 +229,17 @@ forth
 \ Note that code to do the address manip is a pita on a 8bit machine.
 \ To simplify, factor it as "blocks".  EP0 -> 0,1  EP1 -> 2,3 etc..
 
+: buf-addr-lo 3 and rot>> rot>> ; \ n -- lo
+: buf-addr-hi >> >> buf-page +  ; \ n -- hi
+  
 : buf-addr \ n -- lo hi | address of buffer
-    dup >r
-    3 and rot>> rot>>
-    r>
-    >> >> buf-page + ;
-
-: BD-init>a \ ep 0/1 -- | a:BD
-    >r
-    #x08    >a    
-    64      >a
-    << r> +  buf-addr >r >a r> >a ;
-    
+    dup >r buf-addr-lo
+        r> buf-addr-hi ;
+ 
 : EP-BD-init \ ep --
     a>r
-    dup << << << al !  \ 8 bytes per ep
-    bd-page      ah !
-
-    dup 0 BD-init>a
-        1 BD-init>a
+    dup OUT! bufdes-rst
+        IN!  bufdes-rst
     r>a ;
     
 
@@ -393,10 +385,12 @@ forth
     
     \ Enable all endpoints
     1 OUT!
+    1
     total-EP 1 - for
         dup EP-BD-init \ init buffer descriptor
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
         2 buf +!       \ next output buffer
+        1 +
     next
     drop
 
