@@ -64292,3 +64292,23 @@ Lets test and review again with a fresh perspective.
 
 OK, what was necessary was courage and attention - a fresh perspective
 I guess.  Problem was solved by doing review and noticing problems.
+
+Both IN/OUT are working.
+Yeah!
+
+
+Entry: Enable multiple endpoints
+Date: Wed Jul  2 01:30:01 EDT 2014
+
+So next is to finish the MIDI descriptors and attempt to send some
+data.
+
+
+Entry: Driver config.  Enable multiple endpoints.
+Date: Wed Jul  2 13:24:21 EDT 2014
+
+Seems straightforward.  For now the way the buffers are layed out,
+there are 6 endpoint with 64 bytes for IN/OUT each.
+
+
+

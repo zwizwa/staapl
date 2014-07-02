@@ -16,6 +16,15 @@ staapl pic18/afregs
 
 \ USER ACCESS: Buffered polling only.
 \ For ISR access, hook into transaction.OUTx/INx
+
+ 
+
+\ Buffer can be in one of two states:
+\ - BD.STAT.UOWN=1 Owned by USB: a transaction is ongoing and we're not allowed to write
+\ - BD.STAT.UOWN=0 Owned by UC, we can read or write buffer + descriptor
+
+
+
     
 variable buf
 : init-usb-user #xF0 4 *a!! 16 for 0 >a next ;
@@ -34,25 +43,25 @@ variable buf
 : idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable
 : a!box+   idx+ #x3F and a!buf al +! ;     \ a points to "box", index is incremented
 
-: iptr-reset a!iptr 0 >a ;
+: iptr-rst a!iptr 0 >a ;
 
 : bd-len   a!bufdes a> drop a> ;
 
 
-: bd-wait a!bufdes a:wait-UOWN ;    \ wait until we own the bd
+: bd-wait  a!bufdes begin INDF2 7 low? until ; \ poll UOWN until we own the bd
     
 
 \ pump: do IN / OUT transaction if necessary    
 : pump-OUT
     idx bd-len =? not if ; then
     64 ep OUT/DATA+
-    iptr-reset bd-wait ;
+    iptr-rst bd-wait ;
 
 : pump-IN
     idx #x40 =? not if ; then
 : force-pump-IN
     idx ep IN/DATA+
-    iptr-reset bd-wait ;
+    iptr-rst bd-wait ;
     
 
 : OUT! << buf ! ;
@@ -61,14 +70,14 @@ variable buf
 : OUT> \ ep -- val
     OUT! a>r
       bd-wait     \ make sure buffer is ready
-      pump-OUT    \ if fully read, ack buffer and wait for next
+      pump-OUT    \ if fully read, ack buffer and wait for more data from host
       a!box+ a>   \ read, advancing index
     r>a ;
 
 : >IN  \ val ep --
     IN! a>r
       bd-wait     \ make sure buffer is ready
-      pump-IN     \ if buffer is full, send it and wait for avail
+      pump-IN     \ if buffer is full, send it to host and wait until we can write more
       a!box+ >a   \ write, advancing index
     r>a ;
 

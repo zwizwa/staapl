@@ -320,22 +320,16 @@ forth
         
         ;
 
-\ These have current object set to packet buffer.        
-: transaction.OUT   \ -- : a->packet
-    endpoint @ 1 and route
-        transaction.OUT0 .
-        transaction.OUT1 ;
-
-: transaction.OUT0 ;  \ not used
+\ These have current object set to packet buffer.
+\ All ignored.  OUT0 doesn't need it and user code will poll UOWN.
+: transaction.OUT ;  \ -- : a->packet
 
 
-: transaction.OUT1 ;  \ NOP: task polls UOWN
-
-\ UADDR follows address after transaction is finished.    
+\ UADDR follows address after transaction is finished.
+\ Ignored for all but IN0.  User polls UOWN.    
 : transaction.IN    \ -- : a->packet
-    endpoint @ 1 and route
-        transaction.IN0 .
-        transaction.IN1 ;
+    endpoint @ 1 min route
+        transaction.IN0 . ;
         
 : transaction.IN0   \ -- : a->packet
     \ EP0: Notification of end of IN0 transaction.
@@ -350,8 +344,6 @@ forth
         cont-desc setup-reply-next
     then ;
 
-    
-: transaction.IN1 ;  \ NOP: task polls UOWN
 
 : transaction.SETUP \ -- : a->packet
     a>  \ bmRequestType
@@ -572,28 +564,13 @@ forth
 \ USB is fixed at low priority interrupt.    
 ' lo-isr init-isr-lo
 
- 
-
-\ ** WRITING TO IN1 **  
-  
-\ The IN1 buffer can be in one of two states:
-\ - BD.STAT.UOWN=1 Owned by USB: a transaction is ongoing and we're not allowed to write
-\ - BD.STAT.UOWN=0 Owned by UC, we can write to IN1 buffer + descriptor
-
-macro
-: a!IN1.STAT  12 4 a!! ;
-: a!OUT1.STAT  8 4 a!! ;
-: a:STAT.UOWN INDF2 7 ;    
-forth
-: a:wait-UOWN begin a:STAT.UOWN low? until ;  
 
 
 load usb-user.f
-: OUT1>     1 OUT> ;
-: >IN1      1 >IN ;
-: IN1-flush 1 IN-flush ;
+\ : OUT1>     1 OUT> ;
+\ : >IN1      1 >IN ;
+\ : IN1-flush 1 IN-flush ;
 
-\ load usb-generic.f
     
     
     

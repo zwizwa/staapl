@@ -8,12 +8,12 @@ staapl pic18/route
 
 \ Hardcoded to EP1
 
+: receive  monitor-EP OUT> ;
+: transmit monitor-EP >IN ;
+: tx-end   monitor-EP IN-flush ;
 macro
-: receive  OUT1> ;
-: transmit >IN1 ;
 : rx-sync  ;
 : tx-sync  ;
-: tx-end   IN1-flush ;
 
 : interactive? 1 ;
 : init-comm init-usb-isr ;
