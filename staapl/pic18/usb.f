@@ -384,12 +384,13 @@ forth
     \ Enable all endpoints
     1 OUT!
     total-EP 1 - for
-        \ OUTx
-        bufdes-rst     \ init OUTx buffer descriptor
+        \ init OUTx buffer descriptor
+        bufdes-rst
         1 buf +!
         
-        \ INx
-        bufdes-rst     \ init INx buffer descriptor
+        \ init INx buffer descriptor
+        bufdes-rst
+        a!bufdes #x48 >a \ set DATA1. next transactions are DATA0,1,0,...
 
         \ EPx
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
@@ -400,7 +401,7 @@ forth
     0 setup-reply
 
     \ FIXME:
-    #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
+    \ #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
     OUT1-first          \ Prepare receive on OUT1
     usb-configured high \ Notify userspace
     ; 
