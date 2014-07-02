@@ -409,9 +409,10 @@ forth
     \ #x1E UEP2 !  \ IN, OUT, no SETUP, handshake, no stall
     
     0 setup-reply
-    
-    IN1-init
-    OUT1-init
+
+    \ FIXME: should this reset pointers as before?
+    \ IN1-init
+    \ OUT1-init
     
     #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
     OUT1-first          \ Prepare receive on OUT1
@@ -586,91 +587,6 @@ macro
 forth
 : a:wait-UOWN begin a:STAT.UOWN low? until ;  
 
-\ Two interfaces are provided:
-\  high level:  >IN1 IN1-flush
-\  low level:   a!IN1-begin a:IN1-write a:IN1-end
-
-\ The" a!IN1-begin" and "a:IN1-end" words define a context in which
-\ the "a:IN1-write" word is valid.  These words use (clobber) the "a"
-\ register to make transferring multiple bytes more efficient.  The
-\ ">IN1" word is a highlevel byte-per-byte write function.  Note that
-\ as long as the data fits in the buffer, it is possible to use just
-\ ">a" instead of "a:IN1-write", which omits the buffer size check.
-
-: a!IN1-begin
-    a!IN1-wait \ wait until IN1's contents is transferred to host.
-    a!IN1
-    IN1-write @ al +! ;
-
-: a!IN1-wait a!IN1.STAT a:wait-UOWN ;
-
-: a:IN1-write >a
-    al @ _buf-IN1 -
-    BUFSIZE =? if a:IN1-transaction then ;
-
-: a:IN1-transaction
-    a:IN1-end     \ end IN1 buffer write session
-    IN1-flush     \ transfer IN1 buffer to USB
-    a!IN1-begin ; \ start a new IN1 buffer write session
-    
-: a:IN1-end
-    al @ _buf-IN1 - IN1-write ! ;
-
-\ When IN1 buffer is filled by UC, "IN1-flush" will transfer ownership
-\ to the USB peripheral.  It will perform an IN transaction with the
-\ host, and when it is done will get notified through the
-\ transaction.IN1 word in the ISR, at which point the buffer ownership
-\ is returned to the UC.  That word will call "IN1-init" to reset the
-\ write count.
-    
-\ : IN1-flush   IN1-write @  IN1-init 1 IN/DATA+ ;
-: IN1-init    0 IN1-write ! ;
-
-
-\ Just one byte.  This flushes only when necessary.  It is allowed to
-\ call "IN1-flush" after ">IN1" to force a transaction.  The next
-\ ">IN1" will busy-wait until the previous transaction is done.
-
-\ : >IN1 a>r a!IN1-begin a:IN1-write a:IN1-end r>a ; \ byte --
-
-
-\ ** READING FROM OUT1 **  
- 
-: a!OUT1-begin
-    a!OUT1-wait  \ wait until OUT1 has data from host
-    a!OUT1
-    OUT1-read @ al +! ;
-    
-: a!OUT1-wait a!OUT1.STAT a:wait-UOWN ;
-
-: a:OUT1-read
-    al @ OUT1/CNT bd@ -
-    _buf-OUT1 =? if a:OUT1-transaction then
-    a> ;
- 
-: a:OUT1-transaction
-    \ a:OUT-end    \ not necessary (kept here for symmetry with a:IN1-transaction)
-    OUT1-fill      \ transfer OUT1 ownership to USB to collect new data
-    a!OUT1-begin ; \ start new transaction to OUT1 buffer
-
-: a:OUT1-end
-    al @ _buf-OUT1 - OUT1-read ! ;
-
-\ When OUT1 buffer is filled by USB, the UC is notified through the
-\ transaction.OUT1 word in ISR.  That word will call "OUT1-init" to
-\ reset the read count.
-
-macro
-: OUT1-init  0 OUT1-read ! ;
-: OUT1-fill  OUT1-init OUT1-next  ;
-forth
-
-    
-\ Just one byte.  This clears frees the OUT1 buffer when necessary to
-\ request more data from host.
-\ NOTE: It might be good to flush the IN1 buffer to host before
-\ starting a busy wait on OUT1 from host.  
-\ : OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
 
 load usb-user.f
 : OUT1>     1 OUT> ;
