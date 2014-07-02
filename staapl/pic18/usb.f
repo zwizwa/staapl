@@ -237,10 +237,8 @@ forth
         r> buf-addr-hi ;
  
 : EP-BD-init \ ep --
-    a>r
     dup OUT! bufdes-rst
-        IN!  bufdes-rst
-    r>a ;
+        IN!  bufdes-rst ;
     
 
 
@@ -385,14 +383,18 @@ forth
     
     \ Enable all endpoints
     1 OUT!
-    1
     total-EP 1 - for
-        dup EP-BD-init \ init buffer descriptor
+        \ OUTx
+        bufdes-rst     \ init OUTx buffer descriptor
+        1 buf +!
+        
+        \ INx
+        bufdes-rst     \ init INx buffer descriptor
+
+        \ EPx
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
-        2 buf +!       \ next output buffer
-        1 +
+        1 buf +!
     next
-    drop
 
     
     0 setup-reply
