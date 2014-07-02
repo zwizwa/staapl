@@ -103,7 +103,7 @@ variable buf
     a!bufdes
     #x08 >a
     64   >a
-    buf @ buf-addr-lo >a ;
+    buf @ buf-addr-lo >a
     buf @ buf-addr-hi >a ;
     
 : EP-BD-init \ ep --
