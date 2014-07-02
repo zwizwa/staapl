@@ -41,36 +41,39 @@ variable buf
 
 : bd-wait a!bufdes a:wait-UOWN ;    \ wait until we own the bd
     
-    
+
+\ pump: do IN / OUT transaction if necessary    
 : pump-OUT
     idx bd-len =? not if ; then
     64 ep OUT/DATA+
     iptr-reset bd-wait ;
 
-\ : flush-IN  ` flush-IN  .sym iptr-reset ;
-
-    
-
 : pump-IN
     idx #x40 =? not if ; then
-: flush-IN  \ can be called manually
+: force-pump-IN
     idx ep IN/DATA+
     iptr-reset bd-wait ;
     
 
+: OUT! << buf ! ;
+: IN!  << 1 + buf ! ;    
+    
 : OUT> \ ep -- val
-    << buf ! a>r
+    OUT! a>r
       bd-wait     \ make sure buffer is ready
       pump-OUT    \ if fully read, ack buffer and wait for next
       a!box+ a>   \ read, advancing index
     r>a ;
 
 : >IN  \ val ep --
-    << 1 + buf ! a>r
+    IN! a>r
       bd-wait     \ make sure buffer is ready
       pump-IN     \ if buffer is full, send it and wait for avail
       a!box+ >a   \ write, advancing index
     r>a ;
+
+: IN-flush \ ep --
+    IN! force-pump-IN ;
     
    
 

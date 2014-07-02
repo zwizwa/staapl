@@ -673,9 +673,9 @@ forth
 \ : OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
 
 load usb-user.f
-: OUT1> 1 OUT> ;
-: >IN1  1 >IN ;
-: IN1-flush 3 buf ! flush-IN ;    
+: OUT1>     1 OUT> ;
+: >IN1      1 >IN ;
+: IN1-flush 1 IN-flush ;
 
 \ load usb-generic.f
     
