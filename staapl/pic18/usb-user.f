@@ -32,9 +32,9 @@ variable buf
 \ access through a register using >a a> etc..
 
 : ep       buf @ >> ;
-: a!bufdes buf @ << << bd-page a!! ;        \ buffer descriptor
-: a!buf    buf @ buf-addr a!! ;             \ buffer start
-: a!iptr   index-array 2 lfsr buf @ al +! ; \ index register address
+: a!bufdes buf @ << << bd-page a!! ;       \ buffer descriptor
+: a!buf    buf @ buf-addr a!! ;            \ buffer start
+: a!iptr   a!iptr-array buf @ al +! ;      \ index register address
 
 : idx      a!iptr a> ;                     \ -- i | just get index
 : idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable

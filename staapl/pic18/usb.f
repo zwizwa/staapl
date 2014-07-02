@@ -68,9 +68,11 @@ macro
 \ 400-... buffer descriptors, 4 bytes per buffer
 \ 4F0-4FF buffer current user read/write pointers (can go in normal ram)
 \ 500-7FF 64 byte buffers for 6 endpoints
-: bd-page  4 ;
-: buf-page 5 ;
-: index-array #x4F0 ;
+: bd-page      4 ;
+: buf-page     5 ;
+: a!iptr-array #x4F0 2 lfsr ;
+: a!IN0        #x540 2 lfsr ;
+    
 forth
 
 variable address      \ UADDR after current transaction
@@ -145,10 +147,6 @@ forth
 
 \ -- \ ready to receive first packet = DATA0    
 : OUT0-first 64 0 OUT/DATA0 ;  
-\ : OUT1-first 64 1 OUT/DATA0 ;
-
-\ -- \ ready to receive next packet = DATAx toggles    
-\ : OUT1-next 64 1 OUT/DATA+ ;   
     
 \ n ep --    
 : OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
@@ -203,11 +201,6 @@ forth
     
   
     
-\ Load buffer address into `a'.
-\ : a!bd    bd-page a!! ;
-macro  
-: a!IN0     #x540 2 lfsr ;
-forth
 
 
 \ Use a default map with 64 byte buffers for all endpoints.
@@ -457,6 +450,7 @@ forth
     dup a!IN0 f>a
     f>desc-next ;
 
+    
 
 
 
