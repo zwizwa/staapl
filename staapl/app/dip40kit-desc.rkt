@@ -18,6 +18,8 @@
      #:bEndpointAddressIN  #x81
      #:bEndpointAddressOUT #x01)
     (InterfaceDescriptorMIDI
-     #:bInterfaceNumber 2)
+     #:bInterfaceNumber 2
+     #:bEndpointAddressIN  #x83
+     #:bEndpointAddressOUT #x03)
     )))
 

@@ -307,7 +307,9 @@
 
 
 (define (InterfaceDescriptorMIDI
-         #:bInterfaceNumber [in 0])
+         #:bEndpointAddressIN  [ep-in  #f] 
+         #:bEndpointAddressOUT [ep-out #f]
+         #:bInterfaceNumber    [in 0])
 
 
   ;; INTERFACE: communication
@@ -316,7 +318,7 @@
    #:bInterfaceNumber   in
    #:bInterfaceClass    #x01  ;; AUDIO
    #:bInterfaceSubClass #x03  ;; MIDISTREAMING
-   #:bNumEndpoints      1)
+   #:bNumEndpoints      2)
   
   ;; Class-specific MS Interface Header Descriptor
   (TotalLength (nb_bytes_midi)
@@ -332,7 +334,8 @@
     #:bJackType #x01) ;; EMBEDDED
 ;   (MIDI-IN-Jack-Descriptor
 ;    #:bJackID   #x02) ;; ???
-   (BulkEndpoint #:bEndpointAddress #x03) ;; OUT1
+   (BulkEndpoint #:bEndpointAddress ep-out)
+   (BulkEndpoint #:bEndpointAddress ep-in) 
    ))
 
 

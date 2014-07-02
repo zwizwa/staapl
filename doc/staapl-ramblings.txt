@@ -64310,5 +64310,26 @@ Date: Wed Jul  2 13:24:21 EDT 2014
 Seems straightforward.  For now the way the buffers are layed out,
 there are 6 endpoint with 64 bytes for IN/OUT each.
 
+OK, done.
+
+
+Entry: MIDI cont
+Date: Wed Jul  2 16:10:40 EDT 2014
+
+Two avenues:
+- look into kernel driver and see what it expects
+- sniff for errors
+
+I believe a STALL is necessary for MIDI interface requests that are
+not implemented.
+
+I don't see anything obviously wrong on the USB trace.  Looks like a
+descriptor problem.  Have to look into the kernel.
+
+So setup a kernel in a VM.  using a copy of another wheezy machine.
+
+
+
+
 
 
