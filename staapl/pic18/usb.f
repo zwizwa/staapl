@@ -396,18 +396,11 @@ forth
         \ EPx
         a!UEP #x1E >a  \ UEPx: IN, OUT, no SETUP, handshake, no stall
         1 buf +!
-
-        
     next
 
     
     0 setup-reply
-
-    \ FIXME:
-    \ #x48 IN1/STAT bd!   \ Init to DATA1 so next transactions are DATA0,1,0,1,...
-    \ OUT1-first          \ Prepare receive on OUT1
-    usb-configured high \ Notify userspace
-    ; 
+    usb-configured high ;  \ Userspace waits for this
 
 
 : GET_DESCRIPTOR
