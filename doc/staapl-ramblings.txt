@@ -64275,3 +64275,20 @@ host:  Extension of target word set, including host commands.
 The host language is what the user sees on the command line.
 
 
+
+
+Entry: Evaluation
+Date: Tue Jul  1 20:36:02 EDT 2014
+
+usb-user.f doesn't work when I plug it in.  I tested in manually.
+Basically, I don't know how to do this process of "forced ISR-driven
+code".
+
+Well, I got the previous code working using the HW USB sniffer, maybe
+that's what needs to happen next?  Just lazy I guess...
+
+Lets test and review again with a fresh perspective.
+
+
+OK, what was necessary was courage and attention - a fresh perspective
+I guess.  Problem was solved by doing review and noticing problems.

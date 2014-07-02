@@ -143,6 +143,9 @@ forth
 
   
 : init-usb
+
+    init-usb-user
+    
     0 UCON !
     #xFF for next
 
@@ -666,9 +669,11 @@ forth
 \ request more data from host.
 \ NOTE: It might be good to flush the IN1 buffer to host before
 \ starting a busy wait on OUT1 from host.  
-: OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
+\ : OUT1> a>r a!OUT1-begin a:OUT1-read a:OUT1-end r>a ; \ -- byte
 
-
+load usb-user.f
+: OUT1> 1 OUT> ;
+    
 
 \ load usb-generic.f
     
