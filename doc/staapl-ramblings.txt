@@ -64329,6 +64329,15 @@ descriptor problem.  Have to look into the kernel.
 So setup a kernel in a VM.  using a copy of another wheezy machine.
 
 
+Entry: raco pkg install --link
+Date: Wed Jul  2 18:13:53 EDT 2014
+
+Looks like behavior changed at some point?
+Had to run it from a different directory.
+
+
+
+
 
 
 
