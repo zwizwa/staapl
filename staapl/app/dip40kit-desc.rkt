@@ -6,7 +6,9 @@
 (define-values (device configs strings)
   (usb-device
    (DeviceDescriptor
-    #:iSerialNumber "dip40kit-desc.rkt")
+    ;; Use serial number to refer back to dictionary.
+    #:iSerialNumber "dip40kit.dict"
+    )
    (configuration
     (InterfaceDescriptorCDC
      #:bInterfaceNumber 0

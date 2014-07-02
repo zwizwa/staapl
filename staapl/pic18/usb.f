@@ -93,8 +93,10 @@ forth
 \ Used by kernel during enumeration.  After that it's user owned only.    
 variable buf
 
-: OUT! << buf ! ;
-: IN!  << 1 + buf ! ;    
+: OUT! << buf! ;
+: IN!  << 1 +
+: buf! buf ! ;
+: buf@ buf @ ;    
 
 : a!UEP
     UEP0 2 lfsr ep al +! ;
@@ -103,8 +105,8 @@ variable buf
     a!bufdes
     #x08 >a
     64   >a
-    buf @ buf-addr-lo >a
-    buf @ buf-addr-hi >a ;
+    buf@ dup buf-addr-lo >a
+             buf-addr-hi >a ;
     
 : EP-BD-init \ ep --
     dup OUT! bufdes-rst
@@ -488,15 +490,15 @@ forth
 
 
    
+\ The following refer to the `buf' variable as the current buffer.
+\ Indirect memory access uses the a register.  
+    
+: ep       buf@ >> ;
+: a!bufdes buf@ << << bd-page *a!! ;       \ buffer descriptor
+: a!buf    buf@ buf-addr                   \ buffer start
+: *a!!     a!! ;                           \ compiled macro / a!! doesn't get optimized to lfsr
+: a!iptr   a!iptr-array buf@ al +! ;       \ index register address
 
-\ 16-bit pointer chasing on the stack is a bit of a pain in an 8 bit
-\ Forth, so use the a register.  Use address loading words a!xxx in
-\ conjunction with >a a> etc..
-
-: ep       buf @ >> ;
-: a!bufdes buf @ << << bd-page a!! ;       \ buffer descriptor
-: a!buf    buf @ buf-addr a!! ;            \ buffer start
-: a!iptr   a!iptr-array buf @ al +! ;      \ index register address
 
 : idx      a!iptr a> ;                     \ -- i | just get index
 : idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable
@@ -507,34 +509,34 @@ forth
 : bd-len   a!bufdes a> drop a> ;
 
 
-: bd-wait  a!bufdes begin INDF2 7 low? until ; \ poll UOWN until we own the bd
+: wait-buf a!bufdes begin INDF2 7 low? until ; \ poll UOWN until we own the bd
     
 
 \ pump: do IN / OUT transaction if necessary    
 : pump-OUT
     idx bd-len =? not if ; then
     64 ep OUT/DATA+
-    iptr-rst bd-wait ;
+    iptr-rst wait-buf ;
 
 : pump-IN
     idx #x40 =? not if ; then
 : force-pump-IN
     idx ep IN/DATA+
-    iptr-rst bd-wait ;
+    iptr-rst wait-buf ;
     
 
 : OUT> \ ep -- val
     OUT! a>r
-      bd-wait     \ make sure buffer is ready
-      pump-OUT    \ if fully read, ack buffer and wait for more data from host
-      a!box+ a>   \ read, advancing index
+        wait-buf    \ make sure buffer is ready
+        pump-OUT    \ if fully read, ack buffer and wait for more data from host
+        a!box+ a>   \ read, advancing index
     r>a ;
 
 : >IN  \ val ep --
     IN! a>r
-      bd-wait     \ make sure buffer is ready
-      pump-IN     \ if buffer is full, send it to host and wait until we can write more
-      a!box+ >a   \ write, advancing index
+        wait-buf    \ make sure buffer is ready
+        pump-IN     \ if buffer is full, send it to host and wait until we can write more
+        a!box+ >a   \ write, advancing index
     r>a ;
 
 : IN-flush \ ep --
@@ -581,7 +583,7 @@ forth
     STATUS!
     0 retfie ;
 
-\ USB is fixed at low priority interrupt.    
+\ USB is current hardcoded as low priority interrupt.    
 ' lo-isr init-isr-lo
 
 
