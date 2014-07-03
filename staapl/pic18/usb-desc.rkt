@@ -84,52 +84,29 @@
 
   )
 
-(define (EndPoint
-         #:bEndpointAddress [addr #f]
-         #:bmAttributes     [attr #f]
-         #:bmInterval       [ivl  0])
-  (Descriptor
-   (bLength 7)
-   (bDescriptorType 5)
-   (bEndpointAddress addr)
-   (bmAttributes #x02) ;; BULK
-   (wMaxPacketSize 64)
-   (bInterval ivl)))
 
-;; From midi: 9 bytes.  Why is this not 7 as in ACM?
-(define (EndPoint9
+;; From midi: 9 bytes.
+;; Why is this not 7 as in ACM example code?  (last 2 fields missing)
+;; Maybe old USB standard?
+
+(define BULK      #x02)
+(define INTERRUPT #x03)
+
+(define (EndPoint
          #:bEndpointAddress [addr #f]
          #:bmAttributes     [attr BULK]
          #:wMaxPacketSize   [size 64]
-         #:bmInterval       [ivl  0])
+         #:bInterval        [ivl  0])
   (Descriptor
    (bLength 9)
    (bDescriptorType 5)
    (bEndpointAddress addr)
-   (bmAttributes #x02) ;; BULK
+   (bmAttributes attr)
    (wMaxPacketSize size)
    (bInterval ivl)
    (bRefresh  0)
    (bSyncAddr 0)))
            
-
-
-(define BULK      #x02)
-(define INTERRUPT #x03)
-
-(define (BulkEndpoint
-         #:bEndpointAddress [addr #f])
-  (EndPoint
-   #:bEndpointAddress addr
-   #:bmAttributes     BULK))
-
-(define (InterruptEndpoint
-         #:bEndpointAddress [addr #f]
-         #:bmInterval       [ivl 10])
-  (EndPoint
-   #:bEndpointAddress addr
-   #:bmAttributes     INTERRUPT
-   #:bmInterval ivl))
 
 
 (define (DeviceDescriptor
@@ -237,8 +214,10 @@
    (byte 0)               ;; Number of master interface is #0
    (byte 1))              ;; First slave interface is #1
   
-  (InterruptEndpoint
-   #:bEndpointAddress ea))
+  (EndPoint
+   #:bEndpointAddress ea
+   #:bmAttributes INTERRUPT
+   #:bInterval 10))
 
 (define (InterfaceDescriptorCDCdata
          #:bEndpointAddressIN  [eaIN  #x81] ;; IN1
@@ -251,8 +230,8 @@
    #:bInterfaceClass    #x0A  ;; CDC data
    #:bInterfaceSubClass #x00
    #:bNumEndpoints      2)
-  (BulkEndpoint #:bEndpointAddress eaOUT)
-  (BulkEndpoint #:bEndpointAddress eaIN)
+  (EndPoint #:bEndpointAddress eaOUT)
+  (EndPoint #:bEndpointAddress eaIN)
   )
 
 
@@ -399,8 +378,8 @@
    (MIDI-OUT-Jack-Descriptor #:bJackID 3 #:bJackType EMBEDDED #:ID/PIN '((2 1)))
    (MIDI-OUT-Jack-Descriptor #:bJackID 4 #:bJackType EXTERNAL #:ID/PIN '((1 1)))
    
-   (EndPoint9 #:bEndpointAddress ep-out) (MIDI-EndPoint  #:bJackId 1)
-   (EndPoint9 #:bEndpointAddress ep-in)  (MIDI-EndPoint  #:bJackId 3)
+   (EndPoint #:bEndpointAddress ep-out) (MIDI-EndPoint  #:bJackId 1)
+   (EndPoint #:bEndpointAddress ep-in)  (MIDI-EndPoint  #:bJackId 3)
    
    ))
 
