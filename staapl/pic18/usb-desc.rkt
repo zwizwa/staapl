@@ -56,11 +56,19 @@
   (bEndpointAddress    byte)
   (wMaxPacketSize      word)
   (bInterval           byte)
+  (bRefresh            byte)
+  (bSyncAddr           byte)
 
-  ;; MIDI
+
+  
+  ;; MIDI / AUDIO
+  
+  (bInCollection       byte)
+  (baInterfaceNr       byte)
   (bcdMSC              word)
   (bJackType           byte)
   (bJackID             byte)
+  (bNumJacks           byte)
   (BaSourceID          byte)
   (BaSourcePin         byte)
   (iJack               byte)
@@ -73,31 +81,57 @@
   (bmElementCaps       byte)
   (iElement            byte)
 
+
   )
 
-
-(define (BulkEndpoint
-         #:bEndpointAddress [addr #f])
+(define (EndPoint
+         #:bEndpointAddress [addr #f]
+         #:bmAttributes     [attr #f]
+         #:bmInterval       [ivl  0])
   (Descriptor
-   (bLength 7);; Length is verified
+   (bLength 7)
    (bDescriptorType 5)
    (bEndpointAddress addr)
    (bmAttributes #x02) ;; BULK
    (wMaxPacketSize 64)
-   (bInterval 0)))
+   (bInterval ivl)))
 
-
-(define (InterruptEndpoint
-         #:bEndpointAddress [addr #f])
+;; From midi: 9 bytes.  Why is this not 7 as in ACM?
+(define (EndPoint9
+         #:bEndpointAddress [addr #f]
+         #:bmAttributes     [attr BULK]
+         #:wMaxPacketSize   [size 64]
+         #:bmInterval       [ivl  0])
   (Descriptor
-   (bLength 7);; Length is verified
+   (bLength 9)
    (bDescriptorType 5)
    (bEndpointAddress addr)
-   (bmAttributes #x03) ;; BULK
-   (wMaxPacketSize 64)
-   (bInterval 10)))
-          
+   (bmAttributes #x02) ;; BULK
+   (wMaxPacketSize size)
+   (bInterval ivl)
+   (bRefresh  0)
+   (bSyncAddr 0)))
            
+
+
+(define BULK      #x02)
+(define INTERRUPT #x03)
+
+(define (BulkEndpoint
+         #:bEndpointAddress [addr #f])
+  (EndPoint
+   #:bEndpointAddress addr
+   #:bmAttributes     BULK))
+
+(define (InterruptEndpoint
+         #:bEndpointAddress [addr #f]
+         #:bmInterval       [ivl 10])
+  (EndPoint
+   #:bEndpointAddress addr
+   #:bmAttributes     INTERRUPT
+   #:bmInterval ivl))
+
+
 (define (DeviceDescriptor
          #:bMaxPacketSize [mps 64]
          #:idVendor       [iv #x05F9]
@@ -144,7 +178,7 @@
    
 (define (InterfaceDescriptor
          #:bInterfaceNumber [in 0]
-         #:bNumEndpoints [ne #f]
+         #:bNumEndpoints [ne 0]
          #:bInterfaceClass [ic #x02] ;; CDC
          #:bInterfaceSubClass [isc #x02] ;; ACM
          #:iInterface [ii 0]
@@ -257,8 +291,8 @@
 
 
 (define (MIDI-OUT-Jack-Descriptor
-         #:ID/PIN-list [ipl '([#x02    ;; ID of the Entity to which this pin is connected
-                               #x01])] ;; Output Pin numbere of the Entity to which this Input Pin is connected
+         #:ID/PIN [ipl '([#x02    ;; ID of the Entity to which this pin is connected
+                          #x01])] ;; Output Pin numbere of the Entity to which this Input Pin is connected
          #:bJackID   [jid 1]
          #:bJackType [jt 1])
   (define p (length ipl))
@@ -276,12 +310,13 @@
    (iJack              #x00)))    ;; Unused
 
 (define (MIDI-IN-Jack-Descriptor
-         #:bJackID   [jid 1])
+         #:bJackID   [jid 1]
+         #:bJackType [jt 1])
   (Descriptor
    (bLength 6)
    (bDescriptorType    #x24)     ;; CS_INTERFACE
    (bDescriptorSubtype #x02)     ;; MIDI_IN_JACK
-   (bJackType          #x02)     ;; EXTERNAL
+   (bJackType          jt)       ;; EXTERNAL
    (bJackID            jid)     ;; ID of this Jack
    (iJack              #x00)))   ;; unused
 
@@ -304,7 +339,36 @@
    (bmElementCaps ec)
    (iElement 0)))
    
+(define EMBEDDED #x01)
+(define EXTERNAL #x02)
 
+(define (MIDI-EndPoint
+         #:bJackId [jid #f])
+  (Descriptor
+   (bLength 5)
+   (bDescriptorType    #x25)     ;; CS_ENDPOINT
+   (bDescriptorSubtype #x01)     ;; MS_GENERAL
+   (bNumJacks          1)
+   (bJackID            jid)))    ;; ID of the embedded midi in jack
+
+
+(define (InterfaceDescriptorAUDIOCONTROL
+         #:bInterfaceNumber    [in 0])
+  (InterfaceDescriptor
+   #:bInterfaceNumber   in
+   #:bInterfaceClass    #x01  ;; AUDIO
+   #:bInterfaceSubClass #x01) ;; AUDIO CONTROL
+
+  (TotalLength (nb_bytes_audio)
+   (Descriptor
+    (bLength 9)
+    (bDescriptorType    #x24)     ;; CS_INTERFACE
+    (bDescriptorSubtype #x01)     ;; MS_HEADER
+    (bcdMSC #x0100)               ;; release number
+    (wTotalLength nb_bytes_audio) ;; total size of class descriptors
+    (bInCollection 1)             ;; number of streaming interfaces
+    (baInterfaceNr (+ in 1))))    ;; Refer to midistreaming interface
+)  
 
 (define (InterfaceDescriptorMIDI
          #:bEndpointAddressIN  [ep-in  #f] 
@@ -312,13 +376,13 @@
          #:bInterfaceNumber    [in 0])
 
 
-  ;; INTERFACE: communication
   (InterfaceDescriptor
-   #:iInterface         "MIDI"
    #:bInterfaceNumber   in
    #:bInterfaceClass    #x01  ;; AUDIO
    #:bInterfaceSubClass #x03  ;; MIDISTREAMING
    #:bNumEndpoints      2)
+
+    
   
   ;; Class-specific MS Interface Header Descriptor
   (TotalLength (nb_bytes_midi)
@@ -329,17 +393,18 @@
     (bcdMSC #x0100)               ;; release number
     (wTotalLength nb_bytes_midi)) ;; class-specific MIDIStreaming interface desc
    
-   (MIDI-OUT-Jack-Descriptor
-    #:bJackID   #x01
-    #:bJackType #x01) ;; EMBEDDED
-;   (MIDI-IN-Jack-Descriptor
-;    #:bJackID   #x02) ;; ???
-   (BulkEndpoint #:bEndpointAddress ep-out)
-   (BulkEndpoint #:bEndpointAddress ep-in) 
+   (MIDI-IN-Jack-Descriptor  #:bJackID 1 #:bJackType EMBEDDED)
+   (MIDI-IN-Jack-Descriptor  #:bJackID 2 #:bJackType EXTERNAL)
+   
+   (MIDI-OUT-Jack-Descriptor #:bJackID 3 #:bJackType EMBEDDED #:ID/PIN '((2 1)))
+   (MIDI-OUT-Jack-Descriptor #:bJackID 4 #:bJackType EXTERNAL #:ID/PIN '((1 1)))
+   
+   (EndPoint9 #:bEndpointAddress ep-out) (MIDI-EndPoint  #:bJackId 1)
+   (EndPoint9 #:bEndpointAddress ep-in)  (MIDI-EndPoint  #:bJackId 3)
+   
    ))
 
 
-     
 
       
   

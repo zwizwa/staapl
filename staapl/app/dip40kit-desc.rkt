@@ -10,15 +10,21 @@
     #:iSerialNumber "dip40kit.dict"
     )
    (configuration
+
     (InterfaceDescriptorCDC
      #:bInterfaceNumber 0
      #:bEndpointAddress #x82)
+
     (InterfaceDescriptorCDCdata
      #:bInterfaceNumber 1
      #:bEndpointAddressIN  #x81
      #:bEndpointAddressOUT #x01)
+
+    (InterfaceDescriptorAUDIOCONTROL
+     #:bInterfaceNumber 2)
+
     (InterfaceDescriptorMIDI
-     #:bInterfaceNumber 2
+     #:bInterfaceNumber 3
      #:bEndpointAddressIN  #x83
      #:bEndpointAddressOUT #x03)
     )))
