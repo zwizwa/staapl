@@ -303,6 +303,7 @@ forth
     IPR2 TMR3IP high
     \ init-tcons-scale1
     init-tcons-scale4
+    \ init-tcons-scale8/16
     RCON IPEN high      \ enable priority levels
     #x3F PR2 !          \ TMR2 period (31.25 kHz)
     ;
@@ -316,10 +317,16 @@ macro
     ;
 \ same but add 1:4 prescale (TMR2 doesn't support 1:8, the others do)    
 : init-tcons-scale4      
-    #x88 #x02 or T0CON !
-    #x81 #x20 or T1CON !
-    #x04 #x01 or T2CON !
-    #x81 #x20 or T3CON !
+    #x80 #x02 or T0CON ! \ 1:4
+    #x81 #x20 or T1CON ! \ 1:4
+    #x04 #x01 or T2CON ! \ 1:4 
+    #x81 #x20 or T3CON ! \ 1:4
+    ;
+: init-tcons-scale8/16      
+    #x88 #x03 or T0CON ! \ 1:16
+    #x81 #x30 or T1CON ! \ 1:8
+    #x04 #x02 or T2CON ! \ 1:16 
+    #x81 #x30 or T3CON ! \ 1:8
     ;
 forth
     
