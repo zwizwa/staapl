@@ -39,7 +39,7 @@ staapl pic18/vector
     for i> transmit next \ send payload
     tx-end-rpc ;
 
-: dump
+: list>h
     0 rpc ; \ n --
     
 : fcmd \ lo hi --
@@ -53,12 +53,12 @@ staapl pic18/vector
     
 
 \ Connect stdin to different streams   
-: adump a>i dump ; \ RAM
-: fdump f>i dump ; \ Flash
-: ddump d>i dump ; \ datastack
-: 1dump 1 ddump ;  \ 1 byte
+: alist>h a>i list>h ; \ RAM
+: flist>h f>i list>h ; \ Flash
+: dlist>h d>i list>h ; \ datastack
+: 1list>h 1 dlist>h ;  \ 1 byte
 
-: fstring fstring>i dump ; \ Like fdump but send Pascal string (== size prefixed)    
+: fstring fstring>i list>h ; \ Like flist>h but send Pascal string (== size prefixed)    
 
 \ Convenient macro for compiling symbolic word to a Flash string (as a
 \ word that saves the address of the string in the f register) and
@@ -76,7 +76,7 @@ forth
 
 \ send out current execution point.
 : trace
-    xh @ xl @ 2 ddump
+    xh @ xl @ 2 dlist>h
     ` trc host ;
 
 \ For sending log data from target to host, it seems simplest to just
@@ -86,14 +86,18 @@ forth
     
     
  
-: pb ` pb host ;
-: ph ` ph host ;
-: >h ` t> host ;  \ Byte to host stack
-: ts ` ts host ;    
+: pb  ` pb host ;
+: ph  ` ph host ;
+: pha ` pha host ;
+: >h  ` t> host ;  \ Byte to host stack
+: ts  ` ts host ;
+\ : px  ` px host ;
+    
+: emit     1list>h pb ;
+: .fstring fstring pb ;
 
-: emit     1dump pb ;
-: hd       1dump ph ;
-: .fstring fstring pb ;   
+: adump alist>h pha ;
+: fdump alist>h pha ;    
 
 macro
 : .sym  sym .fstring ;

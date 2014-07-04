@@ -32,7 +32,7 @@ staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
 
-load debug.f    
+\ load debug.f    
 
 macro
 : fosc 48000000 ;

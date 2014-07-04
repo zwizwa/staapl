@@ -64784,3 +64784,11 @@ client 128: 'TiMidity' [type=user]
 Entry: Loop until keyboard input
 Date: Fri Jul  4 00:55:50 EDT 2014
 
+Thinking about this a bit and maybe a way to do this is to implement
+some control request on the ACM interface.
+
+There has to be a simpler way though.  What happens when a word is
+executed?  The jsr word is called in interpreter.f which will send an
+ack back to the host.
+
+Wait it should be possible to send a break signal to the ACM.
