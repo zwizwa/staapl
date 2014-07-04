@@ -125,7 +125,7 @@ macro
 : a> @a+ ;
 : >a !a+ ;
 : f> @f+ ;
-: =? - nfdrop z? ; \ a b -- ?
+: = - nfdrop z? ; \ a b -- ?
 forth
   
 
@@ -514,12 +514,12 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
 
 \ pump: do IN / OUT transaction if necessary    
 : pump-OUT
-    idx bd-len =? not if ; then
+    idx bd-len = not if ; then
     64 ep OUT/DATA+
     iptr-rst buf-wait ;
 
 : pump-IN
-    idx #x40 =? not if ; then
+    idx #x40 = not if ; then
 : force-pump-IN
     idx ep IN/DATA+
     iptr-rst buf-wait ;
