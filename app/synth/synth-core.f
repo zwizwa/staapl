@@ -298,10 +298,8 @@ forth
 : init-timers
 
     INTCON2 TMR0IP high \ TMR0: high priority    
-    \ #x3 IPR1 !          \ TMR2IP, TMR1IP high pri
     IPR1 TMR1IP high
     IPR1 TMR2IP high
-    \ 2 IPR2 !            \ TMR3IP high pri
     IPR2 TMR3IP high
     #x88 T0CON !        \ TMR0: on, internal, 16bit, no prescale
     #x81 T1CON !        \ TMR1: 16bit reads, no scaling
@@ -312,20 +310,25 @@ forth
     ;
 
 : ion    
-    INTCON GIEH low
-    PIR1 TMR1IF low
-    PIR1 TMR2IF low
-    PIR2 TMR3IF low
-    PIE1 TMR1IE high
-    PIE1 TMR2IE high
-    PIE2 TMR3IE high
-    sti
+    \ INTCON GIEH low
+    INTCON TMR0IF low
+    PIR1   TMR1IF low
+    PIR1   TMR2IF low
+    PIR2   TMR3IF low
+    INTCON TMR0IE high
+    PIE1   TMR1IE high
+    PIE1   TMR2IE high
+    PIE2   TMR3IE high
+    INTCON GIEH   high
+    \ sti
     ;
     
 : ioff
     INTCON TMR0IE low
-    0 PIE1 !
-    0 PIE2 ! ;
+    PIE1   TMR1IE low
+    PIE1   TMR2IE low
+    PIE2   TMR3IE low
+    ;
 
 
 \ individual interrupt enables

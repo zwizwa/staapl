@@ -5,10 +5,22 @@ provide-all
 
 macro
 
-\ interrupts
+\ interrupts: default to using priority levels
+  
 : cli        INTCON GIE low ;              \ disable interrupts
 : sti        INTCON GIE high ;             \ enable interrupts
 
+\ FIXME: why are these not defined?  
+: _GIEL #x0006 ;
+: _GIEH #x0007 ;
+  
+: _cli
+    INTCON _GIEL low ;
+    INTCON _GIEH low ;
+: _sti
+    INTCON _GIEH high ;
+    INTCON _GIEL high ;
+  
 \ target select
 : config        EECON1 CFGS high ;
 : eeprom        EECON1 EEPGD low EECON1 CFGS low ;
