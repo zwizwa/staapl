@@ -1,6 +1,0 @@
-urs - Unpacking Return Stack
-
-A Forth VM based on the "unpack RS" paradigm where code is stored
-abstractly and is "unpacked" gradually on the return stack for
-execution.
-
