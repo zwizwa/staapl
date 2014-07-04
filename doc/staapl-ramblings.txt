@@ -64737,3 +64737,50 @@ Device Status:     0x0001
   Self Powered
 
 
+
+Entry: MIDI WORKS!
+Date: Thu Jul  3 23:38:58 EDT 2014
+
+Yeah big fat milestone there.  It's been a long time coming.
+
+Next: hook up external keyboard and load the sheepsint on the other
+4550 board.
+
+aconnect 32:1 28:0
+
+tom@zoo:~$ aconnect -i
+client 0: 'System' [type=kernel]
+    0 'Timer           '
+    1 'Announce        '
+client 14: 'Midi Through' [type=kernel]
+    0 'Midi Through Port-0'
+client 20: 'M Audio Delta 1010' [type=kernel]
+    0 'M Audio Delta 1010 MIDI'
+client 28: 'USB Device 0x5f9:0xfff0' [type=kernel]
+    0 'USB Device 0x5f9:0xfff0 MIDI 1'
+client 32: 'BCR2000' [type=kernel]
+    0 'BCR2000 MIDI 1  '
+    1 'BCR2000 MIDI 2  '
+
+tom@zoo:~$ aconnect -o
+client 14: 'Midi Through' [type=kernel]
+    0 'Midi Through Port-0'
+client 20: 'M Audio Delta 1010' [type=kernel]
+    0 'M Audio Delta 1010 MIDI'
+client 28: 'USB Device 0x5f9:0xfff0' [type=kernel]
+    0 'USB Device 0x5f9:0xfff0 MIDI 1'
+client 32: 'BCR2000' [type=kernel]
+    0 'BCR2000 MIDI 1  '
+    1 'BCR2000 MIDI 2  '
+    2 'BCR2000 MIDI 3  '
+client 128: 'TiMidity' [type=user]
+    0 'TiMidity port 0 '
+    1 'TiMidity port 1 '
+    2 'TiMidity port 2 '
+    3 'TiMidity port 3 '
+
+
+
+Entry: Loop until keyboard input
+Date: Fri Jul  4 00:55:50 EDT 2014
+
