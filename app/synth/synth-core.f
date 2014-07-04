@@ -298,8 +298,11 @@ forth
 : init-timers
 
     INTCON2 TMR0IP high \ TMR0: high priority    
-    #x3 IPR1 !          \ TMR2IP, TMR1IP high pri
-    2 IPR2 !            \ TMR3IP high pri
+    \ #x3 IPR1 !          \ TMR2IP, TMR1IP high pri
+    IPR1 TMR1IP high
+    IPR1 TMR2IP high
+    \ 2 IPR2 !            \ TMR3IP high pri
+    IPR2 TMR3IP high
     #x88 T0CON !        \ TMR0: on, internal, 16bit, no prescale
     #x81 T1CON !        \ TMR1: 16bit reads, no scaling
     #x04 T2CON !        \ TMR2: no scaling
@@ -309,11 +312,13 @@ forth
     ;
 
 : ion    
-    #x60 INTCON !       \ TMR0IE and PEIE high, GIE and TMR0IF low
-    0 PIR1 !            \ clear  TMR1IF, TMR2IF
-    3 PIE1 !            \ enable TMR1IE, TMR2IE
-    0 PIR2 !            \ clear  TMR3IF
-    2 PIE2 !            \ enable TMR3IE
+    INTCON GIEH low
+    PIR1 TMR1IF low
+    PIR1 TMR2IF low
+    PIR2 TMR3IF low
+    PIE1 TMR1IE high
+    PIE1 TMR2IE high
+    PIE2 TMR3IE high
     sti
     ;
     
@@ -343,7 +348,7 @@ forth
 : engine-on
     init-timers         \ setup 18f hardware timers
     init-rand           \ setup lfsr RNG
-    init-out            \ seup audio output
+    init-out            \ setup audio output
     ion ;
 
 : _engine-off

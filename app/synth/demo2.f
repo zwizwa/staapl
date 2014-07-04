@@ -4,7 +4,7 @@ load debug.f
 \ use a packet approach: write a report to a region of ram and dump it
 \ out periodically using nadump+
 
-: _dump_ cli dup dump sti ;
+\ : _dump_ cli dup dump sti ;
 
 
 \ Run the engine for a couple of seconds, then return control.  This

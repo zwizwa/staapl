@@ -64803,3 +64803,56 @@ way in which directory structures are interpreted.
 
 Let's just change directory structure in the git repo and move all the
 experimental code into a new repo.
+
+
+Entry: Synth on dip40 board 4550.
+Date: Fri Jul  4 15:43:55 EDT 2014
+
+100 p0
+50 pwm
+engine-on
+
+Signal is visible on scope between RB2 and RB3.
+
+Problems:
+- console hangs
+- frequency is too high
+
+
+Frequency should be fixable with prescalers.  Probably best to run it
+at the same resolution as on the 8MHz clock, so slow down 5x to run on
+48MHz.
+
+The console hang needs code review or another way to test clobber.
+
+
+
+Entry: ISR check
+Date: Fri Jul  4 15:58:36 EDT 2014
+
+RETFIE 1 restores:
+- Status
+- BSR 
+- WREG
+
+It's ok to use the data stack and retain stacks as long as they are
+balanced.  Is the a register used?  Doesn't look like.
+
+Setup?
+
+Maybe INTCON is wrong.  ion sets #x60
+
+GIE/GIEH PEIE/GIEL TMR0IE INT0IE RBIE TMR0IF INT0IF RBIF 
+0        1         1      0      0    0      0      0
+
+Also IPR1 and IPR2 get stored to.  Check these.
+
+
+Ok, setting all the desired bits independently and leaving the rest
+alone fixes hung console.
+
+Though there are things interfering with the timer updates.  Probably
+USB.  Let's remove 'cli' and 'sti' from the main library and put them
+in kernel files as part of configuration.
+
+

@@ -253,7 +253,7 @@ forth
 \ PANEL
 
 load ad.f
-load synth-panel.f
+\ load synth-panel.f
 
 macro
 : andor! | reg | reg and! reg or! ;
