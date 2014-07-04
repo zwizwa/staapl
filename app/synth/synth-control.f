@@ -140,6 +140,9 @@ staapl pic18/double-hacks \ some optimized ones
 
 \ C1 = 61156
 
+\ FIXME: On USB PIC, synth runs at 3 MHz (1:4 scaled from 12MHz)    
+    
+
 \ there are 2 words used here. 'note' computes a note, while 'octave'
 \ sets the current octave. the word 'bass-note' computes the lowest
 \ octave (starting from C1)
@@ -192,6 +195,11 @@ variable oct
 : p1@  _p1@ nip ;
 : p2@  _p2@ nip ;
 
+
+: midi \ midinote -- bassnote
+    begin
+        12 <=? if ; then
+        
     
     
 \ CONTROL TIMER
