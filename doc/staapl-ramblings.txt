@@ -64820,8 +64820,8 @@ Problems:
 
 
 Frequency should be fixable with prescalers.  Probably best to run it
-at the same resolution as on the 8MHz clock, so slow down 5x to run on
-48MHz.
+at the same resolution as on the 8MHz clock, so slow down 6x to run on
+48MHz.  (4x or 8x -> seems it needs to be 4x since TMR2 doesn't do 8x)
 
 The console hang needs code review or another way to test clobber.
 
@@ -64854,5 +64854,22 @@ alone fixes hung console.
 Though there are things interfering with the timer updates.  Probably
 USB.  Let's remove 'cli' and 'sti' from the main library and put them
 in kernel files as part of configuration.
+
+
+Entry: Timer prescalers
+Date: Fri Jul  4 17:39:06 EDT 2014
+
+All 4 timers need to be prescaled.
+The 2MHz cycle (8MHz clock) should be divided by 4 or 8.
+
+(/ 12.0 4) 3 MHz
+(/ 12.0 8) 1.5MHz
+
+Control registers prescalers:
+
+T0CON T0PS2:T0PS0      2 = 1:8, 1 = 1:4
+T1CON T1CKPS1:T1CKPS0  3 = 1:8, 2 = 1:4
+T2CON T2CKPS1:T2CKPS0           1 = 1:4
+T3CON T3CKPS1:T3CKPS0  3 = 1:8, 2 = 1:4
 
 

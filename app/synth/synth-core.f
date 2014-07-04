@@ -301,14 +301,28 @@ forth
     IPR1 TMR1IP high
     IPR1 TMR2IP high
     IPR2 TMR3IP high
-    #x88 T0CON !        \ TMR0: on, internal, 16bit, no prescale
-    #x81 T1CON !        \ TMR1: 16bit reads, no scaling
-    #x04 T2CON !        \ TMR2: no scaling
-    #x81 T3CON !        \ TMR3: 16bit reads, no scaling
+    \ init-tcons-scale1
+    init-tcons-scale4
     RCON IPEN high      \ enable priority levels
     #x3F PR2 !          \ TMR2 period (31.25 kHz)
     ;
 
+macro    
+: init-tcons-scale1
+    #x88 T0CON !         \ TMR0: on, internal, 16bit, no prescale
+    #x81 T1CON !         \ TMR1: 16bit reads, no scaling
+    #x04 T2CON !         \ TMR2: no scaling
+    #x81 T3CON !         \ TMR3: 16bit reads, no scaling
+    ;
+\ same but add 1:4 prescale (TMR2 doesn't support 1:8, the others do)    
+: init-tcons-scale4      
+    #x88 #x02 or T0CON !
+    #x81 #x20 or T1CON !
+    #x04 #x01 or T2CON !
+    #x81 #x20 or T3CON !
+    ;
+forth
+    
 : ion    
     \ INTCON GIEH low
     INTCON TMR0IF low
