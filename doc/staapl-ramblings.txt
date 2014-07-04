@@ -64873,3 +64873,25 @@ T2CON T2CKPS1:T2CKPS0           1 = 1:4
 T3CON T3CKPS1:T3CKPS0  3 = 1:8, 2 = 1:4
 
 
+Entry: Next: midi control
+Date: Fri Jul  4 18:37:57 EDT 2014
+
+Note control is implemented in synth-control.f
+It uses separate note and octave control.
+
+Note: 2 octaves
+
+How to translate to/from midi?
+Successive subtraction seems easiest:
+while note >12 increment octave and subtract 12
+
+
+Entry: Trouble with >? etc..
+Date: Fri Jul  4 19:08:37 EDT 2014
+
+It seems that it's no longer possible to "paste" assembly instructions
+in this form:
+
+ (([cmp? opc f a 1] [qw l] jw/false)  ([,opc f a] [bra l]))
+
+
