@@ -170,6 +170,9 @@
  ((d2    here lo hi) `(,(bior (int8 lo)
                          (<<< (int8 hi) 8))))
 
+ ;; FIXME: not sure why [bra 1] doesn't work: it interprets 1 as absolute address.
+ ((skip  here)       `(#xd001))
+
  ;; One-size-fits all branch instruction.
  ((jsr   here exit address) (smart-jsr here exit address))
 

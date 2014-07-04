@@ -197,9 +197,12 @@ variable oct
 
 
 : midi \ midinote -- bassnote
+    0 oct !
     begin
-        12 <=? if ; then
-        
+        12 <? if drop ; then
+        drop 12 -
+        1 oct +!
+    again 
     
     
 \ CONTROL TIMER

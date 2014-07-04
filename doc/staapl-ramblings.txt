@@ -64894,4 +64894,14 @@ in this form:
 
  (([cmp? opc f a 1] [qw l] jw/false)  ([,opc f a] [bra l]))
 
+Problem was in the quoting:
 
+- ((>?) ([cmp? 'cpfsgt INDF0 0 1]))
++ ((>?) ([cmp? (asm: cpfsgt) INDF0 0 1]))
+
+
+
+Entry: Comparisons drop vs. nondrop
+Date: Fri Jul  4 19:52:13 EDT 2014
+
+Need to decide.  Currently =? used in usb is actually dropping.

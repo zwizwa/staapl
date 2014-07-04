@@ -334,9 +334,11 @@
  ;; The 'jw/false' macro recombines the pseudo ops from above into
  ;; jump constructs. These use 'r' instructions. (see assembler.ss)
  (([bit?  f b p] [qw l] jw/false)     ([btfsp (flip p) f b 0] [bra l]))
+
+ ; (([flag? opc p] [qw l] jw/false)     ([,opc (begin (display "WARNING:flag") (flip p)) l]))
  (([flag? opc p] [qw l] jw/false)     ([,opc (flip p) l]))
    
- (([cmp? opc f a 0] [qw l] jw/false)  ([,opc f a] [bra 1] [bra l]))
+ (([cmp? opc f a 0] [qw l] jw/false)  ([,opc f a] [skip] [bra l]))
  (([cmp? opc f a 1] [qw l] jw/false)  ([,opc f a] [bra l]))
 
  ;; FIXME: using carry is simpler, since it's not affected by 'drop'
@@ -359,9 +361,9 @@
  ;; macro has a simple 'zero?' comparison for inserting the [bra 1] =
  ;; skip instruction.
  
- ((=?) ([cmp? 'cpfseq INDF0 0 1]))
- ((>?) ([cmp? 'cpfsgt INDF0 0 1]))
- ((<?) ([cmp? 'cpfslt INDF0 0 1]))
+ ((=?) ([cmp? (asm: cpfseq) INDF0 0 1]))
+ ((>?) ([cmp? (asm: cpfsgt) INDF0 0 1]))
+ ((<?) ([cmp? (asm: cpfslt) INDF0 0 1]))
 
  ;; Direct bit operations. These to not modify top, so swap
  ;; instructions if there's a drop.
