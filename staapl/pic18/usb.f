@@ -508,28 +508,28 @@ forth
 
 : bd-len   a!bufdes a> drop a> ;
 
-
-: wait-buf a!bufdes begin INDF2 7 low? until ; \ poll UOWN until we own the bd
+macro : buf-ready? a!bufdes INDF2 7 low? ;
+forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     
 
 \ pump: do IN / OUT transaction if necessary    
 : pump-OUT
     idx bd-len =? not if ; then
     64 ep OUT/DATA+
-    iptr-rst wait-buf ;
+    iptr-rst buf-wait ;
 
 : pump-IN
     idx #x40 =? not if ; then
 : force-pump-IN
     idx ep IN/DATA+
-    iptr-rst wait-buf ;
+    iptr-rst buf-wait ;
     
 
 : OUT> \ ep -- val
     1 OUT-begin a> OUT-end ;
 : OUT-begin \ ep n --
     a>r >r OUT!
-        wait-buf    \ make sure buffer is ready
+        buf-wait    \ make sure buffer is ready
         pump-OUT    \ if fully read, ack buffer and wait for more data from host
         r> a!box+ ; \ setup read using a, advancing index
 : OUT-end \ --
@@ -539,7 +539,7 @@ forth
     1 IN-begin >a IN-end ;
 : IN-begin \ ep --    
     a>r >r IN!
-        wait-buf    \ make sure buffer is ready
+        buf-wait    \ make sure buffer is ready
         pump-IN     \ if buffer is full, send it to host and wait until we can write more
         r> a!box+ ; \ setup write using a, advancing index
 : IN-end    

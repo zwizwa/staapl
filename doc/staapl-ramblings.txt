@@ -64792,3 +64792,14 @@ executed?  The jsr word is called in interpreter.f which will send an
 ack back to the host.
 
 Wait it should be possible to send a break signal to the ACM.
+
+
+
+Entry: rack pkg install github : structure changed?
+Date: Fri Jul  4 11:55:17 EDT 2014
+
+Just like the "raco pkg install --link" there seems to be a different
+way in which directory structures are interpreted.
+
+Let's just change directory structure in the git repo and move all the
+experimental code into a new repo.
