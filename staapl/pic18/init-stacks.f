@@ -7,7 +7,7 @@ macro
 : init-stacks-simple
     0 rs!       \ hardware return stack
     #x80 ds!    \ data stack
-    #xA0 xs!    \ aux stack
+    #xC0 xs!    \ aux stack
 ;    
     
 forth
