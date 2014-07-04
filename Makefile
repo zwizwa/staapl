@@ -31,9 +31,9 @@ all-modules: planet-version.txt
 	cd app && mzc -vk `find -name '*.fm'` 
 
 pic18:
-	mzc -vk staapl/pic18.rkt
-	mzc -vk staapl/live.rkt
-	mzc -vk staapl/staaplc.rkt
+	mzc -vk pic18.rkt
+	mzc -vk live.rkt
+	mzc -vk staaplc.rkt
 
 # use planet instead
 install-collects:
