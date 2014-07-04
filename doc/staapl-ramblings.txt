@@ -64104,7 +64104,7 @@ So I got something working: single configuration, CDC + MIDI
 interface.  CDC still works for console, and MIDI gives meaningful
 result using:
 
-sudo lsusb -v -d 
+sudo lsusb -v -d 05f9:fff0
 
 Next: implement endpoint.
 
@@ -64363,7 +64363,7 @@ Date: Thu Jul  3 17:02:54 EDT 2014
 It's this one:
 http://audiodestrukt.wordpress.com/2012/11/18/inexpensive-usb-midi-interfaces/
 Basically, it doesn't work properly :)
-But hey they were really cheap.  Might have some use.  Like snarfing descriptors:
+But hey they were really cheap.  Might have some use.  Like snarfing descriptors
 
 tom@tx:~$ sudo lsusb -v -d 1a86:752d
 
@@ -64518,3 +64518,222 @@ Device Descriptor:
 Device Status:     0x0000
   (Bus Powered)
  
+
+Entry: So this is the form I filled out..
+Date: Thu Jul  3 19:38:46 EDT 2014
+
+USB burocracy.
+Some questions:
+
+ - why both embedded and external jacks: both examples I checked seem
+   to have this.
+
+ - check the input/output connection thing
+
+
+
+[master] tom@zoo:~/staapl/staapl/app$ sudo lsusb -v -d 05f9:fff0
+
+
+Bus 001 Device 031: ID 05f9:fff0 PSC Scanning, Inc. 
+Device Descriptor:
+  bLength                18
+  bDescriptorType         1
+  bcdUSB               1.10
+  bDeviceClass            0 (Defined at Interface level)
+  bDeviceSubClass         0 
+  bDeviceProtocol         0 
+  bMaxPacketSize0        64
+  idVendor           0x05f9 PSC Scanning, Inc.
+  idProduct          0xfff0 
+  bcdDevice            0.00
+  iManufacturer           1 (error)
+  iProduct                2 (error)
+  iSerial                 3 (error)
+  bNumConfigurations      1
+  Configuration Descriptor:
+    bLength                 9
+    bDescriptorType         2
+    wTotalLength          165
+    bNumInterfaces          4
+    bConfigurationValue     1
+    iConfiguration          0 
+    bmAttributes         0xa0
+      (Bus Powered)
+      Remote Wakeup
+    MaxPower              100mA
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        0
+      bAlternateSetting       0
+      bNumEndpoints           1
+      bInterfaceClass         2 Communications
+      bInterfaceSubClass      2 Abstract (modem)
+      bInterfaceProtocol      0 None
+      iInterface              0 
+      CDC Header:
+        bcdCDC               1.10
+      CDC Call Management:
+        bmCapabilities       0x01
+          call management
+        bDataInterface          0
+      CDC ACM:
+        bmCapabilities       0x00
+      CDC Union:
+        bMasterInterface        0
+        bSlaveInterface         1 
+      Endpoint Descriptor:
+        bLength                 9
+        bDescriptorType         5
+        bEndpointAddress     0x82  EP 2 IN
+        bmAttributes            3
+          Transfer Type            Interrupt
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval              10
+        bRefresh                0
+        bSynchAddress           0
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        1
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass        10 CDC Data
+      bInterfaceSubClass      0 Unused
+      bInterfaceProtocol      0 
+      iInterface              0 
+      Endpoint Descriptor:
+        bLength                 9
+        bDescriptorType         5
+        bEndpointAddress     0x01  EP 1 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+        bRefresh                0
+        bSynchAddress           0
+      Endpoint Descriptor:
+        bLength                 9
+        bDescriptorType         5
+        bEndpointAddress     0x81  EP 1 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+        bRefresh                0
+        bSynchAddress           0
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        2
+      bAlternateSetting       0
+      bNumEndpoints           0
+      bInterfaceClass         1 Audio
+      bInterfaceSubClass      1 Control Device
+      bInterfaceProtocol      0 
+      iInterface              0 
+      AudioControl Interface Descriptor:
+        bLength                 9
+        bDescriptorType        36
+        bDescriptorSubtype      1 (HEADER)
+        bcdADC               1.00
+        wTotalLength            9
+        bInCollection           1
+        baInterfaceNr( 0)       3
+    Interface Descriptor:
+      bLength                 9
+      bDescriptorType         4
+      bInterfaceNumber        3
+      bAlternateSetting       0
+      bNumEndpoints           2
+      bInterfaceClass         1 Audio
+      bInterfaceSubClass      3 MIDI Streaming
+      bInterfaceProtocol      0 
+      iInterface              0 
+      MIDIStreaming Interface Descriptor:
+        bLength                 7
+        bDescriptorType        36
+        bDescriptorSubtype      1 (HEADER)
+        bcdADC               1.00
+        wTotalLength           65
+      MIDIStreaming Interface Descriptor:
+        bLength                 6
+        bDescriptorType        36
+        bDescriptorSubtype      2 (MIDI_IN_JACK)
+        bJackType               1 Embedded
+        bJackID                 1
+        iJack                   0 
+      MIDIStreaming Interface Descriptor:
+        bLength                 6
+        bDescriptorType        36
+        bDescriptorSubtype      2 (MIDI_IN_JACK)
+        bJackType               2 External
+        bJackID                 2
+        iJack                   0 
+      MIDIStreaming Interface Descriptor:
+        bLength                 9
+        bDescriptorType        36
+        bDescriptorSubtype      3 (MIDI_OUT_JACK)
+        bJackType               1 Embedded
+        bJackID                 3
+        bNrInputPins            1
+        baSourceID( 0)          2
+        BaSourcePin( 0)         1
+        iJack                   0 
+      MIDIStreaming Interface Descriptor:
+        bLength                 9
+        bDescriptorType        36
+        bDescriptorSubtype      3 (MIDI_OUT_JACK)
+        bJackType               2 External
+        bJackID                 4
+        bNrInputPins            1
+        baSourceID( 0)          1
+        BaSourcePin( 0)         1
+        iJack                   0 
+      Endpoint Descriptor:
+        bLength                 9
+        bDescriptorType         5
+        bEndpointAddress     0x03  EP 3 OUT
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+        bRefresh                0
+        bSynchAddress           0
+        MIDIStreaming Endpoint Descriptor:
+          bLength                 5
+          bDescriptorType        37
+          bDescriptorSubtype      1 (GENERAL)
+          bNumEmbMIDIJack         1
+          baAssocJackID( 0)       1
+      Endpoint Descriptor:
+        bLength                 9
+        bDescriptorType         5
+        bEndpointAddress     0x83  EP 3 IN
+        bmAttributes            2
+          Transfer Type            Bulk
+          Synch Type               None
+          Usage Type               Data
+        wMaxPacketSize     0x0040  1x 64 bytes
+        bInterval               0
+        bRefresh                0
+        bSynchAddress           0
+        MIDIStreaming Endpoint Descriptor:
+          bLength                 5
+          bDescriptorType        37
+          bDescriptorSubtype      1 (GENERAL)
+          bNumEmbMIDIJack         1
+          baAssocJackID( 0)       3
+Device Status:     0x0001
+  Self Powered
+
+
