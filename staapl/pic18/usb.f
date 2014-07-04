@@ -500,9 +500,9 @@ forth
 : a!iptr   a!iptr-array buf@ al +! ;       \ index register address
 
 
-: idx      a!iptr a> ;                     \ -- i | just get index
-: idx+     a!iptr a>r a> dup 1 +  r>a >a ; \ -- i | get index, postincrement variable
-: a!box+   idx+ #x3F and a!buf al +! ;     \ a points to "box", index is incremented
+: idx      a!iptr a> ;                       \ -- i   | just get index
+: idx+     a!iptr a> dup >r + a!iptr >a r> ; \ n -- i | get index, postincrement pointer by n
+: a!box+   idx+ #x3F and a!buf al +! ;       \ n --   | a points to "box", index is incremented by n
 
 : iptr-rst a!iptr 0 >a ;
 
@@ -526,17 +526,23 @@ forth
     
 
 : OUT> \ ep -- val
-    OUT! a>r
+    1 OUT-begin a> OUT-end ;
+: OUT-begin \ ep n --
+    a>r >r OUT!
         wait-buf    \ make sure buffer is ready
         pump-OUT    \ if fully read, ack buffer and wait for more data from host
-        a!box+ a>   \ read, advancing index
+        r> a!box+ ; \ setup read using a, advancing index
+: OUT-end \ --
     r>a ;
 
 : >IN  \ val ep --
-    IN! a>r
+    1 IN-begin >a IN-end ;
+: IN-begin \ ep --    
+    a>r >r IN!
         wait-buf    \ make sure buffer is ready
         pump-IN     \ if buffer is full, send it to host and wait until we can write more
-        a!box+ >a   \ write, advancing index
+        r> a!box+ ; \ setup write using a, advancing index
+: IN-end    
     r>a ;
 
 : IN-flush \ ep --

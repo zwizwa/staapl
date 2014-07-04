@@ -1,24 +1,23 @@
 
 \ Midi connected to EP 3
-: >midi      3 >IN ;
-: midi-flush 3 IN-flush ;
-
+: midi-begin 3 IN-begin ;
+: midi-end   IN-end 3 IN-flush ;   
 
     
 : note-on \ note --
-    #x09 >midi  \ cable, class
-    #x90 >midi  \ note on channel 0
-         >midi  \ note value
-    127  >midi  \ velocity
-    midi-flush
-    ;
+    midi-begin
+    #x09 >a  \ cable, class
+    #x90 >a  \ note on channel 0
+         >a  \ note value
+    127  >a  \ velocity
+    midi-end ;
     
 : note-off \ note --
-    #x08 >midi  \ cable, class
-    #x80 >midi  \ note on channel 0
-         >midi  \ note value
-    127  >midi  \ velocity
-    midi-flush
-    ;
+    midi-begin
+    #x08 >a  \ cable, class
+    #x80 >a  \ note on channel 0
+         >a  \ note value
+    127  >a  \ velocity
+    midi-end ;
     
     
