@@ -4606,5 +4606,43 @@ down.  You want to:
 3. iteratively modify the experiment to narrow down scope
 
 
+Entry: New Staapl platform + USB driver.
+Date: Fri Jul  4 12:16:27 EDT 2014
+
+USB seems to be working reliably now for interactive console access.
+MIDI works as well (part of an ongoing analog/digital monosynth project).
+
+For anyone interested in trying out Staapl, this[1] is the board I've
+been using recently.  It's cheap and adequate.  It can be found on
+eBay as well.  Search for "18f4550 board".
+
+You'll need a PicKit2 and the pk2cmd[3] utility to program the kernel
+using the recipe below.  In case you use a different programmer, just
+manually upload the .hex file.
+
+Note that the Scheme code is cross-platform, but the Makefiles are
+Linux-centric.  Use racket 6.0.1[4].
+
+Either use the github support in racket:
+
+  raco pkg install github://github.com/zwizwa/staapl/master
+  cd ~/.racket/6.0.1/pkgs/staapl/app/
+
+or use the repo directly:
+
+  git clone https://github.com/zwizwa/staapl
+  cd staapl
+  make link
+  cd app
+
+Then setup the 100MHz board[1]:
+
+make dip40kit.dict   # compile kernel
+make dip40kit.flash  # upload kernel using pk2cmd[3]
+./dip40kit.dict      # connect to target
 
 
+[1] http://100mhz.com/pic-dspic-pic32-pic24/development-boards/pic-18f4550-usb-demo-development-board-pic18f4550-microcontroller-1073.html
+[2] http://zwizwa.be/staapl
+[3] ttp://zwizwa.be/stuff/pk2cmdv1.20LinuxMacSource.tar.gz
+[4] http://racket-lang.org/download/
