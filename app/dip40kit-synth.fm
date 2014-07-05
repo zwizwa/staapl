@@ -54,6 +54,7 @@ load synth/synth-example.f
 load synth/sounds.f
 
 \ load synth/synth-midi.f
+load debug.f
 
 macro
 : fosc 48000000 ;

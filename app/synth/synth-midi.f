@@ -47,8 +47,15 @@ variable midi-3
 : note-in  begin midi-in midi-1 @ #x90 = until midi-2 @ ;
         
 variable last-note
-: C9  midi-2 @ dup last-note ! midi note0 1 pwm ;
-: C8  midi-2 @ last-note @ = if silence ; then ;
+
+load midi-arp.f  
+
+: C9  midi-2 @ notes-add    play-last ;
+: C8  midi-2 @ notes-remove play-last ;
+
+: play-last
+    notes-last #xFF = if silence ; then
+    notes-last midi note0 square ;
     
     
     
