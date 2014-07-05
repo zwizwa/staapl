@@ -50,11 +50,10 @@ variable last-note
 
 load midi-arp.f  
 
-: C9  midi-2 @ ts notes-add ts  play-last ;
+: C9  midi-2 @ notes-add    play-last ;
 : C8  midi-2 @ notes-remove play-last ;
-
+    
 : play-last
-    print-notes #x0A emit
     notes-last #xFF = if silence ; then
     notes-last midi note0 square ;
     

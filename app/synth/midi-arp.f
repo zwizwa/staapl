@@ -1,12 +1,12 @@
 \ Keep track of which notes are on.  Play last one.
 
 variable nb-notes
-: init-notes 0 nb-notes !
-: a!notes    0 1 a!! ;
+: init-notes 0 nb-notes ! ;
+: a!notes    0 3 a!! ;
 
 \ load debug.f
-: print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
-: fill-notes 1 5 for dup notes-add 1 + next drop ;    
+\ : print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
+\ : fill-notes 1 5 for dup notes-add 1 + next drop ;    
 
 : notes-last \ -- note
     nb-notes @ z? if drop #xFF ; then
@@ -29,7 +29,9 @@ variable nb-notes
         a> =? if
             2drop
             al @ 1 -
-            a!notes al @ - ;
+            a!notes al @ -
+            r> drop  \ FIXME: this is bad style!!!  looking for half an hour for this missing line..
+            ;
         then drop
     next
     drop #xFF ;
