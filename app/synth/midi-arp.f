@@ -49,8 +49,7 @@ load debug.f
     
 : notes-add \ note --
     dup notes-index #xFF = if
-        a!notes
-        nb-notes @ al +! >a
+        a!notes-endx >a
         1 nb-notes +!
     else
         drop
