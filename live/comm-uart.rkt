@@ -25,8 +25,12 @@
       (unless fmt
         ;; Fixme: do autodetect using 'uname' or something..
         (set! fmt (cdr (assoc "Linux" fmts))))
+      (unless baud ;; Probably means this is USB : make something up to keep stty happy
+        (set! baud 115200)) 
       (when (and fmt name baud)
-          (system (format fmt name baud)))
+        (let ((cmd (format fmt name baud)))
+          ;; (printf "config serial: ~a\n" cmd)
+          (system cmd)))
       )))
 
 
