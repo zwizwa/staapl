@@ -1,4 +1,5 @@
 staapl pic18/route
+staapl pic18/compose-macro
 
 \ USB MIDI connected to EP 3
 
@@ -32,20 +33,20 @@ staapl pic18/route
     midi-out-end ;
 
 
-variable midi-0
-variable midi-1 : m1 midi-1 @ ;
-variable midi-2 : m2 midi-2 @ ;
-variable midi-3 : m3 midi-3 @ ;
+variable midi-cin \ USB only
+variable midi-byte0 : m0 midi-byte0 @ ;
+variable midi-byte1 : m1 midi-byte1 @ ;
+variable midi-byte2 : m2 midi-byte2 @ ;
     
 : midi-in \ -- class
     midi-in-begin
-        a> midi-0 !
-        a> midi-1 !
-        a> midi-2 !
-        a> midi-3 !
+        a> midi-cin !
+        a> midi-byte0 !
+        a> midi-byte1 !
+        a> midi-byte2 !
     midi-in-end ;
 
-\ : note-in  begin midi-in m1 #x90 = until m2 ;
+\ : note-in  begin midi-in m0 #x90 = until m1 ;
         
 
 load midi-arp.f
@@ -54,22 +55,60 @@ load midi-arp.f
 variable pitch-lo  \ low  byte from midi, shifted left one bit
 variable pitch-hi  \ high byte from midi
 
-\ NRPN CC
-\ #x63 ADDR HI
-\ #x62 ADDR LO
-\ #x06 VAL HI
-\ 3x26 VAL LO (optional)
+variable nrpn-addr-hi
+variable nrpn-addr-lo
+variable nrpn-val-hi
+variable nrpn-val-lo
+: nrpn-val15 \ -- lo hi | convert to 15-bit value
+    nrpn-val-lo @ rot<<
+    nrpn-val-hi @ ;
   
+\ NRPN CC
+: CC63 nrpn-addr-hi ! ; 
+: CC62 nrpn-addr-lo ! ; 
+: CC06 nrpn-val-hi ! ;
+: CC26 nrpn-val-lo !
+    \ This is optional in midi spec, though we require it to start
+    \ transaction
+    commit-nrpn ; 
+
+: _dup over over ;
+: _drop 2drop ;    
+
+macro \ trampoline for far away jump addresses
+: .. i/c . ;
+forth  
+    
+\ low-level synth parameters are available through NRPN.
+: commit-nrpn
+    psps
+    nrpn-addr-hi @ 0 = not if ; then \ ignore
+    nrpn-val15
+    nrpn-addr-lo @
+    ` nrpn: .sym ts
+    1 - 4 min
+    ts
+    route
+        [ _p0    ] ..  \ 1
+        [ _p1    ] ..  \ 2
+        [ _p2    ] ..  \ 3
+        [ _synth ] ..  \ 4
+        _drop ;  \ ignore rest
+
+
+        
 \ Guard word: aborts call if condition is not met.
-: ~chan m1 #x0F and 0 = if ; then xdrop ;
+: ~chan m0 #x0F and 0 = if ; then xdrop ;
   
 \ Handle USB MIDI Code Index Number
-: CIN9 ~chan  m2 notes-add    play-last ;
-: CIN8 ~chan  m2 notes-remove play-last ;
-: CINB ~chan  CC ; \ ` c: .sym pm23 ;
-: CINE ~chan  m2 << pitch-lo ! m3 pitch-hi ! ; \ ` p: .sym pm23 ;
+: CIN9 ~chan  m1 notes-add    play-last ;
+: CIN8 ~chan  m1 notes-remove play-last ;
+: CINB ~chan  CC  ;
+: CINE ~chan  m2 << pitch-lo ! m2 pitch-hi ! ; 
 
-: pm23  m2 px m3 px cr ; \ pitchbend
+: .synth ` synth: .sym  synth @ px cr ;
+    
+: pm12  m1 px m2 px cr ; \ pitchbend
 
 \ During silence we need to save synth config.
 variable synth-save    
@@ -84,52 +123,32 @@ variable synth-save
     synth-save @ synth !
     ;
 
-
+\ Controllers should set meaningful high level values.  The synth
+\ engine is already fully controllable through NRPN.
+    
+: CC57
+: CC58 
+: CC59 
+: CC5A 
+: CC55 
+: ____ drop ` ignore:cc: .sym pm12 ;
+    
 \ controller jump table.  this is sparse but we have plenty of room in Flash
-: CC57 m3
-    \ Controller sets Noise, Algo, Sync:
-    \ 0 N A1 A0 | S2 S1 S0 x 
-    \ global synth algo config
-    \ set noise bit synth:7
-    dup
-    rot<<  #b10000000 synth-save mask!
-
-    \ set mixer algo bits synth:1-0
-    dup
-    rot>>4 #b00000011 synth-save mask!
-    
-    \ pot nb 4 sets sync bits [ sync: 3 ignored: 7 ]
-    rot>>
-    rot>>4 #b01110000 synth-save mask!
-
-    synth @ 0 = not if restore-synth then ;
-    
-
-    
-
-    ;
-: CC58 ;
-: CC59 ;
-: CC5A ;
-: CC55 ;
-
-    
-: ____ ` ignore:cc: .sym pm23 ;
 : CC 
-    m2 #x7F and route
+    m2 m1 #x7F and route
         \  0      1      2      3      4      5      6      7      8      9      A      B      C      D      E      F
-        ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
+        ____ . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 1
-        ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 2 
+        ____ . ____ . ____ . ____ . ____ . ____ . CC26 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 2 
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 3
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 4
         ____ . ____ . ____ . ____ . ____ . CC57 . ____ . CC57 . CC58 . CC59 . CC5A . ____ . ____ . ____ . ____ . ____ . \ 5
-        ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 6
+        ____ . ____ . CC62 . CC63 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 6
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ ; \ 7
         
 : midi-poll-once
     \ psps
-    midi-in midi-0 @ #x0F and route
+    midi-in midi-cin @ #x0F and route
            .      .      .      .
            .      .      .      .
       CIN8 . CIN9 .      . CINB .
@@ -137,7 +156,9 @@ variable synth-save
 
 : midi-poll begin midi-poll-once again
         
-: go init-notes engine-on midi-poll ;
+: go
+    square synth @ synth-save ! silence
+    init-notes engine-on midi-poll ;
 
 
 

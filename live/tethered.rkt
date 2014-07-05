@@ -28,7 +28,7 @@
 ;; Debug
 (define-syntax-rule (d: fmt . e)
   (let ((val (begin . e)))
-    ;;(printf fmt val)
+    (printf fmt val)
     val))
 
 

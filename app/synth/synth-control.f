@@ -53,7 +53,7 @@ forth
 : _p0@ posc0l per@ ;
 : _p1@ posc1l per@ ; 
 : _p2@ posc2l per@ ;
-
+: _synth synth ! drop ;
 
 
 

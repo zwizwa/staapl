@@ -32,10 +32,11 @@ variable psample
 \   1 xmod
 \   2 reso
 \   3 osc1  
+\ 3 square/noise switch for osc1  
 \ 4 sync 0->1
 \ 5 sync 0->2  
 \ 6 sync 1->2  
-\ 7 square/noise switch for osc1  
+\ 7 unused
   
 variable synth
 
@@ -48,10 +49,10 @@ macro
 forth    
 
 macro  
+: osc1:noise 3 ; \ osc1 noise/square switch
 : sync:0->1  4 ;
 : sync:0->2  5 ; \ will put 2 in one-shot mode
 : sync:1->2  6 ;
-: osc1:noise 7 ; \ osc1 noise/square switch
 forth  
 
 \ the ordering here is just so we can piggyback on full adder compute
@@ -354,15 +355,15 @@ forth
 
 \ individual interrupt enables
 
-: ioff-0  OSC0-enable low ;
-: ioff-1  OSC1-enable low ;
-: ioff-2  OSC2-enable low ;
-: ioff-f  OSCF-enable low ;   
+\ : ioff-0  OSC0-enable low ;
+\ : ioff-1  OSC1-enable low ;
+\ : ioff-2  OSC2-enable low ;
+\ : ioff-f  OSCF-enable low ;   
 
-: ion-0   OSC0-enable high ;
-: ion-1   OSC1-enable high ;
-: ion-2   OSC2-enable high ;
-: ion-f   OSCF-enable high ;    
+\ : ion-0   OSC0-enable high ;
+\ : ion-1   OSC1-enable high ;
+\ : ion-2   OSC2-enable high ;
+\ : ion-f   OSCF-enable high ;    
 
 
     

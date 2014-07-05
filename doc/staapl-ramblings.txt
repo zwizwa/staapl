@@ -64980,5 +64980,35 @@ For now, P-4 seems to have something usable:
 #x55
 
 
-
 [1] entry://../bcr2000
+
+
+Entry: Synth control byte
+Date: Sat Jul  5 16:29:17 EDT 2014
+
+It uses only 7 bits, so going to change it so it fits directly in a
+MIDI payload, moving bit 7 (noise enable) to unused bit 4.
+
+
+Entry: route problems
+Date: Sat Jul  5 17:57:59 EDT 2014
+
+So code is growing, and I ran into this route assembly:
+
+	0A8A 1514 F000 EC38 [jsr 0 _route]
+.L768:	0A8C 1518 F005 EFE4 [jsr 1 _p0]
+	0A8E 151C F005 EFEE [jsr 1 _p1]
+	0A90 1520 F005 EFF8 [jsr 1 _p2]
+	0A92 1524 D7DE [jsr 1 ~_synth]
+	0A93 1526 D7DC [jsr 1 _drop]
+
+So those 2-word jumps obviously don't work as expected.  Maybe it's
+good to create a new routing table that uses plain addresses, or at
+least a stub or so to warn about route size.
+
+
+
+Entry: HW problems?
+Date: Sat Jul  5 18:23:55 EDT 2014
+
+So something went wrong - now I can no longer connect.

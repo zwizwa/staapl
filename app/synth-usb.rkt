@@ -20,12 +20,12 @@
      #:bEndpointAddressIN  #x81
      #:bEndpointAddressOUT #x01)
 
-;    (InterfaceDescriptorAUDIOCONTROL
-;     #:bInterfaceNumber 2)
+    (InterfaceDescriptorAUDIOCONTROL
+     #:bInterfaceNumber 2)
 
-;    (InterfaceDescriptorMIDI
-;     #:bInterfaceNumber 3
-;     #:bEndpointAddressIN  #x83
-;     #:bEndpointAddressOUT #x03)
+    (InterfaceDescriptorMIDI
+     #:bInterfaceNumber 3
+     #:bEndpointAddressIN  #x83
+     #:bEndpointAddressOUT #x03)
     )))
 

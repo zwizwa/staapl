@@ -72,8 +72,9 @@ forth
     \ pot nb 3 is [ noise:1 synth:2 ignored:5 ] 
     3 ad@ #xFF xor dup
 
-    \ set noise bit synth:7
-    #b10000000 synth-bits!
+    \ set noise bit synth:7  (FIXME: check this / was moved)
+    rot>>4
+    #b00001000 synth-bits!
 
     \ set mixer algo bits synth:1-0
     rot<<3

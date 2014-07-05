@@ -23,7 +23,7 @@ load p18f4550.f          \ chip macros
 load monitor-usbserial.f \ boot block + icsp comm monitor code
 
 load usb.f                     \ USB library
-require-file dip40kit-desc.rkt \ scheme file with descriptor tables       
+require-file synth-usb.rkt     \ scheme file with descriptor tables       
 : device-descriptor        'scheme device  usb-descriptor
 : configuration-descriptor 'scheme configs usb-descriptors
 : string-descriptor        'scheme strings usb-descriptors
