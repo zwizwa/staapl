@@ -280,30 +280,4 @@ forth
 
 
   
-: param
-
-    \ first 3 pots set period
-    
-    0 ad@ p0
-    1 ad@ p1 
-    2 ad@ p2
-
-    \ pot bits are XOR FF because they are upside down.
-    
-    \ pot nb 3 is [ noise:1 synth:2 ignored:5 ] 
-    3 ad@ #xFF xor dup
-
-    \ set noise bit synth:7
-    #b10000000 synth-bits!
-
-    \ set mixer algo bits synth:1-0
-    rot<<3
-    #b00000011 synth-bits!
-    
-    \ pot nb 4 sets sync bits [ sync: 3 ignored: 7 ]
-
-    4 ad@ #xFF xor rot>>
-    #b01110000 synth-bits!
-
-    ;
 

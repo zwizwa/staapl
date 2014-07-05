@@ -64958,3 +64958,27 @@ Date: Sat Jul  5 10:17:27 EDT 2014
 Ever since that debug print is working on top of a high-bandwidth USB
 connection, debugging ease has improved a lot.
 
+
+Entry: Synth name
+Date: Sat Jul  5 12:42:26 EDT 2014
+
+What string descriptor to set to get a proper synth name in alsa?
+Didn't find it...
+
+
+Entry: BCR2000
+Date: Sat Jul  5 14:54:16 EDT 2014
+
+Time to get the old box programmed again.  See [1].
+
+For now, P-4 seems to have something usable:
+
+#x57
+#x58
+#x59
+#x5A
+#x55
+
+
+
+[1] entry://../bcr2000

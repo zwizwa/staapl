@@ -325,7 +325,7 @@ forth
 
 : transaction.SETUP \ -- : a->packet
     a>  \ bmRequestType
-    swap-nibble >> 3 and \ type
+    rot>>4 >> 3 and \ type
     route
         transaction.SETUP_STANDARD .
         transaction.SETUP_CLASS    .

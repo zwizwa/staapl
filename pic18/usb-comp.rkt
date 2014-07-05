@@ -80,7 +80,8 @@
 ;; Structure
 
 
-;; `Descriptor` : check size
+;; Checks descriptor size.  It seems best to leave this field up for
+;; manual specification as a consistency check.
 (define (_descriptor thunk)
   (let* ((chunk (bytes-chunk thunk)))
     (let ((l1 (length chunk))

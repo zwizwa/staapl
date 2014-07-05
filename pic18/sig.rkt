@@ -15,7 +15,7 @@
 
 ;; Machine flags, special operations, and ram/flash index registers.
 (define-macro-set pic18-extra^
-  (rot<<c rot>>c rot<< rot>> swap-nibble
+  (rot<<c rot>>c rot<< rot>> rot>>4
    z? nz? c? nc? n? nn?
    @f+ @f !f+
    @a+ @a @a-

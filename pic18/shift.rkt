@@ -6,4 +6,4 @@ provide-all
 : rot>>3 rot>>
 : rot>>2 rot>> rot>> ;
 : >>2    #xFC and rot>>2 ;
-: >>4    swap-nibble #xF and ;
+: >>4    rot>>4 #xF and ;

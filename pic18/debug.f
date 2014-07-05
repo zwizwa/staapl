@@ -92,6 +92,8 @@ forth
 : >h  ` t> host ;  \ Byte to host stack
 : ts  ` ts host ;
 : px  ` px host ;
+
+
     
 : emit     1list>h pb ;
 : .fstring fstring pb ;
@@ -115,5 +117,11 @@ forth
 \ : rst ack
 \     UCON USBEN low \ turn off USB machinery
 \     0 for next
-\     reset ;
+  \     reset ;
+
+
+\ misc useful things
+: psps  FSR0L @ px FSR1L @ px cr ; \ print stack pointers
+: cr    #x0A emit ;                \ carriage return
+  
   

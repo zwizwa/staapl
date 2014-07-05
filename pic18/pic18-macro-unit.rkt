@@ -71,7 +71,7 @@
   (rot>>c      rrcf)
   (rot<<       rlncf)
   (rot>>       rrncf)
-  (swap-nibble swapf))
+  (rot>>4      swapf))
  ;;----------------------------------------
  (([movf f 0 0] word) ([opcode f 0 0]))
  ((word)              ([opcode WREG 0 0])))

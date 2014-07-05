@@ -266,7 +266,10 @@
 ;;   function. However, if a certain Set request is supported, the
 ;;   associated Get request must also be supported.
 ;; Endpoint descriptors have 2 extra bytes.
-
+;;
+;; FIXME: In the end, I just copied a configuration from another
+;; project.  The USB spec by itself does not make much sense to me.
+;; Find out later when necessary how this actualy works.
 
 
 (define (MIDI-OUT-Jack-Descriptor
