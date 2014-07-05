@@ -4,10 +4,10 @@ variable nb-notes
 : init-notes 0 nb-notes ! ;
 : a!notes    0 2 a!! ;
 
-load debug.f
-: print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
-: fill-notes 1 5 for dup notes-add 1 + next drop ;    
-: print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
+\ load debug.f
+\ : print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
+\ : fill-notes 1 5 for dup notes-add 1 + next drop ;    
+\ : print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
 
     
 : notes-last \ -- note
