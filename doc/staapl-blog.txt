@@ -4646,3 +4646,59 @@ make dip40kit.flash  # upload kernel using pk2cmd[3]
 [2] http://zwizwa.be/staapl
 [3] ttp://zwizwa.be/stuff/pk2cmdv1.20LinuxMacSource.tar.gz
 [4] http://racket-lang.org/download/
+
+
+
+Entry: Forth vs. C
+Date: Sat Jul  5 10:19:27 EDT 2014
+
+Just looked up the first iteration of the Staapl idea in the badnop
+archive.  First commit is:
+
+Thu Mar 25 22:56:06 CET 2004  tom
+  * midibox files
+
+Funny that this whole idea started because I wanted to make a HW MIDI
+controller.  Something that only now is coming to fruition.
+
+So it's been more than 10 years.  Two main things have changed over
+more than a decade of work:
+
+ - I've learned how to program following a more traditional functional
+   programming paradigm, which has lead to learning about compilers
+   and programming languages in general.
+
+ - Chip technology has advanced quite a bit.  You can get an NXP ARM
+   Cortex-M0 in a DIP8 for $3 non-volume!
+
+Would I advise "young players" to get into Forth?  I'd say no if your
+goal is to play the engineer and align with the status quo in the
+embedded software industry.  Learn C on a 32-bit micro first.
+However, if you have time on your hands and want a good mind bend,
+please go ahead and learn Forth, learn Scheme, Haskell, Rust, OCaml,
+F#, ... and pave the way for the next generation to think beyond C.
+
+The problem with Forth is that working with data structures is hard
+due to lack of local names.  It's possible to work around this using
+shallow binding (a.k.a. dynamic parameters), but considering the age
+we live in that is not something I can advise as an alternative to
+using a modern language with static scope.
+
+It is definitely harder to get Forth code to work as compared to C
+once there are data structures involved.  For me, USB has been a pain
+to get right in this respect.
+
+Forth can be made to work for very small programs.
+
+Forth is good at starting from scratch, tuning code to a machine.
+
+Forth is not a language to write reusable libraries.
+
+With Staapl I have a love-hate relationship.  I'm still working on it
+after more than a decade so it's doing something right for me.  I'm
+still not good at writing Forth code, though.  Maybe the point of this
+is more one of perspective.
+
+I am still amazed by the role the Racket system plays in this
+evolution.  Modules and Macros!
+

@@ -64947,3 +64947,14 @@ Yeah that's very cute and also very fast but let's do it using the a reg.
 So it seems to mostly work but does get stuck.
 Ok had a weird bug in there.
 But by now it's gotten to quirky and still gets stuck when pressing a lot of keys for a while.
+
+
+Moving the map from #x300 to #x200 seems to fix it.
+
+
+Entry: Debug print
+Date: Sat Jul  5 10:17:27 EDT 2014
+
+Ever since that debug print is working on top of a high-bandwidth USB
+connection, debugging ease has improved a lot.
+
