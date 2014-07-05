@@ -52,8 +52,11 @@ load midi-arp.f
 
 : C9  midi-2 @ notes-add    play-last ;
 : C8  midi-2 @ notes-remove play-last ;
+
     
 : play-last
+    print-notes
+    print-stacks
     notes-last #xFF = if silence ; then
     notes-last midi note0 square ;
     
@@ -68,6 +71,7 @@ load midi-arp.f
 
 : midi-poll begin midi-poll-once again
         
+: go init-notes engine-on midi-poll ;
 
 
 

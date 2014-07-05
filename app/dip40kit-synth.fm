@@ -53,7 +53,7 @@ load synth/synth-example.f
 
 load synth/sounds.f
 
-load synth/synth-midi.f
+\ load synth/synth-midi.f
 \ load debug.f
 
 macro
@@ -80,7 +80,3 @@ forth
 ' isr init-isr-hi
   
 
-: go
-    init-notes
-    engine-on
-    midi-poll ;
