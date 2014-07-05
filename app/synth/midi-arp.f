@@ -5,7 +5,7 @@ variable nb-notes
 : a!notes    0 1 a!! ;
 
 \ load debug.f
-: print-notes a!notes nb-notes @ nz? if for a> px next then ;
+: print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
 : fill-notes 1 5 for dup notes-add 1 + next drop ;    
 
 : notes-last \ -- note
@@ -21,17 +21,18 @@ variable nb-notes
         drop
     then ;
 
+: 2drop drop drop ;    
 : notes-index \ note -- i
-    a!notes
-    nb-notes @ nz? if
-        for
-            a> =? if
-                drop drop
-                al @ 1 -
-                a!notes al @ - ;
-            then drop
-        next
-    then drop #xFF ;
+    a!notes nb-notes @
+    z? if 2drop #xFF ; then
+    for
+        a> =? if
+            2drop
+            al @ 1 -
+            a!notes al @ - ;
+        then drop
+    next
+    drop #xFF ;
     
 : notes-pop \ index --
     a!notes dup 1 + al +!  \ point past element to remove
@@ -41,7 +42,7 @@ variable nb-notes
     1 nb-notes -! ;
 
 : notes-remove \ note --
-    notes-index \ aborts this word if not found
+    notes-index
     dup #xFF = if drop ; then
     notes-pop ;
     

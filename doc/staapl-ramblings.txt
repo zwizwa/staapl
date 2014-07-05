@@ -64942,3 +64942,6 @@ The brigade can be implemented with a movff instruction.
   
 Yeah that's very cute and also very fast but let's do it using the a reg.
 
+
+
+So it seems to mostly work but does get stuck.
