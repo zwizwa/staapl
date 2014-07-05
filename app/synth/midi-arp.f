@@ -12,10 +12,13 @@
 
 variable nb-notes
 : init-notes   0 nb-notes ! ;
-: a!notes      0 2 a!! ;         \ 256 byte buffer at #x200
-: a!notes-endx a!notes nb-notes @ al +! ;
+: a!notes      0    
+: a!notes+     al ! 2 ah ! ;  \ 256 byte buffer at #x200
+: a!notes-endx nb-notes @ a!notes+ ;
+macro    
 : 1a-!         1 al -! ;
-
+: 1a+!         1 al +! ;
+forth
     
 \ The operations on this data structure consist of:
 \    
@@ -71,7 +74,7 @@ load debug.f
     drop #xFF ;
     
 : notes-pop \ index --
-    a!notes dup 1 + al +!  \ point past element to remove
+    dup 1 + a!notes+       \ point past first element to remove
     nb-notes @ - for
         @a- dup >a >a
     next
