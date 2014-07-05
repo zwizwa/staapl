@@ -64905,3 +64905,28 @@ Entry: Comparisons drop vs. nondrop
 Date: Fri Jul  4 19:52:13 EDT 2014
 
 Need to decide.  Currently =? used in usb is actually dropping.
+
+
+Entry: simple MIDI control working
+Date: Fri Jul  4 21:07:43 EDT 2014
+
+Next:
+- stack of notes  (for arpeggio and fallback)
+
+
+
+Entry: Stack of notes
+Date: Fri Jul  4 21:19:08 EDT 2014
+
+operations:
+- push front
+- remove middle
+- read sequence
+
+Remove middle could be implement with a jump into a "bucket brigade"
+
+0 <- 1
+1 <- 2
+2 <- 3
+
+The brigade can be implemented with a movff instruction.

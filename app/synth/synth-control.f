@@ -197,6 +197,7 @@ variable oct
 
 
 : midi \ midinote -- bassnote  | oct contains octave
+    24 - \ FIXME: find correct note and clip range
     0 oct !
     begin
         12 <? if drop ; then

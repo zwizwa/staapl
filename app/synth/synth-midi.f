@@ -46,7 +46,7 @@ variable midi-3
 : note-in  begin midi-in midi-1 @ #x90 = until midi-2 @ ;
         
 variable last-note
-: C9  midi-2 @ dup last-note ! midi note0 square ;
+: C9  midi-2 @ dup last-note ! midi note0 1 pwm ;
 : C8  midi-2 @ last-note @ = if silence ; then ;
     
     
@@ -60,3 +60,25 @@ variable last-note
 
 : midi-poll begin midi-poll-once again
         
+
+variable n0
+variable n1
+variable n2
+variable n3
+variable nb-notes
+
+: notes-add \ note --
+    n0 0 a!!
+    nb-notes @ al +! >a
+    1 nb-notes +! ;
+
+: notes-remove \ note --
+    \ find note index then pop
+    
+: notes-pop \ index --
+    3 min << \ each slot contains a movff instruction of 2 words wide
+    route
+        n1 n0 @!
+        n2 n1 @!
+        n3 n2 @! ;
+  
