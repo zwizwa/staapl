@@ -12,8 +12,8 @@
 
 variable nb-notes
 : init-notes   0 nb-notes ! ;
-: a!notes      0    
-: a!notes+     al ! 2 ah ! ;  \ 256 byte buffer at #x200
+: a!notes      0 2 a!! ;        \ 256 byte buffer at #x200
+: a!notes+     a!notes al +! ;
 : a!notes-endx nb-notes @ a!notes+ ;
 macro    
 : 1a-!         1 al -! ;
