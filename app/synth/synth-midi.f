@@ -1,5 +1,5 @@
 
-\ Midi connected to EP 3
+\ USB MIDI connected to EP 3
 
 : midi-EP 3 ;
 
@@ -43,7 +43,20 @@ variable midi-3
         a> midi-3 !
     midi-in-end ;
 
-: note-in begin midi-in midi-1 @ #x90 =? until midi-2 @ ;
+: note-in  begin midi-in midi-1 @ #x90 = until midi-2 @ ;
         
+variable last-note
+: C9  midi-2 @ dup last-note ! midi note0 square ;
+: C8  midi-2 @ last-note @ = if silence ; then ;
     
     
+    
+: midi-poll-once
+    midi-in midi-0 @ #x0F and route
+           .    .    .    .
+           .    .    .    .
+        C8 . C9 .    .    .
+           .    .    .    ;
+
+: midi-poll begin midi-poll-once again
+        

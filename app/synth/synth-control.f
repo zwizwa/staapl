@@ -196,7 +196,7 @@ variable oct
 : p2@  _p2@ nip ;
 
 
-: midi \ midinote -- bassnote
+: midi \ midinote -- bassnote  | oct contains octave
     0 oct !
     begin
         12 <? if drop ; then
