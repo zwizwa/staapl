@@ -17,8 +17,9 @@
 (define-macro-set pic18-extra^
   (rot<<c rot>>c rot<< rot>> swap-nibble
    z? nz? c? nc? n? nn?
-   @f+ @f @a+ @a 
-   !f+ !a+ !a !a-
+   @f+ @f !f+
+   @a+ @a @a-
+   !a+ !a !a-
    @i !i
    a!! f!! f!!! ah al fh fl
 

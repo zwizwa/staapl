@@ -64930,3 +64930,15 @@ Remove middle could be implement with a jump into a "bucket brigade"
 2 <- 3
 
 The brigade can be implemented with a movff instruction.
+
+
+: notes-pop \ index --
+    1 nb-notes -!
+    3 min << \ each slot contains a movff instruction of 2 words wide
+    route
+        n1 n0 @!
+        n2 n1 @!
+        n3 n2 @! ;
+  
+Yeah that's very cute and also very fast but let's do it using the a reg.
+

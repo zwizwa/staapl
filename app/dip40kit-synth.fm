@@ -42,6 +42,7 @@ staapl pic18/prom \ FIXME: sti
 staapl pic18/_table
 staapl pic18/task
 staapl pic18/geo  \ scheme extension module
+staapl pic18/route    
 
 load synth/synth-core.f
 load synth/synth-control.f

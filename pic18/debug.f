@@ -91,7 +91,7 @@ forth
 : pha ` pha host ;
 : >h  ` t> host ;  \ Byte to host stack
 : ts  ` ts host ;
-\ : px  ` px host ;
+: px  ` px host ;
     
 : emit     1list>h pb ;
 : .fstring fstring pb ;

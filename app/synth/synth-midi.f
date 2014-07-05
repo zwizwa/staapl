@@ -1,3 +1,4 @@
+staapl pic18/route
 
 \ USB MIDI connected to EP 3
 
@@ -61,24 +62,5 @@ variable last-note
 : midi-poll begin midi-poll-once again
         
 
-variable n0
-variable n1
-variable n2
-variable n3
-variable nb-notes
 
-: notes-add \ note --
-    n0 0 a!!
-    nb-notes @ al +! >a
-    1 nb-notes +! ;
 
-: notes-remove \ note --
-    \ find note index then pop
-    
-: notes-pop \ index --
-    3 min << \ each slot contains a movff instruction of 2 words wide
-    route
-        n1 n0 @!
-        n2 n1 @!
-        n3 n2 @! ;
-  
