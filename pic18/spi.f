@@ -32,7 +32,7 @@ macro
 
 : mcp4922-tx-A \ byte --
     spi-ss low
-    swap-nibble dup
+    rot>>4 dup
     #x0F and #x70 or spi-tx \ channel A, buffered, no gain, powered
     #xF0 and         spi-tx
     spi-ss high
@@ -40,7 +40,7 @@ macro
 
 : mcp4922-tx-B \ byte --
     spi-ss low
-    swap-nibble dup
+    rot>>4  dup
     #x0F and #xF0 or spi-tx \ channel A, buffered, no gain, powered
     #xF0 and         spi-tx
     spi-ss high

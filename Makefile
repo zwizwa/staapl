@@ -9,6 +9,8 @@ all: dev
 MZSCHEME=mzscheme
 RACO=raco
 
+unlink:
+	$(RACO) pkg remove staapl
 
 link:
 	cd $$(readlink -f .)/.. ; $(RACO) pkg install --link staapl

@@ -18,7 +18,7 @@
 : 31note \ n -- lo hi
     dup >x
     #x1F and bass31->period    \ get basic freq
-    x> rot>> swap-nibble 7 and \ get octave
+    x> rot>> rot>> 7 and \ get octave
     nz? if
         for _>> next
     else

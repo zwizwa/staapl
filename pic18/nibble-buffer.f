@@ -32,7 +32,7 @@ forth
 
 : rw-read   \ RW -- byte RW+
     dup >x
-    #xF0 and swap-nibble
+    #xF0 and rot>>4
     al +! @a+
     x> #x10 + ;
     
@@ -42,7 +42,7 @@ forth
     x> 1 + ;
 
 : rw-size \ RW
-    dup swap-nibble - #x0F and ;
+    dup rot>>4 - #x0F and ;
     
     
 : rw-empty>z \ RW

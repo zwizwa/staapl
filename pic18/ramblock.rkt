@@ -8,7 +8,7 @@ macro
 : >block 16 / ;  
 forth
 : block>a \ blockn --
-    swap-nibble dup #x0F and ah ! #xF0 and al ! ;  
+    rot>>4 dup #x0F and ah ! #xF0 and al ! ;  
 : clear-block \ blockn --
     block>a 16 for 0 !a+ next ;
 
