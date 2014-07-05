@@ -55,8 +55,6 @@ load midi-arp.f
 
     
 : play-last
-    print-stacks
-    print-notes
     notes-last #xFF = if silence ; then
     notes-last midi note0 square ;
     

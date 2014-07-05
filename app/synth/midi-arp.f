@@ -14,8 +14,10 @@ variable nb-notes
 macro    
 : 1a-!          1 al -! ;
 : 1a+!          1 al +! ;
+\ 64 bytes buffer at #x200
 : notes-lo      0 ;
-: notes-hi      2 ; \ 256 byte buffer at #x200
+: notes-hi      2 ;
+: nb-notes-max  64 ;    
 forth
 : init-notes    0 nb-notes ! ;
 : a!notes       notes-lo notes-hi a!! ;        
@@ -43,17 +45,17 @@ forth
 
 
 
-load debug.f
-: print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
-: fill-notes 1 5 for dup notes-add 1 + next drop ;    
-: print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
-
+\ load debug.f
+\ : print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
+\ : fill-notes 1 5 for dup notes-add 1 + next drop ;    
+\ : print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
     
 : notes-last \ -- note
     nb-notes @ 0 = if #xFF ; then
     a!notes-endx 1a-! a> ;
     
 : notes-add \ note --
+    nb-notes @ nb-notes-max = if drop ; then 
     dup notes-index #xFF = if
         a!notes-endx >a
         1 nb-notes +!
@@ -88,17 +90,3 @@ load debug.f
     notes-pop ;
     
     
-
-
-
-    
-\ \ Yes cute, but actually less code and faster if array is not too large.
-\ macro    
-\ : _notes-pop \ index --
-\     1 nb-notes -!
-\     3 min << \ each slot contains a movff instruction of 2 words wide
-\     route
-\         n1 n0 @!
-\         n2 n1 @!
-\         n3 n2 @! ;
-\ forth
