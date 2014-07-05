@@ -271,8 +271,10 @@ macro
 : andor! | reg | reg and! reg or! ;
     \ >m m-dup m> and! m> or! ;
 
-: synth-bits! | mask |
-    mask and mask #xFF xor synth andor! ;
+: mask! | mask var |
+    mask and mask #xFF xor var andor! ;
+    
+: synth-bits! synth mask! ;
     
 : rot<<3 rot<< rot<< rot<< ;    
     

@@ -71,11 +71,18 @@ variable pitch-hi  \ high byte from midi
 
 : pm23  m2 px m3 px cr ; \ pitchbend
 
+\ During silence we need to save synth config.
+variable synth-save    
 
+    
 \ from midi-arp.f : get most recently pressed active key    
 : play-last
     notes-last #xFF = if silence ; then
-    notes-last midi note0 square ;
+    notes-last midi note0
+    \ square
+: restore-synth    
+    synth-save @ synth !
+    ;
 
 
 \ controller jump table.  this is sparse but we have plenty of room in Flash
@@ -85,18 +92,17 @@ variable pitch-hi  \ high byte from midi
     \ global synth algo config
     \ set noise bit synth:7
     dup
-    rot<<
-    #b10000000 synth-bits!
+    rot<<  #b10000000 synth-save mask!
 
     \ set mixer algo bits synth:1-0
     dup
-    rot>>4
-    #b00000011 synth-bits!
+    rot>>4 #b00000011 synth-save mask!
     
     \ pot nb 4 sets sync bits [ sync: 3 ignored: 7 ]
-    >>
-    rot>>4
-    #b01110000 synth-bits! ;
+    rot>>
+    rot>>4 #b01110000 synth-save mask!
+
+    synth @ 0 = not if restore-synth then ;
     
 
     
