@@ -64872,6 +64872,15 @@ T1CON T1CKPS1:T1CKPS0  3 = 1:8, 2 = 1:4
 T2CON T2CKPS1:T2CKPS0           1 = 1:4
 T3CON T3CKPS1:T3CKPS0  3 = 1:8, 2 = 1:4
 
+EDIT: check again!
+
+TMR2 is the one that's used for establishing real time.  It's also the
+one that has a linear postscaler.  It seems originally it's set to
+31.25kHz for midi.
+
+
+
+
 
 Entry: Next: midi control
 Date: Fri Jul  4 18:37:57 EDT 2014
@@ -65012,3 +65021,46 @@ Entry: HW problems?
 Date: Sat Jul  5 18:23:55 EDT 2014
 
 So something went wrong - now I can no longer connect.
+EDIT: was prob with stty not getting called
+
+
+
+Entry: Poll console / midi
+Date: Sat Jul  5 21:20:23 EDT 2014
+
+How to build a polling loop?
+
+- Data is ready if
+  UOWN = 0
+  ptr < len
+
+Same for serial btw.
+
+So let's add main polling loop that does both midi and console.
+
+
+Entry: Formant stuff
+Date: Sat Jul  5 21:25:37 EDT 2014
+
+
+OSC0 = base freq
+OSC1 = cutof
+OSC2 = reso
+
+The reso retrigger should not re-enable.  Is that so?  YES!
+
+
+: osc2
+    restart2
+    synth sync:0->2 high? if
+	bus:2 low     \ if synced to 0, do one shot
+    else
+	bus:2 toggle  \ else just osc
+    then  
+
+    bus>audio ;
+    
+So the mixing is symmetric: OSC0 xor (OSC1 and OSC2) but the
+retriggering is not.
+
+This can also do other kinds of pulse tricks.
