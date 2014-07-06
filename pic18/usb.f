@@ -514,8 +514,12 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     
 
 \ pump: do IN / OUT transaction if necessary + wait for action to complete.
+
+: ~bufcheck \ -- | early exit procedure if pointer is within buffer
+    bufidx buflen = not if xdrop ; then ;
+
 : ack-OUT
-    bufidx buflen = not if ; then
+    ~bufcheck
     64 ep OUT/DATA+
     iptr-rst ;
 : pump-OUT
@@ -523,7 +527,7 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     buf-wait ;
 
 : pump-IN
-    bufidx #x40 = not if ; then
+    ~bufcheck
 : force-pump-IN
     bufidx ep IN/DATA+
     iptr-rst buf-wait
