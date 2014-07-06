@@ -509,8 +509,8 @@ forth
 : a!buflen a!bufdes 1 al +! ;    
 : buflen   a!buflen a> ;
 
-macro : buf-ready? a!bufdes INDF2 7 low? ;
-forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
+macro : bufready? a!bufdes INDF2 7 low? ;
+forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
     
 
 \ pump: do IN / OUT transaction if necessary + wait for action to complete.
@@ -524,13 +524,13 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     iptr-rst ;
 : pump-OUT
     ack-OUT
-    buf-wait ;
+    bufwait ;
 
 : pump-IN
     ~bufcheck
 : force-pump-IN
     bufidx ep IN/DATA+
-    iptr-rst buf-wait
+    iptr-rst bufwait
     a!buflen 64 >a
     ;
 
@@ -542,7 +542,7 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     1 OUT-begin a> OUT-end ;
 : OUT-begin \ ep n --
     a>r >r OUT!
-        buf-wait    \ make sure buffer is ready
+        bufwait     \ make sure buffer is ready
         pump-OUT    \ if fully read, ack buffer and wait for more data from host
         r> a!box+ ; \ setup read using a, advancing index
 : OUT-end \ --
@@ -553,8 +553,8 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     1 IN-begin >a IN-end ;
 : IN-begin \ ep --    
     a>r >r IN!
-        buf-wait    \ make sure buffer is ready
-        pump-IN     \ if buffer is full, send it to host and wait until we can write more
+        bufwait     \ make sure buffer is ready
+        pump-IN     \ if buffer is full, send it to host and wait until we can write
         r> a!box+ ; \ setup write using a, advancing index
 : IN-end    
     r>a ;
@@ -571,11 +571,13 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
 \
 \ - UOWN=0 and len == buf size means there might be data in the host
 \   but we don't know because we're blocking the buffer.  This case
-\   might is handled by calling ack-OUT after reading.
+\   does not occur because ack-OUT is called in OUT-end.
+
+: OUTrem OUT! a>r bufrem r>a ;
+: INrem  IN!  a>r bufrem r>a ;    
+: bufrem \ -- remaining
+    a>r bufready? if buflen bufidx - else 0 then r>a ;
     
-macro
-: buf-left   
-forth
     
 
 \ debug

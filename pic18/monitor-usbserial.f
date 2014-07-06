@@ -11,6 +11,13 @@ staapl pic18/route
 : receive  monitor-EP OUT> ;
 : transmit monitor-EP >IN ;
 : tx-end   monitor-EP IN-flush ;
+
+\ Useful for loop-until-ctrlC    
+macro
+: rx-ready? monitor-EP OUTrem 0 = not ;
+forth
+    
+    
 macro
 : rx-sync  ;
 : tx-sync  ;
