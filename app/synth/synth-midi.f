@@ -7,6 +7,7 @@ staapl pic18/afregs
 load midi-arp.f  \ keep track of which keys are pressed and in which order
 \ load debug.f
 
+\ https://ccrma.stanford.edu/~craig/articles/linuxmidi/misc/essenmidi.html
 
 variable midi-byte0 : m0 midi-byte0 @ ;
 variable midi-byte1 : m1 midi-byte1 @ ;
@@ -35,9 +36,9 @@ variable nrpn-val-lo
 : _dup over over ;
 : _drop 2drop ;    
 
-macro \ trampoline for far away jump addresses
-: .. i/c . ;
-forth  
+\ Insert jump to compiled macro.  Easy way to work around long jump
+\ addresses in route tables.
+macro : .. i/c . ; forth  
     
 \ low-level synth parameters are available through NRPN.
 : commit-nrpn
@@ -60,16 +61,12 @@ forth
  
 
 : m-interpret \ --
-    m0-route
+    m0-cmd route
         8x . 9x .    . Bx .
            .    . Ex .    ;
 
-\ Needs to be a macro.  WHY?    
-macro    
-: m0-route
-    m0 rot>>4 8 - 7 and
-    route ;
-forth
+: m0-cmd \ 0-7 | maps 9x-Fx to 0-7 for route command
+    m0 rot>>4 8 - 7 and ;
         
 \ Guard: aborts call if condition is not met.
 : ~chan
@@ -145,14 +142,15 @@ variable synth-save
     
 \ Note this only works properly with d=i if the message is
 \ well-formed.
-    
+
+\ NOT TESTED       
 : i>m \ --
     \ Postcondition is valid midi frame in midi-byte0/1/2.  Replace a
     \ non-command byte with dummy active sensing byte, effectively
     \ ignoring it.
     i> 1st 7 low? if drop #xFE then
     midi-byte0 !
-    m0-route
+    m0-cmd route
         i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
         i>m12 . i>m1  . i>m12 .       ; \ C D E F
 
@@ -170,29 +168,29 @@ variable synth-save
 \ USB is named from pov. of host.  For midi words below, we use a
 \ slightly less awkward device-centered view.
     
-: usb-midi-out-begin midi-EP 4 IN-begin ;
-: usb-midi-out-end   IN-end midi-EP IN-flush ;
+\ : usb-midi-out-begin midi-EP 4 IN-begin ;
+\ : usb-midi-out-end   IN-end midi-EP IN-flush ;
 
 : usb-midi-in-begin  midi-EP 4 OUT-begin ;
 : usb-midi-in-end    OUT-end ;
     
 
-\ FIXME: connect any panel pots to send out CC    
-: note-on>usb \ note --
-    usb-midi-out-begin
-        #x09 >a  \ cable, class
-        #x90 >a  \ note on channel 0
-             >a  \ note value
-        127  >a  \ velocity
-    usb-midi-out-end ;
+\ TESTED.  Connect any panel pots to send out CC    
+\ : note-on>usb \ note --
+\     usb-midi-out-begin
+\         #x09 >a  \ cable, class
+\         #x90 >a  \ note on channel 0
+\              >a  \ note value
+\         127  >a  \ velocity
+\     usb-midi-out-end ;
     
-: note-off>usb \ note --
-    usb-midi-out-begin
-        #x08 >a  \ cable, class
-        #x80 >a  \ note on channel 0
-             >a  \ note value
-        127  >a  \ velocity
-    usb-midi-out-end ;
+\ : note-off>usb \ note --
+\     usb-midi-out-begin
+\         #x08 >a  \ cable, class
+\         #x80 >a  \ note on channel 0
+\              >a  \ note value
+\         127  >a  \ velocity
+\     usb-midi-out-end ;
 
 : usb>m \ -- 
     usb-midi-in-begin

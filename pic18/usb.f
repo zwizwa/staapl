@@ -641,7 +641,7 @@ macro
 : usb-descriptors
     \ FIXME: no bounds check
     >m ' route compile m>
-        [ descriptor-compiler i/c* . ]
+        [ descriptor-compiler raw-i/c . ]
         for-list ;
 
 \ see dip40kit.fm for example

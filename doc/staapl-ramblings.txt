@@ -65077,3 +65077,12 @@ macro
     route ;
 forth
      
+
+Maybe it has something to do with the tail call stuff:
+
+macro
+: route
+    _route              \ proper call
+    end: ;              \ avoids optimization into tail call
+forth
+  
