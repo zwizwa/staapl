@@ -51,10 +51,19 @@ forth
 \ : print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
     
 : notes-last \ -- note
-    nb-notes @ 0 = if #xFF ; then
-    a!notes-endx 1a-! a> ;
+    nb-notes @ 0 = if
+        #xFF
+    else 
+        a!notes-endx 1a-! a>
+    then 
+    \ ` last: .sym ts
+    \ print-notes
+    ;
+    
     
 : notes-add \ note --
+    \ ` add: .sym ts
+    \ print-notes
     nb-notes @ nb-notes-max = if drop ; then 
     dup notes-index #xFF = if
         a!notes-endx >a

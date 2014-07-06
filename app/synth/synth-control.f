@@ -196,7 +196,7 @@ variable oct
 : p2@  _p2@ nip ;
 
 
-: midi \ midinote -- bassnote  | oct contains octave
+: midi>note \ notenumer -- bassnote  | oct contains octave
     24 - \ FIXME: find correct note and clip range
     0 oct !
     begin

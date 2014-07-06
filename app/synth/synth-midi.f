@@ -2,12 +2,12 @@ staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/stdin
 staapl pic18/cond
+staapl pic18/afregs
 
 load midi-arp.f  \ keep track of which keys are pressed and in which order
 \ load debug.f
 
 
-variable midi-cin \ USB only
 variable midi-byte0 : m0 midi-byte0 @ ;
 variable midi-byte1 : m1 midi-byte1 @ ;
 variable midi-byte2 : m2 midi-byte2 @ ;
@@ -57,19 +57,30 @@ forth
 
 
         
-\ Guard word: aborts call if condition is not met.
-: ~chan m0 #x0F and 0 = if ; then xdrop ;
-  
-\ Handle USB MIDI Code Index Number
+ 
 
+: m-interpret \ --
+    m0-route
+        8x . 9x .    . Bx .
+           .    . Ex .    ;
+
+\ Needs to be a macro.  WHY?    
+macro    
+: m0-route
+    m0 rot>>4 8 - 7 and
+    route ;
+forth
+        
+\ Guard: aborts call if condition is not met.
+: ~chan
+    \ psps m-print
+    m0 #x0F and 0 = if ; then xdrop ;
+    
 : 9x ~chan  m1 notes-add    play-last ;
 : 8x ~chan  m1 notes-remove play-last ;
 : Bx ~chan  CC  ;
 : Ex ~chan  m2 << pitch-lo ! m2 pitch-hi ! ;
     
-: pm12  m1 px m2 px cr ; \ pitchbend
-    
-: .synth ` synth: .sym  synth @ px cr ;
     
 
 
@@ -79,9 +90,10 @@ variable synth-save
     
 \ from midi-arp.f : get most recently pressed active key    
 : play-last
+    \ print-notes
     notes-last #xFF = if silence ; then
-    notes-last midi note0
-    \ square
+    notes-last midi>note note0 \ set p0 according to midi note
+    square
 : restore-synth    
     synth-save @ synth !
     ;
@@ -109,29 +121,23 @@ variable synth-save
         ____ . ____ . CC62 . CC63 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 6
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ ; \ 7
 
-\ Attempt to use as the same code for USB and good old current loop
-\ calbe MIDI.
 
-\ For old MIDI, the messages are not segmented so need "smart parsing"
-\ if we want to get to a message payload before the next command byte
-\ arrives.
+\ USB PACKET / STREAM
 
-\ It's always possible to segment based on command bytes, but that
-\ introduces one byte delay.  Might not be a huge problem if the
-\ device also sends tick messages.
+\ usb>m | For USB MIDI, data is packetized already.
+\ i>m   | For MIDI streams, the messages are not segmented so need
+\ "smart parsing" if we want to get to a message payload before the
+\ next command byte arrives.
 
-\ So the idea is to have two entry points to this, one for usb and one
-\ for cable midi.  Both call midi-route when a message has arrived.
-\ Currently sysex is not supported (handle as a side-channel?)
-
-        
+\ ( It's always possible to segment based on command bytes, but that
+\ introduces one byte delay.  This might actually not be a huge
+\ problem if the device also sends tick messages. )
 
 
-\ save data bytes and enterpret message    
-: i>m1  i> midi-byte1 ! ;
-: i>m2  i> midi-byte2 ! ;
-: i>m12 i>m1 i>m2 ;
-    
+
+\ STREAM        
+
+
 
 \ For MIDI cable, this can be called in a polling loop with i> set to
 \ the UART input.  For midi USB this is called once per loop with i>
@@ -141,87 +147,83 @@ variable synth-save
 \ well-formed.
     
 : i>m \ --
-    i> 1st 7 low? if drop ; then \ resync
+    \ Postcondition is valid midi frame in midi-byte0/1/2.  Replace a
+    \ non-command byte with dummy active sensing byte, effectively
+    \ ignoring it.
+    i> 1st 7 low? if drop #xFE then
     midi-byte0 !
-    m0 midi-cmd-route
+    m0-route
         i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
         i>m12 . i>m1  . i>m12 .       ; \ C D E F
 
-: i:midi \ --
-    i>m midi-route ;
-    
-: midi-route \ --
-    m0 midi-cmd-route
-        8x . 9x .    . Bx .
-           .    . Ex .    ;
-
-: midi-cmd-route rot>>4 8 - 7 and dup px route ;
+: i>m1       i> midi-byte1 ! ;
+: i>m12 i>m1 i> midi-byte2 ! ;
 
 
-: a!midi-cin midi-cin 0 a!! ;
-: m-clear a!midi-cin 4 for 0 >a next ;
-: m-print a!midi-cin 4 for a> px next cr ;
-: m-test 2 1 #x90 d>i i>m ;    
+
         
-\ USB MIDI connected to EP 3
 
-: midi-EP 3 ;
+
+\ USB PACKET 
+
 
 \ USB is named from pov. of host.  For midi words below, we use a
 \ slightly less awkward device-centered view.
     
-: midi-out-begin midi-EP 4 IN-begin ;
-: midi-out-end   IN-end midi-EP IN-flush ;
+: usb-midi-out-begin midi-EP 4 IN-begin ;
+: usb-midi-out-end   IN-end midi-EP IN-flush ;
 
-: midi-in-begin  midi-EP 4 OUT-begin ;
-: midi-in-end    OUT-end ;
+: usb-midi-in-begin  midi-EP 4 OUT-begin ;
+: usb-midi-in-end    OUT-end ;
     
 
 \ FIXME: connect any panel pots to send out CC    
-: note-on \ note --
-    midi-out-begin
+: note-on>usb \ note --
+    usb-midi-out-begin
         #x09 >a  \ cable, class
         #x90 >a  \ note on channel 0
              >a  \ note value
         127  >a  \ velocity
-    midi-out-end ;
+    usb-midi-out-end ;
     
-: note-off \ note --
-    midi-out-begin
+: note-off>usb \ note --
+    usb-midi-out-begin
         #x08 >a  \ cable, class
         #x80 >a  \ note on channel 0
              >a  \ note value
         127  >a  \ velocity
-    midi-out-end ;
+    usb-midi-out-end ;
 
-
-: midi-in \ -- class
-    midi-in-begin
-        a> midi-cin !
+: usb>m \ -- 
+    usb-midi-in-begin
+        a> drop  \ we don't use USB Code Index Number
         a> midi-byte0 !
         a> midi-byte1 !
         a> midi-byte2 !
-    midi-in-end ;
-
-\ : note-in  begin midi-in m0 #x90 = until m1 ;
+    usb-midi-in-end ;
         
 
-        
-
-       
 : midi-poll-once
-    \ psps
-    midi-in midi-cin @ #x0F and route
-           .    .    .    .
-           .    .    .    .
-        8x . 9x .    . Bx .
-           .    . Ex .    ;
-
-: midi-poll begin midi-poll-once again
-        
+    usb>m
+    \ m0 #xF8 = not if m-print then
+    \ i>r midi-uart>i i>m r>i  \ or something like that..
+    m-interpret ;
+    
 : go
     square synth @ synth-save ! silence
     init-notes engine-on 
-    begin midi-poll-once rx-ready? until ;
+    begin
+        \ psps
+        midi-poll-once
+    rx-ready? until ;
 
+
+
+\ DEBUG: comment-out in standalone version
+\ : a!midi-bytes midi-byte0 0 a!! ;
+\ : m-clear a!midi-bytes 3 for 0 >a next ;
+\ : m-print a>r a!midi-bytes 3 for a> px next cr r>a ;
+\ : m-test 2 1 #x90 d>i i>m ;    
+\ : .synth ` synth: .sym  synth @ px cr ;
+: pm12  m1 px m2 px cr ;
     

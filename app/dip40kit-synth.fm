@@ -58,8 +58,11 @@ load debug.f
 
 macro
 : fosc 48000000 ;
+\ USB endpoint constants: see synth-usb.rkt
+\ control:0, ACM data:1, ACM control:2, MIDI:3 
+: total-EP   4 ; 
 : monitor-EP 1 ;
-: total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3    
+: midi-EP    3 ;
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
   
