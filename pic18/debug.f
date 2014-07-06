@@ -32,43 +32,42 @@ staapl pic18/vector
     
 \ Send RPC command token and payload bytes from stdin.
     
-: rpc \ n token --
+: i:rpc \ n token --
     >r dup
     1 + tx-begin-rpc     \ start RPC command packet
     r> transmit          \ send token
     for i> transmit next \ send payload
     tx-end-rpc ;
 
-: list>h
-    0 rpc ; \ n --
+: i:list>h
+    0 i:rpc ; \ n --
     
-: fcmd \ lo hi --
+: i:fcmd \ lo hi --
     af>r       \ Let host clobber a&f during execution of command.
     fstring>i  \ Pascal string from flash
-    1 rpc      \ see host-rpc / host-rpc-cmd in tethered.rkt  (uses `live:')
+    1 i:rpc    \ see host-rpc / host-rpc-cmd in tethered.rkt  (uses `live:')
     r>af ;
 
-: fstring>i \ lo hi -- n
-    f!! f>i i> ;
+
     
 
-\ Connect stdin to different streams   
-: alist>h a>i list>h ; \ RAM
-: flist>h f>i list>h ; \ Flash
-: dlist>h d>i list>h ; \ datastack
-: 1list>h 1 dlist>h ;  \ 1 byte
+    
+    
 
-: fstring fstring>i list>h ; \ Like flist>h but send Pascal string (== size prefixed)    
+\ Send list from different streams, restoring user's stdin.
+: alist>h i>r a>i i:list>h r>i ; \ RAM
+: flist>h i>r f>i i:list>h r>i ; \ Flash
+: dlist>h i>r d>i i:list>h r>i ; \ datastack
 
-\ Convenient macro for compiling symbolic word to a Flash string (as a
-\ word that saves the address of the string in the f register) and
-\ invoking fcmd.  To execute kb host command, do: ` kb host
+: 1list>h 1 dlist>h ;                  \ 1 byte
 
-\ sym>f overwrites the f register, so we save it.  Might as well save
-\ the a register here so host can clobber it during the RPC call,
-\ avoiding an expensive round-trip delay for host to save/restore the
-\ reg.
-   
+: fstring>h i>r fstring>i i:list>h r>i ; \ Flash Pascal string (== size prefixed)    
+: fstring>i f!! f>i i> ;                 \ lo hi -- n
+
+: fcmd i>r i:fcmd r>i ;   
+
+    
+\ Execute host command <cmd> as ` <cmd> host
 macro
 : host sym fcmd ;
 forth
@@ -92,20 +91,12 @@ forth
 
 : >h    ` t> host ;  \ Byte to host stack
 
-: emit     1list>h hlp ;
-: cr       #x0A emit ;
-
-: .fstring fstring hlp ;
-
+: emit  i>r 1list>h hlp r>i ;
 : adump alist>h hlpxa ;
 : fdump alist>h hlpxa ;    
-
-macro
-: .sym  sym .fstring ;
-forth
-
-
-
+    
+macro : .sym     sym .fstring ;
+forth : .fstring fstring>h hlp ;
 
 \ : rst ack
 \     UCON USBEN low \ turn off USB machinery
@@ -125,5 +116,5 @@ forth
     
 \ print data and retain stack pointers    
 : psps  FSR0L @ px FSR1L @ px cr ; 
-  
+: cr    #x0A emit ;  
   

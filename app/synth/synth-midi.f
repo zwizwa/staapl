@@ -1,6 +1,7 @@
 staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/stdin
+staapl pic18/cond
 
 load midi-arp.f  \ keep track of which keys are pressed and in which order
 \ load debug.f

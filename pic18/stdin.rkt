@@ -12,11 +12,11 @@ staapl pic18/vector
 
 \ Save/restore stdin
 
-: stdin>r
+: i>r
     stdin @ >r
     stdin 1 + @ >r ;
 
-: r>stdin
+: r>i
     r> stdin 1 + !
     r> stdin ! ;
 
