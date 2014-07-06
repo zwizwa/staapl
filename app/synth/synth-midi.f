@@ -127,33 +127,42 @@ variable synth-save
         
 
 
-    
-: M0                                 midi-route ;
-: M1 i> midi-byte1 !                 midi-route ;
-: M2 i> midi-byte1 ! i> midi-byte2 ! midi-route ;
+\ save data bytes and enterpret message    
+: i>m1  i> midi-byte1 ! ;
+: i>m2  i> midi-byte2 ! ;
+: i>m12 i>m1 i>m2 ;
     
 
 \ For MIDI cable, this can be called in a polling loop with i> set to
 \ the UART input.  For midi USB this is called once per loop with i>
 \ set to a> in the buffer.
     
-: i>midi-bytes \ --
-    i>
-: cmd>midi-bytes \ cmd --
-    1st 7 low? if drop ; next \ resync
+\ Note this only works properly with d=i if the message is
+\ well-formed.
+    
+: i>m \ --
+    i> 1st 7 low? if drop ; then \ resync
     midi-byte0 !
-    cmd-route
-        M2 . M2 . M2 . M2 . \ 8 9 A B
-        M2 . M1 . M2 . M0 ; \ C D E F
+    m0 midi-cmd-route
+        i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
+        i>m12 . i>m1  . i>m12 .       ; \ C D E F
 
-: midi-route
-    m0 cmd-route
+: i:midi \ --
+    i>m midi-route ;
+    
+: midi-route \ --
+    m0 midi-cmd-route
         8x . 9x .    . Bx .
            .    . Ex .    ;
 
-: cmd-route rot>>4 8 - 7 and route ;
+: midi-cmd-route rot>>4 8 - 7 and dup px route ;
 
 
+: a!midi-cin midi-cin 0 a!! ;
+: m-clear a!midi-cin 4 for 0 >a next ;
+: m-print a!midi-cin 4 for a> px next cr ;
+: m-test 2 1 #x90 d>i i>m ;    
+        
 \ USB MIDI connected to EP 3
 
 : midi-EP 3 ;

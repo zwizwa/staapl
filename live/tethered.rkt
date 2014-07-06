@@ -326,7 +326,7 @@
 
 (define (hlp   bytes) (display (list->bytes bytes)))
 (define (hlpx  bytes) (hexdump bytes))
-(define (hlpxa bytes) (hexdump bytes #t))
+(define (hlxpa bytes) (hexdump bytes #t))
 (define (htrc  bytes) (trace-hook (car (bytes->words bytes))))
 
 ;; Dump RAM memory region, word size arguments.
