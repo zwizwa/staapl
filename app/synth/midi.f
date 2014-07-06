@@ -8,6 +8,7 @@ load midi-arp.f  \ keep track of which keys are pressed and in which order
 \ load debug.f
 
 \ https://ccrma.stanford.edu/~craig/articles/linuxmidi/misc/essenmidi.html
+\ http://www.nortonmusic.com/midi_cc.html
 
 variable midi-byte0 : m0 midi-byte0 @ ;
 variable midi-byte1 : m1 midi-byte1 @ ;
@@ -16,10 +17,10 @@ variable midi-byte2 : m2 midi-byte2 @ ;
 variable pitch-lo  \ low  byte from midi, shifted left one bit
 variable pitch-hi  \ high byte from midi
 
-variable nrpn-addr-hi
 variable nrpn-addr-lo
-variable nrpn-val-hi
+variable nrpn-addr-hi
 variable nrpn-val-lo
+variable nrpn-val-hi
 : nrpn-val15 \ -- lo hi | convert to 15-bit value
     nrpn-val-lo @ rot<<
     nrpn-val-hi @ ;
@@ -54,8 +55,9 @@ macro : .. i/c . ; forth
         [ _p1    ] ..  \ 2
         [ _p2    ] ..  \ 3
         [ _synth ] ..  \ 4
-        _drop ;  \ ignore rest
-
+        _drop          \ ignore rest
+        ` ignore:nrpn: .sym print-nrpn
+        ;
 
         
  
@@ -63,7 +65,7 @@ macro : .. i/c . ; forth
 : m-interpret \ --
     m0-cmd route
         8x . 9x .    . Bx .
-           .    . Ex .    ;
+        Cx .    . Ex .    ;
 
 : m0-cmd \ 0-7 | maps 9x-Fx to 0-7 for route command
     m0 rot>>4 8 - 7 and ;
@@ -75,7 +77,8 @@ macro : .. i/c . ; forth
     
 : 9x ~chan  m1 notes-add    play-last ;
 : 8x ~chan  m1 notes-remove play-last ;
-: Bx ~chan  CC  ;
+: Bx ~chan  continuous-controller  ;
+: Cx ~chan  m1 program-change ;    
 : Ex ~chan  m2 << pitch-lo ! m2 pitch-hi ! ;
     
     
@@ -89,7 +92,7 @@ variable synth-save
 : play-last
     \ print-notes
     notes-last #xFF = if silence ; then
-    notes-last midi>note note0 \ set p0 according to midi note
+    notes-last midi-note _p0 \ set p0 according to midi note
     square
 : restore-synth    
     synth-save @ synth !
@@ -98,15 +101,15 @@ variable synth-save
 \ Controllers should set meaningful high level values.  The synth
 \ engine is already fully controllable through NRPN.
     
-: CC57
+: CC57 midi>note
 : CC58 
 : CC59 
 : CC5A 
 : CC55 
 : ____ drop ` ignore:cc: .sym pm12 ;
     
-\ controller jump table.  this is sparse but we have plenty of room in Flash
-: CC 
+\ jump table is sparse but we have plenty of room in Flash
+: continuous-controller
     m2 m1 #x7F and route
         \  0      1      2      3      4      5      6      7      8      9      A      B      C      D      E      F
         ____ . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
@@ -118,6 +121,15 @@ variable synth-save
         ____ . ____ . CC62 . CC63 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 6
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ ; \ 7
 
+
+\ Eventually it might be interesting to find out a generic patch
+\ format, but for now these are best pre-defined.
+        
+: program-change \ program --
+    2 min route
+        square .
+        ;
+    
 
 \ USB PACKET / STREAM
 
@@ -224,4 +236,5 @@ variable synth-save
 \ : m-test 2 1 #x90 d>i i>m ;    
 \ : .synth ` synth: .sym  synth @ px cr ;
 : pm12  m1 px m2 px cr ;
+: print-nrpn a>r nrpn-addr-lo 0 a!! 2 for a> a> _px next cr r>a ;
     

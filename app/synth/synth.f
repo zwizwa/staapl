@@ -39,12 +39,12 @@ staapl pic18/task
 
 \ application
 
-load synth-core.f
-load synth-control.f
-load synth-soundgen.f
+load core.f
+load control.f
+load soundgen.f
 
-load synth-patch.f
-load synth-example.f
+load patch.f
+load example.f
 
 load sounds.f
 

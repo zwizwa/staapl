@@ -44,16 +44,15 @@ staapl pic18/task
 staapl pic18/geo  \ scheme extension module
 staapl pic18/route    
 
-load synth/synth-core.f
-load synth/synth-control.f
-load synth/synth-soundgen.f
+load synth/core.f      \ core timer ISRs
+load synth/control.f   \ patch / period control
+load synth/soundgen.f  \ highlevel sounds
+load synth/notes.f     \ note memory
+\ load synth/midi.f      \ midi control
+\ load synth/patch.f     \ old patch stuff
+\ load synth/example.f
+\ load synth/sounds.f    \ collection of sounds
 
-load synth/synth-patch.f
-load synth/synth-example.f
-
-load synth/sounds.f
-
-\ load synth/synth-midi.f
 load debug.f
 
 macro

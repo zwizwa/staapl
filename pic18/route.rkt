@@ -9,10 +9,10 @@ provide-all
 
 macro
 : route
-    _route              \ proper call
-    end: ;              \ avoids optimization into tail call
+    _route     \ proper call
+    end: ;     \ avoids tail call if route is followed by . or ;
 : route/e
-    _route/e            \ proper call
-    end: ;              \ avoids optimization into tail call
+    _route/e
+    end: ;
 forth
   

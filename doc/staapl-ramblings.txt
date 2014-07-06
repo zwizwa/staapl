@@ -65086,3 +65086,23 @@ macro
     end: ;              \ avoids optimization into tail call
 forth
   
+Ok I get it.  If route is followed by '.' it results in a tail call.
+
+
+Entry: New name
+Date: Sun Jul  6 18:14:25 EDT 2014
+
+So what should the successor of sheep be called?
+Goat of course!
+
+
+
+Entry: New modulation structure
+Date: Sun Jul  6 18:46:39 EDT 2014
+
+XMOD / PWM should probably be configured as fixed offset wrt. Base
+osc.  This keeps the beating constant over the note range.
+
+Let's use the same mechanism as note translation for controller
+translation.  What CCs to use?
+

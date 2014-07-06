@@ -1,4 +1,4 @@
-load synth/synth.f   \ synth core
+load synth.f   \ synth core
 load debug.f
 \ Disable interrupts during PK2 comm.  Note that it might be best to
 \ use a packet approach: write a report to a region of ram and dump it
