@@ -81,13 +81,13 @@ forth
     
 \ low-level synth parameters are available through NRPN.
 : commit-nrpn
-    psps
+    \ psps
     nrpn-addr-hi @ 0 = not if ; then \ ignore
     nrpn-val15
     nrpn-addr-lo @
-    ` nrpn: .sym ts
+    \ ` nrpn: .sym ts
     1 - 4 min
-    ts
+    \ ts
     route
         [ _p0    ] ..  \ 1
         [ _p1    ] ..  \ 2
