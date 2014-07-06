@@ -500,30 +500,39 @@ forth
 : a!iptr   a!iptr-array buf@ al +! ;       \ index register address
 
 
-: idx      a!iptr a> ;                       \ -- i   | just get index
-: idx+     a!iptr a> dup >r + a!iptr >a r> ; \ n -- i | get index, postincrement pointer by n
-: a!box+   idx+ #x3F and a!buf al +! ;       \ n --   | a points to "box", index is incremented by n
+: bufidx   a!iptr a> ;                       \ -- i   | just get index
+: bufidx+  a!iptr a> dup >r + a!iptr >a r> ; \ n -- i | get index, postincrement pointer by n
+: a!box+   bufidx+ #x3F and a!buf al +! ;    \ n --   | a points to "box", index is incremented by n
 
 : iptr-rst a!iptr 0 >a ;
 
-: bd-len   a!bufdes a> drop a> ;
+: a!buflen a!bufdes 1 al +! ;    
+: buflen   a!buflen a> ;
 
 macro : buf-ready? a!bufdes INDF2 7 low? ;
 forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     
 
-\ pump: do IN / OUT transaction if necessary    
-: pump-OUT
-    idx bd-len = not if ; then
+\ pump: do IN / OUT transaction if necessary + wait for action to complete.
+: ack-OUT
+    bufidx buflen = not if ; then
     64 ep OUT/DATA+
-    iptr-rst buf-wait ;
+    iptr-rst ;
+: pump-OUT
+    ack-OUT
+    buf-wait ;
 
 : pump-IN
-    idx #x40 = not if ; then
+    bufidx #x40 = not if ; then
 : force-pump-IN
-    idx ep IN/DATA+
-    iptr-rst buf-wait ;
-    
+    bufidx ep IN/DATA+
+    iptr-rst buf-wait
+    a!buflen 64 >a
+    ;
+
+
+\ Note: For multi-byte reads or writes, no checks are performed on the
+\ buffer sizes!  Check using buflen or bufidx if necessary.
 
 : OUT> \ ep -- val
     1 OUT-begin a> OUT-end ;
@@ -533,6 +542,7 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
         pump-OUT    \ if fully read, ack buffer and wait for more data from host
         r> a!box+ ; \ setup read using a, advancing index
 : OUT-end \ --
+        ack-OUT     \ In case we've read all, best to return the buffer now.
     r>a ;
 
 : >IN  \ val ep --
@@ -549,6 +559,20 @@ forth : buf-wait   begin buf-ready? until ; \ poll UOWN until we own the bd
     a>r IN! force-pump-IN r>a ;
     
 
+\ Polling:
+\
+\ - OUT data is ready when UOWN=0 and len < buf size.
+\
+\ - UOWN=1 means definitely no data ready
+\
+\ - UOWN=0 and len == buf size means there might be data in the host
+\   but we don't know because we're blocking the buffer.  This case
+\   might is handled by calling ack-OUT after reading.
+    
+macro
+: buf-left   
+forth
+    
 
 \ debug
 \ : pa al @ ah @ ` _px host ;
