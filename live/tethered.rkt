@@ -321,20 +321,23 @@
 ;; functions are automatically lifted to scat words, and target will
 ;; push a byte buffer to the host stack before these words are
 ;; executed.
-(define (pb  bytes) (display (list->bytes bytes)))
-(define (ph  bytes) (hexdump bytes))
-(define (pha bytes) (hexdump bytes #t))
-(define (trc bytes) (trace-hook (car (bytes->words bytes))))
+
+;; Names are kept short because they are stored as Flash strings.
+
+(define (hlp   bytes) (display (list->bytes bytes)))
+(define (hlpx  bytes) (hexdump bytes))
+(define (hlpxa bytes) (hexdump bytes #t))
+(define (htrc  bytes) (trace-hook (car (bytes->words bytes))))
 
 ;; Dump RAM memory region, word size arguments.
 
-(define (_ad bytes)
-  (apply (hex-dump-bytes a! a>/b)
-         (bytes->words bytes)))
+;(define (_ad bytes)
+;  (apply (hex-dump-bytes a! a>/b)
+;         (bytes->words bytes)))
 
-(define (_fd bytes)
-  (apply (hex-dump-bytes f! f>/b)
-         (bytes->words bytes)))
+;(define (_fd bytes)
+;  (apply (hex-dump-bytes f! f>/b)
+;         (bytes->words bytes)))
 
 (define (texec/sym sym [texec texec/b])
   (let ((addr (target-find-realm sym 'code)))

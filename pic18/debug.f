@@ -18,7 +18,7 @@ staapl pic18/vector
 \ from 'jsr/ack'.  The rest are tail calls.  If there is no previous
 \ stack frame, don't do anything.
 
-: continue  STKPTR @ 3 _>= if pop pop then ;
+: continue  STKPTR @ 3 >= if pop pop then ;
 
 
 \ After issuing RPC packet, fall into interpreter.  During the RPC
@@ -77,7 +77,7 @@ forth
 \ send out current execution point.
 : trace
     xh @ xl @ 2 dlist>h
-    ` trc host ;
+    ` htrc host ;
 
 \ For sending log data from target to host, it seems simplest to just
 \ send a "pull" command to host and let it control the data transfer,
@@ -85,33 +85,26 @@ forth
 \ word.  Dictionaries scanned are: host, scat, and scheme
     
     
- 
-: pb  ` pb host ;
-: ph  ` ph host ;
-: pha ` pha host ;
-: >h  ` t> host ;  \ Byte to host stack
-: ts  ` ts host ;
-: px  ` px host ;
+\ Operations on list on host stack.
+: hlp   ` hlp   host ;  \ host list print
+: hlpx  ` hlpx  host ;  \ host list print hex
+: hlpxa ` hlpxa host ;  \ host list print hex + ascii
 
+: >h    ` t> host ;  \ Byte to host stack
 
-    
-: emit     1list>h pb ;
-: .fstring fstring pb ;
+: emit     1list>h hlp ;
+: cr       #x0A emit ;
 
-: adump alist>h pha ;
-: fdump alist>h pha ;    
+: .fstring fstring hlp ;
+
+: adump alist>h hlpxa ;
+: fdump alist>h hlpxa ;    
 
 macro
 : .sym  sym .fstring ;
 forth
 
 
-\ FIXME: words like _>= should go into a library, or at least "if"
-\ should be able to interpret real stack words so predicates can be
-\ implemented as functions.
-macro    
-: _>= - nfdrop c? ;
-forth     
 
 
 \ : rst ack
@@ -120,8 +113,17 @@ forth
   \     reset ;
 
 
-\ misc useful things
-: psps  FSR0L @ px FSR1L @ px cr ; \ print stack pointers
-: cr    #x0A emit ;                \ carriage return
+\ Host commands operating on target stack / memory directly.    
+: ts  ` ts  host ;
+: p   ` p   host ;
+: px  ` px  host ;
+: _p  ` _p  host ;
+: _px ` _px host ;
+
+
+\ misc tools
+    
+\ print data and retain stack pointers    
+: psps  FSR0L @ px FSR1L @ px cr ; 
   
   

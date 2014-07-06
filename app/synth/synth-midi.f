@@ -121,10 +121,12 @@ variable synth-save
 
 \ So the idea is to have two entry points to this, one for usb and one
 \ for cable midi.  Both call midi-route when a message has arrived.
-\ Currently sysex is not supported.
+\ Currently sysex is not supported (handle as a side-channel?)
 
-: midi-route ;        
         
+
+
+    
 : M0                                 midi-route ;
 : M1 i> midi-byte1 !                 midi-route ;
 : M2 i> midi-byte1 ! i> midi-byte2 ! midi-route ;
@@ -139,13 +141,16 @@ variable synth-save
 : cmd>midi-bytes \ cmd --
     1st 7 low? if drop ; next \ resync
     midi-byte0 !
-    rot>>4 8 - 7 and route
+    cmd-route
         M2 . M2 . M2 . M2 . \ 8 9 A B
         M2 . M1 . M2 . M0 ; \ C D E F
-        
 
-        
+: midi-route
+    m0 cmd-route
+        8x . 9x .    . Bx .
+           .    . Ex .    ;
 
+: cmd-route rot>>4 8 - 7 and route ;
 
 
 \ USB MIDI connected to EP 3

@@ -10,6 +10,7 @@ staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/afregs
 staapl pic18/serial
+staapl pic18/cond
 
 \ --------------- DRIVER --------------
 
@@ -125,7 +126,6 @@ macro
 : a> @a+ ;
 : >a !a+ ;
 : f> @f+ ;
-: = - nfdrop z? ; \ a b -- ?
 forth
   
 
