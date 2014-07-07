@@ -16,10 +16,13 @@ staapl pic18/vector
 \ interpreter at the point of the executed command is 2 levels deep:
 \ one for the call from the 'interpreter' loop, and one for the call
 \ from 'jsr/ack'.  The rest are tail calls.  If there is no previous
-\ stack frame, don't do anything.
+\ stack frame top pop, don't pop it!
 
 : continue  STKPTR @ 3 >= if pop pop then ;
 
+
+\ Software breakpoint.  Use 'continue' to resume execution.    
+: break     ack interpreter ;
 
 \ After issuing RPC packet, fall into interpreter.  During the RPC
 \ call the host can use us as a resource.  When host is done it will

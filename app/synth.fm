@@ -35,19 +35,26 @@ staapl pic18/vector
 \ copied from synth.f - we don't have the panel on this board and
 \ setup is a little different.
     
+staapl pic18/afregs
+staapl pic18/compose-macro
+staapl pic18/cond
+staapl pic18/double-hacks
+staapl pic18/double-math
 staapl pic18/execute
-staapl pic18/vector
-staapl pic18/route
+staapl pic18/geo  \ scheme extension module  (FIXME: use .rkt module here)
 staapl pic18/prom \ FIXME: sti
+staapl pic18/route
 staapl pic18/_table
 staapl pic18/task
-staapl pic18/geo  \ scheme extension module
-staapl pic18/route    
+staapl pic18/vector    
 
+    
 load synth/core.f      \ core timer ISRs
 load synth/control.f   \ patch / period control
 load synth/soundgen.f  \ highlevel sounds
 load synth/notes.f     \ note memory
+load synth/midi-nrpn.f \ direct parameter access
+    
 \ load synth/midi.f      \ midi control
 \ load synth/patch.f     \ old patch stuff
 \ load synth/example.f

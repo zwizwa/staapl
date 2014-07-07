@@ -3,9 +3,8 @@ staapl pic18/compose-macro
 staapl pic18/stdin
 staapl pic18/cond
 staapl pic18/afregs
-
-load midi-arp.f  \ keep track of which keys are pressed and in which order
-\ load debug.f
+staapl pic18/double-math
+staapl pic18/vector
 
 \ https://ccrma.stanford.edu/~craig/articles/linuxmidi/misc/essenmidi.html
 \ http://www.nortonmusic.com/midi_cc.html
@@ -14,52 +13,15 @@ variable midi-byte0 : m0 midi-byte0 @ ;
 variable midi-byte1 : m1 midi-byte1 @ ;
 variable midi-byte2 : m2 midi-byte2 @ ;
     
-variable pitch-lo  \ low  byte from midi, shifted left one bit
-variable pitch-hi  \ high byte from midi
+2variable pitch-mod  \ low  byte from midi, shifted left one bit
+2variable mod1       
 
-variable nrpn-addr-lo
-variable nrpn-addr-hi
-variable nrpn-val-lo
-variable nrpn-val-hi
-: nrpn-val15 \ -- lo hi | convert to 15-bit value
-    nrpn-val-lo @ rot<<
-    nrpn-val-hi @ ;
   
-\ NRPN CC
-: CC63 nrpn-addr-hi ! ; 
-: CC62 nrpn-addr-lo ! ; 
-: CC06 nrpn-val-hi ! ;
-: CC26 nrpn-val-lo !
-    \ This is optional in midi spec, though we require it to start
-    \ transaction
-    commit-nrpn ; 
+\ During silence we need to save synth config.
+variable synth-save    
 
-: _dup over over ;
-: _drop 2drop ;    
-
-\ Insert jump to compiled macro.  Easy way to work around long jump
-\ addresses in route tables.
-macro : .. i/c . ; forth  
-    
-\ low-level synth parameters are available through NRPN.
-: commit-nrpn
-    \ psps
-    nrpn-addr-hi @ 0 = not if ; then \ ignore
-    nrpn-val15
-    nrpn-addr-lo @
-    \ ` nrpn: .sym ts
-    1 - 4 min
-    \ ts
-    route
-        [ _p0    ] ..  \ 1
-        [ _p1    ] ..  \ 2
-        [ _p2    ] ..  \ 3
-        [ _synth ] ..  \ 4
-        _drop          \ ignore rest
-        ` ignore:nrpn: .sym print-nrpn
-        ;
-
-        
+\ Main pitch
+variable period
  
 
 : m-interpret \ --
@@ -70,30 +32,23 @@ macro : .. i/c . ; forth
 : m0-cmd \ 0-7 | maps 9x-Fx to 0-7 for route command
     m0 rot>>4 8 - 7 and ;
         
-\ Guard: aborts call if condition is not met.
-: ~chan
-    \ psps m-print
-    m0 #x0F and 0 = if ; then xdrop ;
+\ Guard: aborts caller if incorrect channel.
+: ~chan m0 #x0F and 0 = if ; then xdrop ;
     
 : 9x ~chan  m1 notes-add    play-last ;
 : 8x ~chan  m1 notes-remove play-last ;
 : Bx ~chan  continuous-controller  ;
 : Cx ~chan  m1 program-change ;    
-: Ex ~chan  m2 << pitch-lo ! m2 pitch-hi ! ;
-    
+: Ex ~chan  m1 m2 pitch-mod 2! ;
     
 
-
-\ During silence we need to save synth config.
-variable synth-save    
-
-    
-\ from midi-arp.f : get most recently pressed active key    
 : play-last
     \ print-notes
     notes-last #xFF = if silence ; then
-    notes-last midi-note _p0 \ set p0 according to midi note
-    square
+    notes-last midi-note
+    _dup period 2!
+    _p0
+    \ square
 : restore-synth    
     synth-save @ synth !
     ;
@@ -101,7 +56,7 @@ variable synth-save
 \ Controllers should set meaningful high level values.  The synth
 \ engine is already fully controllable through NRPN.
     
-: CC57 midi>note
+: CC57 midi-note mod1 2! ;
 : CC58 
 : CC59 
 : CC5A 
@@ -236,5 +191,4 @@ variable synth-save
 \ : m-test 2 1 #x90 d>i i>m ;    
 \ : .synth ` synth: .sym  synth @ px cr ;
 : pm12  m1 px m2 px cr ;
-: print-nrpn a>r nrpn-addr-lo 0 a!! 2 for a> a> _px next cr r>a ;
     

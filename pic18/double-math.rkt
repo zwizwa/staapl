@@ -3,10 +3,6 @@ provide-all
 
 \ double word math 8 -> 16 bit
 
-
-\ some 16bit math routines. i don't have time for it now, but at this
-\ point, a 16 bit forth would come in handy. all math on periods is
-\ unsigned.
     
 : _dup    over over ;
 

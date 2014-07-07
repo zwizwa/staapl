@@ -31,7 +31,7 @@ staapl pic18/double-math
     PRODL +r movff                  \ b z       \ az_h az_l
     POSTDEC0 mulwf drop             \           \ az_h az_l
     PRODH @ r- @ +                  \ bz_h+az_l \ az_h
-    rot<< 1 and                      \ roundbit  \ az_h
+    rot<< 1 and                     \ roundbit  \ az_h
     r- @ ++                         \ r         \
 ;
 
