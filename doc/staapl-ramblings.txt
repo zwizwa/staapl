@@ -65106,3 +65106,93 @@ osc.  This keeps the beating constant over the note range.
 Let's use the same mechanism as note translation for controller
 translation.  What CCs to use?
 
+
+
+Entry: Polling
+Date: Sun Jul  6 19:59:16 EDT 2014
+
+So time to get the polling arch properly defined.  It should run everything:
+- midi input
+- control rate SMs
+- debug interpreter
+
+There's still quite a lot of work in here.
+Modulation and envelopes are useful for the analog part as well.
+
+A nice goal is to get the formant stuff to work with envelopes.  That
+would involve most of the arch.
+
+So basic linear period control already seems to work with the NRPN
+mechanism.  Squeaky little bastard!
+
+
+Entry: Later arch
+Date: Sun Jul  6 21:32:15 EDT 2014
+
+Should run on a 18F13K22 as well for per-voice operation maybe?  These
+things are so cheap they pale in comparison with the rest of the
+analog stuff.
+
+Thought crossed my mind to use I2C to connect them for multiple voices
+on a board, but why not just TTL MIDI?
+
+[1] entry://20120731-172308
+
+
+Entry: Microchip advanced part selector
+Date: Sun Jul  6 21:34:33 EDT 2014
+
+[1] http://www.microchip.com/maps/microcontroller.aspx
+
+
+Entry: 18F with DAC
+Date: Sun Jul 6 21:39:03 EDT 2014
+
+Using the parts selector, there are a couple of 18F pics that have a
+DAC.  Some of these might even fit the proto board..  However it seems
+to be only 32 steps / 5 bits.
+
+
+
+Entry: Envelopes / LFO
+Date: Sun Jul  6 22:02:46 EDT 2014
+
+Core routine is exponential decay
+
+state += a (target - state)
+
+Does this need 24 bit states?  As long as there is enough resolution
+in the shortest period settings to get it going that should not be
+necessary.
+
+So the core routine here is a 16 x 16 -> 16 fixed point mul, possibly
+8 bit is enough for the a coeff.
+
+There is double-hacks.rkt
+
+This has:
+
+ 0.0pole+  computes 0.ab x 1.0z
+ 0.0pole-  computes 0.ab x 1.Fz
+
+Other variants should be easy to add for LFO sine waves.
+
+
+Problem is that these don't start from low values.  Maybe add a little
+fudge to let them increment/decrement anyway in case they don't?
+
+Or alternatively use some kind of ad-hoc floating point approach to
+prescale / postscale the states?
+
+Basically, we can't ever gain more than one bit so conditionally
+shifting whenever the top or guard bit changes sign might work.
+
+
+
+Entry: Recursively start interpreter
+Date: Sun Jul  6 22:51:00 EDT 2014
+
+Doesn't seem to work any more.  Probably because it's waiting for an
+ack.
+
+
