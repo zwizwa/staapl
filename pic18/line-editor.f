@@ -17,35 +17,44 @@ staapl pic18/compose-macro
     >o o-flush ;    
 
 
-variable string-index/ready
+variable stringi
 macro
-: string-buf-size 10 ;
-: string-ready    string-index/ready 0 ;
+: string-index-max 31 ; \ bufsize - 1 (room for null terminator)
 forth
   
   
-: string-index   string-index/ready @ >> ;
-: a!string       0 2 a!! ; \ 128 byte buf
+: string-index   stringi @ ;
+: backspace      stringi 1-! ;    
+
+: a!string       0 2 a!! ; \ max 254 + 1 bytes, minus page alignment
 : a!string-endx  a!string string-index al +! ;
-: a!string-endx+ a!string-endx 2 string-index/ready +! ;
+: a!string-endx+ a!string-endx stringi 1+! ;
 : >string        a!string-endx+ >a ;
-: backspace      2 string-index/ready -! ;    
+: string-last    a!string-endx al 1-! a> ;
+    
+: p-string       a!string string-index 1 - dup 0 = if ; then for a> emit next cr ;
 
-: p-string       a!string string-index dup 0 = if ; then for a> emit next cr ;
-
+: input-keys
+    begin
+        input-key
+        string-index 0 = not if
+            string-last 0 = if ; then
+        then
+    again
+    
 : line-editor
-    0 string-index/ready !
-    begin input-char string-ready high? until
-    string-index
+    0 stringi !
+    input-keys
+    string-index 1 -  \ don't count null
     p-string
     ;
 
-: input-char    
+: input-key
     terminal>
     \ carriage return: also print line feed
     dup 13 = if
         10 >terminal >terminal
-        string-ready high ;
+        0 >string ;
     then
 
     \ backspace: print space to erase character
@@ -68,7 +77,7 @@ forth
     dup 127 >= if drop ; then
     
     \ print a '!' in case the buffer is full
-    string-index string-buf-size = if
+    string-index string-index-max = if
         drop 
         33 >terminal
         8  >terminal ;
