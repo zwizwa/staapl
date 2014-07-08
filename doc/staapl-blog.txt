@@ -4815,10 +4815,10 @@ Then it's time to modularize.  But hey I'm just advocating OO here..
 
 
 Maybe shame is a better word for what I feel when I'm whipping out the
-globals.  I got so used to writing (mostly) pure functional code it
-feels as treason to back to global variables.  It's a cultural clash.
-This picture speaks a 1000 words [1][2].  That's Daniel Friedman on
-the left and Chuck Moore on the right.  Scheme meets Forth :)
+globals.  I got so used to writing (mostly) pure functional code that
+globals feels like treason.  It's a cultural clash.  This picture
+speaks a 1000 words [1][2].  That's Daniel Friedman on the left and
+Chuck Moore on the right.  Scheme meets Forth :)
 
 
 So yes, it's ok to write your Forth application using a couple of
