@@ -65195,4 +65195,10 @@ Date: Sun Jul  6 22:51:00 EDT 2014
 Doesn't seem to work any more.  Probably because it's waiting for an
 ack.
 
+EDIT: Actually it works just fine:
+
+: bp ack interpreter ;
+
+
+
 

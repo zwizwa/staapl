@@ -4705,3 +4705,125 @@ evolution.  Modules and Macros!
 
 
 
+Entry: .fm vs .f
+Date: Mon Jul  7 12:00:12 EDT 2014
+
+Torn between two "right ways."
+
+Racket:
+
+  Modules allow sane, flexible, static name space management.
+  Every name is defined just once.  No surprises.
+
+Classical Forth:
+
+  A word name dictionary is a stack, with the definition of a word
+  being the last one defined.
+
+Staapl uses both these approaches.
+
+For .fm = .rkt forth modules, the Racket module approach is used.
+Every name is well defined and modules are allowed to have private
+name spaces.
+
+For .f forth files, there is no name management.  Such files are
+typically included directly in the parent's name space.
+
+A kernel (= main bare metal PIC application) is a .fm forth module: at
+the top level there are no surprises in that all names are unique.
+
+Interactive exploration can use .f forth files to redefine a piece of
+code mimicking classical Forth behavior.  If a .f file contains names
+that are already defined, references that occur after reading the file
+use the new definition.  However, old symbol references are not
+changed since all code uses early binding.
+
+Bottom line:
+- the Forth `:' word is implemented directly as Scheme's `define'.
+- compiled code doesn't ever change meaning (early binding)
+- macros can be redefined and can cahnge meaning (late binding)
+- when in doubt, use modules
+
+
+
+So how to use this?  What I do is this:
+
+Reusable library code goes into an .f file that I can load multiple
+times so I can do interactive testing without needing device reboots
+or kernel reloads.  When things get messy I restart the .dict file,
+starting from a clean slate = well-defined kerne.fm module.
+
+Once develeopment of a piece of code is done, reusable code is
+transferred to a .rkt file or is wrapped in a .rkt that loads the .f
+file.
+
+Non-reusable application code usually stays as a collection of .f
+files that all share the same namespace, included from a toplevel
+kernel.fm module.  See the staapl/app/synth code for an example.
+
+Best of both worlds:
+
+- put code definitions in a mylib.f
+- at the top of the mylib.f put all require statements (e.g. staapl pic18/vector)
+- create a mylib.rkt wrapper file containing:
+
+  #lang staapl/pic18 
+  provide-all
+  load mylib.f
+
+This allows users of your library to use the .rkt file, but also
+allows to develop the code interactively without reboot using:
+
+  load mylib.f
+
+
+Note that when redefininig macros, old macros _do_ point to the newer
+version, and this can be be a bit tricky to keep track of.
+
+When in doubt, compile everything as a single kernel without any
+`load' on the command line.
+
+It's always possible to restart the .dict file which will give a clean
+slate starting from what was defined in the kernel .fm, erasing all
+the dynamically loaded code.  See the `make xyz.live' target in
+app/Makefile
+
+
+
+
+
+Entry: Small code bases and global variables
+Date: Tue Jul  8 02:44:28 EDT 2014
+
+I'm a bit bothered by the necessity of the whole shallow binding
+approach in Forth - essentially using global variables like "current
+output" to parameterize library code.
+
+To be honest, I use this style in small embedded C programs as well
+instead of pretending and using a single instance of some "reusable"
+class.  Often the embedded world is really made out of singletons.
+
+And once I give into adding a couple of global variables, the code
+becomes a lot easier to write, i.e. I'm able to write a subsystem as a
+collection of mostly Forth oneliners.  The swearing stops and I think
+it's actually kind of beautiful.  Well-chosen dynamic context isn't
+such a bad idea.  And of course, don't expose those variables.  Hide
+them in the dungeon of a module's namespace.
+
+It's only when different contexts start to clash that problems arise.
+Then it's time to modularize.  But hey I'm just advocating OO here..
+
+
+Maybe shame is a better word for what I feel when I'm whipping out the
+globals.  I got so used to writing (mostly) pure functional code it
+feels as treason to back to global variables.  It's a cultural clash.
+This picture speaks a 1000 words [1][2].  That's Daniel Friedman on
+the left and Chuck Moore on the right.  Scheme meets Forth :)
+
+
+So yes, it's ok to write your Forth application using a couple of
+globals.  Just remember that reading a value from a global variable
+kills a sailor at sea, so use it sparingly.
+
+[1] http://pbs.twimg.com/media/BUoIz1pCUAAeXQo.jpg
+[2] http://eventifier.com/event/strangeloop13/casio_juarez
