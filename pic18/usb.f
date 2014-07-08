@@ -162,7 +162,7 @@ forth
 \ Prepare buffer descriptor to send to USB transceiver with updated
 \ DATAx and buffer size.
 
-: >usb \ n bd x --
+: usb-commit \ n bd x --
     a>r
       >r bd>a r>
       a:bd-update
@@ -172,11 +172,11 @@ forth
 : OUT0-first 64 0 OUT/DATA0 ;  
     
 \ n ep --    
-: OUT/DATA0 OUT DATA0 >usb ;  \ it seems DATAx is ignored for OUT?
-: OUT/DATA+ OUT DATA+ >usb ;    
-: IN/DATA0  IN  DATA0 >usb ;
-: IN/DATA1  IN  DATA1 >usb ;    
-: IN/DATA+  IN  DATA+ >usb ;    
+: OUT/DATA0 OUT DATA0 usb-commit ;  \ it seems DATAx is ignored for OUT?
+: OUT/DATA+ OUT DATA+ usb-commit ;    
+: IN/DATA0  IN  DATA0 usb-commit ;
+: IN/DATA1  IN  DATA1 usb-commit ;    
+: IN/DATA+  IN  DATA+ usb-commit ;    
 
     
 
@@ -578,6 +578,8 @@ forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
 : bufrem \ -- remaining
     a>r bufready? if buflen bufidx - else 0 then r>a ;
     
+
+
     
 
 \ debug

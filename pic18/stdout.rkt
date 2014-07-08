@@ -2,9 +2,9 @@
 provide-all
 staapl pic18/vector
 
-2variable stdout
-: >o stdout invoke ;
-
+2variable stdout       : >o       stdout       invoke ;
+2variable stdout-flush : o-flush  stdout-flush invoke ;
+    
 \ These are small and often used.
 : a>o  stdout -> !a+ ;
 : f>o  stdout -> !f+ ;    

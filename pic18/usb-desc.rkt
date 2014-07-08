@@ -60,6 +60,9 @@
   (bSyncAddr           byte)
 
 
+  ;; CDC
+  (bMasterInterface    byte)
+  (bSlaveInterface     byte)
   
   ;; MIDI / AUDIO
   
@@ -91,6 +94,8 @@
 
 (define BULK      #x02)
 (define INTERRUPT #x03)
+
+(define CS_INTERFACE #x24)
 
 (define (EndPoint
          #:bEndpointAddress [addr #f]
@@ -175,7 +180,8 @@
 
 (define (InterfaceDescriptorCDC
          #:bEndpointAddress [ea #x82]
-         #:bInterfaceNumber [in 0])
+         #:bInterfaceNumber [in 0]
+         #:bSlaveInterfaces [sins '(1)])
 
   ;; INTERFACE: communication
   (InterfaceDescriptor
@@ -187,32 +193,33 @@
   ;; Class-specific header functional descriptor
   (Descriptor 
    (bLength 5)
-   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorType CS_INTERFACE)
    (bDescriptorSubtype #x00)  ;; Header functional descriptor subtype
    (word #x0110))
   
   ;; Class-specific call management functional descriptor
   (Descriptor
    (bLength 5)
-   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorType CS_INTERFACE)
    (bDescriptorSubtype #x01) ;; Call management functional descriptor subtype
-   (byte #x01)            ;; Device handles call management itself
-   (byte #x00))           ;; No associated data iterface
+   (byte #x01)               ;; Device handles call management itself
+   (byte #x00))              ;; No associated data iterface
   
   ;; Class-specific abstract control management functional descriptor
   (Descriptor
    (bLength 4)
-   (bDescriptorType #x24)    ;; Indicates that a CDC descriptor applies to an interface
+   (bDescriptorType CS_INTERFACE)
    (bDescriptorSubtype #x02) ;; Abstract control management descriptor subtype
-   (byte #x00))           ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
+   (byte #x00))              ;; Don't support any request, FIXME: still get 22,21,22 interface requests!
   
   ;; Class-specific union functional descriptor with one slave interfac
   (Descriptor
-   (bLength 5)
-   (bDescriptorType #x24) ;; Indicates that a CDC descriptor applies to an interface
+   (bLength (+ 4 (length sins)))
+   (bDescriptorType CS_INTERFACE)
    (bDescriptorSubtype #x06) ;; Union descriptor subtype
-   (byte 0)               ;; Number of master interface is #0
-   (byte 1))              ;; First slave interface is #1
+   (bMasterInterface in)
+   (for ((sin sins))
+     (bSlaveInterface sin)))
   
   (EndPoint
    #:bEndpointAddress ea

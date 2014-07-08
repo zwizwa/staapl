@@ -65201,4 +65201,36 @@ EDIT: Actually it works just fine:
 
 
 
+Entry: Floating point exponentials
+Date: Tue Jul  8 10:57:49 EDT 2014
+
+It turns out that just for exponential curve generation i.e. just
+multiplication, ad-hoc FP isn't such a bad idea.  For curvers like
+sines that also involve addition, the normalization bit might become
+quite inefficient.  Otoh we do have quite a lot of cycles to burn.
+
+
+Entry: 16bit Forth
+Date: Tue Jul  8 11:00:05 EDT 2014
+
+Been thinking again about finishing a frontend for a 16 bit Forth.
+Last time I believe I got stuck at the Forth syntax macros
+implementation.
+
+Need to be clear about what the idea is there.  Once there is a kernel
+of 16 bit words, jumps and calls will no longer fit in single word
+cells, so there is a clear tradeoff between speed and code size.
+
+Other than that there are a lot of other things to figure out:
+- stand-alone vs. hosted
+- memory model
+
+To simplify, my current opinion on this is:
+- use staapl extended with 16 bit words for kernel work
+- build a stand-alone DTC on top of that
+- use a dual interface: 2 serial ports, one for kernel, one for stand-alone
+
+
+
+
 

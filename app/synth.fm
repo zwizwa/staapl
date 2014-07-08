@@ -20,7 +20,7 @@ org-end
 staapl pic18/boot   \ chip init code
 
 load p18f4550.f          \ chip macros
-load monitor-usbserial.f \ boot block + icsp comm monitor code
+load monitor-usbserial.f \ boot block + interactive monitor over USB ACM serial port
 
 load usb.f                     \ USB library
 require-file synth-usb.rkt     \ scheme file with descriptor tables       
