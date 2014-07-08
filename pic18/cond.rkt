@@ -8,6 +8,7 @@ provide-all
 macro    
 : >= - nfdrop c? ; \ a b -- ?    | >=? \ a b -- a b ?
 : =  - nfdrop z? ; \ a b -- ?    | =?  \ a b -- a b ?
+: <  >= not ;
 forth     
 
 \ Note: these are all macros because `if' does not yet support

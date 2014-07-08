@@ -65233,4 +65233,10 @@ To simplify, my current opinion on this is:
 
 
 
+Entry: ctrl-C
+Date: Tue Jul  8 12:15:49 EDT 2014
+
+Seems to work also when there is just an 'emit' in the instruction stream..
+
+
 
