@@ -12,17 +12,15 @@ staapl pic18/vector
 : f@@   fl @ fh @ ;    
   
 
-\ Resume recursive interpreter call, e.g. after 'break'.  The
-\ interpreter at the point of the executed command is 2 levels deep:
-\ one for the call from the 'interpreter' loop, and one for the call
-\ from 'jsr/ack'.  The rest are tail calls.  If there is no previous
-\ stack frame top pop, don't pop it!
+\ Resume recursive interpreter call, e.g. after 'bp' software
+\ breakpoint.  The interpreter at the point of the executed command is
+\ 2 levels deep: one for the call from the 'interpreter' loop, and one
+\ for the call from 'jsr/ack'.  The rest are tail calls.  If there is
+\ no previous stack frame top pop, don't pop it!
 
+\ FIXME: should this restore a&f?  (should bp save them?)
 : continue  STKPTR @ 3 >= if pop pop then ;
 
-
-\ Software breakpoint.  Use 'continue' to resume execution.    
-: break     ack interpreter ;
 
 \ After issuing RPC packet, fall into interpreter.  During the RPC
 \ call the host can use us as a resource.  When host is done it will
@@ -109,6 +107,7 @@ forth : .fstring fstring>h hlp ;
 
 \ Host commands operating on target stack / memory directly.    
 : ts  ` ts  host ;
+: tsx ` tsx host ;
 : p   ` p   host ;
 : px  ` px  host ;
 : _p  ` _p  host ;
