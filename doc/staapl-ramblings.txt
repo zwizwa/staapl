@@ -65226,9 +65226,9 @@ Other than that there are a lot of other things to figure out:
 - memory model
 
 To simplify, my current opinion on this is:
-- use staapl extended with 16 bit words for kernel work
+- use staapl extended with 16 bit words for kernel work.
 - build a stand-alone DTC on top of that
-- use a dual interface: 2 serial ports, one for kernel, one for stand-alone
+- use a dual serial interface: 2 serial ports, one for kernel, one for stand-alone
 
 
 

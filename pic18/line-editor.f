@@ -24,7 +24,6 @@ forth
   
   
 : string-index   stringi @ ;
-: backspace      stringi 1-! ;    
 
 : a!string       0 2 a!! ; \ max 254 + 1 bytes, minus page alignment
 : a!string-endx  a!string string-index al +! ;
@@ -32,7 +31,7 @@ forth
 : >string        a!string-endx+ >a ;
 : string-last    a!string-endx al 1-! a> ;
     
-: p-string       a!string string-index 1 - dup 0 = if ; then for a> emit next cr ;
+\ : p-string       a!string string-index 1 - dup 0 = if ; then for a> emit next cr ;
 
 : input-keys
     begin
@@ -46,30 +45,43 @@ forth
     0 stringi !
     input-keys
     string-index 1 -  \ don't count null
-    p-string
+    \ p-string
     ;
 
+\ print space to erase character
+: backspace \ char --
+    string-index 0 = if drop ; then
+    drop 8 >terminal
+    32 >terminal
+    8 >terminal
+    stringi 1-! ;
+
+    
 : input-key
     terminal>
+    \ dup px
     \ carriage return: also print line feed
     dup 13 = if
         10 >terminal >terminal
         0 >string ;
     then
 
-    \ backspace: print space to erase character
-    dup 8 = if
-        string-index 0 = if drop ; then
-        >terminal 32 >terminal 8 >terminal
-        backspace ;
-    then
+    \ BS, DEL
+    dup 8   = if backspace ; then
+    dup 127 = if backspace ; then
 
     \ ignore all ANSI escape codes
     dup 27  = if
         \ ignore escape codes
         drop
-        terminal> drop
-        terminal> drop ;
+        terminal>
+        dup #x5B = if
+            \ CSI se terminated by char in 64-127 range
+            begin drop terminal> 1st 6 high? until \ CSI
+            drop ; then
+        \ Otherwise it's a 2-byte code
+        terminal> px
+        terminal> px ;
     then
 
     \ ignore all non-ascii characters
