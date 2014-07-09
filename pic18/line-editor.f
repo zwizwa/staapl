@@ -73,6 +73,7 @@ forth
     \ ignore all ANSI escape codes
     dup 27  = if
         \ ignore escape codes
+        \ http://en.wikipedia.org/wiki/ANSI_escape_code
         drop
         terminal>
         dup #x5B = if

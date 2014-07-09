@@ -65240,3 +65240,8 @@ Seems to work also when there is just an 'emit' in the instruction stream..
 
 
 
+Entry: Make 'if' work on integers
+Date: Tue Jul  8 22:59:34 EDT 2014
+
+Was already working.
+Added 'not'

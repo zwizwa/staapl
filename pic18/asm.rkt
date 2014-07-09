@@ -172,7 +172,9 @@
 
  ;; FIXME: not sure why [bra 1] doesn't work: it interprets 1 as absolute address.
  ((skip  here)       `(#xd001))
-
+;; ((skipz here)       `(#xE001)) ;; [bpz 0 +1]
+ ((skipnc here)       `(#xE301)) ;; [bpc 1 +1]
+ 
  ;; One-size-fits all branch instruction.
  ((jsr   here exit address) (smart-jsr here exit address))
 

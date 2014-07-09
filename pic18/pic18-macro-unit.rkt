@@ -345,13 +345,13 @@
  ;; (([qw l] jw/false)       (macro: ~>z ,(insert `([bpz 0 ,l])))) ;; STUB
  (([qw l] jw/false)       ([decf WREG 0 0] [drop] [bpc 1 l]))
 
+ 
  ;; The 'not' macro is useful as predicate negation. Note that it's not the
  ;; same as "FF XOR" !
  (([bit?  f b p] not)     ([bit? f b (flip p)]))
  (([flag? opc p] not)     ([flag? opc (flip p)]))
  (([cmp?  opc f a p] not) ([cmp?  opc f a (flip p)]))
-
- 
+ ((not)                   ([addlw -1] [skipnc] [clrf WREG 0]))
 
  ;; TESTS
  
@@ -616,7 +616,7 @@
  (([qw a] pseudo)           ([save] [movlw a]))
  (([cw a] pseudo)           ([jsr 0 a]))
  (([jw a] pseudo)           ([jsr 1 a]))
-   
+
  (([movlw a] [exit] pseudo) ([retlw a]))
  (([exit] pseudo)           ([return 0]))
 
