@@ -54,9 +54,9 @@ load synth/control.f   \ patch / period control
 load synth/soundgen.f  \ highlevel sounds
 load synth/notes.f     \ note memory
 load synth/midi-nrpn.f \ direct parameter access
-    
-\ load synth/midi.f      \ midi control
-\ load synth/patch.f     \ old patch stuff
+load synth/midi.f      \ midi control
+
+    \ load synth/patch.f     \ old patch stuff
 \ load synth/example.f
 \ load synth/sounds.f    \ collection of sounds
 
