@@ -151,20 +151,12 @@ staapl pic18/double-hacks \ some optimized ones
 \ [ badnop (synth meta) use ]
 
 
-\ require pic18/geo.ss  \ geo-seq macro
-
-macro
-: geo-seq ' ,, compile-geo-seq ;
-forth
+require-file synth/table.rkt
+    
 
 : bass->period
     23 min _table   \ 2 octaves, more convenient..
-    
-    61156      \ start
-    dup 4 /    \ endx
-    24         \ nb of items
-    geo-seq    \ compile geometric sequence
-
+    'scheme notes-24 ' ,, for-list ;
 
 
 variable oct

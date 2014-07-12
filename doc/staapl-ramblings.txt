@@ -65264,3 +65264,36 @@ aconnect BCR2000:0 'USB Device 0x5f9:0xfff0 MIDI 1':0   # knobs
 aconnect BCR2000:1 'USB Device 0x5f9:0xfff0 MIDI 1':0   # midi in
 
 
+Entry: Polling is working
+Date: Sat Jul 12 17:38:08 EDT 2014
+
+\ poll midi and command console    
+: go/i
+    \ command console: acknowledge current command.
+    \ remaining commands are handled by poll-interpret.
+    ack 
+    init-synth
+    begin
+        poll-midi
+        poll-interpreter
+    again
+
+
+
+Entry: exponentials
+Date: Sat Jul 12 17:38:30 EDT 2014
+
+Control signals.
+Envelope generators?
+
+One avenue is the floating point numbers.  Alternative is table lookup
+exponential conversion.  What about sub-note precision lookups?  Those
+are necessary anyway for pitchbend.
+
+Currently: 2 octave table.  This could be a 12 * 16 table.  Is 1/16
+enough frequency resolution?
+
+Maybe first remove the geo thing and go to a proper table.
+
+
+

@@ -7,6 +7,8 @@
 \ 32 tone scale. the latter is easier to use. so i embed the 31 tone
 \ scale in a 32 tone scale with doubled octave slot.
 
+\ FIXME: see table.rkt and control.f
+
 : bass31->period \ n -- lo hi
     _table
     61156               \ start at C1
