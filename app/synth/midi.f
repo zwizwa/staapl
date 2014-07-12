@@ -173,15 +173,17 @@ variable period
     \ m0 #xF8 = not if m-print then
     \ i>r midi-uart>i i>m r>i  \ or something like that..
     m-interpret ;
-    
-: go
-    square synth @ synth-save ! silence
-    init-notes engine-on 
-    begin
-        \ psps
-        midi-poll-once
-    rx-ready? until ;
 
+: init-synth
+    square synth @ synth-save ! silence
+    init-notes engine-on ;
+    
+
+macro
+: usb-midi-ready? midi-EP OUTrem 0 = not ;  
+forth
+
+: poll-midi usb-midi-ready? not if ; then midi-poll-once ;
 
 
 \ DEBUG: comment-out in standalone version

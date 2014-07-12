@@ -204,3 +204,10 @@ macro
     0 transmit
     tx-end ;
 forth
+
+\ Call this from mainloop to handle console commands.
+\ Send `ack' before starting the mainloop.
+macro
+: poll-interpreter cmd-ready? if interpret-packet then ;  
+forth
+  

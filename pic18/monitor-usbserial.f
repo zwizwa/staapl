@@ -14,7 +14,7 @@ staapl pic18/route
 
 \ Useful for loop-until-ctrlC    
 macro
-: rx-ready? monitor-EP OUTrem 0 = not ;
+: cmd-ready? monitor-EP OUTrem 0 = not ;
 forth
     
     
