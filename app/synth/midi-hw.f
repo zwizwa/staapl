@@ -4,10 +4,17 @@ staapl pic18/serial
 \ TX = RC6
 \ RX = RC7
 
+\ 6N136 midi in:
+\ http://www.natrium42.com/wiki/File:Midi-schematic.gif
 
-: init-hwmidi 31250 fosc init-serial ;
-: >hwmidi begin async.tx-ready? until async.>tx ;
-: hwmidi> begin async.rx-ready? until async.rx> ;
+macro
+: midi-ready? async.rx-ready? ;
+forth
+
+: init-midi 31250 fosc init-serial ;
+: >midi begin async.tx-ready? until async.>tx ;
+: midi> begin async.rx-ready? until async.rx> ;
 
 \ Clock check
-: hwmidi-clockcheck init-hwmidi begin #x55 >hwmidi again
+\ : midi-clockcheck init-midi begin #x55 >midi again
+    

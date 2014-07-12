@@ -22,7 +22,6 @@ Trivial to fix:
 PIC18 features:
 - I2C bus monitor
 - live access to multiple microcontrollers
-- usb driver: basic abstractions
 
 PIC18 apps:
 - interrupt based CRT display controller
@@ -37,6 +36,7 @@ Possible extensions / Non-trivial things to fix:
 - assembler addressing modes
 - dsPIC
 - 6809
+- Cortex M0
 - assembler text output
 - external emulator hooks
 
