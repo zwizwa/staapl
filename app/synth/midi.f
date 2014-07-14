@@ -113,17 +113,24 @@ variable period
 
         
 \ NOT TESTED       
-: i>m \ --
-    i>
-    \ Keep previous command byte if this is a data byte.
-    1st 7 high? if midi-byte0 ! else drop then
-    
-    m0 midi-cmd route
-        i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
-        i>m12 . i>m1  . i>m12 .       ; \ C D E F
+: midi>m \ --
+    midi>
+    1st 7 low? if midi-continuation ; then \ not a new command byte
+    dup midi-byte0 !
+    midi-cmd route
+        midi>m12 . midi>m12 . midi>m12 . midi>m12 . \ 8 9 A B
+        midi>m12 . midi>m1  . midi>m12 .          ; \ C D E F
 
-: i>m1       i> midi-byte1 ! ;
-: i>m12 i>m1 i> midi-byte2 ! ;
+: midi-continuation \ byte1 --
+    midi-byte1 !
+    m0 midi-cmd route
+        midi>m2 . midi>m2 . midi>m2 . midi>m2 . \ 8 9 A B
+        midi>m2 .         . midi>m2 .         ; \ C D E F
+        
+: midi>m1  midi> midi-byte1 ! ;
+: midi>m2  midi> midi-byte2 ! ;
+: midi>m12 midi>m1 midi>m2 ;
+    
 
 
 
@@ -171,8 +178,6 @@ variable period
 
 : usb-midi-once
     usb>m
-    \ m0 #xF8 = not if m-print then
-    \ i>r midi-uart>i i>m r>i  \ or something like that..
     m-interpret ;
 
 : init-synth

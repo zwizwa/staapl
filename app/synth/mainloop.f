@@ -1,3 +1,4 @@
+staapl pic18/afregs
 \ load synth/midi-hw.f
 
 \ : go
@@ -14,9 +15,11 @@
     init-synth
     init-midi
     begin
-        \ poll-usb-midi
-        poll-hw-midi   \ Something not right here..
         poll-interpreter
+        af[ \ protect a&f state used in interpreter
+          \ poll-usb-midi
+          poll-hw-midi
+        ]af
     again
 
 

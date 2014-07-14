@@ -19,11 +19,11 @@ forth
 \ implementing this word as a macro leads to too much code, so i'm
 \ using indirect addressing. 
 : do-arrow
-    a>r
-    0 a!!
-    TOSL @ !a+
-    TOSH @ !a+
-    r>a
+    a[
+      0 a!!
+      TOSL @ !a+
+      TOSH @ !a+
+    ]a
     pop ;
 
 

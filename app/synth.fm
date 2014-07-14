@@ -10,8 +10,8 @@
 \ 080-099    32  data stack
 \ 0A0-0FF    96  retain stack
 \ 100-1DF   224  *unused*
-\ 1E0-1EF    16  midi note buffer
-\ 1F0-1FF    16  uart receive buffer
+\ 1C0-1DF    32  midi note buffer
+\ 1E0-1FF    32  uart receive buffer
 \ 200-2FF   256  *unused*
 \ 100-2FF   256  *unused*
 \ 400-419    32  BD (USB buffer descriptors EP0-EP3)  (1)

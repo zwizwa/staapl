@@ -17,24 +17,24 @@ staapl pic18/cond
 variable midi-write  
 variable midi-read
 macro
-: midi-buf #xF0 1 ;
+: midi-bufspec #xE0 1 5 ; \ 32 bytes at 1E0
 
 \ Generic circular buffer hole macro
 : bitmask | bits | 1 bits <<< 1 - ;
-: a!circle+ | lo hi ptr bits |
+: a!circle+ | ptr lo hi logsize |
     lo hi a!!
-    ptr @ bits bitmask and al +!
+    ptr @ logsize bitmask and al +!
     ptr 1+! ;
+: a!midibuf+ midi-bufspec a!circle+ ;    
     
-: midi-size   midi-write @ midi-read @ - ;
 : midi-empty? midi-size 0 = ;
 : midi-ready? midi-empty? not ;
-: midi-full?  midi-size 16 = ; 
+: midi-full?  midi-size 32 = ; 
 
 forth
-
-: >midi-buf  a>r midi-buf midi-write 4 a!circle+ >a r>a ;
-: midi-buf>  a>r midi-buf midi-read  4 a!circle+ a> r>a ;   
+: midi-size   midi-write @ midi-read @ - ;
+: >midi-buf   a[ midi-write a!midibuf+ >a ]a ;
+: midi-buf>   a[ midi-read  a!midibuf+ a> ]a ;   
     
 
 : service-midi \ included in low-pri isr
@@ -64,13 +64,9 @@ forth
     ;
 
     
-: i=midi stdin -> midi> ; \ dup px ; 
-    
 : midi-once
-    i>r
-    i=midi i>m
-    m-interpret
-    r>i ;
+    midi>m
+    m-interpret ;
 
 : poll-hw-midi midi-ready? if midi-once then ;
     

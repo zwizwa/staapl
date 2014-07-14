@@ -8,12 +8,12 @@ provide-all
 \ Since the retain stack (r) is not the execution stack (x), the
 \ following words don't need to be macros.
 
-: a>r al @ >r ah @ >r ;
-: r>a r> ah ! r> al ! ;
+: a[ al @ >r ah @ >r ;
+: ]a r> ah ! r> al ! ;
 
-: f>r fl @ >r fh @ >r ;
-: r>f r> fh ! r> fl ! ;
+: f[ fl @ >r fh @ >r ;
+: ]f r> fh ! r> fl ! ;
 
-: af>r a>r f>r ;
-: r>af r>f r>a ;
+: af[ a[ f[ ;
+: ]af ]f ]a ;
     

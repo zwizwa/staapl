@@ -65448,3 +65448,12 @@ before the USB handler.
 
 
 So ISR + buffer seem to work.  Something wrong with the rest though.
+
+
+Seems there is memory corruption.  Cleared 1C0-1EF to 00 before.
+
+1C0  5C F8 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+1D0  00 00 00 00 00 00 00 00 00 00 F8 90 5C 90 5C F8
+1E0  F8 F8 F8 F8 FE F8 F8 F8 F8 F8 F8 F8 FE F8 F8 F8
+1F0  F8 F8 F8 FE F8 F8 F8 F8 F8 F8 F8 FE F8 F8 F8 F8
+

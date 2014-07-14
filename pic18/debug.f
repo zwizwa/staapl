@@ -45,10 +45,10 @@ staapl pic18/cond
     0 i:rpc ; \ n --
     
 : i:fcmd \ lo hi --
-    af>r       \ Let host clobber a&f during execution of command.
-    fstring>i  \ Pascal string from flash
-    1 i:rpc    \ see host-rpc / host-rpc-cmd in tethered.rkt  (uses `live:')
-    r>af ;
+    af[          \ Let host clobber a&f during execution of command.
+      fstring>i  \ Pascal string from flash
+      1 i:rpc    \ see host-rpc / host-rpc-cmd in tethered.rkt  (uses `live:')
+    ]af ;
 
 
     
@@ -57,16 +57,16 @@ staapl pic18/cond
     
 
 \ Send list from different streams, restoring user's stdin.
-: alist>h i>r a>i i:list>h r>i ; \ RAM
-: flist>h i>r f>i i:list>h r>i ; \ Flash
-: dlist>h i>r d>i i:list>h r>i ; \ datastack
+: alist>h i[ i=a i:list>h ]i ; \ RAM
+: flist>h i[ i=f i:list>h ]i ; \ Flash
+: dlist>h i[ i=d i:list>h ]i ; \ datastack
 
 : 1list>h 1 dlist>h ;                  \ 1 byte
 
-: fstring>h i>r fstring>i i:list>h r>i ; \ Flash Pascal string (== size prefixed)    
-: fstring>i f!! f>i i> ;                 \ lo hi -- n
+: fstring>h i[ fstring>i i:list>h ]i ; \ Flash Pascal string (== size prefixed)    
+: fstring>i f!! i=f i> ;                \ lo hi -- n
 
-: fcmd i>r i:fcmd r>i ;   
+: fcmd i[ i:fcmd ]i ;   
 
     
 \ Execute host command <cmd> as ` <cmd> host
@@ -93,7 +93,7 @@ forth
 
 : >h    ` t> host ;  \ Byte to host stack
 
-: emit  i>r 1list>h hlp r>i ;
+: emit  i[ 1list>h hlp ]i ;
 : adump alist>h hlpxa ;
 : fdump alist>h hlpxa ;    
     

@@ -6,7 +6,7 @@ staapl pic18/vector
 2variable stdout-flush : o-flush  stdout-flush invoke ;
     
 \ These are small and often used.
-: a>o  stdout -> !a+ ;
-: f>o  stdout -> !f+ ;    
-: d>o  stdout -> ;        \ data stack
+: o=a  stdout -> !a+ ;
+: o=f  stdout -> !f+ ;    
+: o=d  stdout -> ;        \ data stack
  

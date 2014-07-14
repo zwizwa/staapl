@@ -6,17 +6,17 @@ staapl pic18/vector
 : i> stdin invoke ;
 
 \ These are small and often used.
-: a>i  stdin -> @a+ ;
-: f>i  stdin -> @f+ ;    
-: d>i  stdin -> ;        \ data stack
+: i=a  stdin -> @a+ ;
+: i=f  stdin -> @f+ ;    
+: i=d  stdin -> ;        \ data stack
 
 \ Save/restore stdin
 
-: i>r
+: i[
     stdin @ >r
     stdin 1 + @ >r ;
 
-: r>i
+: ]i
     r> stdin 1 + !
     r> stdin ! ;
 

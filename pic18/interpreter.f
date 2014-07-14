@@ -149,13 +149,13 @@ forth
   
 \ Read/write for datastack, RAM, Flash
 
-: npop  d>i i>host ;
-: n@a+  a>i i>host ;
-: n@f+  f>i i>host ;
+: npop  i=d i>host ;
+: n@a+  i=a i>host ;
+: n@f+  i=f i>host ;
 
-: npush d>o host>o ;
-: n!a+  a>o host>o ;
-: n!f+  f>o host>o ;
+: npush o=d host>o ;
+: n!a+  o=a host>o ;
+: n!f+  o=f host>o ;
 
 \ pointer initialization
 : lda  receive2 a!! ack ;

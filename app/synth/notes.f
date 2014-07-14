@@ -14,10 +14,9 @@ variable nb-notes
 macro    
 : 1a-!          1 al -! ;
 : 1a+!          1 al +! ;
-\ 64 bytes buffer at #x1F0
-: notes-lo      #xE0 ;
+: notes-lo      #x80 ;
 : notes-hi      #x01 ;
-: nb-notes-max  16 ;    
+: nb-notes-max  32 ;    
 forth
 : init-notes    0 nb-notes ! ;
 : a!notes       notes-lo notes-hi a!! ;        

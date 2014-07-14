@@ -162,10 +162,10 @@ forth
 \ DATAx and buffer size.
 
 : usb-commit \ n bd x --
-    a>r
+    a[
       >r bd>a r>
       a:bd-update
-    r>a ;
+    ]a ;
 
 \ -- \ ready to receive first packet = DATA0    
 : OUT0-first 64 0 OUT/DATA0 ;  
@@ -540,26 +540,26 @@ forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
 : OUT> \ ep -- val
     1 OUT-begin a> OUT-end ;
 : OUT-begin \ ep n --
-    a>r >r OUT!
+    a[  >r OUT!
         bufwait     \ make sure buffer is ready
         pump-OUT    \ if fully read, ack buffer and wait for more data from host
         r> a!box+ ; \ setup read using a, advancing index
 : OUT-end \ --
         ack-OUT     \ In case we've read all, best to return the buffer now.
-    r>a ;
+    ]a ;
 
 : >IN  \ val ep --
     1 IN-begin >a IN-end ;
 : IN-begin \ ep --    
-    a>r >r IN!
+    a[  >r IN!
         bufwait     \ make sure buffer is ready
         pump-IN     \ if buffer is full, send it to host and wait until we can write
         r> a!box+ ; \ setup write using a, advancing index
 : IN-end    
-    r>a ;
+    ]a ;
 
 : IN-flush \ ep --
-    a>r IN! force-pump-IN r>a ;
+    a[ IN! force-pump-IN ]a ;
     
 
 \ Polling:
@@ -572,10 +572,10 @@ forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
 \   but we don't know because we're blocking the buffer.  This case
 \   does not occur because ack-OUT is called in OUT-end.
 
-: OUTrem OUT! a>r bufrem r>a ;
-: INrem  IN!  a>r bufrem r>a ;    
+: OUTrem OUT! a[ bufrem ]a ;
+: INrem  IN!  a[ bufrem ]a ;    
 : bufrem \ -- remaining
-    a>r bufready? if buflen bufidx - else 0 then r>a ;
+    a[ bufready? if buflen bufidx - else 0 then ]a ;
     
 
 
@@ -612,9 +612,7 @@ forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
         PIR2 USBIF low
 
         \ Save/restore RAM/Flash byte pointers since service-usb clobbers.
-        a>r f>r
-        service-usb
-        r>f r>a
+        af[ service-usb ]af
     then
 
     \ Restore status (see boot.ss)
