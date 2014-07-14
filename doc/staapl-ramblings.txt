@@ -65447,3 +65447,4 @@ For now: add a "macro callback" to the kernel USB routine, called
 before the USB handler.
 
 
+So ISR + buffer seem to work.  Something wrong with the rest though.

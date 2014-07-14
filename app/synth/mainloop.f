@@ -1,4 +1,4 @@
-load synth/midi-hw.f
+\ load synth/midi-hw.f
 
 \ : go
 \    init-synth

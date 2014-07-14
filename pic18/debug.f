@@ -5,6 +5,7 @@ staapl pic18/stdin
 staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
+staapl pic18/cond
 
 \ Host needs to clobber a reg for memory accesses so can't get at it
 \ without us providing the value like this.  For symmetry, also do f.

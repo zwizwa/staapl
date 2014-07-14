@@ -120,7 +120,7 @@ variable period
     
     m0 midi-cmd route
         i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
-        i>m12 . i>m1  . i>m12 .            ; \ C D E F
+        i>m12 . i>m1  . i>m12 .       ; \ C D E F
 
 : i>m1       i> midi-byte1 ! ;
 : i>m12 i>m1 i> midi-byte2 ! ;

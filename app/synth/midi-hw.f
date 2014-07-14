@@ -51,20 +51,18 @@ forth
     begin midi-ready? until
     midi-buf> ;
     
-forth
-
 : init-midi-buf
     0 midi-write !
     0 midi-read ! ;
   
 : init-midi
-    0 midi-write !
-    0 midi-read !
+    init-midi-buf
     31250 fosc init-serial
     \ serial-enable-isr-lo
     IPR1 RCIP low  \ low pri
     PIE1 RCIE high \ enable
     ;
+
     
 : i=midi stdin -> midi> ; \ dup px ; 
     
