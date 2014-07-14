@@ -65,7 +65,7 @@
 (define-syntax-rule (1cmd:  cmd ...) (host-words (cmd t> cmd) ...))
 (define-syntax-rule (_1cmd: cmd ...) (host-words (cmd t> t> hilo> cmd) ...))
 
-(1cmd:  kb a! f! abd fbd bd p px ps pc erase-block erase-from-block client target!)
+(1cmd:  kb a! f! abd fbd apd bd p px ps pc erase-block erase-from-block client target!)
 (_1cmd: _p _px _ps)
  
 

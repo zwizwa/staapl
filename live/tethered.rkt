@@ -679,16 +679,29 @@
     (hex-dump (in-list (read size))
               addr 3 2 8)))
 
+;; ram blocks correspond to the smallest size that is fully
+;; addressable using an 8 bit value: 16 bytes.
 (define (abd b)
   (let ((bs (a-block-size)))
     (ba! b)
     (hex-dump (in-list (a>/b bs))
               (* bs b) 3 2 8)))
+;; flash blocks correspond to erase size
 (define (fbd b)
   (let ((bs (f-block-size)))
     (bf! b)
     (hex-dump (in-list (f>/w (/ bs 2)))
               (* bs b) 4 4 4)))
+
+;; pages are 256 bytes
+(define (apd p)
+  (let* ((ps 256)
+         (ba (* p ps)))
+    (a! ba)
+    (hex-dump (in-list (a>/b ps))
+              ba 3 2 16)))
+
+
 
 
 ;; Disassembly.

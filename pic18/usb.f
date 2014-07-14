@@ -9,7 +9,6 @@ staapl pic18/shift
 staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/afregs
-staapl pic18/serial
 staapl pic18/cond
 
 \ --------------- DRIVER --------------
@@ -607,6 +606,7 @@ forth : bufwait   begin bufready? until ; \ poll UOWN until we own the bd
     \ run from interrupt as long as INDF0/INDF1 point to proper stack
     \ space.
     STATUS@
+    service-lo \ hook for app's low-pri ISR
     
     PIR2 USBIF high? if
         PIR2 USBIF low

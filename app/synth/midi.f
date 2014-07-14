@@ -25,12 +25,12 @@ variable period
  
 
 : m-interpret \ --
-    m0-cmd route
+    m0 midi-cmd route
         8x . 9x .    . Bx .
         Cx .    . Ex .    ;
 
-: m0-cmd \ 0-7 | maps 9x-Fx to 0-7 for route command
-    m0 rot>>4 8 - 7 and ;
+: midi-cmd \ 0-7 | maps 9x-Fx to 0-7 for route command
+    rot>>4 8 - 7 and ;
         
 \ Guard: aborts caller if incorrect channel.
 : ~chan m0 #x0F and 0 = if ; then xdrop ;
@@ -61,7 +61,7 @@ variable period
 : CC59 
 : CC5A 
 : CC55 
-: ____ drop ` ignore:cc: .sym pm12 ;
+: ____ drop ; \ ` ignore:cc: .sym pm12 ;
     
 \ jump table is sparse but we have plenty of room in Flash
 : continuous-controller
@@ -110,16 +110,17 @@ variable period
 \ Note this only works properly with d=i if the message is
 \ well-formed.
 
+
+        
 \ NOT TESTED       
 : i>m \ --
-    \ Postcondition is valid midi frame in midi-byte0/1/2.  Replace a
-    \ non-command byte with dummy active sensing byte, effectively
-    \ ignoring it.
-    i> 1st 7 low? if drop #xFE then
-    midi-byte0 !
-    m0-cmd route
+    i>
+    \ Keep previous command byte if this is a data byte.
+    1st 7 high? if midi-byte0 ! else drop then
+    
+    m0 midi-cmd route
         i>m12 . i>m12 . i>m12 . i>m12 . \ 8 9 A B
-        i>m12 . i>m1  . i>m12 .       ; \ C D E F
+        i>m12 . i>m1  . i>m12 .            ; \ C D E F
 
 : i>m1       i> midi-byte1 ! ;
 : i>m12 i>m1 i> midi-byte2 ! ;
@@ -168,7 +169,7 @@ variable period
     usb-midi-in-end ;
         
 
-: midi-poll-once
+: usb-midi-once
     usb>m
     \ m0 #xF8 = not if m-print then
     \ i>r midi-uart>i i>m r>i  \ or something like that..
@@ -179,11 +180,13 @@ variable period
     init-notes engine-on ;
     
 
+    
+    
 macro
 : usb-midi-ready? midi-EP OUTrem 0 = not ;  
 forth
 
-: poll-midi usb-midi-ready? not if ; then midi-poll-once ;
+: poll-usb-midi usb-midi-ready? if usb-midi-once then ;
 
 
 \ DEBUG: comment-out in standalone version
@@ -192,5 +195,5 @@ forth
 \ : m-print a>r a!midi-bytes 3 for a> px next cr r>a ;
 \ : m-test 2 1 #x90 d>i i>m ;    
 \ : .synth ` synth: .sym  synth @ px cr ;
-: pm12  m1 px m2 px cr ;
+\ : pm12  m1 px m2 px cr ;
     

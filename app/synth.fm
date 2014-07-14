@@ -3,6 +3,28 @@
 \ PIC DIP40 MINI KIT - PIC Developmen​t Board kit for DIP40 PIC with 18F4550 + 4Mhz XTAL
 \ http://100mhz.com/pic-dspic-pic32-pic24/development-boards/pic-18f4550-usb-demo-development-board-pic18f4550-microcontroller-1074.html
 
+\ RAM map
+\ range   bytes
+\ ----------------------------------------------------
+\ 000-07F   128  named variables
+\ 080-099    32  data stack
+\ 0A0-0FF    96  retain stack
+\ 100-1DF   224  *unused*
+\ 1E0-1EF    16  midi note buffer
+\ 1F0-1FF    16  uart receive buffer
+\ 200-2FF   256  *unused*
+\ 100-2FF   256  *unused*
+\ 400-419    32  BD (USB buffer descriptors EP0-EP3)  (1)
+\ 420-42F    16  BD reserved EP4-EP5
+\ 440-4EF   192  *unused*
+\ 4F0-4F7     8  EP read/write pointers
+\ 4F8-4FF     8  *unused*
+\ 500-6FF   512  EP buffers (EP0-EP3: 4 x 2 x 64 bytes)
+\ 700-7FF   256  EP buffers (EP4-EP5) reserved (2)
+
+\ (1) Some of these are not used in practice so could be repurposed.
+\ (2) For now, 6 total endpoints are reserved.
+
 provide-all
 
 \ config
@@ -43,6 +65,7 @@ staapl pic18/double-math
 staapl pic18/execute
 staapl pic18/prom \ FIXME: sti
 staapl pic18/route
+staapl pic18/serial-debug    
 staapl pic18/_table
 staapl pic18/task
 staapl pic18/vector    
@@ -54,12 +77,13 @@ load synth/soundgen.f  \ highlevel sounds
 load synth/notes.f     \ note memory
 load synth/midi-nrpn.f \ direct parameter access
 load synth/midi.f      \ midi control
+load synth/midi-hw.f   \ midi serial hw support
 
-    \ load synth/patch.f     \ old patch stuff
+\ load synth/patch.f     \ old patch stuff
 \ load synth/example.f
 \ load synth/sounds.f    \ collection of sounds
 
-load debug.f
+\ load debug.f
 
 macro
 : fosc 48000000 ;
@@ -68,13 +92,18 @@ macro
 : total-EP   4 ; 
 : monitor-EP 1 ;
 : midi-EP    3 ;
+
+\ handle UART input in kernel low-pri isr.  STATUS is already saved,
+\ normal return or macro.
+: service-lo service-midi ;
+
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
   
 : init-board     \ FIXME
     #xF0 TRISB ! \ low nibble is LED1-LED4
-    0 TRISA !   \ FIXME: check these
-    0 TRISC !
+    0 TRISA !    \ FIXME: check these
+    #x80 TRISC ! \ RC7 is midi in
     0 TRISD !
     0 TRISE !
     hello       \ remove if doesn't fit in bootloader

@@ -55,7 +55,7 @@
      (define (data x) (hex->string data-nibbles x))
 
      (for ((row (in-naturals)))
-       (lp (x) "~a  ~a" (addr (+ start (* row 8))) (data x))
+       (lp (x) "~a  ~a" (addr (+ start (* row items-per-line))) (data x))
        (for ((i (in-range (- items-per-line 2)))) (lp (x) " ~a" (data x)))
        (lp (x)  " ~a\n" (data x))))))
 

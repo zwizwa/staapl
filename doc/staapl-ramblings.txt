@@ -65295,5 +65295,155 @@ enough frequency resolution?
 
 Maybe first remove the geo thing and go to a proper table.
 
+Done
+
+
+Entry: Next
+Date: Sat Jul 12 18:23:07 EDT 2014
+
+- Control rate.  What do I really want?  Envelopes for formant
+  frequency.  Thinking about linear attack, exponential decay.
+
+- Patches.
+
+- Write hw midi parser as a state machine that can be fed 1 byte at a
+  time.  Currently it doesn't seem to work.
+
+
+
+Entry: HW midi
+Date: Sun Jul 13 11:17:59 EDT 2014
+
+Seems to work for notes.
+NRPNs don't get through
+It drops bytes:
+
+: getsome init-midi 0 7 a!! 0 for midi> >a next ;
+: dumpsome 0 7 a!! 0 for a> px next ;
+
+B0 63 00 62 01 06 04 26 00 63 00 ...
+
+dmesg:
+
+[152428.028926] MIDI output buffer overrun
+[152428.049169] MIDI output buffer overrun
+[152428.070154] MIDI output buffer overrun
+[152428.090669] MIDI output buffer overrun
+
+
+Put it back to U-3 later.
+Trying the other modes: S-1
+
+Entry: Midi CC
+Date: Sun Jul 13 11:31:13 EDT 2014
+
+So I keep consistently getting sequences like this:
+B0 63 00 62 01 06 07 26 20
+
+The control byte B0 is not repeated.  Is this standard??  See [1]:
+
+
+  To further optimize the data stream, "Running status", a convention
+  that allows the status byte to be omitted if it would be the same as
+  that of the previous message, helps to mitigate bandwidth issues
+  somewhat.
+
+[1] http://en.wikipedia.org/wiki/MIDI_1.0#Message_format
+
+
+Entry: Need buffer?
+Date: Sun Jul 13 13:50:09 EDT 2014
+
+Seems that serial input needs a buffer.  It doesn't look like there
+are any comm errors from dumping straight to ram and from examining
+the line with pyla.  This makes the next assumption to be timing
+issues.
+
+Let's run uart in through low-pri interrupt.
+
+It misses note off sometimes.  This is the pyla output from one of
+those misses.  Manually annotated with new note state.
+
+
+F8 (131) 
+80 60 38 
+F8 (2) 
+90 5E 1A              # 5E
+F8 (3) 
+80 5E 10              #
+F8 (2) 
+90 5C 5A              # 5C
+F8 (1) 
+80 5C 16              #
+F8 (2) 
+90 60 3E              # 60
+F8 (1) 
+90 5C 6A              # 60 5C
+F8 (1) 
+90 59 3E 5B 5C        # 60 5C 59 5B
+F8 (1) 
+80 60 24              # 5C 5B 59
+F8 (1) 
+80 59 46 5B 0A 5C 2A  # 
+F8 (1) 
+90 60 42              # 60
+F8 (2) 
+90 5E 4E              # 60 5E
+80 60 3E              # 5E
+F8 (1) 
+90 5A 62 5C 4E        # 5E 5A 5C
+F8 (2) 
+80 5E 48              # 5A 5C
+
+F8 (631) 
+
+
+Hmm.  that actually doesn't have note off for 5A and 5C.  Keyboard or
+BCR2000 not doing the right thing there..
+
+
+
+Let's see: 31250 baud, 3125 bytes / sec.
+
+This gives 12MHz / 3125kHz = 3840 cycles to get a byte out of the
+buffer before the next one arrives.
+
+This should really be enough in the current approach..
+
+Anyway it's still possible I guess.
+How to find out?
+Check overflow / frame errors?
+
+RCSTA is #x90 so no overruns or framing errors.
+
+Weird..
+Switch back to USB to see if that changes anything
+USB works without a glitch.
+
+Hmm... weird.
+
+So things I've seen:
+- missing note off when keyboard -> BCR2000 -> synth
+- stuck note but no missing note off keyboard -> synth
+
+
+Well.. Let's try to make this work with buffered input.  Probably need
+that anyway at some point.
+
+Actually, the serial.rkt resets these bits, so let's define a new
+word.
+
+See serial-debug.rkt  (records OR and FE)
+Indeed when it misses there is an overrun recorded.
+
+
+Entry: Buffered input, low-pri I/O
+Date: Sun Jul 13 17:59:41 EDT 2014
+
+
+So need a buffered approach for UART.  Write to RAM from low-pri ISR.
+
+For now: add a "macro callback" to the kernel USB routine, called
+before the USB handler.
 
 
