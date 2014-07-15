@@ -65457,3 +65457,24 @@ Seems there is memory corruption.  Cleared 1C0-1EF to 00 before.
 1E0  F8 F8 F8 F8 FE F8 F8 F8 F8 F8 F8 F8 FE F8 F8 F8
 1F0  F8 F8 F8 FE F8 F8 F8 F8 F8 F8 F8 FE F8 F8 F8 F8
 
+
+
+Entry: todo
+Date: Mon Jul 14 20:39:24 EDT 2014
+
+- weird serial midi bug
+
+- envelopes
+
+
+
+Entry: state machine compiler: sm/sm.rkt
+Date: Tue Jul 15 14:27:47 EDT 2014
+
+Language with:
+- all "lexical" variable allocated as globals
+- tail calls are "gotos with arguments", i.e. they never return
+- recursive function calls are inlined
+
+Later maybe optimize inlining to real function calls if there are no
+yield calls in the dynamic extent.
