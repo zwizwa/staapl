@@ -65,8 +65,6 @@
 ;; it to the current environ.
 (define-syntax-rule (_let1 name val body)
   (let ((var (alloc-variable!)))  
-  (printf "functions: ~a\n" (functions))
-
     (parameterize ((environ (cons var (environ))))
       (compile-statement! `(set! ,var ,val))
       (let ((name `(ref ,var)))
@@ -85,7 +83,7 @@
 ;; Application:
 ;;  - non tail call just inlines the function
 (define-syntax-rule (_apply_ntc fn . args)
-  (fn args))
+  (apply fn (list . args)))
 ;;  - tail call compiles function + label if it's not yet compiled,
 ;;  and inserts a "goto with arguments".
 (define-syntax-rule (_apply_tc  fn . args)
@@ -99,14 +97,18 @@
 
 ;; Test
 
-;; Mutually recursive functions.
+;; Used as inlined ntc functions.
+(define (op1 a b) (_prim + a b))
+(define (op2 a b) (_prim * a b))
+
+;; Used as mutually recursive tc functions.
 (define (state1 acc inc)
   (_let1 acc+
-         (_prim + acc inc)
+         (_apply_ntc op1 acc inc)
          (_apply_tc state2 acc+ inc)))
 (define (state2 acc inc)
   (_let1 acc+
-         (_prim + acc inc)
+         (_apply_ntc op2 acc inc)
          (_apply_tc state1 acc+ inc)))
 
 (define-syntax-rule (compile-machine name)
@@ -114,7 +116,7 @@
    (lambda ()
      `((input . ,(compile-function! 'name name))
        (nb-vars . ,(nb-vars))
-       (functions . ,(functions))))))
+       (functions . ,(reverse (functions)))))))
 
 (compile-machine state1)
 
