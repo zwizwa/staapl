@@ -65478,3 +65478,13 @@ Language with:
 
 Later maybe optimize inlining to real function calls if there are no
 yield calls in the dynamic extent.
+
+One necssary optimization is to reduce the memory footprint.  This is
+related to register allocation.  The number of registers is not
+limited: it just needs to be minimal.  Does this make the problem
+easier?  It could also be left to the C compiler.
+
+The language needs conditionals to be useful.  Problem is that it only
+does straight line compilation now.  Split into basic blocks?
+
+[1] http://en.wikipedia.org/wiki/Register_allocation

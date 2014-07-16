@@ -16,22 +16,28 @@
 ;; Later optimizations:
 ;; - register allocation to reuse memory cells
 ;; - use run-time stack to implement non-yielding functions used multiple times
+;;
+;; TODO:
+;; - conditionals
 
-
-(define nb-vars   (make-parameter #f))
-(define code      (make-parameter #f))
-(define environ   (make-parameter #f))
-(define functions (make-parameter #f))
+(define nb-vars      (make-parameter #f))
+(define code         (make-parameter #f))
+(define functions    (make-parameter #f))
+(define stack-depth  (make-parameter #f))
   
 (define (with-context thunk)  
   (parameterize ((nb-vars 0)
                  (code '())
-                 (environ '())
-                 (functions '()))
+                 (functions '())
+                 (stack-depth 0)) ;; to prevent infinite recursion
     (thunk)))
     
-(define (alloc-variable!) (let ((rv (nb-vars))) (nb-vars (add1 rv)) rv))
-(define (compile-statement! s) (code (cons s (code))))
+(define (alloc-variable!)
+  (let ((rv (nb-vars)))
+    (nb-vars (add1 rv))
+    rv))
+(define (compile-statement! s)
+  (code (cons s (code))))
 (define (register-function! name vars code)
   (functions (cons (list name vars code) (functions))))
 
@@ -49,9 +55,7 @@
            (code-box (box #f)))
       ;; Create entry before compilation to allow for recursive calls.
       (register-function! name arg-vars code-box)
-      (parameterize
-          ((code '())
-           (environ (append arg-vars environ)))
+      (parameterize ((code '()))
         ;; compile function and save the body code.
         (apply body (for/list ((v arg-vars)) `(ref ,v)))
         (set-box! code-box (reverse (code))))))
@@ -65,10 +69,15 @@
 ;; it to the current environ.
 (define-syntax-rule (_let1 name val body)
   (let ((var (alloc-variable!)))  
-    (parameterize ((environ (cons var (environ))))
-      (compile-statement! `(set! ,var ,val))
-      (let ((name `(ref ,var)))
-        body))))
+    (compile-statement! `(set! ,var ,val))
+    (let ((name `(ref ,var))) body)))
+
+(define-syntax _let*
+  (syntax-rules ()
+    ((_ () b) b)
+    ((_ ((n v) . nvs) b)
+     (_let1 n v (_let* nvs b)))))
+
     
 (define-syntax-rule (_prim op . args)
   `(,'op ,@(list . args)))
@@ -83,11 +92,17 @@
 ;; Application:
 ;;  - non tail call just inlines the function
 (define-syntax-rule (_apply_ntc fn . args)
-  (apply fn (list . args)))
+  (parameterize ((stack-depth (add1 (stack-depth))))
+    (when (> (stack-depth) 10)
+      (raise 'infinite-ntc-recursion))
+    (apply fn (list . args))))
+
 ;;  - tail call compiles function + label if it's not yet compiled,
 ;;  and inserts a "goto with arguments".
 (define-syntax-rule (_apply_tc  fn . args)
   (begin
+    (unless (zero? (stack-depth))
+      (raise 'non-toplevel-tailcall))
     (let ((vars (compile-function! 'fn fn)))  ;; compile function if not already compiled
       (for ((v vars)
             (a (list . args)))
@@ -103,20 +118,23 @@
 
 ;; Used as mutually recursive tc functions.
 (define (state1 acc inc)
-  (_let1 acc+
-         (_apply_ntc op1 acc inc)
-         (_apply_tc state2 acc+ inc)))
+  (_let* ((acc+ (_apply_ntc op1 acc inc)))
+      (_apply_tc state2 acc+ inc)))
 (define (state2 acc inc)
-  (_let1 acc+
-         (_apply_ntc op2 acc inc)
-         (_apply_tc state1 acc+ inc)))
+  (_let* ((acc+ (_apply_ntc op2 acc inc)))
+      (_apply_tc state1 acc+ inc)))
 
 (define-syntax-rule (compile-machine name)
   (with-context
    (lambda ()
      `((input . ,(compile-function! 'name name))
        (nb-vars . ,(nb-vars))
-       (functions . ,(reverse (functions)))))))
+       (functions . ,(map unbox-function (reverse (functions))))))))
+
+(define (unbox-function f)
+  (list `(name . ,(list-ref f 0))
+        `(args . ,(list-ref f 1))
+        `(code . ,(unbox (list-ref f 2)))))
 
 (compile-machine state1)
 
