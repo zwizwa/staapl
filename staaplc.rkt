@@ -177,6 +177,12 @@
      (lambda ()
        (eval '(write-ihex (code->binary)))))
 
+    ;; FIXME: make this optional
+    (with-output-to-file "test.bin"
+      (lambda () (write (code->binary))))
+        
+    
+
     ;; Save symbolic output.
     (let* ((reqs (requirements (filename)))
            (boot-run
