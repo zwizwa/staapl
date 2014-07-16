@@ -43,6 +43,7 @@
 
 (flags: output-hex
         output-dict
+        output-code
         console
         device
         baud
@@ -70,6 +71,9 @@
     [("-o" "--output-hex") filename "Output Intel HEX file."
      (output-hex filename)]
 
+    [("--output-code") filename "Output s-expression code dump."
+     (output-code filename)]
+    
     [("--print-code") "Print assembly and binary code output."
      (print-asm (lambda () (eval '(code-print))))]
 
@@ -176,6 +180,11 @@
      (output-hex)
      (lambda ()
        (eval '(write-ihex (code->binary)))))
+
+    ;; Dump binary code chunks in hex format.
+    (when (output-code)
+      (with-output-to-file (output-code)
+        (lambda () (eval '(write (code->binary))))))
 
     ;; Save symbolic output.
     (let* ((reqs (requirements (filename)))

@@ -38,6 +38,8 @@ apps: $(APPS)
 # STAAPLC_FLAGS = -c uart -d /dev/tty-FT9FP1Z6 --baud 9600
 
 
+STAAPLC_FLAGS := --output-code test.sx
+
 # make sure this works without the "staaplc" command line app wrapper installed
 STAAPLC = $(INTERP) -l staapl/staaplc --
 

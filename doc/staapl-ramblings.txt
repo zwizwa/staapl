@@ -65488,3 +65488,21 @@ The language needs conditionals to be useful.  Problem is that it only
 does straight line compilation now.  Split into basic blocks?
 
 [1] http://en.wikipedia.org/wiki/Register_allocation
+
+
+Entry: Emulator
+Date: Wed Jul 16 00:30:12 EDT 2014
+
+One of those days.  No interest in solving a real, hard problem.
+Let's write a PIC18 emulator!
+
+This should go on top of the disassembler.
+How to invoke that?
+
+Tracing it down from 'see' in commands.rkt -> tsee -> disassembe->word
+I don't need to create a datastructure so let's look inside that one.
+
+            (dasm-parse dasm-list+default
+                        (seq->ll bin)
+                        addr))))
+
