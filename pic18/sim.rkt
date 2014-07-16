@@ -20,7 +20,7 @@
   (begin (define p (make-parameter #f)) ...))
     
 
-(params mem ip wreg ram stack fsr)
+(params flash ip wreg ram stack fsr)
 
 (define (fsr-set! f v) (vector-set! (fsr) f v))
 (define (fsr-ref f)    (vector-ref  (fsr) f))
@@ -34,14 +34,14 @@
 (define (ram-set! addr val) (vector-set! (ram) addr val))
 (define (ram-ref  addr)     (vector-ref  (ram) addr))
 
-(define (load-mem filename)
+(define (load-flash filename)
   (for/list ((chunk (read (open-input-file filename))))
     (list (list-ref chunk 0)
           (apply vector (list-ref chunk 1)))))
 
-(define (mem-ref addr [word #f])
+(define (flash-ref addr [word #f])
   (prompt
-   (for ((chunk (mem)))
+   (for ((chunk (flash)))
      (let-values (((chunk-addr chunk-data) (apply values chunk)))
        (let ((offset (- addr chunk-addr)))
          (when (and (>= offset 0) 
@@ -57,7 +57,7 @@
        #xFF)))
 
 (define (next-word)
-  (let ((w (mem-ref (ip) #t)))
+  (let ((w (flash-ref (ip) #t)))
     (ip (+ (ip) 2))
     w))
 
@@ -72,8 +72,8 @@
 (define (dasm-ip)
   (let* ((here (ip))
          ;; Feed the dasm two words of context
-         (w0 (mem-ref here #t))
-         (w1 (mem-ref (+ 2 here) #t)))
+         (w0 (flash-ref here #t))
+         (w1 (flash-ref (+ 2 here) #t)))
     (car ;; only interested in first instruction
      (ll->l
       (dasm-parse dasm-collection+dw
@@ -105,8 +105,12 @@
 (define sfrs
   `((#xFC  . ,(sfr-fixme 'STKPTR))
     (#x93  . ,(sfr-fixme 'TRISB))
-    (#xEC  . ,(preinc 0))
     (#xED  . ,(postdec 0))
+    (#xEC  . ,(preinc  0))
+    (#xE5  . ,(postdec 1))
+    (#xE4  . ,(preinc  1))
+    (#xDD  . ,(postdec 2))
+    (#xDC  . ,(preinc  2))
     ))
 
 (define (reg-write r v) ((car r) v))
@@ -166,7 +170,7 @@
 
 ;; Testing
 (define (test)
-  (mem (load-mem "/home/tom/staapl/app/test.sx"))
+  (flash (load-flash "/home/tom/staapl/app/test.sx"))
   (ip 0)
   (wreg 0)
   (ram (make-vector #x100 #f))
