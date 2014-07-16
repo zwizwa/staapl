@@ -27,6 +27,7 @@
  dasm-parse
  dasm-arity
  define-dasm-collection   ;; call another macro with the visible disassembler collection
+ default-dasm
  disassemble->word)
 
 
@@ -79,12 +80,12 @@
                                 (loop ll-bin+ (+ addr n)))
                           (next ds+))))))))))))
 
+(define default-dasm 
+  (make-dasm (lambda (here word) (op: dw word))))
 
 (define (disassemble->word dasm-list
                            bin addr wordsize
                            [resolve (lambda (x) x)])
-  (define default-dasm 
-    (make-dasm (lambda (here word) (op: dw word))))
   (define dasm-list+default
     (append dasm-list (list default-dasm)))
   (define (resolve-op lst)

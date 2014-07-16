@@ -65478,3 +65478,22 @@ Language with:
 
 Later maybe optimize inlining to real function calls if there are no
 yield calls in the dynamic extent.
+
+
+Entry: Emulator
+Date: Wed Jul 16 00:30:12 EDT 2014
+
+One of those days.  No interest in solving a real, hard problem.
+Let's write a PIC18 emulator!
+
+This should go on top of the disassembler.
+How to invoke that?
+
+Tracing it down from 'see' in commands.rkt -> tsee -> disassembe->word
+I don't need to create a datastructure so let's look inside that one.
+
+            (dasm-parse dasm-list+default
+                        (seq->ll bin)
+                        addr))))
+
+Where is `dasm-collection' defined?
