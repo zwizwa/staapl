@@ -65506,3 +65506,12 @@ I don't need to create a datastructure so let's look inside that one.
                         (seq->ll bin)
                         addr))))
 
+
+Entry: Emulator cont
+Date: Thu Jul 17 02:22:31 EDT 2014
+
+So it was fun getting this started.  Finishing it will take some work.
+For some, and interesting problem found:
+
+movf 15 0 0
+from non-initialized memory

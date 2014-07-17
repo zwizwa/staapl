@@ -4,6 +4,7 @@
          racket/match
          racket/dict
          racket/pretty
+         (except-in racket/bool true false)
          "../target/rep.rkt" ;; instruction->string
          "../tools.rkt"      ;; ll->l
          "asm.rkt"           ;; pic18
@@ -17,10 +18,11 @@
 
 
 (define-syntax-rule (params p ...)
-  (begin (define p (make-parameter #f)) ...))
+  (begin (define p (make-parameter (void))) ...))
     
 
-(params flash ip wreg ram stack fsr)
+(params
+ flash ip wreg ram stack fsr Z C DC N OV)
 
 (define (fsr-set! f v) (vector-set! (fsr) f v))
 (define (fsr-ref f)    (vector-ref  (fsr) f))
@@ -80,77 +82,126 @@
                   (list w0 w1)
                   here)))))
 
-(define-syntax-rule (define-opcodes opcodes (name args . body) ...)
+(define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (define opcodes
     `((name . ,(lambda args . body)) ...)))
 
 ;; Generic FSR access
 (define (indirect f [pre void] [post void])
-  (list (lambda (v) (pre) (ram-set! (fsr-ref f) v) (post))
-        (lambda ()  (pre) (let ((rv (ram-ref (fsr-ref f)))) (post) rv))))
+  (list (lambda ()  (pre) (let ((rv (ram-ref (fsr-ref f)))) (post) rv))
+        (lambda (v) (pre) (ram-set! (fsr-ref f) v) (post))
+        ))
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 (define (preinc f)  (indirect f (fsr-update f add1) void))
 (define (postdec f) (indirect f void (fsr-update f sub1)))
 
-(define (sfr-fixme tag)
+(define (sfr-fixme addr)
   (define (dummy . args)
-    (printf "-- sfr-fixme ~s\n" tag))
-  (list dummy dummy))
+    (printf "-- sfr-fixme ~s\n" addr))
+  (list addr dummy dummy))
 
-;; Regs are lists of write, read operations
-(define STKPTR   #xFC)
-(define TRISB    #x93)
+;; Most SFR are implemented as RAM read/write.
+(define (sfr-ram addr)
+  (list
+   addr
+   (lambda ()  (ram-ref addr))
+   (lambda (v) (ram-set! addr v))))
 
 (define sfrs
-  `((#xFC  . ,(sfr-fixme 'STKPTR))
-    (#x93  . ,(sfr-fixme 'TRISB))
-    (#xED  . ,(postdec 0))
-    (#xEC  . ,(preinc  0))
-    (#xE5  . ,(postdec 1))
-    (#xE4  . ,(preinc  1))
-    (#xDD  . ,(postdec 2))
-    (#xDC  . ,(preinc  2))
+  `(,(sfr-ram #xFC) ;; STKPTR
+    ,(sfr-ram #x92) ;; TRISA
+    ,(sfr-ram #x93) ;; TRISB
+    ,(sfr-ram #x94) ;; TRISC
+    ,(sfr-ram #x95) ;; TRISD
+    ,(sfr-ram #x96) ;; TRISE
+    ,(sfr-ram #x89) ;; LATA
+    ,(sfr-ram #x8A) ;; LATB
+    ,(sfr-ram #x8B) ;; LATC
+    ,(sfr-ram #x8C) ;; LATD
+    ,(sfr-ram #x8D) ;; LATE
+    ,(sfr-ram #xF6) ;; TBLPTRL
+    ,(sfr-ram #xF5) ;; TABLAT
+    (#xE8 ,wreg ,wreg)
+    (#xED . ,(postdec 0))
+    (#xEC . ,(preinc  0))
+    (#xE5 . ,(postdec 1))
+    (#xE4 . ,(preinc  1))
+    (#xDD . ,(postdec 2))
+    (#xDC . ,(preinc  2))
     ))
 
-(define (reg-write r v) ((car r) v))
-(define (reg-read  r)   ((cadr r)))
+(define (reg-read  r)   ((car r)))
+(define (reg-write r v) ((cadr r) v))
 
 (define (lohi lo hi) (+ lo (* #x100 hi)))
 (define (ipw lo [hi 0])  (ip (* 2 (lohi lo hi))))
-                  
+
+;; 8-bit operand read/write
+(define (store reg a v)
+  (unless (zero? a) (raise 'banked-write))
+  (if (>= reg #x80)
+      (reg-write (dict-ref sfrs reg) v)
+      (ram-set! (+ #xF00 reg) v)))
+  
+(define (load reg a)
+  (unless (zero? a) (raise 'banked-read))
+  (if (>= reg #x80)
+      (reg-read (dict-ref sfrs reg))
+      (ram-ref (+ #xF00 reg))))
+
+(define (N-from v)
+  (N (not (zero? (bitwise-and #x80 v)))))
+
+
+;; FIXME: word/byte addresses and rel/abs is a bit messed up in the dasm.
+
 (define-opcodes opcodes
-  (bra   (addr)  (ipw addr))
-  (_goto (lo hi) (ipw lo hi))  
-  (_call (s lo hi)
-         (unless (zero? s) (raise 'call-s=1))
-         (push (ip))
-         (ipw lo hi))
-  (return (s)
-         (unless (zero? s) (raise 'call-s=1))
-         (ip (pop)))
-          
-          
-  (movlw (l)     (wreg l))
-  (movwf (reg b)
-         (unless (zero? b) (raise 'movwf-b=1))
-         (if (>= reg #x80)
-             (reg-write (dict-ref sfrs reg) (wreg))
-             (ram-set! reg (wreg))))
-  (movf (reg a d)
-        (unless (zero? a) (raise 'movf-a=1))
-        (unless (zero? d) (raise 'movf-d=1))
-        (wreg
-         (if (>= reg #x80)
-             (reg-read (dict-ref sfrs reg))
-             (ram-ref reg))))
-
+  ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
   
+  ((bpc p dst) ;; FIXME: probably wrong
+   (unless (xor (C) (bit->bool p))
+     (ip dst)))
 
-  (_lfsr (f l h) (fsr-set! f (lohi l h)))
+  ((bra addr)    (ipw addr))
+  ((rcall addr)  (ip addr) (push (ip)))
   
+  ((_goto lo hi) (ipw lo hi))  
+  ((_call s lo hi)
+   (unless (zero? s) (raise 'call-shadow=1))
+   (push (ip))
+   (ipw lo hi))
+  ((return s)
+   (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
+   (ip (pop)))
+          
+  ; movff ;; no STATUS
+  ((movlw l) (wreg l)) ;; no STATUS
+  ((movwf reg a) (store reg a (wreg))) ;; no STATUS
+  ((movf reg a d)
+   (unless (zero? d) (raise 'movf-d=1)) ;; d=1 just sets N,Z flags
+   (let ((v (load reg a)))
+     (wreg v)
+     (Z (zero? v))
+     (N-from v)
+     ))
+  ((incf reg a d)
+   (unless (zero? d) (raise 'movf-d=1)) ;; d=1 just sets N,Z flags
+   (let ((v (bitwise-and #xFF (+ 1 (load reg a)))))
+     (store reg a v)
+     (C (zero? v))
+     (Z (zero? v))
+     (N-from v)
+     ;; DC
+     ;; OV
+     ))
+  ((clrf reg a) (store reg a 0)) ;; FIXME: Z
+  ((_lfsr f l h) (fsr-set! f (lohi l h)))
+
+  ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
-
+(define (bit->bool bit) (not (zero? bit)))
+   
 (define (execute-next)
   (match (dasm-ip)
     ((list (list-rest asm args) words addr)
@@ -173,7 +224,7 @@
   (flash (load-flash "/home/tom/staapl/app/test.sx"))
   (ip 0)
   (wreg 0)
-  (ram (make-vector #x100 #f))
+  (ram (make-vector #x1000 #f))
   (fsr (make-vector 3 #f))
   (stack '())
   (run))
