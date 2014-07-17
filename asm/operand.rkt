@@ -73,8 +73,15 @@
 (define (dasm/signed pc value bits)
   (sign-extend (dasm/unsigned pc value bits) bits))
 
+;; Please not that the combination between lazy lists and dynamic
+;; parameters isn't the best fit.
+(define dasm-pcr-enable (make-parameter #t))
+
 (define (dasm/pcr pc value bits)
-  (+ (dasm/signed pc value bits) pc))  ;; Doesn't use asm pointer environment.
+  (let ((signed (dasm/signed pc value bits)))
+    (if (dasm-pcr-enable) ;; HACK.  Sim is better off with relative word addresses.
+        (+ signed pc)  ;; Doesn't use asm pointer environment.
+        signed)))
 
 
 

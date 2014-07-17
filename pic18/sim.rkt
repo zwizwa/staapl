@@ -77,10 +77,11 @@
          (w0 (flash-ref here #t))
          (w1 (flash-ref (+ 2 here) #t)))
     (car ;; only interested in first instruction
-     (ll->l
-      (dasm-parse dasm-collection+dw
-                  (list w0 w1)
-                  here)))))
+      (parameterize ((dasm-pcr-enable #f)) ;; turn off PC-relative to abs translation
+        (ll->l
+         (dasm-parse dasm-collection+dw
+                     (list w0 w1)
+                     here))))))
 
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (define opcodes
@@ -135,7 +136,13 @@
 (define (reg-write r v) ((cadr r) v))
 
 (define (lohi lo hi) (+ lo (* #x100 hi)))
-(define (ipw lo [hi 0])  (ip (* 2 (lohi lo hi))))
+
+(define (ipw lo [hi 0] [offset 0])
+  (ip (+ offset (* 2 (lohi lo hi)))))
+(define (ipw-rel lo [hi 0])
+  (ipw lo hi (ip)))
+
+
 
 ;; 8-bit operand read/write
 (define (store reg a v)
@@ -159,12 +166,12 @@
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
   
-  ((bpc p dst) ;; FIXME: probably wrong
+  ((bpc p rel) ;; FIXME: probably wrong
    (unless (xor (C) (bit->bool p))
-     (ip dst)))
+     (ipw-rel rel)))
 
-  ((bra addr)    (ipw addr))
-  ((rcall addr)  (ip addr) (push (ip)))
+  ((bra   rel)              (ipw-rel rel))
+  ((rcall rel)  (push (ip)) (ipw-rel rel))
   
   ((_goto lo hi) (ipw lo hi))  
   ((_call s lo hi)
