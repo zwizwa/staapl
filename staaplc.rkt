@@ -48,7 +48,7 @@
         device
         baud
         filename
-        print-asm
+        output-asm
         debug-script
         dict-suffix
         debug-suffix
@@ -57,7 +57,6 @@
 ;; Defaults
 ; (device "/dev/staapl0")
 (baud #f)
-(print-asm void)
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
 
@@ -74,8 +73,8 @@
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
     
-    [("--print-code") "Print assembly and binary code output."
-     (print-asm (lambda () (eval '(code-print))))]
+    [("--output-asm") filename "Output assembly code."
+     (output-asm filename)]
 
     [("-c" "--comm") filename "Console port. (default: pickit2)"  (console (string->symbol filename))]
 
@@ -172,19 +171,21 @@
     (eval (requirements (filename)))
 
     ;; Optionally print assembler code.
-    ((print-asm))  
-    
+    (when (output-asm)
+      (with-output-to-file/safe
+       (output-asm)
+       (lambda () (eval '(code-print)))))
 
     ;; Save binary output.
     (with-output-to-file/safe
      (output-hex)
-     (lambda ()
-       (eval '(write-ihex (code->binary)))))
+     (lambda () (eval '(write-ihex (code->binary)))))
 
     ;; Dump binary code chunks in hex format.
     (when (output-code)
-      (with-output-to-file (output-code)
-        (lambda () (eval '(write (code->binary))))))
+      (with-output-to-file/safe
+       (output-code)
+       (lambda () (eval '(write (code->binary))))))
 
     ;; Save symbolic output.
     (let* ((reqs (requirements (filename)))

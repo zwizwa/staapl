@@ -219,9 +219,15 @@
   (run))
     
 
+;; To make this more immediately useful, it might be good to focus on
+;; running subroutines in isolation.  Booting a real world image is
+;; going to have a lot of HW init that needs to be supported to be
+;; able to get it to run correctly at all.
+
+
 ;; Testing
 (define (test)
-  (flash (load-flash "/home/tom/staapl/app/test.sx"))
+  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
   (ip 0)
   (wreg 0)
   (ram (make-vector #x1000 #f))

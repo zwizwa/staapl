@@ -245,7 +245,7 @@
   ;; Ugly code for pretty output..
 
   (define w->s  word->string)
-  (define (a->s x) (hex->string (/ (target-print-address-bits) 4) x))
+  (define (a->s x) (string->symbol (hex->string (/ (target-print-address-bits) 4) x)))
   (define (hex x)
     (cond
      ((number? x) (w->s x))

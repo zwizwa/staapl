@@ -38,7 +38,6 @@ apps: $(APPS)
 # STAAPLC_FLAGS = -c uart -d /dev/tty-FT9FP1Z6 --baud 9600
 
 
-STAAPLC_FLAGS := --output-code test.sx
 
 # make sure this works without the "staaplc" command line app wrapper installed
 STAAPLC = $(INTERP) -l staapl/staaplc --
@@ -55,7 +54,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 %.app: %.fm $(F_LIB)
 	rm -f compiled/$*_fm.*
 	$(COMP) -vk $<
-	$(STAAPLC) $(STAAPLC_FLAGS) $<
+	$(STAAPLC) $(STAAPLC_FLAGS) --output-code $*.sx --output-asm $*.asm $< 
 	chmod +x $*.dict
 	ls -l $*.hex $*.dict >$@
 
@@ -84,7 +83,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 
 
 clean:
-	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app *.flash
+	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app *.flash *.sx *.asm
 
 # Regression tests for binary code generator.
 
