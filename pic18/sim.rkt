@@ -167,7 +167,7 @@
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
   
   ((bpc p rel) ;; FIXME: probably wrong
-   (unless (xor (C) (bit->bool p))
+   (unless (not (xor (C) (bit->bool p)))
      (ipw-rel rel)))
 
   ((bra   rel)              (ipw-rel rel))
