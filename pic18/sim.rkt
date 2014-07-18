@@ -15,12 +15,7 @@
 ;; core does with the binary compiler output, so a hackable emulator
 ;; is the closest thing.
 
-
-;; Tools: somewhere else
-(define (bit->bool bit) (not (zero? bit)))
-(define (>> x) (arithmetic-shift x -1))
-(define (8bit x) (bitwise-and #xFF x))
-
+;; Machine constants
 (define reg-access #x60) ;; #x80 FIXME: depends on core version
 
 (define-syntax-rule (params p ...)
@@ -95,6 +90,10 @@
 
 (define (make-param-register param)
   (make-rw-register param param))
+
+(define (make-ni-register tag)
+  (define (ni . _) (error 'register-not-implemented "~s" tag))
+  (make-register ni ni ni))
 
 ;; Map data address space to ram or sfrs.
 (define (data-register addr)
@@ -177,6 +176,7 @@
     (#xFE4 . ,(preinc  1))
     (#xFDD . ,(postdec 2))
     (#xFDC . ,(preinc  2))
+    (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
   (dict-ref sfrs reg
@@ -204,26 +204,47 @@
 (define (bp flag p rel)
   (unless (not (xor (flag) (bit->bool p)))
     (ipw-rel rel)))
+
+;; 2s complement add truncated to 8 bit + flag updates
+
+(define (unsigned8 x) (band #xFF x))
+(define (unsigned4 x) (band #x0F x))
+
+(define (add/flags! a b)
+  (let* ((usum (+ (unsigned8 a) (unsigned8 b)))
+         (rv (band #xFF usum)))
+    (N/Z! rv)
+    (C  (bit-set? usum 8))
+    (DC (bit-set? (+ (unsigned4 a)
+                     (unsigned4 b))
+                  4))
+    ; (OV ...) ;; haha FIXME!
+    rv))
+(define (N/Z! result)
+  (N (bit-set? result 7))
+  (Z (zero? result)))
+
   
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (begin
     (begin (define (name . args) . body) ...)
     (define opcodes (make-hash `((name . ,name) ...)))))
 
+;; FIXME: check flags updates for all
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
   
   ((bpc p rel) (bp C p rel))
   ((bpz p rel) (bp Z p rel))  ;; hangs it on synth code
 
-  ((bra   rel)              (ipw-rel rel))
-  ((rcall rel)  (push (ip)) (ipw-rel rel))
+  ((bra   rel)  (ipw-rel rel))
+  ((rcall rel)  (push (ip)) (bra rel))
   
   ((_goto lo hi) (ipw lo hi))  
   ((_call s lo hi)
    (unless (zero? s) (raise 'call-shadow=1))
    (push (ip))
-   (ipw lo hi))
+   (_goto lo hi))
   ((return s)
    (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
    (ip (pop)))
@@ -244,29 +265,11 @@
      (Z (zero? v))
      (N-from v)
      ))
-  ((incf reg d a)
-   (let ((v (read-modify-write
-             (lambda (x) (8bit (add1 x)))
-             reg d a)))
-     (C (zero? v))
-     (Z (zero? v))
-     (N-from v)
-     ;; DC
-     ;; OV
-     ))
-  ((decf reg d a)
-   (let ((v (read-modify-write
-             (lambda (x) (8bit (sub1 x)))
-             reg d a)))
-     (C (zero? v))
-     (Z (zero? v))
-     (N-from v)
-     ;; DC
-     ;; OV
-     ))
-  ((clrf reg a) (store reg a 0)) ;; FIXME: Z
-  ((_lfsr f l h) (fsr-set! f (lohi l h)))
+  ((incf reg d a) (read-modify-write (lambda (x) (add/flags! x  1)) reg d a))
+  ((decf reg d a) (read-modify-write (lambda (x) (add/flags! x -1)) reg d a))
+  ((clrf reg a)   (store reg a 0) (Z #t))
 
+  ((_lfsr f l h)  (fsr-set! f (lohi l h)))
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
 
@@ -280,7 +283,7 @@
 
 (define (last-trace [n 5])
   (for ((ip (reverse (take n (trace)))))
-    (match (vector-ref (jit) (>> ip))
+    (match (vector-ref (jit) (2/ ip))
       ((struct ins-jit (op args ip+ words))
        (print-dasm words ip+)))))
 
@@ -311,13 +314,13 @@
     (print-target-word
      (disassemble->word dasm-collection+dw
                         words
-                        (>> ip)
+                        (2/ ip)
                         16
                         (lambda (addr) (format "~x" addr))
                         ))))
 (define (execute-next)
   (let* ((ip-prev (ip))
-         (jit-index (>> ip-prev))
+         (jit-index (2/ ip-prev))
          (jitted (vector-ref (jit) jit-index)))
     (let-values
         (((op args)
@@ -367,11 +370,10 @@
 (define (test)
   (flash (load-flash "/home/tom/staapl/app/synth.sx"))
   (ip 0)
-  (wreg 0)
   (ram (make-vector #x1000 #f))
   (fsr (make-vector 3 #f))
   (jit (make-vector #x2000 #f))
-  (stack '())
+  (stack '())  ;; FIXME: implement this as 31-word vector + SPTR reg
   (trace '())
   (run))
 

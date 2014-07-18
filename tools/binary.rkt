@@ -75,7 +75,10 @@
 
 (define (negate x) (* -1 x))
 
+(define (bit->bool bit) (not (zero? bit)))
 
+(define (bit-set? value bit)
+  (bit->bool (band 1 (>>> value bit))))
 
 ;; ;; symbol generation. not going to make a separate module for this...
 ;; (define (generated-label? x)
