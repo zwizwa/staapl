@@ -91,24 +91,32 @@
                         words
                         (>> ip)
                         16
-                        (lambda (addr) (format "#x~x" addr))
+                        (lambda (addr) (format "~x" addr))
                         ))))
                        
   
 
-(define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
-  (define opcodes
-    (make-hash `((name . ,(lambda args . body)) ...))))
 
 ;; Generic FSR access
+
+;; FIXME: for load-store operations this is wrong!
 (define (indirect f [pre void] [post void])
-  (list (lambda ()  (pre) (let ((rv (ram-ref (fsr-ref f)))) (post) rv))
-        (lambda (v) (pre) (ram-set! (fsr-ref f) v) (post))
-        ))
+  (define (read)
+    (pre)
+    (let ((rv (ram-ref (fsr-ref f))))
+      (post)
+      rv))
+  (define (write v)
+    (pre)
+    (ram-set! (fsr-ref f) v)
+    (post))
+  (list read write))
+
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 (define (preinc f)  (indirect f (fsr-update f add1) void))
 (define (postdec f) (indirect f void (fsr-update f sub1)))
+(define (indf f)    (indirect f void void))
 
 (define (sfr-fixme addr)
   (define (dummy . args)
@@ -136,14 +144,19 @@
     ,(sfr-ram #x8D) ;; LATE
     ,(sfr-ram #xF6) ;; TBLPTRL
     ,(sfr-ram #xF5) ;; TABLAT
-    (#xE8 ,wreg ,wreg)
     (#xED . ,(postdec 0))
     (#xEC . ,(preinc  0))
+    (#xE8 ,wreg ,wreg)
+    (#xE7 . ,(indf 1))
     (#xE5 . ,(postdec 1))
     (#xE4 . ,(preinc  1))
     (#xDD . ,(postdec 2))
     (#xDC . ,(preinc  2))
     ))
+(define (sfr reg)
+  (dict-ref sfrs reg
+            (lambda ()
+              (error 'sfr-not-found "~x" reg))))
 
 (define (reg-read  r)   ((car r)))
 (define (reg-write r v) ((cadr r) v))
@@ -157,17 +170,20 @@
 
 
 
+
 ;; 8-bit operand read/write
-(define (store reg a v)
+(define (store reg a v [d 1])
   (unless (zero? a) (raise 'banked-write))
-  (if (>= reg #x80)
-      (reg-write (dict-ref sfrs reg) v)
-      (ram-set! (+ #xF00 reg) v)))
+  (if (zero? d)
+      (wreg v) ;; also support 'd' flag
+      (if (>= reg #x60)  ;; FIXME: depends on core version
+          (reg-write (sfr reg) v)
+          (ram-set! (+ #xF00 reg) v))))
   
 (define (load reg a)
   (unless (zero? a) (raise 'banked-read))
   (if (>= reg #x80)
-      (reg-read (dict-ref sfrs reg))
+      (reg-read (sfr reg))
       (ram-ref (+ #xF00 reg))))
 
 (define (N-from v)
@@ -176,12 +192,20 @@
 
 ;; FIXME: word/byte addresses and rel/abs is a bit messed up in the dasm.
 
+(define (bp flag p rel)
+  (unless (not (xor (flag) (bit->bool p)))
+    (ipw-rel rel)))
+  
+(define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
+  (begin
+    (begin (define (name . args) . body) ...)
+    (define opcodes (make-hash `((name . ,name) ...)))))
+
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
   
-  ((bpc p rel) ;; FIXME: probably wrong
-   (unless (not (xor (C) (bit->bool p)))
-     (ipw-rel rel)))
+  ((bpc p rel) (bp C p rel))
+  ((bpz p rel) (bp Z p rel))  ;; hangs it on synth code
 
   ((bra   rel)              (ipw-rel rel))
   ((rcall rel)  (push (ip)) (ipw-rel rel))
@@ -194,21 +218,33 @@
   ((return s)
    (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
    (ip (pop)))
-          
+
+  ((btfsp pol reg bit a)  ;; FIXME: check polarity
+   (let ((v (load reg a)))
+     (when (xor
+            (bit->bool pol)
+            (bit->bool (bitwise-and 1 (arithmetic-shift v (- bit)))))
+       (ip (+ (ip) 2)))))
+  
   ; movff ;; no STATUS
   ((movlw l) (wreg l)) ;; no STATUS
   ((movwf reg a) (store reg a (wreg))) ;; no STATUS
-  ((movf reg a d)
-   (unless (zero? d) (raise 'movf-d=1)) ;; d=1 just sets N,Z flags
+  ((movf reg d a)
    (let ((v (load reg a)))
-     (wreg v)
+     (when (zero? d) (wreg v)) ;; otherwise just flag effect
      (Z (zero? v))
      (N-from v)
      ))
-  ((incf reg a d)
-   (unless (zero? d) (raise 'movf-d=1)) ;; d=1 just sets N,Z flags
-   (let ((v (bitwise-and #xFF (+ 1 (load reg a)))))
-     (store reg a v)
+  ((incf reg d a)
+   (let ((v (read-modify-write add1 reg d a)))
+     (C (zero? v))
+     (Z (zero? v))
+     (N-from v)
+     ;; DC
+     ;; OV
+     ))
+  ((decf reg d a)
+   (let ((v (read-modify-write sub1 reg d a)))
      (C (zero? v))
      (Z (zero? v))
      (N-from v)
@@ -220,6 +256,13 @@
 
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
+
+(define (read-modify-write fun reg d a)
+  (let ((v (bitwise-and #xFF (fun (load reg a)))))
+    (store reg a v d)
+    v))
+    
+
 (define (bit->bool bit) (not (zero? bit)))
 
 (define-struct ins-jit (op args ip+ words))
