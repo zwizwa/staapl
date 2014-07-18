@@ -19,7 +19,9 @@
 ;; Tools: somewhere else
 (define (bit->bool bit) (not (zero? bit)))
 (define (>> x) (arithmetic-shift x -1))
+(define (8bit x) (bitwise-and #xFF x))
 
+(define reg-access #x60) ;; #x80 FIXME: depends on core version
 
 (define-syntax-rule (params p ...)
   (begin (define p (make-parameter (void))) ...))
@@ -37,10 +39,6 @@
  bsr    ;; bank select register
  Z C DC N OV  ;; flags, broken out as bool
  )
-
-;; fsr
-(define (fsr-set! f v) (vector-set! (fsr) f v))
-(define (fsr-ref f)    (vector-ref  (fsr) f))
 
 ;; stack
 (define (push x) (stack (cons x (stack))))
@@ -79,82 +77,106 @@
     (ip (+ (ip) 2))
     w))
 
-;; generic registers
-(define-struct register (read write))
+;; abstract register access
+(define-struct register
+  (read
+   write
+   read-modify-write  ;; separate due to pre/post inc/dec on FSRs
+   ))
 
-;; fsr load/store with ACCESS and BANKED support
+;; if register access does not have side effects (see FSRs), just
+;; implement rmw in terms of read & write
+(define (make-rw-register read write)
+  (define (read-modify-write update)
+    (let ((v (update (read))))
+      (write v)
+      v))
+  (make-register read write read-modify-write))
+
+(define (make-param-register param)
+  (make-rw-register param param))
+
+;; Map data address space to ram or sfrs.
+(define (data-register addr)
+  (if (> addr (+ #xF00 reg-access))
+      (sfr addr)
+      (make-rw-register
+       (lambda ()  (ram-ref addr))
+       (lambda (v) (ram-set! addr v)))))
+
+;; map 8bit register selector + access bit used in most instructions
+;; to an abstract register accessor.
+(define (ab-register reg a)
+  (unless (zero? a) (raise 'banked))
+  (let ((addr
+         (if (>= reg reg-access)
+             (+ #xF00 reg)
+             reg)))
+    (data-register addr)))
+
+;; ops using ab-register addressing
 (define (store reg a v [d 1])
-  (unless (zero? a) (raise 'banked-write))
   (if (zero? d)
       (wreg v) ;; also support 'd' flag
-      (if (>= reg #x60)  ;; FIXME: depends on core version
-          ((register-write (sfr reg)) v)
-          (ram-set! (+ #xF00 reg) v))))
+      ((register-write (ab-register reg a)) v)))
 (define (load reg a)
   (unless (zero? a) (raise 'banked-read))
-  (if (>= reg #x80)
-      ((register-read (sfr reg)))
-      (ram-ref (+ #xF00 reg))))
+  ((register-read (ab-register reg a))))
 (define (read-modify-write fun reg d a)
-  (let ((v (bitwise-and #xFF (fun (load reg a)))))
-    (store reg a v d)
-    v))
+  (if (zero? d)
+      (let ((v (fun (load reg a)))) (wreg v) v)
+      ((register-read-modify-write (ab-register reg a)))))
 
-
-
-                       
-  
-
-
-;; fsr indirect access
-(define (indirect f [pre void] [post void])  ;; FIXME: load store don't update twice!
-  (define (read)
-    (pre)
-    (let ((rv (ram-ref (fsr-ref f))))
-      (post)
-      rv))
-  (define (write v)
-    (pre)
-    (ram-set! (fsr-ref f) v)
-    (post))
-  (make-register read write))
-
+;; fsr
+(define (fsr-set! f v) (vector-set! (fsr) f v))
+(define (fsr-ref f)    (vector-ref  (fsr) f))
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
+
+(define (indirect f [pre void] [post void])
+  (define (reg)      (data-register (fsr-ref f)))  ;; Abstract accessor to reg.
+  (define (pp thunk) (pre) (let ((v (thunk))) (post) v))
+  (define (read)     (pp (lambda () ((register-read (reg))))))
+  (define (write v)  (pp (lambda () ((register-write (reg)) v))))
+  (define (rmw fun)  (pp (lambda () ((register-read-modify-write (reg)) fun))))
+  (make-register read write rmw))
+
 (define (preinc f)  (indirect f (fsr-update f add1) void))
 (define (postdec f) (indirect f void (fsr-update f sub1)))
 (define (indf f)    (indirect f void void))
 
 
-;; Most SFR are implemented as RAM read/write.
+;; SFRs that behave as configuration (as opposed to I/O ports) can be
+;; implemented simply as RAM read/write.
 (define (sfr-ram addr)
   (cons addr
-        (make-register
+        (make-rw-register
          (lambda ()  (ram-ref addr))
          (lambda (v) (ram-set! addr v)))))
 
+;; FIXME get names from machine const def modules
 (define sfrs
-  `(,(sfr-ram #xFC) ;; STKPTR
-    ,(sfr-ram #x92) ;; TRISA
-    ,(sfr-ram #x93) ;; TRISB
-    ,(sfr-ram #x94) ;; TRISC
-    ,(sfr-ram #x95) ;; TRISD
-    ,(sfr-ram #x96) ;; TRISE
-    ,(sfr-ram #x89) ;; LATA
-    ,(sfr-ram #x8A) ;; LATB
-    ,(sfr-ram #x8B) ;; LATC
-    ,(sfr-ram #x8C) ;; LATD
-    ,(sfr-ram #x8D) ;; LATE
-    ,(sfr-ram #xF6) ;; TBLPTRL
-    ,(sfr-ram #xF5) ;; TABLAT
-    (#xED . ,(postdec 0))
-    (#xEC . ,(preinc  0))
-    (#xE8 . ,(make-register wreg wreg))
-    (#xE7 . ,(indf 1))
-    (#xE5 . ,(postdec 1))
-    (#xE4 . ,(preinc  1))
-    (#xDD . ,(postdec 2))
-    (#xDC . ,(preinc  2))
+  `(,(sfr-ram #xFFC) ;; STKPTR
+    ,(sfr-ram #xF92) ;; TRISA
+    ,(sfr-ram #xF93) ;; TRISB
+    ,(sfr-ram #xF94) ;; TRISC
+    ,(sfr-ram #xF95) ;; TRISD
+    ,(sfr-ram #xF96) ;; TRISE
+    ,(sfr-ram #xF89) ;; LATA
+    ,(sfr-ram #xF8A) ;; LATB
+    ,(sfr-ram #xF8B) ;; LATC
+    ,(sfr-ram #xF8C) ;; LATD
+    ,(sfr-ram #xF8D) ;; LATE
+    ,(sfr-ram #xFF6) ;; TBLPTRL
+    ,(sfr-ram #xFF5) ;; TABLAT
+    (#xFED . ,(postdec 0))
+    (#xFEC . ,(preinc  0))
+    (#xFE8 . ,(make-param-register wreg))
+    (#xFE7 . ,(indf 1))
+    (#xFE5 . ,(postdec 1))
+    (#xFE4 . ,(preinc  1))
+    (#xFDD . ,(postdec 2))
+    (#xFDC . ,(preinc  2))
     ))
 (define (sfr reg)
   (dict-ref sfrs reg
@@ -223,7 +245,9 @@
      (N-from v)
      ))
   ((incf reg d a)
-   (let ((v (read-modify-write add1 reg d a)))
+   (let ((v (read-modify-write
+             (lambda (x) (8bit (add1 x)))
+             reg d a)))
      (C (zero? v))
      (Z (zero? v))
      (N-from v)
@@ -231,7 +255,9 @@
      ;; OV
      ))
   ((decf reg d a)
-   (let ((v (read-modify-write sub1 reg d a)))
+   (let ((v (read-modify-write
+             (lambda (x) (8bit (sub1 x)))
+             reg d a)))
      (C (zero? v))
      (Z (zero? v))
      (N-from v)
