@@ -84,16 +84,14 @@
                      here))))))
 
 ;; see tsee in tethered.rkt
-(define (dasm-dont-resolve addr)
-  (format "~x" addr))
 (define (print-dasm words ip+)
   (let ((ip (- ip+ (<< (length words)))))
     (print-target-word
      (disassemble->word dasm-collection+dw
                         words
-                        ip
+                        (>> ip)
                         16
-                        dasm-dont-resolve
+                        (lambda (addr) (format "#x~x" addr))
                         ))))
                        
   
