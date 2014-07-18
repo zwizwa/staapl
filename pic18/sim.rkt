@@ -16,6 +16,10 @@
 ;; is the closest thing.
 
 
+;; Tools: somewhere else
+(define (bit->bool bit) (not (zero? bit)))
+(define (>> x) (arithmetic-shift x -1))
+
 
 (define-syntax-rule (params p ...)
   (begin (define p (make-parameter (void))) ...))
@@ -75,7 +79,8 @@
     (ip (+ (ip) 2))
     w))
 
-
+;; generic registers
+(define-struct register (read write))
 
 ;; fsr load/store with ACCESS and BANKED support
 (define (store reg a v [d 1])
@@ -83,12 +88,12 @@
   (if (zero? d)
       (wreg v) ;; also support 'd' flag
       (if (>= reg #x60)  ;; FIXME: depends on core version
-          (reg-write (sfr reg) v)
+          ((register-write (sfr reg)) v)
           (ram-set! (+ #xF00 reg) v))))
 (define (load reg a)
   (unless (zero? a) (raise 'banked-read))
   (if (>= reg #x80)
-      (reg-read (sfr reg))
+      ((register-read (sfr reg)))
       (ram-ref (+ #xF00 reg))))
 (define (read-modify-write fun reg d a)
   (let ((v (bitwise-and #xFF (fun (load reg a)))))
@@ -97,34 +102,6 @@
 
 
 
-;; Disassembler
-
-;; Gather disassembler functions visible in this module namespace
-;; (i.e. pic-specific opcodes imported from staapl/pic18/dasm)
-(define-dasm-collection dasm-collection)
-;; `default-dasm' contains a catch-all `dw' opcode.
-(define dasm-collection+dw (append dasm-collection (list default-dasm)))
-(define (dasm-ip)
-  (let* ((here (ip))
-         ;; Feed the dasm two words of context
-         (w0 (flash-ref here #t))
-         (w1 (flash-ref (+ 2 here) #t)))
-    (car ;; only interested in first instruction
-      (parameterize ((dasm-pcr-enable #f)) ;; turn off PC-relative to abs translation
-        (ll->l
-         (dasm-parse dasm-collection+dw
-                     (list w0 w1)
-                     here))))))
-;; see tsee in tethered.rkt
-(define (print-dasm words ip+)
-  (let ((ip (- ip+ (<< (length words)))))
-    (print-target-word
-     (disassemble->word dasm-collection+dw
-                        words
-                        (>> ip)
-                        16
-                        (lambda (addr) (format "~x" addr))
-                        ))))
                        
   
 
@@ -140,9 +117,7 @@
     (pre)
     (ram-set! (fsr-ref f) v)
     (post))
-      
-     
-  (list read write))
+  (make-register read write))
 
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
@@ -150,17 +125,13 @@
 (define (postdec f) (indirect f void (fsr-update f sub1)))
 (define (indf f)    (indirect f void void))
 
-(define (sfr-fixme addr)
-  (define (dummy . args)
-    (printf "-- sfr-fixme ~s\n" addr))
-  (list addr dummy dummy))
 
 ;; Most SFR are implemented as RAM read/write.
 (define (sfr-ram addr)
-  (list
-   addr
-   (lambda ()  (ram-ref addr))
-   (lambda (v) (ram-set! addr v))))
+  (cons addr
+        (make-register
+         (lambda ()  (ram-ref addr))
+         (lambda (v) (ram-set! addr v)))))
 
 (define sfrs
   `(,(sfr-ram #xFC) ;; STKPTR
@@ -178,7 +149,7 @@
     ,(sfr-ram #xF5) ;; TABLAT
     (#xED . ,(postdec 0))
     (#xEC . ,(preinc  0))
-    (#xE8 ,wreg ,wreg)
+    (#xE8 . ,(make-register wreg wreg))
     (#xE7 . ,(indf 1))
     (#xE5 . ,(postdec 1))
     (#xE4 . ,(preinc  1))
@@ -190,8 +161,6 @@
             (lambda ()
               (error 'sfr-not-found "~x" reg))))
 
-(define (reg-read  r)   ((car r)))
-(define (reg-write r v) ((cadr r) v))
 
 (define (lohi lo hi) (+ lo (* #x100 hi)))
 
@@ -277,12 +246,10 @@
 
     
 
-(define (bit->bool bit) (not (zero? bit)))
 
 (define-struct ins-jit (op args ip+ words))
 
 (define (trace! x) (trace (cons x (trace))))
-(define (>> x) (arithmetic-shift x -1))
 ;; (define (<< x) (arithmetic-shift x 1))
 
 (define (last-trace [n 5])
@@ -292,36 +259,77 @@
        (print-dasm words ip+)))))
 
 
+;; CORE:
+;; - disassemble
+;; - execute-next
+
+;; Gather disassembler functions visible in this module namespace
+;; (i.e. pic-specific opcodes imported from staapl/pic18/dasm)
+(define-dasm-collection dasm-collection)
+;; `default-dasm' contains a catch-all `dw' opcode.
+(define dasm-collection+dw (append dasm-collection (list default-dasm)))
+(define (dasm-ip)
+  (let* ((here (ip))
+         ;; Feed the dasm two words of context
+         (w0 (flash-ref here #t))
+         (w1 (flash-ref (+ 2 here) #t)))
+    (car ;; only interested in first instruction
+      (parameterize ((dasm-pcr-enable #f)) ;; turn off PC-relative to abs translation
+        (ll->l
+         (dasm-parse dasm-collection+dw
+                     (list w0 w1)
+                     here))))))
+;; see tsee in tethered.rkt
+(define (print-dasm words ip+)
+  (let ((ip (- ip+ (<< (length words)))))
+    (print-target-word
+     (disassemble->word dasm-collection+dw
+                        words
+                        (>> ip)
+                        16
+                        (lambda (addr) (format "~x" addr))
+                        ))))
 (define (execute-next)
   (let* ((ip-prev (ip))
          (jit-index (>> ip-prev))
          (jitted (vector-ref (jit) jit-index)))
-    (if jitted
-        (match jitted
-          ((struct ins-jit (op args ip+ dasm))
-           (begin
-             (ip ip+)
-             (trace! ip-prev)
-             (apply op args)
-             )))
-        (let ((dasm (dasm-ip)))
-          (match dasm
-            ((list (list-rest asm args) words addr)
-             (begin
-               (let ((ip-next (+ (ip) (* 2 (length words))))
-                     (mnem (asm-name asm)))
-                 (ip ip-next)
-                 (let ((op (dict-ref opcodes mnem)))
-                   (vector-set! (jit) jit-index
-                                (make-ins-jit op args ip-next words))
-                   (trace! ip-prev)
-                   (apply op args)
-                   )))))))))
-
+    (let-values
+        (((op args)
+          (if (not jitted)
+              ;; Disassemble, lookup, 
+              (let ((dasm (dasm-ip)))
+                (match dasm
+                  ((list (list-rest asm args) words addr)
+                   (begin
+                     (let ((ip-next (+ (ip) (* 2 (length words))))
+                           (mnem (asm-name asm)))
+                       (ip ip-next)
+                       (let ((op (dict-ref opcodes mnem)))
+                         (vector-set! (jit) jit-index
+                                      (make-ins-jit op args ip-next words))
+                         (values op args)
+                         ))))))
+              ;; Caching opcode lookup gives about an order of magnitude
+              ;; better performance.  Not a luxury when running wait loops.
+              (match jitted
+                ((struct ins-jit (op args ip+ dasm))
+                 (begin
+                   (ip ip+)
+                   (values op args)
+                   )))
+              )))
+      ;; Keep instruction trace for debug.  Might want to limit the
+      ;; size of this.
+      (trace! ip-prev)
+      (apply op args))))
+      
 (define (run)
   (execute-next)
   (run))
-    
+
+
+
+
 
 ;; To make this more immediately useful, it might be good to focus on
 ;; running subroutines in isolation.  Booting a real world image is
