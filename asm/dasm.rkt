@@ -106,11 +106,11 @@
 
       (unless (list? l)
         (error 'disassemble->word "~s" l))
-      (new-target-word #:name    '<raw-dasm>
-                       #:realm   'code
-                       #:address addr
-                       #:code    (reverse asm)
-                       #:bin     (reverse bin)))))
+      (new-target-word 
+       #:realm   'code
+       #:address addr
+       #:code    (reverse asm)
+       #:bin     (reverse bin)))))
 
 ;; Note that this is for RISC instruction sets only. All instructions
 ;; have the same size and are word-addressed. Any mult-word

@@ -22,7 +22,7 @@
     
 
 (params
- flash ip wreg ram stack fsr Z C DC N OV)
+ trace flash ip wreg ram stack fsr Z C DC N OV jit)
 
 (define (fsr-set! f v) (vector-set! (fsr) f v))
 (define (fsr-ref f)    (vector-ref  (fsr) f))
@@ -83,9 +83,24 @@
                      (list w0 w1)
                      here))))))
 
+;; see tsee in tethered.rkt
+(define (dasm-dont-resolve addr)
+  (format "~x" addr))
+(define (print-dasm words ip+)
+  (let ((ip (- ip+ (<< (length words)))))
+    (print-target-word
+     (disassemble->word dasm-collection+dw
+                        words
+                        ip
+                        16
+                        dasm-dont-resolve
+                        ))))
+                       
+  
+
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (define opcodes
-    `((name . ,(lambda args . body)) ...)))
+    (make-hash `((name . ,(lambda args . body)) ...))))
 
 ;; Generic FSR access
 (define (indirect f [pre void] [post void])
@@ -208,18 +223,45 @@
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
 (define (bit->bool bit) (not (zero? bit)))
-   
+
+(define-struct ins-jit (op args ip+ words))
+
+(define (trace! x) (trace (cons x (trace))))
+(define (>> x) (arithmetic-shift x -1))
+;; (define (<< x) (arithmetic-shift x 1))
+
+(define (last-trace [n 5])
+  (for ((ip (reverse (take n (trace)))))
+    (match (vector-ref (jit) (>> ip))
+      ((struct ins-jit (op args ip+ words))
+       (print-dasm words ip+)))))
+
+
 (define (execute-next)
-  (match (dasm-ip)
-    ((list (list-rest asm args) words addr)
-     (begin
-       (ip (+ (ip) (* 2 (length words))))
-       (let ((mnem (asm-name asm)))
-         (for ((w words)) (printf "~x " w))
-         (printf "~s " mnem)
-         (printf "~s \n" args)
-         (let ((op (dict-ref opcodes mnem)))
-           (apply op args)))))))
+  (let* ((ip-prev (ip))
+         (jit-index (>> ip-prev))
+         (jitted (vector-ref (jit) jit-index)))
+    (if jitted
+        (match jitted
+          ((struct ins-jit (op args ip+ dasm))
+           (begin
+             (ip ip+)
+             (trace! ip-prev)
+             (apply op args)
+             )))
+        (let ((dasm (dasm-ip)))
+          (match dasm
+            ((list (list-rest asm args) words addr)
+             (begin
+               (let ((ip-next (+ (ip) (* 2 (length words))))
+                     (mnem (asm-name asm)))
+                 (ip ip-next)
+                 (let ((op (dict-ref opcodes mnem)))
+                   (vector-set! (jit) jit-index
+                                (make-ins-jit op args ip-next words))
+                   (trace! ip-prev)
+                   (apply op args)
+                   )))))))))
 
 (define (run)
   (execute-next)
@@ -239,7 +281,9 @@
   (wreg 0)
   (ram (make-vector #x1000 #f))
   (fsr (make-vector 3 #f))
+  (jit (make-vector #x2000 #f))
   (stack '())
+  (trace '())
   (run))
 
 

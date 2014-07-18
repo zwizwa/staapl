@@ -60,7 +60,7 @@
 
 
 
-(define (new-target-word #:name      [name '<anonymous>]
+(define (new-target-word #:name      [name (void)]
                          #:realm     [realm 'code]
                          #:code      [code #f]
                          #:srcloc    [srcloc #f]
@@ -260,13 +260,14 @@
              name
              ((list _ v) (a->s (addr-conv (target-value->number v))))
              (sym sym))))
-      (printf
-       (if (and
-            ((string-length (symbol->string name-sym)) . < . 7)
-            (not (null? code)))
-           "~a:"
-           "~a:\n")
-       name-sym))
+      (when (symbol? name-sym)
+        (printf
+         (if (and
+              ((string-length (symbol->string name-sym)) . < . 7)
+              (not (null? code)))
+             "~a:"
+             "~a:\n")
+         name-sym)))
   
     (unless (null? code)
         ;; (printf "\t<not compiled>\n")
