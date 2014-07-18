@@ -22,25 +22,37 @@
     
 
 (params
- trace flash ip wreg ram stack fsr Z C DC N OV jit)
+ trace  ;; instruction trace addresses
+ jit    ;; cache of scheme op lookups (about 10x speedup?)
+ flash  ;; chunked flash memory: (list-of (addr (vector-of byte)))
+ ip     ;; next instruction to execute.  updated before executing op
+ wreg   ;; current working register
+ ram    ;; flat (vector-of byte)
+ stack  ;; call stack (list-of address)
+ fsr    ;; fsr pointers (vector-of byte)
+ bsr    ;; bank select register
+ Z C DC N OV  ;; flags, broken out as bool
+ )
 
+;; fsr
 (define (fsr-set! f v) (vector-set! (fsr) f v))
 (define (fsr-ref f)    (vector-ref  (fsr) f))
 
+;; stack
 (define (push x) (stack (cons x (stack))))
 (define (pop) (let ((s (stack)))
                 (stack (cdr s))
                 (car s)))
   
-
+;; ram
 (define (ram-set! addr val) (vector-set! (ram) addr val))
 (define (ram-ref  addr)     (vector-ref  (ram) addr))
 
+;; flash
 (define (load-flash filename)
   (for/list ((chunk (read (open-input-file filename))))
     (list (list-ref chunk 0)
           (apply vector (list-ref chunk 1)))))
-
 (define (flash-ref addr [word #f])
   (prompt
    (for ((chunk (flash)))
@@ -64,13 +76,34 @@
     w))
 
 
-;; Disassemble
 
-;; This non-hygienic form collects all disassembler functions visible
-;; in this module namespace.  This is used during live interaction.
+;; fsr load/store with ACCESS and BANKED support
+(define (store reg a v [d 1])
+  (unless (zero? a) (raise 'banked-write))
+  (if (zero? d)
+      (wreg v) ;; also support 'd' flag
+      (if (>= reg #x60)  ;; FIXME: depends on core version
+          (reg-write (sfr reg) v)
+          (ram-set! (+ #xF00 reg) v))))
+(define (load reg a)
+  (unless (zero? a) (raise 'banked-read))
+  (if (>= reg #x80)
+      (reg-read (sfr reg))
+      (ram-ref (+ #xF00 reg))))
+(define (read-modify-write fun reg d a)
+  (let ((v (bitwise-and #xFF (fun (load reg a)))))
+    (store reg a v d)
+    v))
+
+
+
+;; Disassembler
+
+;; Gather disassembler functions visible in this module namespace
+;; (i.e. pic-specific opcodes imported from staapl/pic18/dasm)
 (define-dasm-collection dasm-collection)
-(define dasm-collection+dw
-  (append dasm-collection (list default-dasm)))
+;; `default-dasm' contains a catch-all `dw' opcode.
+(define dasm-collection+dw (append dasm-collection (list default-dasm)))
 (define (dasm-ip)
   (let* ((here (ip))
          ;; Feed the dasm two words of context
@@ -82,7 +115,6 @@
          (dasm-parse dasm-collection+dw
                      (list w0 w1)
                      here))))))
-
 ;; see tsee in tethered.rkt
 (define (print-dasm words ip+)
   (let ((ip (- ip+ (<< (length words)))))
@@ -97,10 +129,8 @@
   
 
 
-;; Generic FSR access
-
-;; FIXME: for load-store operations this is wrong!
-(define (indirect f [pre void] [post void])
+;; fsr indirect access
+(define (indirect f [pre void] [post void])  ;; FIXME: load store don't update twice!
   (define (read)
     (pre)
     (let ((rv (ram-ref (fsr-ref f))))
@@ -110,6 +140,8 @@
     (pre)
     (ram-set! (fsr-ref f) v)
     (post))
+      
+     
   (list read write))
 
 (define (fsr-update f upd)
@@ -171,20 +203,6 @@
 
 
 
-;; 8-bit operand read/write
-(define (store reg a v [d 1])
-  (unless (zero? a) (raise 'banked-write))
-  (if (zero? d)
-      (wreg v) ;; also support 'd' flag
-      (if (>= reg #x60)  ;; FIXME: depends on core version
-          (reg-write (sfr reg) v)
-          (ram-set! (+ #xF00 reg) v))))
-  
-(define (load reg a)
-  (unless (zero? a) (raise 'banked-read))
-  (if (>= reg #x80)
-      (reg-read (sfr reg))
-      (ram-ref (+ #xF00 reg))))
 
 (define (N-from v)
   (N (not (zero? (bitwise-and #x80 v)))))
@@ -257,10 +275,6 @@
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
 
-(define (read-modify-write fun reg d a)
-  (let ((v (bitwise-and #xFF (fun (load reg a)))))
-    (store reg a v d)
-    v))
     
 
 (define (bit->bool bit) (not (zero? bit)))
