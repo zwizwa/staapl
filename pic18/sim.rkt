@@ -198,12 +198,6 @@
 
 
 
-
-
-
-
-;; FIXME: word/byte addresses and rel/abs is a bit messed up in the dasm.
-
 (define (bp flag p rel)
   (unless (not (xor (flag) (bit->bool p)))
     (ipw-rel rel)))
@@ -375,7 +369,7 @@
   (ram (make-vector #x1000 #f))
   (fsr (make-vector 3 #f))
   (jit (make-vector #x2000 #f))
-  (stack (make-vector 31 #f)) ;; FIXME: implement this as 31-word vector + STKPTR reg
+  (stack (make-vector 31 #f))
   (trace '())
   (run))
 
