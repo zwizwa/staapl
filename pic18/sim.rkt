@@ -36,6 +36,12 @@
  Z C DC N OV  ;; flags, broken out as bool
  )
 
+;; flags
+(define (status [bits #f])
+  (raise 'status))
+;  (if bits
+;      (Z (bit->bool (band 1 (>>> bits
+
 ;; stack
 (define (push x)
   (let ((p (stkptr)))
@@ -197,6 +203,7 @@
     (#xFDC . ,(preinc  2))
     (#xFDA . ,(fsrh 2))
     (#xFD9 . ,(fsrl 2))
+    (#xFD8 . ,(make-param-register status))
     (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
@@ -205,16 +212,9 @@
               (error 'sfr-not-found "~x" reg))))
 
 
-(define (lohi lo hi) (+ lo (* #x100 hi)))
 
-
-;; FIXME: mixing signed and unsigned here!
-(define (ipw lo [hi 0] [offset 0])
-  (ip (+ offset (* 2 (lohi lo hi)))))
-(define (ipw-rel lo [hi 0])
-  (ipw lo hi (ip)))
-
-
+(define (ipw abs)      (ip (* 2 abs)))
+(define (ipw-rel rel)  (ip (+ (ip) (* 2 rel))))
 
 (define (bp flag p rel)
   (unless (not (xor (flag) (bit->bool p)))
@@ -251,11 +251,15 @@
   
   ((bpc p rel) (bp C p rel))
   ((bpz p rel) (bp Z p rel))  ;; hangs it on synth code
+  ((bpf p f b a)
+   (let ((v (load f a)))
+     (when (bit->bool (bxor p (>>> v b)))
+       (ip (+ 2 (ip))))))
 
   ((bra   rel)  (ipw-rel rel))
   ((rcall rel)  (push (ip)) (bra rel))
   
-  ((_goto lo hi) (ipw lo hi))  
+  ((_goto lo hi) (ipw (lohi lo hi)))
   ((_call s lo hi)
    (unless (zero? s) (raise 'call-shadow=1))
    (push (ip))
@@ -296,7 +300,10 @@
 ;; (define (<< x) (arithmetic-shift x 1))
 
 (define (last-trace [n 5])
-  (for ((ip (reverse (take n (trace)))))
+  (for ((ip (reverse
+             (if n
+                 (take n (trace))
+                 (trace)))))
     (match (vector-ref (jit) (2/ ip))
       ((struct ins-jit (op args ip+ words))
        (print-dasm words ip+)))))
@@ -382,7 +389,7 @@
 (define (call-word addr)
   (with-local-context
    (lambda ()
-     (fsr (vector #x80 #x90 #f)) ;; setup stacks
+     (fsr (vector #x80 #xA0 0)) ;; setup stacks
      (push #f) ;; termination mark
      (ip addr)
      (while (ip) (execute-next)))))
@@ -405,7 +412,7 @@
 
 
 ;; Testing
-(define (test)
+(define (test1)
   (flash (load-flash "/home/tom/staapl/app/synth.sx"))
   (jit (make-jit))
   (begin
@@ -418,4 +425,11 @@
     (run))
 
   ;; (call-word #x03A8) ;; interpreter
+  )
+
+(define (test2)
+  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
+  (jit (make-jit))
+  (trace '())
+  (call-word #x03A8) ;; interpreter
   )

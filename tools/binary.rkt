@@ -80,6 +80,10 @@
 (define (bit-set? value bit)
   (bit->bool (band 1 (>>> value bit))))
 
+;; signed and unsigned
+(define (lohi lo hi)
+  (+ (<<< hi 8) (band #xFF lo)))
+
 ;; ;; symbol generation. not going to make a separate module for this...
 ;; (define (generated-label? x)
 ;;   (and (symbol? x)
