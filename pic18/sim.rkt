@@ -200,8 +200,6 @@
 
 
 
-(define (N-from v)
-  (N (not (zero? (bitwise-and #x80 v)))))
 
 
 ;; FIXME: word/byte addresses and rel/abs is a bit messed up in the dasm.
@@ -267,8 +265,7 @@
   ((movf reg d a)
    (let ((v (load reg a)))
      (when (zero? d) (wreg v)) ;; otherwise just flag effect
-     (Z (zero? v))
-     (N-from v)
+     (N/Z! v)
      ))
   ((incf reg d a) (read-modify-write (lambda (x) (add/flags! x  1)) reg d a))
   ((decf reg d a) (read-modify-write (lambda (x) (add/flags! x -1)) reg d a))
