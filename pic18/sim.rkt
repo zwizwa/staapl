@@ -1,4 +1,6 @@
 #lang racket/base
+(provide (all-defined-out)) ;; user will probably need to prefix
+ 
 (require racket/control
          racket/promise
          racket/match
@@ -36,6 +38,16 @@
  Z C DC N OV  ;; flags, broken out as bool
  )
 
+(define (make-stack) (make-vector 31 #f))
+(define (make-ram)   (make-vector #x1000 #f))
+(define (make-jit)   (make-vector #x2000 #f))
+(define (make-fsr)   (make-vector 3 #f))
+
+;; These can be initialized for global use.  Keep other params at #f
+;; to force manual init.  Just clear jit buffer when loading code.
+(trace '())
+(jit (make-jit))
+
 ;; flags
 (define (status [bits #f])
   (raise 'status))
@@ -58,9 +70,12 @@
 
 ;; flash
 (define (load-flash filename)
-  (for/list ((chunk (read (open-input-file filename))))
+  (code (read (open-input-file filename))))
+(define (code code-chunks)
+  (for/list ((chunk code-chunks))
     (list (list-ref chunk 0)
           (apply vector (list-ref chunk 1)))))
+
 (define (flash-ref addr [word #f])
   (prompt
    (for ((chunk (flash)))
@@ -377,10 +392,6 @@
   (execute-next)
   (run))
 
-(define (make-stack) (make-vector 31 #f))
-(define (make-ram)   (make-vector #x1000 #f))
-(define (make-jit)   (make-vector #x2000 #f))
-(define (make-fsr)   (make-vector 3 #f))
 
 (define-syntax-rule (while cond . body)
   (let next ()

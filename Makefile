@@ -34,6 +34,7 @@ all-modules: planet-version.txt
 
 pic18:
 	mzc -vk pic18.rkt
+	mzc -vk pic18/sim.rkt
 	mzc -vk live.rkt
 	mzc -vk staaplc.rkt
 

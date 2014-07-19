@@ -44,6 +44,7 @@
 (flags: output-hex
         output-dict
         output-code
+        output-sim
         console
         device
         baud
@@ -72,6 +73,9 @@
 
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
+    
+    [("--output-sim") filename "Output simulator module."
+     (output-sim filename)]
     
     [("--output-asm") filename "Output assembly code."
      (output-asm filename)]
@@ -115,7 +119,9 @@
 (define (requirements kernel-path)
   `(require
     staapl/live-pic18
+    (prefix-in sim- staapl/pic18/sim)
     (file ,(path->string kernel-path))))
+
 
 (define (process-arguments)
   (out output-hex (filename) ".hex")
@@ -154,6 +160,15 @@
   `(console ',(console) ,(device-string (device)) ,(baud)))
 
 
+;; formatting
+(define (save text [code #f])
+  (when text
+    (display text)
+    (newline))
+  (when code
+    (pretty-print code)))
+
+
 (define (instantiate-and-save)
   ;;(printf "in:  ~a\n" (filename))
   ;;(printf "out: ~a ~a\n" (output-hex) (output-dict))
@@ -187,7 +202,29 @@
        (output-code)
        (lambda () (eval '(write (code->binary))))))
 
-    ;; Save symbolic output.
+    ;; Save simulator start script.
+    (when (output-sim)
+      (let* ((reqs `(staapl/code
+                     staapl/target
+                     staapl/pic18/sim
+                     (file ,(path->string (filename)))))
+             (out (for/list ((r reqs))
+                    `(all-from-out ,r))))
+      
+      (with-output-to-file/safe
+       (output-sim)
+       (lambda ()
+         (save "#lang racket/base")
+         (save #f `(require ,@reqs))
+         (save #f `(provide ,@out))
+         (save #f `(provide (all-defined-out)))
+         (save ";; Sim setup"
+               `(begin
+                  (define (call tw)
+                    (call-word (target-word-address tw)))
+                  (flash (code (code->binary)))))))))
+      
+    ;; Save interaction script.
     (let* ((reqs (requirements (filename)))
            (boot-run
             `(begin
@@ -196,25 +233,22 @@
                (param-to-toplevel 'command repl-command-hook)
                (param-to-toplevel 'break   repl-break-hook)
                (forth-begin-prefix '(library "pic18")) ;; add library path
+               ;; After loading the .fm file the code buffer
+               ;; contains target kernel code.  Pass it on to the
+               ;; emulator.
+               (sim-flash (code->binary))
+               ;; Then get rid of it since it's already on the
+               ;; target through the .hex programming.
+               (code-clear!)
                (run
                 (lambda ()
-                  ;; After loading the .fm file the code buffer
-                  ;; contains target code.  Get rid of it.
-                  (code-clear!)
                   ;; Delete all target scratch buffer code past the
-                  ;; 'code pointer.
+                  ;; 'code pointer to bring it into a known state.
                   (clear-flash)
                   ;; Load host debug script into toplevel namespace on
                   ;; a clean target.
                   (when-file ',(path->string (debug-script)) load)))))
             
-           ;; formatting
-           (save
-            (lambda (text [code #f])
-              (display text)
-              (newline)
-              (when code
-                (pretty-print code))))
            (save-module
             (lambda ()
               (save "#!/usr/bin/env racket")
