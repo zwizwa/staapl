@@ -37,7 +37,8 @@ staapl pic18/vector
 macro
 : fosc 48000000 ;
 : monitor-EP 1 ;
-: total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3    
+: total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3
+: service-lo ;  \ inlined in USB kernel lo-pri isr
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
   
