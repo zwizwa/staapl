@@ -75,7 +75,8 @@
 
 (define (negate x) (* -1 x))
 
-(define (bit->bool bit) (not (zero? bit)))
+(define (bit->bool bit)  (not (zero? bit)))
+(define (bool->bit bool) (if bool 1 0))
 
 (define (bit-set? value bit)
   (bit->bool (band 1 (>>> value bit))))

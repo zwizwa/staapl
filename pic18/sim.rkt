@@ -48,11 +48,20 @@
 (trace '())
 (jit (make-jit))
 
-;; flags
-(define (status [bits #f])
-  (raise 'status))
-;  (if bits
-;      (Z (bit->bool (band 1 (>>> bits
+;; STATUS word read/write
+(define flags (reverse (list N OV Z DC C)))
+(define (status-read)
+  (for/fold
+      ((s 0))
+      ((b (in-naturals))
+       (f flags))
+    (bior s (<<< (bool->bit (f)) b))))
+(define (status-write bits)
+  (for ((b (in-naturals))
+        (f flags))
+    (f (bit->bool (band 1 (>>> bits b))))))
+       
+
 
 ;; stack
 (define (push x)
@@ -65,8 +74,12 @@
     (vector-ref (stack) p)))
   
 ;; ram
-(define (ram-set! addr val) (vector-set! (ram) addr val))
-(define (ram-ref  addr)     (vector-ref  (ram) addr))
+(define (ram-set! addr val)
+  (vector-set! (ram) addr val))
+(define (ram-ref  addr)
+  (let ((v (vector-ref (ram) addr)))
+    (unless v (error 'ram-ref-undefined "~x" addr))
+    v))
 
 ;; flash
 (define (load-flash filename)
@@ -218,7 +231,7 @@
     (#xFDC . ,(preinc  2))
     (#xFDA . ,(fsrh 2))
     (#xFD9 . ,(fsrl 2))
-    (#xFD8 . ,(make-param-register status))
+    (#xFD8 . ,(make-rw-register status-read status-write))
     (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
@@ -398,12 +411,9 @@
     (when cond (begin . body) (next))))
 
 (define (call-word addr)
-  (with-local-context
-   (lambda ()
-     (fsr (vector #x80 #xA0 0)) ;; setup stacks
-     (push #f) ;; termination mark
-     (ip addr)
-     (while (ip) (execute-next)))))
+  (push #f) ;; termination mark
+  (ip addr)
+  (while (ip) (execute-next)))
 
 (define (with-local-context thunk)
   (parameterize ((ip 0)
@@ -423,16 +433,19 @@
 
 
 ;; Testing
-(define (test1)
-  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
-  (jit (make-jit))
-  (begin
+(define (reg-defaults)
     (ip 0)
     (wreg 0)
     (stkptr 0)
     (stack (make-stack))
     (ram (make-ram))
-    (fsr (make-fsr))
+    (fsr (vector #x80 #xA0 0)))
+
+(define (test1)
+  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
+  (jit (make-jit))
+  (begin
+    (reg-defaults)
     (run))
 
   ;; (call-word #x03A8) ;; interpreter

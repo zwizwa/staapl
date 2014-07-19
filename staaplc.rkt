@@ -221,7 +221,7 @@
          (save ";; Sim setup"
                `(begin
                   (define (call tw)
-                    (call-word (target-word-address tw)))
+                    (call-word (* 2 (target-word-address tw))))
                   (flash (code (code->binary)))))))))
       
     ;; Save interaction script.

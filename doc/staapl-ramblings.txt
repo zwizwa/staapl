@@ -65515,3 +65515,29 @@ For some, and interesting problem found:
 
 movf 15 0 0
 from non-initialized memory
+
+
+Entry: Emulator in staaplc
+Date: Sat Jul 19 13:12:09 EDT 2014
+
+staapc --output-sim produces a .sim file that's a racket module
+linking up the code from a forth kernel to the sim as:
+
+  (define (call tw) (call-word (target-word-address tw)))
+  (flash (code->binary))
+
+To use in geiser:
+
+M-x run-racket
+(enter! (file "/home/tom/staapl/app/synth.sim"))
+(call target/midi>m)
+
+Lots of things not yet implemented.  Trying to see if I can use this
+to debug memory access patterns in some midi parsing code.
+
+
+Entry: Debugging midi
+Date: Sat Jul 19 13:16:54 EDT 2014
+
+(call target/init-midi-buf)
+(call target/
