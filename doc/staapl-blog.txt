@@ -4829,3 +4829,17 @@ kills a sailor at sea, so use it sparingly.
 [2] http://eventifier.com/event/strangeloop13/casio_juarez
 
 
+
+
+Entry: rackseq
+Date: Fri Jul 18 21:08:13 EDT 2014
+
+Not sure where this will end up, but here you go:
+
+raco pkg install github://github.com/zwizwa/rackseq/master 
+
+$ racket
+Welcome to Racket v6.0.1.
+> (require rackseq/test)
+rackseq OK
+

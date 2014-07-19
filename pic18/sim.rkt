@@ -137,6 +137,20 @@
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 
+(define (fsr-lref f) (band #xFF (fsr-ref f)))
+(define (fsr-href f) (band #xFF (>>> (fsr-ref f) 8)))
+(define (fsr-lhset! f l h) (fsr-set! f (lohi l h)))
+  
+
+(define (fsrl f)
+  (make-rw-register
+   (lambda ()  (fsr-lref f))
+   (lambda (v) (fsr-lhset! f v (fsr-href f)))))
+(define (fsrh f)
+  (make-rw-register
+   (lambda ()  (fsr-href f))
+   (lambda (v) (fsr-lhset! f (fsr-lref f) v))))
+
 (define (indirect f [pre void] [post void])
   (define (reg)      (data-register (fsr-ref f)))  ;; Abstract accessor to reg.
   (define (pp thunk) (pre) (let ((v (thunk))) (post) v))
@@ -181,6 +195,8 @@
     (#xFE4 . ,(preinc  1))
     (#xFDD . ,(postdec 2))
     (#xFDC . ,(preinc  2))
+    (#xFDA . ,(fsrh 2))
+    (#xFD9 . ,(fsrl 2))
     (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
@@ -191,6 +207,8 @@
 
 (define (lohi lo hi) (+ lo (* #x100 hi)))
 
+
+;; FIXME: mixing signed and unsigned here!
 (define (ipw lo [hi 0] [offset 0])
   (ip (+ offset (* 2 (lohi lo hi)))))
 (define (ipw-rel lo [hi 0])
@@ -352,7 +370,31 @@
   (execute-next)
   (run))
 
+(define (make-stack) (make-vector 31 #f))
+(define (make-ram)   (make-vector #x1000 #f))
+(define (make-jit)   (make-vector #x2000 #f))
+(define (make-fsr)   (make-vector 3 #f))
 
+(define-syntax-rule (while cond . body)
+  (let next ()
+    (when cond (begin . body) (next))))
+
+(define (call-word addr)
+  (with-local-context
+   (lambda ()
+     (fsr (vector #x80 #x90 #f)) ;; setup stacks
+     (push #f) ;; termination mark
+     (ip addr)
+     (while (ip) (execute-next)))))
+
+(define (with-local-context thunk)
+  (parameterize ((ip 0)
+                 (wreg 0)
+                 (stkptr 0)
+                 (stack (make-stack))
+                 (ram (make-ram))
+                 (fsr (make-fsr)))
+    (thunk)))
 
 
 
@@ -365,13 +407,15 @@
 ;; Testing
 (define (test)
   (flash (load-flash "/home/tom/staapl/app/synth.sx"))
-  (ip 0)
-  (ram (make-vector #x1000 #f))
-  (fsr (make-vector 3 #f))
-  (jit (make-vector #x2000 #f))
-  (stack (make-vector 31 #f))
-  (trace '())
-  (run))
+  (jit (make-jit))
+  (begin
+    (ip 0)
+    (wreg 0)
+    (stkptr 0)
+    (stack (make-stack))
+    (ram (make-ram))
+    (fsr (make-fsr))
+    (run))
 
-
-;; (dasm-ins '(#xD01F))
+  ;; (call-word #x03A8) ;; interpreter
+  )
