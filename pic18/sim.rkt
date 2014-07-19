@@ -30,16 +30,21 @@
  wreg   ;; current working register
  ram    ;; flat (vector-of byte)
  stack  ;; call stack (list-of address)
+ stkptr ;; stack pointer for call stack
  fsr    ;; fsr pointers (vector-of byte)
  bsr    ;; bank select register
  Z C DC N OV  ;; flags, broken out as bool
  )
 
 ;; stack
-(define (push x) (stack (cons x (stack))))
-(define (pop) (let ((s (stack)))
-                (stack (cdr s))
-                (car s)))
+(define (push x)
+  (let ((p (stkptr)))
+    (vector-set! (stack) p x)
+    (stkptr (add1 p))))
+(define (pop)
+  (let ((p (sub1 (stkptr))))
+    (stkptr p)
+    (vector-ref (stack) p)))
   
 ;; ram
 (define (ram-set! addr val) (vector-set! (ram) addr val))
@@ -155,7 +160,7 @@
 
 ;; FIXME get names from machine const def modules
 (define sfrs
-  `(,(sfr-ram #xFFC) ;; STKPTR
+  `((#xFFC . ,(make-param-register stkptr))
     ,(sfr-ram #xF92) ;; TRISA
     ,(sfr-ram #xF93) ;; TRISB
     ,(sfr-ram #xF94) ;; TRISC
@@ -373,7 +378,7 @@
   (ram (make-vector #x1000 #f))
   (fsr (make-vector 3 #f))
   (jit (make-vector #x2000 #f))
-  (stack '())  ;; FIXME: implement this as 31-word vector + SPTR reg
+  (stack (make-vector 31 #f)) ;; FIXME: implement this as 31-word vector + STKPTR reg
   (trace '())
   (run))
 
