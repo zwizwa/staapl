@@ -25,6 +25,8 @@
 (define ram-nb-bytes   #x1000)
 (define flash-nb-bytes #x8000)
 
+(define d-stack #x80)
+(define r-stack #xA0)
 
 (params
  trace  ;; instruction trace addresses
@@ -74,13 +76,20 @@
     (vector-ref (stack) p)))
   
 ;; ram
+;; support raw vector and abstract memory
 (define (ram-set! addr val)
-  (vector-set! (ram) addr val))
+  (let ((r (ram)))
+    (if (vector? r)
+        (vector-set! r addr val)
+        ((memory-write r) addr val))))
 (define (ram-ref  addr)
-  (let ((v (vector-ref (ram) addr)))
-    (unless (number? v)
-      (error 'ram-ref "#x~x = ~s" addr v))
-    v))
+  (let ((r (ram)))
+    (let ((v (if (vector? r)
+                 (vector-ref r addr)
+                 ((memory-read r) addr))))
+      (unless (number? v)
+        (error 'ram-ref "#x~x = ~s" addr v))
+      v)))
 
 ;; flash
 
@@ -151,7 +160,7 @@
 (define (read-modify-write fun reg d a)
   (if (zero? d)
       (let ((v (fun (load reg a)))) (wreg v) v)
-      ((register-read-modify-write (ab-register reg a)))))
+      ((register-read-modify-write (ab-register reg a)) fun)))
 
 ;; fsr
 (define (fsr-set! f v) (vector-set! (fsr) f v))
@@ -181,8 +190,12 @@
   (define (rmw fun)  (pp (lambda () ((register-read-modify-write (reg)) fun))))
   (make-register read write rmw))
 
-(define (preinc f)  (indirect f (fsr-update f add1) void))
-(define (postdec f) (indirect f void (fsr-update f sub1)))
+(define (inc x) (band #xFFF (add1 x)))
+(define (dec x) (band #xFFF (sub1 x)))
+
+(define (preinc f)  (indirect f (fsr-update f inc) void))
+(define (postdec f) (indirect f void (fsr-update f dec)))
+(define (postinc f) (indirect f void (fsr-update f inc)))
 (define (indf f)    (indirect f void void))
 
 
@@ -226,6 +239,7 @@
     (#xFE5 . ,(postdec 1))
     (#xFE4 . ,(preinc  1))
     (#xFDD . ,(postdec 2))
+    (#xFDE . ,(postinc 2))
     (#xFDC . ,(preinc  2))
     (#xFDA . ,(fsrh 2))
     (#xFD9 . ,(fsrl 2))
@@ -246,6 +260,13 @@
   (unless (not (xor (flag) (bit->bool p)))
     (ipw-rel rel)))
 
+;; logic ops + set N/Z flags
+
+(define (logic! op a b)
+  (let ((rv (band #xFF (op a b))))
+    (N/Z! rv)
+    rv))
+
 ;; add + signed/unsigned flag updates
 (define (add a b #:flags! [update-flags #f])
   (let* ((usum (+ a b))
@@ -265,6 +286,7 @@
 (define (N/Z! result)
   (N (bit-set? result 7))
   (Z (zero? result)))
+
 
 (define (skip!)
   (ip (+ 2 (ip))))
@@ -329,9 +351,13 @@
          (rdst (data-register dst)))
      ((register-write rdst) ((register-read rsrc)))))
   
-  ((incf reg d a) (read-modify-write (lambda (x) (add x  1 #:flags! #t)) reg d a))
-  ((decf reg d a) (read-modify-write (lambda (x) (add x -1 #:flags! #t)) reg d a))
+  ((incf   f d a) (read-modify-write (lambda (x) (add x  1         #:flags! #t)) f d a))
+  ((decf   f d a) (read-modify-write (lambda (x) (add x -1         #:flags! #t)) f d a))
+  ((addwf  f d a) (read-modify-write (lambda (x) (add x (wreg)     #:flags! #t)) f d a))
+  ((subfwb f d a) (read-modify-write (lambda (x) (add (wreg) (- x) #:flags! #t)) f d a))
+  
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
+  ((andlw l)      (wreg (logic! band (wreg) l)))
   
   ((clrf reg a)   (store reg a 0) (Z #t))
 
@@ -340,7 +366,6 @@
   )
 
     
-
 
 (define-struct ins-jit (op args ip+ words))
 
@@ -465,7 +490,7 @@
     (stack (make-stack))
     (ram (make-ram))
     (flash (make-flash))
-    (fsr (vector #x80 #xA0 0))
+    (fsr (vector d-stack r-stack 0))
     ((register-write status) 0)
     ((register-write pir1) 0)
     ((register-write pir2) 0)

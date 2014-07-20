@@ -105,3 +105,46 @@
     (define-values bits (undefined-params 'bits)) ...
     (begin (define reg (make-flags-register (list . bits))) ...)
     ))
+
+
+
+
+;; LATER: abstract memory access as well.
+
+;; Convenient interface for memory access
+(define (memory-fn reg addr [arg #f])
+  (cond
+   #;((procedure? arg)
+      ((memory-read-modify-write reg) addr arg))
+   (arg
+    ((memory-write reg) addr arg))
+   (else
+    ((memory-read addr reg)))))
+
+(define (memory-print reg port write?)
+  (write-string (format "#<memory>") port))
+
+(define-values
+  (struct:memory make-memory memory? memory-ref memory-set!)
+  (begin
+    (make-struct-type
+     'memory    ;; name-symbol
+     #f           ;; super-struct-type
+     3            ;; init-field-k
+     0            ;; auto-field-k
+     #f           ;; auto-v
+     (list (cons prop:custom-write memory-print))
+     #f           ;; inspector or false
+     memory-fn  ;; word-run or 0
+     )))
+
+(define (memory-read  mem) (memory-ref mem 0))
+(define (memory-write mem) (memory-ref mem 1))
+#;(define (memory-read-modify-write mem)
+  (let ((rmw (memory-ref mem 2)))
+    (if rmw rmw
+        (let ((r (memory-read  mem))
+              (w (memory-write mem)))
+          (lambda (addr fun)
+            (w addr (fun (r addr))))))))
+

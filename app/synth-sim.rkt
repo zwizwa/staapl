@@ -4,14 +4,14 @@
 ;; 2014-JUL-20
 
 ;; While the sim is not feature complete wrt. peripheral device
-;; simulation, it seems useful enough to just run subroutines.
+;; simulation, it seems useful enough to run individual words / isrs.
 
 (require staapl/pic18/sim
          staapl/pic18/sim-tools
          (file "synth.fm"))
 
 (define (reload)
-  (reg-defaults!)     ;; initializes registers and ram to a pseudo useful state
+  (reg-defaults!)     ;; initializes registers and ram
   (flash-from-code!)  ;; initialize flash from the compiler's code output
   (trace '()))        ;; reset tracing
 
@@ -26,9 +26,13 @@
 
 (define (test2)
   (reload)
-  (eusart-read (lambda () #xF8))  ;; midi stream
-  (RCIF #t)
-  (call-word target/lo-isr)
-  (print-trace))
+  (eusart-read (lambda () #xF8))   ;; emulate midi stream
+  (call-word target/init-midi-buf) ;; initialize serial buffer pointers
+  (RCIF #t)                        ;; set interrupt flag
+  (call-word target/lo-isr)        ;; run interrupt routine (adds byte to buffer)
+  (call-word target/midi>)         ;; read from buffer onto data stack
+  (print-trace)
+  (printf "WREG=~x\n" (wreg)))
+
 
  
