@@ -26,6 +26,8 @@
 
 (define (test2)
   (reload)
+  (eusart-read (lambda () #xF8))  ;; midi stream
+  (RCIF #t)
   (call-word target/lo-isr)
   (print-trace))
 

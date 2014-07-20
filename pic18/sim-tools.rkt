@@ -33,7 +33,6 @@
      (list (cons prop:custom-write register-print))
      #f           ;; inspector or false
      register-fn  ;; word-run or 0
-     
      )))
 
 (define (register-read r) (register-ref r 0))
@@ -56,6 +55,12 @@
       (write v)
       v))
   (make-register read write read-modify-write))
+
+(define (make-r-register read)
+  (make-rw-register read (lambda (v) (error 'read-only))))
+
+(define (make-w-register read)
+  (make-rw-register (lambda () (error 'write-only)) write))
 
 (define (make-param-register param)
   (make-rw-register param param))

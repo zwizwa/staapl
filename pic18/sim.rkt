@@ -37,6 +37,10 @@
  stkptr ;; stack pointer for call stack
  fsr    ;; fsr pointers (vector-of byte)
  bsr    ;; bank select register
+
+ ;; simulate EUSART input/output stream
+ eusart-read  
+ eusart-write
  )
 
 ;; Define bool flag parameters and 8bit register.
@@ -74,7 +78,8 @@
   (vector-set! (ram) addr val))
 (define (ram-ref  addr)
   (let ((v (vector-ref (ram) addr)))
-    (unless v (error 'ram-ref-init "#x~x" addr))
+    (unless (number? v)
+      (error 'ram-ref "#x~x = ~s" addr v))
     v))
 
 ;; flash
@@ -190,6 +195,10 @@
          (lambda (v) (ram-set! addr v)))))
 
 
+;; Peripherals
+(define rcreg (make-r-register (lambda () ((eusart-read)))))
+(define txreg (make-w-register (lambda (v) ((eusart-write) v))))
+
 
 ;; FIXME get names from machine const def modules
 (define sfrs
@@ -208,6 +217,8 @@
     ,(sfr-ram #xFF5) ;; TABLAT
     (#xF9E . ,pir1)
     (#xFA1 . ,pir2)
+    (#xFAE . ,rcreg)
+    (#xFAD . ,txreg)
     (#xFED . ,(postdec 0))
     (#xFEC . ,(preinc  0))
     (#xFE8 . ,(make-param-register wreg))
@@ -435,6 +446,13 @@
                  (ram (make-ram))
                  (fsr (make-fsr)))
     (thunk)))
+
+
+
+  
+
+
+
 
 ;; Provide a somewhat sane initial state to start running naked
 ;; functions.  Alternatively, start the kernel at the reset vector and
