@@ -248,35 +248,24 @@
   (unless (not (xor (flag) (bit->bool p)))
     (ipw-rel rel)))
 
-;; 2s complement add truncated to 8 bit + flag updates
-
-(define (unsigned8 x) (band #xFF x))
-(define (unsigned7 x) (band #x7F x))
-(define (unsigned4 x) (band #x0F x))
-
+;; add + signed/unsigned flag updates
 (define (add/flags! a b)
   (let* ((usum (+ (unsigned8 a) (unsigned8 b)))
+         (carries (bxor usum (bxor a b))) ;; vector of internal carries
          (rv (band #xFF usum)))
     (N/Z! rv)
-    (C  (bit-set? usum 8))
-    (DC (bit-set? (+ (unsigned4 a)
-                     (unsigned4 b))
-                  4))
-    ;; OV I always have to think...  OV = negative result from
-    ;; positive operands or vicee versa. so it is the nagation of the
-    ;; XOR of two input signs and output sign.  According to
-    ;; wikipedia, often generated as the XOR of carry into and out of
-    ;; sign bit.  FIXME: check this.
-    (OV (bit->bool
-         (bxor (>>> usum 8)
-               (>>> (+ (unsigned7 a)
-                       (unsigned7 b)) 7))))
-         
+    (C  (bit-set? carries 8))
+    (DC (bit-set? carries 4))
+    ;; OV = negative result from positive operands or vicee versa. so
+    ;; it is the nagation of the XOR of two input signs and output
+    ;; sign.  According to wikipedia, often generated as the XOR of
+    ;; carry into and out of sign bit.
+    (OV (xor (bit-set? carries 8)
+             (bit-set? carries 7)))
     rv))
 (define (N/Z! result)
   (N (bit-set? result 7))
   (Z (zero? result)))
-
   
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (begin
