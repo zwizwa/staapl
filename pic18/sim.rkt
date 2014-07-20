@@ -302,8 +302,8 @@
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
 
-  ;; Note that most of the PIC bit ops are replaced with a ___i op
-  ;; that has an extra invert flag.
+  ;; Note that most of the PIC bit mnemonics are replaced with a ___i
+  ;; op that has an extra invert flag.
   
   ((bci i rel) (bp C i rel))
   ((bzi i rel) (bp Z i rel))  ;; hangs it on synth code
@@ -376,13 +376,16 @@
 ;; (define (<< x) (arithmetic-shift x 1))
 
 (define (print-trace [n #f])
-  (for ((ip (reverse
-             (if n
-                 (take n (trace))
-                 (trace)))))
-    (match (vector-ref (jit) (2/ ip))
-      ((struct ins-jit (op args ip+ words))
-       (print-dasm words ip+)))))
+  (for ((addr (reverse
+               (if n
+                   (take n (trace))
+                   (trace)))))
+    (if (number? addr)
+        (match (vector-ref (jit) (2/ addr))
+          ((struct ins-jit (op args ip+ words))
+           (print-dasm words ip+)))
+        ;; Allow user to add tags to trace.
+        (pretty-print addr))))
 
 
 ;; CORE:

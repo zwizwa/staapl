@@ -130,7 +130,7 @@
     (make-struct-type
      'memory    ;; name-symbol
      #f           ;; super-struct-type
-     3            ;; init-field-k
+     2            ;; init-field-k
      0            ;; auto-field-k
      #f           ;; auto-v
      (list (cons prop:custom-write memory-print))
