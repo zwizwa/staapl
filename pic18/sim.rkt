@@ -442,17 +442,16 @@
                                       (make-ins-jit op args ip-next words))
                          (values op args)
                          ))))))
-              ;; Caching opcode lookup gives about an order of magnitude
-              ;; better performance.  Not a luxury when running wait loops.
+              ;; Caching opcodes solves two problems: it's a lot
+              ;; faster for busy loops, and it avoids worry about
+              ;; optimizing the dasm :)
               (match jitted
-                ((struct ins-jit (op args ip+ dasm))
+                ((struct ins-jit (op args ip+ _))
                  (begin
                    (ip ip+)
                    (values op args)
                    )))
               )))
-      ;; Keep instruction trace for debug.  Might want to limit the
-      ;; size of this.
       (trace! ip-prev)
       (apply op args))))
       
