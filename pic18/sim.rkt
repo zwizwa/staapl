@@ -7,6 +7,7 @@
          racket/dict
          racket/pretty
          (except-in racket/bool true false)
+         "sim-tools.rkt"     ;; register and other tools
          "../target/rep.rkt" ;; instruction->string
          "../tools.rkt"      ;; ll->l
          "../code.rkt"       ;; code->binary
@@ -25,10 +26,6 @@
 (define flash-nb-bytes #x8000)
 
 
-(define-syntax-rule (params p ...)
-  (begin (define p (make-parameter (void))) ...))
-    
-
 (params
  trace  ;; instruction trace addresses
  jit    ;; cache of scheme op lookups (about 10x speedup?)
@@ -40,8 +37,16 @@
  stkptr ;; stack pointer for call stack
  fsr    ;; fsr pointers (vector-of byte)
  bsr    ;; bank select register
- Z C DC N OV  ;; flags, broken out as bool
  )
+
+;; Define bool flag parameters and 8bit register.
+(flag-params
+ (status (N OV Z DC C))
+ (pir1   (SPPIF ADIF RCIF TXIF SSPIF CCP1IF TMR2IF TMR1IF))
+ (pir2   (OSCFIF CMIF USBIF EEIF BCLIF HLVDIF TMR3IF CCP2IF))
+ )
+
+
 
 (define (make-stack) (make-vector 31 #f))
 (define (make-fsr)   (make-vector 3  #f))
@@ -53,25 +58,6 @@
 ;; to force manual init.  Just clear jit buffer when loading code.
 (trace '())
 (jit (make-jit))
-
-;; Represent a list of bool parameters as a 8-bit register interface.
-(define (make-flags-register flags-params)
-  (define flags (reverse flags-params))
-  (define (read)
-    (for/fold
-        ((s 0))
-        ((b (in-naturals))
-         (f flags))
-      (bior s (<<< (bool->bit (f)) b))))
-  (define (write bits)
-    (for ((b (in-naturals))
-          (f flags))
-      (f (bit->bool (band 1 (>>> bits b))))))
-  (make-rw-register read write))
-
-;; STATUS word read/write
-(define status (make-flags-register (list N OV Z DC C)))
-
 
 ;; stack
 (define (push x)
@@ -126,28 +112,10 @@
     (ip (+ (ip) 2))
     w))
 
-;; abstract register access
-(define-struct register
-  (read
-   write
-   read-modify-write  ;; separate due to pre/post inc/dec on FSRs
-   ))
 
-;; if register access does not have side effects (see FSRs), just
-;; implement rmw in terms of read & write
-(define (make-rw-register read write)
-  (define (read-modify-write update)
-    (let ((v (update (read))))
-      (write v)
-      v))
-  (make-register read write read-modify-write))
 
-(define (make-param-register param)
-  (make-rw-register param param))
 
-(define (make-ni-register tag)
-  (define (ni . _) (error 'register-not-implemented "~s" tag))
-  (make-register ni ni ni))
+
 
 ;; Map data address space to ram or sfrs.
 (define (data-register addr)
@@ -238,7 +206,8 @@
     ,(sfr-ram #xF8D) ;; LATE
     ,(sfr-ram #xFF6) ;; TBLPTRL
     ,(sfr-ram #xFF5) ;; TABLAT
-    ;; (#xF9E . ,(iflags pir1))
+    (#xF9E . ,pir1)
+    (#xFA1 . ,pir2)
     (#xFED . ,(postdec 0))
     (#xFEC . ,(preinc  0))
     (#xFE8 . ,(make-param-register wreg))
@@ -292,7 +261,9 @@
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (begin
     (begin (define (name . args) . body) ...)
-    (define opcodes (make-hash `((name . ,name) ...)))))
+    (define opcodes
+      (make-parameter
+       `((name . ,name) ...)))))
 
 ;; FIXME: check flags updates for all
 (define-opcodes opcodes
@@ -416,7 +387,7 @@
                      (let ((ip-next (+ (ip) (* 2 (length words))))
                            (mnem (asm-name asm)))
                        (ip ip-next)
-                       (let ((op (dict-ref opcodes mnem)))
+                       (let ((op (dict-ref (opcodes) mnem)))
                          (vector-set! (jit) jit-index
                                       (make-ins-jit op args ip-next words))
                          (values op args)
@@ -461,7 +432,10 @@
                  (fsr (make-fsr)))
     (thunk)))
 
-;; State setup
+;; Provide a somewhat sane initial state to start running naked
+;; functions.  Alternatively, start the kernel at the reset vector and
+;; let it do its own init, though that might need more peripheral
+;; support.
 (define (reg-defaults!)
     (ip 0)
     (wreg 0)
@@ -469,7 +443,10 @@
     (stack (make-stack))
     (ram (make-ram))
     (flash (make-flash))
-    (fsr (vector #x80 #xA0 0)))
+    (fsr (vector #x80 #xA0 0))
+    ((register-write status) 0)
+    ((register-write pir1) 0))
+    
 (define (flash-from-code!)
   (flash (binary->flash (code->binary))))
 
