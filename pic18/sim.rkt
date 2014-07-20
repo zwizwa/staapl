@@ -251,6 +251,7 @@
 ;; 2s complement add truncated to 8 bit + flag updates
 
 (define (unsigned8 x) (band #xFF x))
+(define (unsigned7 x) (band #x7F x))
 (define (unsigned4 x) (band #x0F x))
 
 (define (add/flags! a b)
@@ -261,7 +262,16 @@
     (DC (bit-set? (+ (unsigned4 a)
                      (unsigned4 b))
                   4))
-    ; (OV ...) ;; haha FIXME!
+    ;; OV I always have to think...  OV = negative result from
+    ;; positive operands or vicee versa. so it is the nagation of the
+    ;; XOR of two input signs and output sign.  According to
+    ;; wikipedia, often generated as the XOR of carry into and out of
+    ;; sign bit.  FIXME: check this.
+    (OV (bit->bool
+         (bxor (>>> usum 8)
+               (>>> (+ (unsigned7 a)
+                       (unsigned7 b)) 7))))
+         
     rv))
 (define (N/Z! result)
   (N (bit-set? result 7))
