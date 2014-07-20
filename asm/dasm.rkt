@@ -110,7 +110,8 @@
        #:realm   'code
        #:address addr
        #:code    (reverse asm)
-       #:bin     (reverse bin)))))
+       #:bin     (reverse (map reverse bin))
+       ))))
 
 ;; Note that this is for RISC instruction sets only. All instructions
 ;; have the same size and are word-addressed. Any mult-word

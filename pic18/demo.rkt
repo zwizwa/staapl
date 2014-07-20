@@ -16,6 +16,7 @@
 ;; Target code printer config.
 (target-print-word-bytes 2) 
 (target-print-address-bits 16)
+(target-print-max-ins-words 2)
 
 
 ;; For this demo we use a simple printing method for showing the

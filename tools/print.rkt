@@ -60,4 +60,7 @@
        (lp (x)  " ~a\n" (data x))))))
 
 
+(define (pad-string str len)
+  (string-append str (make-string (- len (string-length str)) #\space)))
+
         

@@ -14,9 +14,10 @@
  ;; printing
  print-target-word
  format-target-word
- target-print-word-bytes      ;; code size for printing
+ target-print-word-bytes     ;; code size for printing
  target-print-address-bits   ;; address width for printing
-
+ target-print-max-ins-words  ;; max number of words in instruction
+ target-print-max-mnem
  
  new-target-word
  word?->name
@@ -185,6 +186,8 @@
 ;; Set reasonable defaults for address printing.
 (define target-print-address-bits  (make-parameter 16))
 (define target-print-word-bytes    (make-parameter 2))
+(define target-print-max-ins-words (make-parameter 2))
+(define target-print-max-mnem      (make-parameter 6))
 
 (define (instruction->string ins [term ""])
   (if (not (list? ins))
@@ -197,8 +200,9 @@
                       ((target-word? x) (target-word-name x))
                       (else x)))
                    (cdr ins))))
-        (format "[~a~a]~a"
-                (asm-name asm)
+        (format "~a~a~a"
+                (pad-string (symbol->string (asm-name asm))
+                            (target-print-max-mnem))
                 (if (null? args)
                     ""
                     (apply string-append
@@ -245,7 +249,11 @@
   ;; Ugly code for pretty output..
 
   (define w->s  word->string)
-  (define (a->s x) (string->symbol (hex->string (/ (target-print-address-bits) 4) x)))
+  (define addres-digits (/ (target-print-address-bits) 4))
+  (define word-digits   (* 2 (target-print-word-bytes)))
+  (define ins-spacing (* (target-print-max-ins-words) (+ 1 word-digits)))
+  (define (a->s x) (string->symbol (hex->string addres-digits x)))
+
   (define (hex x)
     (cond
      ((number? x) (w->s x))
@@ -254,6 +262,7 @@
                                 (format "~a " (w->s y)))
                               x)))
      (else "")))
+  
   (parameterize ((current-output-port port))
     (let ((name-sym
             (match
@@ -278,9 +287,9 @@
             (display "\t")
             (when a
               (printf "~a " (hex a))        ;; raw address
-              (printf "~a ~a"
+              (printf "~a  ~a "
                       (hex (addr-conv a))   ;; converted address
-                      (hex (car b))))
+                      (pad-string (hex (reverse (car b))) ins-spacing)))
             (printf "~a\n" (car c))
             (next (and a (+ (length (car b)) a))
                   (and a (cdr b))
