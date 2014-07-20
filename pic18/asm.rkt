@@ -110,12 +110,12 @@
  (bpz      (p R)     "1110 000p RRRR RRRR")
  
  (bra     (R)     "1101 0RRR RRRR RRRR")
- (_call   (s l h) "1110 110s llll llll" "1111 hhhh hhhh hhhh") ;; h = high, l = low  (~nop h)
+ (call   (s l h)  "1110 110s llll llll" "1111 hhhh hhhh hhhh") ;; h = high, l = low  (~nop h)
  (clrwdt  ()      "0000 0000 0000 0100")
  (daw     ()      "0000 0000 0000 0111")
- (_goto   (l h)   "1110 1111 llll llll" "1111 hhhh hhhh hhhh") ; (~nop h)
- (nop     ()      "0000 0000 0000 0000")
- (_nop    (d)     "1111 dddd dddd dddd") ; used for extra argument
+ (goto   (l h)    "1110 1111 llll llll" "1111 hhhh hhhh hhhh") ; (~nop h)
+ (nop0    ()      "0000 0000 0000 0000")
+ (nop    (d)      "1111 dddd dddd dddd") ; used for extra argument
  (pop     ()      "0000 0000 0000 0110")
  (push    ()      "0000 0000 0000 0101")
  (reset   ()      "0000 0000 1111 1111")
@@ -145,8 +145,11 @@
  (tblwt*- ()      "0000 0000 0000 1110")
  (tblwt+* ()      "0000 0000 0000 1111")
 
- (_lfsr   (f l h) "1110 1110 00ff hhhh" "1111 0000 llll llll")  ; (~nop l)
+ (lfsr    (f l h) "1110 1110 00ff hhhh" "1111 0000 llll llll")  ; (~nop l)
 
+ ;; FIXME: what would it take to support something like this instead,
+ ;; where word is concatenated/split for asm/dasm?
+ ;; (lfsr    (f (l h)) "1110 1110 00ff hhhh" "1111 0000 llll llll")  ; (~nop l)
 
  )
 
@@ -179,10 +182,10 @@
  ((jsr   here exit address) (smart-jsr here exit address))
 
  ;; Simpler interface to multi-word instructions.
- ((lfsr  here f addr) ((delegate-asm _lfsr) here f addr (page addr)))
- ((goto  here addr)   ((delegate-asm _goto) here addr (page addr)))
- ((call  here addr s) ((delegate-asm _call) here s addr (page addr)))
- ((call0 here addr)   ((delegate-asm _call) here 0 addr (page addr)))) ;; not using shadow
+ ((lfsr_  here f addr) ((delegate-asm lfsr) here f addr (page addr)))
+ ((goto_  here addr)   ((delegate-asm goto) here addr   (page addr)))
+ ((call_  here addr s) ((delegate-asm call) here s addr (page addr)))
+ ((call0_ here addr)   ((delegate-asm call) here 0 addr (page addr)))) ;; not using shadow
 
 
 
@@ -193,8 +196,8 @@
       ;; determine jump/call based on exit flag
       (((short long)
         (if (zero? exit)
-            (values (asm: rcall) (asm: call0))
-            (values (asm: bra)   (asm: goto)))))
+            (values (asm: rcall) (asm: call0_))
+            (values (asm: bra)   (asm: goto_)))))
 
        ;; determine relative/absolute based on distance.
        (let ((jsr (if (relative-ok? here address) short long)))

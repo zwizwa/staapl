@@ -173,7 +173,7 @@
 
 (patterns-class
  (macro)
- opcode (push pop sleep reset nop clrwdt daw tblrd* tblrd*- tblrd*+ tblwt* tblwt*- tblwt*+)
+ opcode (push pop sleep reset nop0 clrwdt daw tblrd* tblrd*- tblrd*+ tblwt* tblwt*- tblwt*+)
  ;; ---------------------------------------------------------------------------------------
  ((opcode) ([opcode])))
   
@@ -250,7 +250,7 @@
  
    
  ;; ARRAY
- (([qw lo] [qw hi] a!!) ([_lfsr 2 lo hi]))
+ (([qw lo] [qw hi] a!!) ([lfsr 2 lo hi]))
  ((a!!)                 (macro: ~a!!))
 
 
@@ -284,7 +284,7 @@
  (([qw s] [qw d] movff) ([movff s d]))
  (([qw s] retfie)       ([retfie s]))
 
- (([qw addr] [qw reg] lfsr) ([lfsr reg addr])) ;; macro only
+ (([qw addr] [qw reg] lfsr) ([lfsr_ reg addr])) ;; macro only
    
  ;; TABLES
 
@@ -404,7 +404,7 @@
  ;; compiler, which encoded error conditions in #xF000 NOP
  ;; instructions. the generic error was #xFBAD.
  
- ((badnop)  ([_nop #xBAD]))
+ ((badnop)  ([nop #xBAD]))
    
 
  ;; Save will undo a previous drop, but will be translated to dup

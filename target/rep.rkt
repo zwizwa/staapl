@@ -187,7 +187,7 @@
 (define target-print-address-bits  (make-parameter 16))
 (define target-print-word-bytes    (make-parameter 2))
 (define target-print-max-ins-words (make-parameter 2))
-(define target-print-max-mnem      (make-parameter 6))
+(define target-print-max-mnem      (make-parameter 8))
 
 (define (instruction->string ins [term ""])
   (if (not (list? ins))

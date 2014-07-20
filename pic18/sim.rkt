@@ -312,11 +312,11 @@
   ((bra   rel)  (ipw-rel rel))
   ((rcall rel)  (push (ip)) (bra rel))
   
-  ((_goto lo hi) (ipw (lohi lo hi)))
-  ((_call s lo hi)
+  ((goto lo hi) (ipw (lohi lo hi)))
+  ((call s lo hi)
    (unless (zero? s) (raise 'call-shadow=1))
    (push (ip))
-   (_goto lo hi))
+   (goto lo hi))
   ((return s)
    (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
    (ip (pop)))
@@ -361,7 +361,7 @@
   
   ((clrf reg a)   (store reg a 0) (Z #t))
 
-  ((_lfsr f l h)  (fsr-set! f (lohi l h)))
+  ((lfsr f l h)   (fsr-set! f (lohi l h)))
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
 

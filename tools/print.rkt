@@ -61,6 +61,9 @@
 
 
 (define (pad-string str len)
-  (string-append str (make-string (- len (string-length str)) #\space)))
+  (let ((n (- len (string-length str))))
+    (if (> n 0)
+        (string-append str (make-string n #\space))
+        str)))
 
         
