@@ -1,5 +1,6 @@
 #lang racket/base
-(require "../tools.rkt")
+(require "../tools.rkt"
+         racket/dict)
 (provide (all-defined-out))
 
 ;; Reusable tools for writing machine emulators.
@@ -138,13 +139,24 @@
      memory-fn  ;; word-run or 0
      )))
 
+
 (define (memory-read  mem) (memory-ref mem 0))
 (define (memory-write mem) (memory-ref mem 1))
-#;(define (memory-read-modify-write mem)
-  (let ((rmw (memory-ref mem 2)))
-    (if rmw rmw
-        (let ((r (memory-read  mem))
-              (w (memory-write mem)))
-          (lambda (addr fun)
-            (w addr (fun (r addr))))))))
+
+(define (vector->memory vec)
+  (make-memory
+   (lambda (addr)     (vector-ref  vec addr))
+   (lambda (addr val) (vector-set! vec addr val))))
+
+;; Memory inspector wrapper.
+(define (memory-inspect mem read-notify write-notify)
+  (define (read addr)
+    (let ((v ((memory-read mem) addr)))
+      (read-notify addr v)
+      v))
+  (define (write addr vnew)
+    (let ((vold ((memory-read mem) addr)))
+      ((memory-write mem) addr vnew)
+      (write-notify addr vold vnew)))
+  (make-memory read write))
 

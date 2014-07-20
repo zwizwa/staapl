@@ -56,7 +56,7 @@
 
 (define (make-stack) (make-vector 31 #f))
 (define (make-fsr)   (make-vector 3  #f))
-(define (make-ram)   (make-vector #x1000 #f))
+(define (make-ram)   (vector->memory (make-vector #x1000 #f)))
 (define (make-jit)   (make-vector (2/ flash-nb-bytes) #f))
 (define (make-flash) (make-vector flash-nb-bytes #f))
 
@@ -78,18 +78,12 @@
 ;; ram
 ;; support raw vector and abstract memory
 (define (ram-set! addr val)
-  (let ((r (ram)))
-    (if (vector? r)
-        (vector-set! r addr val)
-        ((memory-write r) addr val))))
+  ((memory-write (ram)) addr val))
+
 (define (ram-ref  addr)
-  (let ((r (ram)))
-    (let ((v (if (vector? r)
-                 (vector-ref r addr)
-                 ((memory-read r) addr))))
-      (unless (number? v)
-        (error 'ram-ref "#x~x = ~s" addr v))
-      v)))
+  (let ((v ((memory-read (ram)) addr)))
+    (unless (number? v) (error 'ram-ref "#x~x = ~s" addr v))
+    v))
 
 ;; flash
 
@@ -372,20 +366,30 @@
 
 (define-struct ins-jit (op args ip+ words))
 
-(define (trace! x) (trace (cons x (trace))))
-;; (define (<< x) (arithmetic-shift x 1))
+(define (trace! x)
+  (let ((t (trace)))
+    (if (procedure? t) ;; allow for abstract trace
+        (t x)
+        (trace (cons x t)))))
+
+(define (print-trace-item addr)
+  (if (number? addr)
+      (match (vector-ref (jit) (2/ addr))
+        ((struct ins-jit (op args ip+ words))
+         (print-dasm words ip+)))
+      ;; Allow user to add tags to trace.
+      (pretty-print addr)))
 
 (define (print-trace [n #f])
-  (for ((addr (reverse
-               (if n
-                   (take n (trace))
-                   (trace)))))
-    (if (number? addr)
-        (match (vector-ref (jit) (2/ addr))
-          ((struct ins-jit (op args ip+ words))
-           (print-dasm words ip+)))
-        ;; Allow user to add tags to trace.
-        (pretty-print addr))))
+  (unless (list? (trace))
+    (error 'trace-type-error "~s" (trace)))
+  (let* ((full (trace))
+         (chunk (if n (take n (trace)) (trace)))
+         (offset (- (length full) (length chunk))))
+    (for ((i (in-naturals))
+          (addr (reverse chunk)))
+      (printf "~s\t" (+ offset i))
+      (print-trace-item addr))))
 
 
 ;; CORE:

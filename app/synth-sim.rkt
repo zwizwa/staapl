@@ -8,6 +8,8 @@
 
 (require staapl/pic18/sim
          staapl/pic18/sim-tools
+         staapl/target/rep
+         racket/dict
          (file "synth.fm"))
 
 (define (reload)
@@ -15,6 +17,7 @@
   (flash-from-code!)  ;; initialize flash from the compiler's code output
   (trace '()))        ;; reset tracing
 
+;; Boot kernel
 (define (test0)
   (reload)
   (call-word 0))
@@ -24,31 +27,32 @@
   (call-word target/init-midi-buf)
   (print-trace))
 
+(define (var tw)     (target-word-address tw))
+(define (vars . tws) (map var tws))
 
-(define inspect-addr (make-parameter '()))
-(define (do-inspect tag addr)
-  (when (member addr (inspect-addr))
-    (trace! (list tag addr))))
-
-(define (mem-inspect vec)
-  (define (read addr)
-    (do-inspect 'read addr)
-    (vector-ref vec addr))
-  (define (write addr v)
-    (do-inspect 'write addr)
-    (vector-set! vec addr v))
-  (make-memory read write))
-
+;; Simulate MIDI in + read
 (define (test2)
+
   (reload)
-  (ram (mem-inspect (ram)))        ;; Add memory inspector
-  (inspect-addr '(#x38))
+  (trace print-trace-item) ;; use immediate trace instead of list
+
+  ;; keep an eye on some addresses
+  (define addrs (vars target/midi-write
+                      target/midi-read))
+  (define (access-notify addr . a)
+    (when (member addr addrs)
+      (trace! (cons 'var (cons addr a)))))
+  (ram (memory-inspect
+        (ram)
+        access-notify
+        access-notify))
+  
   (eusart-read (lambda () #xF8))   ;; emulate midi stream
   (call-word target/init-midi-buf) ;; initialize serial buffer pointers
   (RCIF #t)                        ;; set interrupt flag
   (call-word target/lo-isr)        ;; run interrupt routine (adds byte to buffer)
   (call-word target/midi>)         ;; read from buffer onto data stack
-  (print-trace)
+  ;; (print-trace)
   (printf "WREG=~x\n" (wreg)))
 
 

@@ -65536,8 +65536,15 @@ Lots of things not yet implemented.  Trying to see if I can use this
 to debug memory access patterns in some midi parsing code.
 
 
-Entry: Debugging midi
-Date: Sat Jul 19 13:16:54 EDT 2014
 
-(call target/init-midi-buf)
-(call target/
+Entry: Debugging midi
+Date: Sun Jul 20 19:02:02 EDT 2014
+
+Sim can now run isr by simulating RCREG and implementing RCIF flag.
+
+Now how to use this for effective debugging?  I guess I'm looking
+mostly for clobbers.  E.g. set up the memory with a bunch of
+uninitialized values and/or read/write triggers and see what happens.
+
+
+
