@@ -44,7 +44,6 @@
 (flags: output-hex
         output-dict
         output-code
-        output-sim
         console
         device
         baud
@@ -73,9 +72,6 @@
 
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
-    
-    [("--output-sim") filename "Output simulator module."
-     (output-sim filename)]
     
     [("--output-asm") filename "Output assembly code."
      (output-asm filename)]
@@ -202,27 +198,6 @@
        (output-code)
        (lambda () (eval '(write (code->binary))))))
 
-    ;; Save simulator start script.
-    (when (output-sim)
-      (let* ((reqs `(staapl/code
-                     staapl/target
-                     staapl/pic18/sim
-                     (file ,(path->string (filename)))))
-             (out (for/list ((r reqs))
-                    `(all-from-out ,r))))
-      
-      (with-output-to-file/safe
-       (output-sim)
-       (lambda ()
-         (save "#lang racket/base")
-         (save #f `(require ,@reqs))
-         (save #f `(provide ,@out))
-         (save #f `(provide (all-defined-out)))
-         (save ";; Sim setup"
-               `(begin
-                  (define (call tw)
-                    (call-word (* 2 (target-word-address tw))))
-                  (flash (code (code->binary)))))))))
       
     ;; Save interaction script.
     (let* ((reqs (requirements (filename)))

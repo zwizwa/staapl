@@ -54,7 +54,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 %.app: %.fm $(F_LIB)
 	rm -f compiled/$*_fm.*
 	$(COMP) -vk $<
-	$(STAAPLC) $(STAAPLC_FLAGS) --output-code $*.sx --output-asm $*.asm --output-sim $*.sim $< 
+	$(STAAPLC) $(STAAPLC_FLAGS) --output-code $*.sx --output-asm $*.asm $< 
 	chmod +x $*.dict
 	ls -l $*.hex $*.dict >$@
 
@@ -83,7 +83,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 
 
 clean:
-	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app *.flash *.sx *.asm *.sim
+	rm -rf *~ *.hex *.dict test.md5sum *.timestamp *.dasm compiled *.app *.flash *.sx *.asm
 
 # Regression tests for binary code generator.
 

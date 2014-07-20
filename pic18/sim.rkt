@@ -9,6 +9,8 @@
          (except-in racket/bool true false)
          "../target/rep.rkt" ;; instruction->string
          "../tools.rkt"      ;; ll->l
+         "../code.rkt"       ;; code->binary
+         "../target.rkt"     ;; target-word-address
          "asm.rkt"           ;; pic18
          "../asm.rkt")       ;; generic
 
@@ -18,7 +20,10 @@
 ;; is the closest thing.
 
 ;; Machine constants
-(define reg-access #x60) ;; #x80 FIXME: depends on core version
+(define reg-access     #x60) ;; #x80 FIXME: depends on core version
+(define ram-nb-bytes   #x1000)
+(define flash-nb-bytes #x8000)
+
 
 (define-syntax-rule (params p ...)
   (begin (define p (make-parameter (void))) ...))
@@ -39,28 +44,33 @@
  )
 
 (define (make-stack) (make-vector 31 #f))
+(define (make-fsr)   (make-vector 3  #f))
 (define (make-ram)   (make-vector #x1000 #f))
-(define (make-jit)   (make-vector #x2000 #f))
-(define (make-fsr)   (make-vector 3 #f))
+(define (make-jit)   (make-vector (2/ flash-nb-bytes) #f))
+(define (make-flash) (make-vector flash-nb-bytes #f))
 
 ;; These can be initialized for global use.  Keep other params at #f
 ;; to force manual init.  Just clear jit buffer when loading code.
 (trace '())
 (jit (make-jit))
 
+;; Represent a list of bool parameters as a 8-bit register interface.
+(define (make-flags-register flags-params)
+  (define flags (reverse flags-params))
+  (define (read)
+    (for/fold
+        ((s 0))
+        ((b (in-naturals))
+         (f flags))
+      (bior s (<<< (bool->bit (f)) b))))
+  (define (write bits)
+    (for ((b (in-naturals))
+          (f flags))
+      (f (bit->bool (band 1 (>>> bits b))))))
+  (make-rw-register read write))
+
 ;; STATUS word read/write
-(define flags (reverse (list N OV Z DC C)))
-(define (status-read)
-  (for/fold
-      ((s 0))
-      ((b (in-naturals))
-       (f flags))
-    (bior s (<<< (bool->bit (f)) b))))
-(define (status-write bits)
-  (for ((b (in-naturals))
-        (f flags))
-    (f (bit->bool (band 1 (>>> bits b))))))
-       
+(define status (make-flags-register (list N OV Z DC C)))
 
 
 ;; stack
@@ -78,17 +88,22 @@
   (vector-set! (ram) addr val))
 (define (ram-ref  addr)
   (let ((v (vector-ref (ram) addr)))
-    (unless v (error 'ram-ref-undefined "~x" addr))
+    (unless v (error 'ram-ref-init "#x~x" addr))
     v))
 
 ;; flash
-(define (load-flash filename)
-  (code (read (open-input-file filename))))
-(define (code code-chunks)
-  (for/list ((chunk code-chunks))
-    (list (list-ref chunk 0)
-          (apply vector (list-ref chunk 1)))))
 
+;; "Binary" files are (list-of (list-of addr (list-of byte)))
+;; The way they come out of code->binary.
+(define (load-binary filename)
+  (read (open-input-file filename)))
+;; Translate lists to vectors for faster access.
+(define (binary->flash code-chunks)
+  (apply vector
+         (for/list ((chunk code-chunks))
+           (list (list-ref chunk 0)
+                 (apply vector (list-ref chunk 1))))))
+  
 (define (flash-ref addr [word #f])
   (prompt
    (for ((chunk (flash)))
@@ -206,6 +221,8 @@
          (lambda ()  (ram-ref addr))
          (lambda (v) (ram-set! addr v)))))
 
+
+
 ;; FIXME get names from machine const def modules
 (define sfrs
   `((#xFFC . ,(make-param-register stkptr))
@@ -221,6 +238,7 @@
     ,(sfr-ram #xF8D) ;; LATE
     ,(sfr-ram #xFF6) ;; TBLPTRL
     ,(sfr-ram #xFF5) ;; TABLAT
+    ;; (#xF9E . ,(iflags pir1))
     (#xFED . ,(postdec 0))
     (#xFEC . ,(preinc  0))
     (#xFE8 . ,(make-param-register wreg))
@@ -231,7 +249,7 @@
     (#xFDC . ,(preinc  2))
     (#xFDA . ,(fsrh 2))
     (#xFD9 . ,(fsrl 2))
-    (#xFD8 . ,(make-rw-register status-read status-write))
+    (#xFD8 . ,status)
     (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
@@ -249,23 +267,27 @@
     (ipw-rel rel)))
 
 ;; add + signed/unsigned flag updates
-(define (add/flags! a b)
-  (let* ((usum (+ (unsigned8 a) (unsigned8 b)))
+(define (add a b #:flags! [update-flags #f])
+  (let* ((usum (+ a b))
          (carries (bxor usum (bxor a b))) ;; vector of internal carries
          (rv (band #xFF usum)))
-    (N/Z! rv)
-    (C  (bit-set? carries 8))
-    (DC (bit-set? carries 4))
-    ;; OV = negative result from positive operands or vicee versa. so
-    ;; it is the nagation of the XOR of two input signs and output
-    ;; sign.  According to wikipedia, often generated as the XOR of
-    ;; carry into and out of sign bit.
-    (OV (xor (bit-set? carries 8)
-             (bit-set? carries 7)))
+    (when update-flags
+      (N/Z! rv)
+      (C  (bit-set? carries 8))
+      (DC (bit-set? carries 4))
+      ;; OV = negative result from positive operands or vicee versa. so
+      ;; it is the nagation of the XOR of two input signs and output
+      ;; sign.  According to wikipedia, often generated as the XOR of
+      ;; carry into and out of sign bit.
+      (OV (xor (bit-set? carries 8)
+               (bit-set? carries 7))))
     rv))
 (define (N/Z! result)
   (N (bit-set? result 7))
   (Z (zero? result)))
+
+(define (skip!)
+  (ip (+ 2 (ip))))
   
 (define-syntax-rule (define-opcodes opcodes ((name . args) . body) ...)
   (begin
@@ -281,7 +303,7 @@
   ((bpf p f b a)
    (let ((v (load f a)))
      (when (bit->bool (bxor p (>>> v b)))
-       (ip (+ 2 (ip))))))
+       (skip!))))
 
   ((bra   rel)  (ipw-rel rel))
   ((rcall rel)  (push (ip)) (bra rel))
@@ -300,9 +322,15 @@
      (when (xor
             (bit->bool pol)
             (bit->bool (bitwise-and 1 (arithmetic-shift v (- bit)))))
-       (ip (+ (ip) 2)))))
+       (skip!))))
+
+  ((decfsnz f d a)
+   (read-modify-write
+    (lambda (x)
+      (let ((v (add x  1 #:flags! #f)))
+        (when (zero? v) (skip!))))
+    f d a))
   
-  ; movff ;; no STATUS
   ((movlw l) (wreg l)) ;; no STATUS
   ((movwf reg a) (store reg a (wreg))) ;; no STATUS
   ((movf reg d a)
@@ -310,8 +338,15 @@
      (when (zero? d) (wreg v)) ;; otherwise just flag effect
      (N/Z! v)
      ))
-  ((incf reg d a) (read-modify-write (lambda (x) (add/flags! x  1)) reg d a))
-  ((decf reg d a) (read-modify-write (lambda (x) (add/flags! x -1)) reg d a))
+  ((movff src dst) ;; no STATUS
+   (let ((rsrc (data-register src))
+         (rdst (data-register dst)))
+     ((register-write rdst) ((register-read rsrc)))))
+  
+  ((incf reg d a) (read-modify-write (lambda (x) (add x  1 #:flags! #t)) reg d a))
+  ((decf reg d a) (read-modify-write (lambda (x) (add x -1 #:flags! #t)) reg d a))
+  ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
+  
   ((clrf reg a)   (store reg a 0) (Z #t))
 
   ((_lfsr f l h)  (fsr-set! f (lohi l h)))
@@ -326,7 +361,7 @@
 (define (trace! x) (trace (cons x (trace))))
 ;; (define (<< x) (arithmetic-shift x 1))
 
-(define (last-trace [n 5])
+(define (print-trace [n #f])
   (for ((ip (reverse
              (if n
                  (take n (trace))
@@ -409,10 +444,13 @@
   (let next ()
     (when cond (begin . body) (next))))
 
+;; This doesn't set up context other than ip.
 (define (call-word addr)
-  (push #f) ;; termination mark
-  (ip addr)
-  (while (ip) (execute-next)))
+  (let ((addr (if (number? addr) addr
+                  (* 2 (target-word-address addr)))))
+    (push #f) ;; termination mark
+    (ip addr)
+    (while (ip) (execute-next))))
 
 (define (with-local-context thunk)
   (parameterize ((ip 0)
@@ -423,36 +461,33 @@
                  (fsr (make-fsr)))
     (thunk)))
 
-
-
-;; To make this more immediately useful, it might be good to focus on
-;; running subroutines in isolation.  Booting a real world image is
-;; going to have a lot of HW init that needs to be supported to be
-;; able to get it to run correctly at all.
-
-
-;; Testing
-(define (reg-defaults)
+;; State setup
+(define (reg-defaults!)
     (ip 0)
     (wreg 0)
     (stkptr 0)
     (stack (make-stack))
     (ram (make-ram))
+    (flash (make-flash))
     (fsr (vector #x80 #xA0 0)))
+(define (flash-from-code!)
+  (flash (binary->flash (code->binary))))
 
-(define (test1)
-  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
-  (jit (make-jit))
-  (begin
-    (reg-defaults)
-    (run))
 
-  ;; (call-word #x03A8) ;; interpreter
-  )
 
-(define (test2)
-  (flash (load-flash "/home/tom/staapl/app/synth.sx"))
-  (jit (make-jit))
-  (trace '())
-  (call-word #x03A8) ;; interpreter
-  )
+
+;; Testing
+#;(define (test-synth.sx)
+(flash (binary->flash (load-binary "/home/tom/staapl/app/synth.sx")))
+(jit (make-jit)))
+
+#;(define (test1)
+(test-synth.sx)
+(reg-defaults!)
+(run))
+
+
+#;(define (test2)
+(test-synth.sx)
+(trace '())
+(call-word #x03A8))
