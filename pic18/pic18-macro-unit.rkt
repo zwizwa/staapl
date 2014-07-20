@@ -211,7 +211,7 @@
  (([qw a] -)                     ([addlw (tv: a -1 *)]))
    
  ;; there's no subfw
- (([save] [movf a 0 0] -)        ([bpf 0 STATUS 0 0] [subfwb a 0 0])) 
+ (([save] [movf a 0 0] -)        ([bsfi 0 STATUS 0 0] [subfwb a 0 0])) 
  ((-)                            ([subwf POSTDEC0 0 0]))
 
  (([save] [movf a 0 0] --)       ([subfwb a 0 0])) ;; (1)
@@ -333,7 +333,7 @@
 
  ;; The 'jw/false' macro recombines the pseudo ops from above into
  ;; jump constructs. These use 'r' instructions. (see assembler.ss)
- (([bit?  f b p] [qw l] jw/false)     ([btfsp (flip p) f b 0] [bra l]))
+ (([bit?  f b p] [qw l] jw/false)     ([btfssi (flip p) f b 0] [bra l]))
 
  ; (([flag? opc p] [qw l] jw/false)     ([,opc (begin (display "WARNING:flag") (flip p)) l]))
  (([flag? opc p] [qw l] jw/false)     ([,opc (flip p) l]))
@@ -373,8 +373,8 @@
  ;; It is possible to use literal and/or to operate on WREG though, so
  ;; as a general rule, you are not allowed to touch WREG in forth!
 
- (([drop] [qw f] [qw b] [qw c] bit!) ([bpf (flip c) f b 0] [drop]))
- (([qw f] [qw b] [qw c] bit!)        ([bpf (flip c) f b 0]))
+ (([drop] [qw f] [qw b] [qw c] bit!) ([bsfi (flip c) f b 0] [drop]))
+ (([qw f] [qw b] [qw c] bit!)        ([bsfi (flip c) f b 0]))
 
  ;; ((bit!)                             (macro: ~bit!))  ;; STUB
  

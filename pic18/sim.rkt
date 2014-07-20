@@ -304,7 +304,7 @@
   
   ((bpc p rel) (bp C p rel))
   ((bpz p rel) (bp Z p rel))  ;; hangs it on synth code
-  ((bpf p f b a)
+  ((bsfi p f b a)
    (let ((v (load f a)))
      (when (bit->bool (bxor p (>>> v b)))
        (skip!))))
@@ -325,7 +325,7 @@
    ;; (printf "WARNING: retfie as return\n")
    (return s))
 
-  ((btfsp pol reg bit a)  ;; FIXME: check polarity
+  ((btfssi pol reg bit a)  ;; FIXME: check polarity
    (let ((v (load reg a)))
      (when (xor
             (bit->bool pol)

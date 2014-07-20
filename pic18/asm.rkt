@@ -85,9 +85,11 @@
  ;;(btg     (f b a) "0111 bbba ffff ffff")
 
  ;; POLARIZED
- ;; p = INVERTED bit value : clear = 1, set = 0
- (bpf    (p f b a) "100p bbba ffff ffff")
- (btfsp  (p f b a) "101p bbba ffff ffff")
+ ;; i = INVERTED bit value
+ ;; 0 -> set   / skip if set
+ ;; 1 -> clear / skip if clear
+ (bsfi   (i f b a) "100i bbba ffff ffff")
+ (btfssi (i f b a) "101i bbba ffff ffff")
  (btg    (f b a)   "0111 bbba ffff ffff")
 
  ;; ORIGINAL
