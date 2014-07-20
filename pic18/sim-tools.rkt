@@ -2,8 +2,45 @@
 (require "../tools.rkt")
 (provide (all-defined-out))
 
+;; Reusable tools for writing machine emulators.
+
+
 ;; abstract register access
-(define-struct register
+
+;; Convenient interface for register access
+(define (register-fn reg [arg #f])
+  (cond
+   ((procedure? arg)
+    ((register-read-modify-write reg) arg))
+   (arg
+    ((register-write reg) arg))
+   (else
+    ((register-read reg)))))
+
+(define (register-print reg port write?)
+  (write-string (format "#<register>") port))
+
+
+(define-values
+  (struct:register make-register register? register-ref register-set!)
+  (begin
+    (make-struct-type
+     'register    ;; name-symbol
+     #f           ;; super-struct-type
+     3            ;; init-field-k
+     0            ;; auto-field-k
+     #f           ;; auto-v
+     (list (cons prop:custom-write register-print))
+     #f           ;; inspector or false
+     register-fn  ;; word-run or 0
+     
+     )))
+
+(define (register-read r) (register-ref r 0))
+(define (register-write r) (register-ref r 1))
+(define (register-read-modify-write r) (register-ref r 2))
+
+#;(define-struct register
   (read
    write
    read-modify-write  ;; separate due to pre/post inc/dec on FSRs
@@ -41,9 +78,12 @@
           (error 'flag-type "~s" v))
         (bior s (<<< (bool->bit (f)) b)))))
   (define (write bits)
-    (for ((b (in-naturals))
-          (f flags))
-      (f (bit->bool (band 1 (>>> bits b))))))
+    (if (uninitialized? bits)
+        (for ((f flags))
+          (f (make-uninitialized)))
+        (for ((b (in-naturals))
+              (f flags))
+          (f (bit->bool (band 1 (>>> bits b)))))))
   (make-rw-register read write))
 
 

@@ -7,6 +7,7 @@
 ;; simulation, it seems useful enough to just run subroutines.
 
 (require staapl/pic18/sim
+         staapl/pic18/sim-tools
          (file "synth.fm"))
 
 (define (reload)

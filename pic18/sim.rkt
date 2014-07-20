@@ -288,6 +288,10 @@
    (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
    (ip (pop)))
 
+  ((retfie s)
+   ;; (printf "WARNING: retfie as return\n")
+   (return s))
+
   ((btfsp pol reg bit a)  ;; FIXME: check polarity
    (let ((v (load reg a)))
      (when (xor
@@ -445,7 +449,9 @@
     (flash (make-flash))
     (fsr (vector #x80 #xA0 0))
     ((register-write status) 0)
-    ((register-write pir1) 0))
+    ((register-write pir1) 0)
+    ((register-write pir2) 0)
+    )
     
 (define (flash-from-code!)
   (flash (binary->flash (code->binary))))
