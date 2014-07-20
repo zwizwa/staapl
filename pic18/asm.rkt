@@ -105,11 +105,11 @@
  
  ;; POLARIZED
  ;; conditionals
- ;; p = polarity   1 : inverted   0 : normal
- (bpc      (p R)     "1110 001p RRRR RRRR")
- (bpn      (p R)     "1110 011p RRRR RRRR")
- (bpov     (p R)     "1110 010p RRRR RRRR")
- (bpz      (p R)     "1110 000p RRRR RRRR")
+ ;; i = inverted
+ (bci      (i R)     "1110 001i RRRR RRRR")
+ (bni      (i R)     "1110 011i RRRR RRRR")
+ (bovi     (i R)     "1110 010i RRRR RRRR")
+ (bzi      (i R)     "1110 000i RRRR RRRR")
  
  (bra     (R)     "1101 0RRR RRRR RRRR")
  (call   (s l h)  "1110 110s llll llll" "1111 hhhh hhhh hhhh") ;; h = high, l = low  (~nop h)

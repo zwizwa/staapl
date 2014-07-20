@@ -27,7 +27,7 @@
 (patterns
  (macro)
 
- (([qw l] jw/nz)   ([bpz 1 l])) ;; ( label -- )   ;; FIXME
+ (([qw l] jw/nz)   ([bzi 1 l])) ;; ( label -- )   ;; FIXME
  
  ((rdrop)          ([movf POSTDEC1 1 0]))
 

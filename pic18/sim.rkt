@@ -301,9 +301,12 @@
 ;; FIXME: check flags updates for all
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
+
+  ;; Note that most of the PIC bit ops are replaced with a ___i op
+  ;; that has an extra invert flag.
   
-  ((bpc p rel) (bp C p rel))
-  ((bpz p rel) (bp Z p rel))  ;; hangs it on synth code
+  ((bci i rel) (bp C i rel))
+  ((bzi i rel) (bp Z i rel))  ;; hangs it on synth code
   ((bsfi p f b a)
    (let ((v (load f a)))
      (when (bit->bool (bxor p (>>> v b)))

@@ -313,9 +313,9 @@
  ;; ((bit?)                      (macro: ~bit?)) ;; STUB
 
  ;; STATUS flag -> conditional jump opcode
- (([qw p] pz?)      ([flag? (asm: bpz) p]))    
- (([qw p] pc?)      ([flag? (asm: bpc) p]))
- (([qw p] pn?)      ([flag? (asm: bpn) p]))
+ (([qw p] pz?)      ([flag? (asm: bzi) p]))    
+ (([qw p] pc?)      ([flag? (asm: bci) p]))
+ (([qw p] pn?)      ([flag? (asm: bni) p]))
 
 
  ;; Conditional skip optimisation for 'then'.
@@ -343,7 +343,7 @@
 
  ;; FIXME: using carry is simpler, since it's not affected by 'drop'
  ;; (([qw l] jw/false)       (macro: ~>z ,(insert `([bpz 0 ,l])))) ;; STUB
- (([qw l] jw/false)       ([decf WREG 0 0] [drop] [bpc 1 l]))
+ (([qw l] jw/false)       ([decf WREG 0 0] [drop] [bci 1 l]))
 
  
  ;; The 'not' macro is useful as predicate negation. Note that it's not the
