@@ -45,14 +45,18 @@
 (define (in-hex-printer start
                         address-nibbles
                         data-nibbles
-                        items-per-line)
+                        items-per-line
+                        [non-number (lambda (x) "?")])
   (in-acor
    (lambda (yield)
      
      (define-syntax-rule (lp formals . args)
        (yield (lambda formals (printf . args))))
      (define (addr x) (hex->string address-nibbles x))
-     (define (data x) (hex->string data-nibbles x))
+     (define (data x)
+       (if (number? x)
+           (hex->string data-nibbles x)
+           (pad-string (non-number x) data-nibbles)))
 
      (for ((row (in-naturals)))
        (lp (x) "~a  ~a" (addr (+ start (* row items-per-line))) (data x))
