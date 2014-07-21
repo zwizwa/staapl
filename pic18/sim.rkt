@@ -86,7 +86,7 @@
 
 (define (tos-write val [n #f])
   (if (not n)
-      (vector-set! (stack) (stKptrx) val)
+      (vector-set! (stack) (stkptr) val)
       (for/fold ((a 0))
           ((i '(0 1 2)))
         (let ((byte (if (= n i) val (tos-read i)))
@@ -305,6 +305,12 @@
     (N/Z! rv)
     rv))
 
+(define (bit-set byte bit val)
+  (let* ((mask (<<< 1 bit))
+         (imask (bxor #xFF mask)))
+    (bior (band imask byte)
+          (<<< val bit))))
+
 ;; add + signed/unsigned flag updates
 (define (add a b #:flags! [update-flags #f])
   (let* ((usum (+ a b))
@@ -347,6 +353,8 @@
     (when set-flags (N/Z! rv))
     rv))
 
+(define (bitC) (bool->bit (C)))
+(define rmw read-modify-write)
 
 ;; FIXME: check flags updates for all
 (define-opcodes opcodes
@@ -357,10 +365,6 @@
   
   ((bci i rel) (bp C i rel))
   ((bzi i rel) (bp Z i rel))  ;; hangs it on synth code
-  ((bsfi p f b a)
-   (let ((v (load f a)))
-     (when (bit->bool (bxor p (>>> v b)))
-       (skip!))))
 
   ((bra   rel)  (ipw-rel rel))
   ((rcall rel)  (push (ip)) (bra rel))
@@ -404,14 +408,19 @@
          (rdst (data-register dst)))
      ((register-write rdst) ((register-read rsrc)))))
   
-  ((incf   f d a) (read-modify-write (lambda (x) (add x  1         #:flags! #t)) f d a))
-  ((decf   f d a) (read-modify-write (lambda (x) (add x -1         #:flags! #t)) f d a))
-  ((addwf  f d a) (read-modify-write (lambda (x) (add x (wreg)     #:flags! #t)) f d a))
-  ((subfwb f d a) (read-modify-write (lambda (x) (add (wreg) (- x) #:flags! #t)) f d a))
+  ((incf   f d a) (rmw (lambda (x) (add x  1         #:flags! #t)) f d a))
+  ((decf   f d a) (rmw (lambda (x) (add x -1         #:flags! #t)) f d a))
+  ((addwf  f d a) (rmw (lambda (x) (add x (wreg)     #:flags! #t)) f d a))
+  ((subfwb f d a) (rmw (lambda (x) (add (wreg) (- x) #:flags! #t)) f d a))
 
-  ((swapf  f d a) (read-modify-write (lambda (x) (rot8<<< x 4 #:flags! #f)) f d a))
-  ((rlncf  f d a) (read-modify-write (lambda (x) (rot8<<< x 1 #:flags! #t)) f d a))
-  ((rrncf  f d a) (read-modify-write (lambda (x) (rot8<<< x 7 #:flags! #t)) f d a))
+  ((addwfc f d a) (rmw (lambda (x) (add x (+ (wreg) (bitC)) #:flags! #t)) f d a))
+
+  ((bsfi i f b a) (rmw (lambda (x) (bit-set x b (bxor i 1))) f 1 a))
+
+  
+  ((swapf  f d a) (rmw (lambda (x) (rot8<<< x 4 #:flags! #f)) f d a))
+  ((rlncf  f d a) (rmw (lambda (x) (rot8<<< x 1 #:flags! #t)) f d a))
+  ((rrncf  f d a) (rmw (lambda (x) (rot8<<< x 7 #:flags! #t)) f d a))
   
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
   ((andlw l)      (wreg (logic! band (wreg) l)))
@@ -422,7 +431,6 @@
   ((tblrd*+) (store #xF5 0 0)) ;; FIXME
   )
 
-    
 
 (define-struct ins-jit (op args ip+ words))
 
