@@ -4846,11 +4846,14 @@ rackseq OK
 
 Entry: Simulator supports uninitialized values
 Date: Sun Jul 20 22:31:20 EDT 2014
+Git: c2012286c28ea7ace4546a1c3be5daf24ec14399
 
-It's actually quite neat to have a simulator available "in pieces"
-i.e. as a collection of scheme functions.
+It's actually quite neat to have a simulator available "in pieces" as
+a collection of scheme functions.
 
 A useful addition has been the support for uninitialized values.
+
+
 
 racket@synth-sim.rkt> (test3)
 	0925 124A  6A38       clrf     38 0
@@ -4891,3 +4894,43 @@ racket@synth-sim.rkt> (dump)
 1D0  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 
 1E0  F8 F8 F8 F8 F8 F8 F8 F8 F8 F8 .  .  .  .  .  . 
 1F0  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . 
+
+
+
+Relative part of synth-sim.rkt:
+
+
+(define (reload)
+  (reg-defaults!)     ;; initializes registers and ram
+  (flash-from-code!)  ;; initialize flash from the compiler's code output
+  (trace '()))        ;; reset tracing
+
+(define empty (make-uninitialized))
+(define *ram* (make-vector #x1000 empty))
+(define (dump)
+  (for ((p (in-hex-printer 0 3 2 16 (lambda _ ".")))
+        (i (in-range #x200)))
+    (p (vector-ref *ram* i))))
+
+(define (read-once var)
+  (lambda ()
+    (when (not var)
+      (error 'already-consumed "~s" var))
+    (let ((v var))
+      (set! var #f)
+      v)))
+
+(define (send-byte! byte [n 1])
+  (for ((i (in-range n)))
+    (eusart-read (read-once byte))
+    (RCIF #t)
+    (call-word target/lo-isr)))
+
+(define (test3 [n 1])
+  (reload)
+  (ram (vector-memory *ram*))
+  (trace print-trace-item) ;; use immediate trace instead of list
+  (call-word target/init-midi-buf) ;; initialize serial buffer pointers
+  (send-byte! #xF8 n))
+
+ 

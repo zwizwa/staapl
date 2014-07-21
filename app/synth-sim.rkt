@@ -59,36 +59,30 @@
 
 
 
-
-(define (read-once var)
-  (lambda ()
-    (when (not var)
-      (error 'already-consumed "~s" var))
-    (let ((v var))
-      (set! var #f)
-      v)))
-
-(define (send-byte! byte [n 1])
-  (for ((i (in-range n)))
-    (eusart-read (read-once byte))
-    (RCIF #t)
-    (call-word target/lo-isr)))
-
-
 (define empty (make-uninitialized))
-
 (define *ram* (make-vector #x1000 empty))
-
 (define (dump)
   (for ((p (in-hex-printer 0 3 2 16 (lambda _ ".")))
         (i (in-range #x200)))
     (p (vector-ref *ram* i))))
 
-(define (test3 [n 1])
+
+(define (send-bytes! bytes)
+  (for ((b bytes))
+    (let ((bs (list b)))
+      (eusart-read (lambda () (pop! bs))) ;; one read per val
+      (RCIF #t)
+      (call-word target/lo-isr))))
+
+(define (test3 [bytes '(#x90 64 127
+                             65 127)])
   (reload)
   (ram (vector-memory *ram*))
   (trace print-trace-item) ;; use immediate trace instead of list
   (call-word target/init-midi-buf) ;; initialize serial buffer pointers
-  (send-byte! #xF8 n))
-
+  (send-bytes! bytes))
  
+(define (test4)
+  (test3)
+  (call-word target/midi>m)
+  (call-word target/midi>m))

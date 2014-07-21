@@ -68,13 +68,37 @@
 
 ;; stack
 (define (push x)
-  (let ((p (stkptr)))
+  (let* ((p (add1 (stkptr))))
+    (stkptr (band #x1F p)) ;; FIXME
     (vector-set! (stack) p x)
-    (stkptr (add1 p))))
+    ))
 (define (pop)
-  (let ((p (sub1 (stkptr))))
-    (stkptr p)
-    (vector-ref (stack) p)))
+  (let* ((rv (tos-read)))
+    (stkptr (band #x1F (sub1 (stkptr)))) ;; FIXME
+    rv))
+(define (tos-read [n #f])
+  (let ((v (vector-ref (stack) (stkptr))))
+    ;; (printf "tos ~s, stack ~s\n" v (stack))
+    (if (uninitialized? v) v
+        (if (not n)
+            (band #x1FFFFF v)
+            (band #xFF (>>> v (* n 8)))))))
+
+(define (tos-write val [n #f])
+  (if (not n)
+      (vector-set! (stack) (stKptrx) val)
+      (for/fold ((a 0))
+          ((i '(0 1 2)))
+        (let ((byte (if (= n i) val (tos-read i)))
+              (shift (* i 8)))
+          (bior a (<<< byte shift))))))
+(define (tos-register n)
+  (make-rw-register
+   (lambda ()  (tos-read n))
+   (lambda (v) (tos-write v n))))
+
+
+
   
 ;; ram
 ;; support raw vector and abstract memory
@@ -178,7 +202,6 @@
           (uninitialized? h))
       (fsr-set! f (make-uninitialized))
       (fsr-set! f (lohi l h))))
-  
 
 (define (fsrl f)
   (make-rw-register
@@ -204,6 +227,11 @@
 (define (postdec f) (indirect f void (fsr-update f dec)))
 (define (postinc f) (indirect f void (fsr-update f inc)))
 (define (indf f)    (indirect f void void))
+
+
+    
+    
+
 
 
 ;; SFRs that behave as configuration (as opposed to I/O ports) can be
@@ -235,6 +263,9 @@
     ,(sfr-ram #xF8D) ;; LATE
     ,(sfr-ram #xFF6) ;; TBLPTRL
     ,(sfr-ram #xFF5) ;; TABLAT
+    (#xFFD . ,(tos-register 0))
+    (#xFFE . ,(tos-register 1))
+    (#xFFF . ,(tos-register 2))
     (#xF9E . ,pir1)
     (#xFA1 . ,pir2)
     (#xFAE . ,rcreg)
@@ -308,6 +339,15 @@
       (make-parameter
        `((name . ,name) ...)))))
 
+(define (rot8<<< byte bits #:flags! [set-flags #f])
+  (let* ((x (band #xFF byte))
+         (rv (band #xFF
+                   (bior (>>> x (- 8 bits))
+                         (<<< x bits)))))
+    (when set-flags (N/Z! rv))
+    rv))
+
+
 ;; FIXME: check flags updates for all
 (define-opcodes opcodes
   ;; ((_nop arg) (void))  ;; Probably means we've hit a bug in the sim.
@@ -368,6 +408,10 @@
   ((decf   f d a) (read-modify-write (lambda (x) (add x -1         #:flags! #t)) f d a))
   ((addwf  f d a) (read-modify-write (lambda (x) (add x (wreg)     #:flags! #t)) f d a))
   ((subfwb f d a) (read-modify-write (lambda (x) (add (wreg) (- x) #:flags! #t)) f d a))
+
+  ((swapf  f d a) (read-modify-write (lambda (x) (rot8<<< x 4 #:flags! #f)) f d a))
+  ((rlncf  f d a) (read-modify-write (lambda (x) (rot8<<< x 1 #:flags! #t)) f d a))
+  ((rrncf  f d a) (read-modify-write (lambda (x) (rot8<<< x 7 #:flags! #t)) f d a))
   
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
   ((andlw l)      (wreg (logic! band (wreg) l)))
@@ -484,9 +528,10 @@
 (define (call-word addr)
   (let ((addr (if (number? addr) addr
                   (* 2 (target-word-address addr)))))
-    (push #f) ;; termination mark
+    (push (make-uninitialized)) ;; termination mark
     (ip addr)
-    (while (ip) (execute-next))))
+    (while (not (uninitialized? (ip)))
+      (execute-next))))
 
 (define (with-local-context thunk)
   (parameterize ((ip 0)
