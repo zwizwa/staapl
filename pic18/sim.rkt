@@ -85,13 +85,16 @@
             (band #xFF (>>> v (* n 8)))))))
 
 (define (tos-write val [n #f])
-  (if (not n)
-      (vector-set! (stack) (stkptr) val)
-      (for/fold ((a 0))
-          ((i '(0 1 2)))
-        (let ((byte (if (= n i) val (tos-read i)))
-              (shift (* i 8)))
-          (bior a (<<< byte shift))))))
+  (vector-set!
+   (stack) (stkptr) 
+   (if (not n)
+       val
+       (for/fold
+           ((a 0))
+           ((i '(0 1 2)))
+         (let ((byte (if (= n i) val (tos-read i)))
+               (shift (* i 8)))
+           (bior a (<<< byte shift)))))))
 (define (tos-register n)
   (make-rw-register
    (lambda ()  (tos-read n))
@@ -250,7 +253,33 @@
 
 ;; FIXME get names from machine const def modules
 (define sfrs
-  `((#xFFC . ,(make-param-register stkptr))
+  `((#xFFF . ,(tos-register 2))
+    (#xFFE . ,(tos-register 1))
+    (#xFFD . ,(tos-register 0))
+    (#xFFC . ,(make-param-register stkptr))
+    ,(sfr-ram #xFF8) ;; TBLPTRU
+    ,(sfr-ram #xFF7) ;; TBLPTRH
+    ,(sfr-ram #xFF6) ;; TBLPTRL
+    ,(sfr-ram #xFF5) ;; TABLAT
+    ,(sfr-ram #xFF4) ;; PRODH
+    ,(sfr-ram #xFF3) ;; PRODL
+    (#xFEF . ,(indf    0))
+    (#xFEE . ,(postinc 0))
+    (#xFED . ,(postdec 0))
+    (#xFEC . ,(preinc  0))
+    (#xFE8 . ,(make-param-register wreg))
+    (#xFE7 . ,(indf    1))
+    (#xFE6 . ,(postinc 1))
+    (#xFE5 . ,(postdec 1))
+    (#xFE4 . ,(preinc  1))
+    (#xFE0 . ,(make-param-register bsr))
+    (#xFDF . ,(indf    2))
+    (#xFDE . ,(postinc 2))
+    (#xFDD . ,(postdec 2))
+    (#xFDC . ,(preinc  2))
+    (#xFDA . ,(fsrh    2))
+    (#xFD9 . ,(fsrl    2))
+    (#xFD8 . ,status)
     ,(sfr-ram #xF92) ;; TRISA
     ,(sfr-ram #xF93) ;; TRISB
     ,(sfr-ram #xF94) ;; TRISC
@@ -261,27 +290,10 @@
     ,(sfr-ram #xF8B) ;; LATC
     ,(sfr-ram #xF8C) ;; LATD
     ,(sfr-ram #xF8D) ;; LATE
-    ,(sfr-ram #xFF6) ;; TBLPTRL
-    ,(sfr-ram #xFF5) ;; TABLAT
-    (#xFFD . ,(tos-register 0))
-    (#xFFE . ,(tos-register 1))
-    (#xFFF . ,(tos-register 2))
-    (#xF9E . ,pir1)
-    (#xFA1 . ,pir2)
     (#xFAE . ,rcreg)
     (#xFAD . ,txreg)
-    (#xFED . ,(postdec 0))
-    (#xFEC . ,(preinc  0))
-    (#xFE8 . ,(make-param-register wreg))
-    (#xFE7 . ,(indf 1))
-    (#xFE5 . ,(postdec 1))
-    (#xFE4 . ,(preinc  1))
-    (#xFDD . ,(postdec 2))
-    (#xFDE . ,(postinc 2))
-    (#xFDC . ,(preinc  2))
-    (#xFDA . ,(fsrh 2))
-    (#xFD9 . ,(fsrl 2))
-    (#xFD8 . ,status)
+    (#xFA1 . ,pir2)
+    (#xF9E . ,pir1)
     (#xF6d . ,(make-ni-register 'UCON))
     ))
 (define (sfr reg)
@@ -382,6 +394,10 @@
    ;; (printf "WARNING: retfie as return\n")
    (return s))
 
+  ((retlw l)
+   (wreg l)
+   (return 0))
+
   ((btfssi inv reg bit a)
    (let ((v (load reg a)))
      (when (xor
@@ -395,6 +411,10 @@
       (let ((v (add x  1 #:flags! #f)))
         (when (zero? v) (skip!))))
     f d a))
+
+  ((cpfsgt f a) (when (> (load f a) (wreg)) (skip!)))
+  ((cpfseq f a) (when (= (load f a) (wreg)) (skip!)))
+  ((cpfslt f a) (when (< (load f a) (wreg)) (skip!)))
   
   ((movlw l) (wreg l)) ;; no STATUS
   ((movwf reg a) (store reg a (wreg))) ;; no STATUS

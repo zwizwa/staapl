@@ -1,5 +1,12 @@
 #lang staapl/pic18
 staapl pic18/afregs
+staapl pic18/route
 provide-all
 
 : test1 a[ 0 0 a!! ]a ;
+: test2 3 min route a . b . c . d ;
+: a 11 ;
+: b 12 ;
+: c 13 ;
+: d 14 ;
+        

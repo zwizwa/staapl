@@ -28,4 +28,12 @@
   (fsr-set! 2 (make-uninitialized))
   (call-word target/test1))
 
+(define (test2 in)
+  (reload)
+  (trace print-trace-item) ;; use immediate trace instead of list
+  (wreg in)
+  (call-word target/test2)
+  (wreg))
+
+
  

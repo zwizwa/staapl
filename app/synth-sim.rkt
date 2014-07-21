@@ -11,6 +11,7 @@
          staapl/target/rep
          staapl/tools
          racket/dict
+         racket/pretty
          (file "synth.fm"))
 
 (define (reload)
@@ -72,7 +73,11 @@
     (let ((bs (list b)))
       (eusart-read (lambda () (pop! bs))) ;; one read per val
       (RCIF #t)
-      (call-word target/lo-isr))))
+      (vector-set! (fsr) 2 empty)
+      (pretty-print `(pre . ,(fsr)))
+      (call-word target/lo-isr)
+      (pretty-print `(post . ,(fsr)))
+      )))
 
 (define (test3 [bytes '(#x90 64 127
                              65 127)])
