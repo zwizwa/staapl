@@ -143,7 +143,7 @@
 (define (memory-read  mem) (memory-ref mem 0))
 (define (memory-write mem) (memory-ref mem 1))
 
-(define (vector->memory vec)
+(define (vector-memory vec)
   (make-memory
    (lambda (addr)     (vector-ref  vec addr))
    (lambda (addr val) (vector-set! vec addr val))))

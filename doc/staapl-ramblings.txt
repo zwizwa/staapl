@@ -65548,3 +65548,18 @@ uninitialized values and/or read/write triggers and see what happens.
 
 
 
+Entry: reality check
+Date: Sun Jul 20 21:52:44 EDT 2014
+
+So writing that simulator was fun and probably will be useful for
+something in the future (e.g. property based testing of the peephole
+optimizer?) but for the current problem it isn't quite useful until I
+know what questions to ask.
+
+Main questions is: why does the memory get clobbered?
+
+If that can be reproduced in the sim it's easy to see where it
+happens.
+
+
+

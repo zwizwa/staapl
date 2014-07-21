@@ -53,12 +53,13 @@
  )
 
 
+(define ui (make-uninitialized))
 
-(define (make-stack) (make-vector 31 #f))
-(define (make-fsr)   (make-vector 3  #f))
-(define (make-ram)   (vector->memory (make-vector #x1000 #f)))
+(define (make-stack) (make-vector 31 ui))
+(define (make-fsr)   (make-vector 3  ui))
+(define (make-ram)   (vector-memory (make-vector #x1000 ui)))
 (define (make-jit)   (make-vector (2/ flash-nb-bytes) #f))
-(define (make-flash) (make-vector flash-nb-bytes #f))
+(define (make-flash) (make-vector flash-nb-bytes ui))
 
 ;; These can be initialized for global use.  Keep other params at #f
 ;; to force manual init.  Just clear jit buffer when loading code.
@@ -81,9 +82,8 @@
   ((memory-write (ram)) addr val))
 
 (define (ram-ref  addr)
-  (let ((v ((memory-read (ram)) addr)))
-    (unless (number? v) (error 'ram-ref "#x~x = ~s" addr v))
-    v))
+  ((memory-read (ram)) addr))
+
 
 ;; flash
 
@@ -111,6 +111,7 @@
                   (let ((hi (vector-ref chunk-data (add1 offset))))
                     (+ lo (* #x100 hi)))
                   lo)))))))
+   ;; Should be uninitialized but parser reads ahead.
    (if word
        #xFFFF
        #xFF)))
@@ -162,9 +163,21 @@
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 
-(define (fsr-lref f) (band #xFF (fsr-ref f)))
-(define (fsr-href f) (band #xFF (>>> (fsr-ref f) 8)))
-(define (fsr-lhset! f l h) (fsr-set! f (lohi l h)))
+(define (fsr-lref f)
+  (let ((v (fsr-ref f)))
+    (if (uninitialized? v) v
+        (band #xFF v))))
+
+(define (fsr-href f)
+  (let ((v (fsr-ref f)))
+    (if (uninitialized? v) v
+        (band #xFF (>>> v 8)))))
+
+(define (fsr-lhset! f l h)
+  (if (or (uninitialized? l)
+          (uninitialized? h))
+      (fsr-set! f (make-uninitialized))
+      (fsr-set! f (lohi l h))))
   
 
 (define (fsrl f)
@@ -277,9 +290,12 @@
       (OV (xor (bit-set? carries 8)
                (bit-set? carries 7))))
     rv))
-(define (N/Z! result)
-  (N (bit-set? result 7))
-  (Z (zero? result)))
+(define (N/Z! v)
+  (if (uninitialized? v)
+      (begin (N v) (Z v))
+      (begin
+        (N (bit-set? v 7))
+        (Z (zero? v)))))
 
 
 (define (skip!)
@@ -322,11 +338,11 @@
    ;; (printf "WARNING: retfie as return\n")
    (return s))
 
-  ((btfssi pol reg bit a)  ;; FIXME: check polarity
+  ((btfssi inv reg bit a)
    (let ((v (load reg a)))
      (when (xor
-            (bit->bool pol)
-            (bit->bool (bitwise-and 1 (arithmetic-shift v (- bit)))))
+            (bit->bool inv)  ;; invert polarity
+            (bit-set? v bit))
        (skip!))))
 
   ((decfsnz f d a)

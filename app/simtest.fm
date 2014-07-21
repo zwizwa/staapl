@@ -1,0 +1,5 @@
+#lang staapl/pic18
+staapl pic18/afregs
+provide-all
+
+: test1 a[ 0 0 a!! ]a ;
