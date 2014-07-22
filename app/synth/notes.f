@@ -84,10 +84,11 @@ forth
         drop
     next
     drop #xFF ;
+
     
 : notes-pop \ index --
-    dup 1 + a!notes+       \ point past first element to remove
-    nb-notes @ - for
+    dup >r 1 + a!notes+       \ point past first element to remove
+    nb-notes @ r> - for
         @a- dup >a >a
     next
     1 nb-notes -! ;

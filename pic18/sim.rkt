@@ -15,10 +15,21 @@
          "asm.rkt"           ;; pic18
          "../asm.rkt")       ;; generic
 
-;; Is it just crazy midnight hacking to want to emulate the PIC18?
-;; Not really.  There is no semantics to Staapl other than what the uC
+;; Started as a bored midnight hack, but turns out to be quite useful.
+;; Note that there is no semantics to Staapl other than what the uC
 ;; core does with the binary compiler output, so a hackable emulator
-;; is the closest thing.
+;; with some inspection bolted on is the closest thing.
+
+;; Emulator or simulator?
+;; I'm going with the following answer from here:
+;; http://stackoverflow.com/questions/1584617/simulator-or-emulator-what-is-the-difference
+;; - Simulation = For analysis and study
+;; - Emulation = For usage as a substitute
+;;
+;; So definitely a simulator since the idea is to add extra behavior
+;; not possible on the target.  It's also practically infeasible to
+;; make a full emulation.
+
 
 ;; Machine constants
 (define reg-access     #x60) ;; #x80 FIXME: depends on core version
@@ -573,10 +584,6 @@
 
 
   
-
-
-
-
 ;; Provide a somewhat sane initial state to start running naked
 ;; functions.  Alternatively, start the kernel at the reset vector and
 ;; let it do its own init, though that might need more peripheral
@@ -597,7 +604,27 @@
 (define (flash-from-code!)
   (flash (binary->flash (code->binary))))
 
+;; Data stack access.
+(define (>d v)
+  (movwf #xEC 0)
+  (wreg (band #xFF v)))
+(define (d>)
+  (let ((v (wreg)))
+    (movf #xED 0 0)
+    v))
+(define (ds)
+  (let* ((d-top (vector-ref (fsr) 0))
+         (n (- d-top d-stack)))
+    (if (zero? n)
+        '()
+        (cons
+         (wreg)
+         (for/list ((offset (in-range d-top (+ 1 d-stack) -1)))
+           (ram-ref offset))))))
+                                      
+                                      
 
+    
 
 
 ;; Testing

@@ -65625,3 +65625,209 @@ midi-size:
 
 sim problem
 bsf is not a skip instruction!
+
+
+Entry: Stack is growing
+Date: Mon Jul 21 21:47:47 EDT 2014
+
+(test4)
+(call-word target/init-notes)
+
+(>d 1) (call-word target/notes-add)    (dump) (ds)
+(>d 1) (call-word target/notes-remove) (dump) (ds)
+
+notes-remove causes stack to grow
+
+it doesn't do that on target though.
+looks like a sim problem.
+
+it's doing a 256 byte loop when the buffer is empty
+
+maybe this happens on target as well?  would explain why bytes from
+the serial buffer are shifting up!
+
+next: make some tests for that notes.f code
+it's too messy anyway.
+
+Looks like notes-pop was wrong: for loop count is inverted.
+
+wrong:
+
+: notes-pop \ index --
+    dup 1 + a!notes+       \ point past first element to remove
+    nb-notes @ - for
+        @a- dup >a >a
+    next
+    1 nb-notes -! ;
+
+
+right:
+
+: notes-pop \ index --
+    dup >r 1 + a!notes+       \ point past first element to remove
+    nb-notes @ r> - for
+        @a- dup >a >a
+    next
+    1 nb-notes -! ;
+
+
+
+so what is there to learn?
+- don't mess with for .. next if there is ever a 0 case.  use a more abstract word.
+- don't write branching code (if/then/else hell)
+
+not that i didn't already know that.  i guess this was a slip of discipline..
+
+
+macro
+: 0=? 0 addlw z? ;  
+: _for  0=? if drop else for ;
+: _next next then ;
+forth
+
+
+yeah it's not working still so probably time to start over.
+
+basic operations:
+- add element to front of list if not already present
+- remove element from list
+- get first element
+
+
+maybe linked lists are a better primitive? they would sure be useful
+in other applications.  and it should be straightforward to write a
+proper test suite in the emulator.
+
+
+Entry: Linked lists - specialized as sorted sets
+Date: Mon Jul 21 23:24:05 EDT 2014
+
+To implement the lists, might be best to separate indexing from
+storage, i.e. use separate pages.  Since we're always going to have to
+put hard limits on the size of the lists, it doesn't matter where we
+put things.
+
+So implement a list linked list in a single page.
+
+Wait, what I need is a list of sorted, unique numbers.  This might be
+done with indices only.
+
+An element is not in the list if it points to #xFF
+Head of the list is stored in a variable.
+Each cell just contains the number as the address.
+
+So 7,5,18 is implemented as
+
+var head = 7
+cell 7 = 5
+cell 5 = 18
+cell 18 = FF
+
+
+one problem: remove is not simple since this is a singly linked list.
+it requires a scan from the head.
+
+this might be a good case for iteration macros, i.e. begin..end
+constructs that act as a for loop but iterate a pointer over a data
+structure.
+
+
+
+Entry: soset
+Date: Tue Jul 22 11:09:40 EDT 2014
+
+So I'm writing a bunch of 'soset-' prefixes.  Maybe time to make a
+proper module with a private namespace?
+
+
+Entry: singletons
+Date: Tue Jul 22 11:28:03 EDT 2014
+
+I need an abstraction for static objects.
+
+I.e. given a set of parameters - usually memory addresses -
+instantiate a collection of words that bind these parameters to
+abstract behavior.
+
+This is nothing more than instantiation of objects, hower, with the
+optimization of making singletons.
+
+Often in deeply embedded work you only need one.
+
+And if you need more, in forth it seems easier to have a dynamic
+parameter pointing to a current object.  However that doesn't work
+well if code is also to be used in interrupt routines or other
+pre-emptive task switching.
+
+So, for the (circular) array abstraction, the parameters are:
+  - log size
+  - start address
+
+
+
+Summary:
+
+- passing "current object" pointers on the stack isn't very practical
+  in forth.  saving these in a dynamic parameter works as long as the
+  code is not used in another part of the code that uses pre-emptive
+  scheduling like an isr.
+
+- it might be more useful to represent a singleton as a separate set
+  of words bound to abstract state.  i.e. use compile-time instantiation.
+
+Is it possible to have dynamic parameters during compilation?
+
+Or just do this manually:
+
+macro
+: array-state #x1F0 5 ;
+forth
+: my-init array-state array-init ;
+: my-!    array-state array-! ;
+: my-@    array-state array-@ ;
+
+Problem here is that the array-init, array-! and array-@ words have to
+be macros, and can't use shared code bound to the memory.
+
+
+So how to abstract this properly?
+
+Input:  state vectors
+Output: compile public words bound to state, make accessible to user
+        compile private words bound to state, inaccessible to user
+
+The interface should be simple, as above:
+
+macro
+: ob .... ;
+forth
+: bound1 ob method1 ;
+: bound2 ob method2 ;
+
+so essentially `ob' should contain all info
+this means an indirection is necessary:
+
+macro
+: param ... ;            \ object instantiation parameters
+: ob    param make-ob ;  \ compile time representation of ob
+forth  \ for instantiated methods.  can also use inline here
+: bound1 ob method1 ;
+: bound2 ob method2 ;
+
+not so simple to mix the ct and rt things here..
+
+
+I wonder if all the low-level support is there.  It seems somehow this
+needs an abstraction over a collection of words which doesn't seem to
+be possible at this time apart from compiling anonymous words.
+
+Let's see where we get with what is possible right now, i.e. no
+intermediate words.  Then see what's necessary to add those.
+
+So doing this for array it seems to go like this:
+
+spec -> instatiate word
+spec, word -> instantiate more words
+
+so it looks like this needs extra functionality to abstract out completely.
+
