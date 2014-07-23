@@ -21,7 +21,7 @@ variable midi-byte2 : m2 midi-byte2 @ ;
 variable synth-save    
 
 \ Main pitch
-variable period
+2variable period
  
 
 : m-interpret \ --

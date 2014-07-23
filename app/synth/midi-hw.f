@@ -49,7 +49,9 @@ forth
     then ;
 : midi>
     begin midi-ready? until
-    midi-buf> ;
+    midi-buf>
+    dup px
+    ;
     
 : init-midi-buf
     0 midi-write !

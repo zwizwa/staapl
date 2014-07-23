@@ -78,12 +78,13 @@ load synth/notes.f     \ note memory
 load synth/midi-nrpn.f \ direct parameter access
 load synth/midi.f      \ midi control
 load synth/midi-hw.f   \ midi serial hw support
-
+load synth/mainloop.f
+    
 \ load synth/patch.f     \ old patch stuff
 \ load synth/example.f
 \ load synth/sounds.f    \ collection of sounds
 
-\ load debug.f
+load debug.f
 
 macro
 : fosc 48000000 ;

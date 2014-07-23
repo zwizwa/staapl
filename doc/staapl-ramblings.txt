@@ -65873,3 +65873,46 @@ arpeggio might be a bit much.
 
 Let's take home what was learned:
 - if buffer is full, delete last note and add a new one.
+
+
+Entry: midi cont
+Date: Wed Jul 23 02:51:40 EDT 2014
+
+So USB is back online.
+HW midi still gives trouble.
+I'm seeing weird patterns in the rx buf:
+1E0  90 38 1A 00 00 00 33 10 90 36 00 00 00 00 00 00
+1F0  00 00 33 00 00 00 00 00 00 00 00 00 00 00 00 00
+
+What's with those zeros?
+
+Time for another debug session it seems..
+
+Weird stuff going on.  When adding a px to the midi> word I'm getting
+a lot of duplicate nodes.
+
+90 30 1D 2A 7F 
+99 2A 00 
+90 30 0D 32 7F 
+99 32 00 
+99 32 7F 
+99 32 
+90 30 00 7F 
+99 32 00 99 32 7F 99 90 30 1D 2A 7F 99 2A 00 90 30 0D 32 7F 99 32 00 99 32 7F 99 32 90 30 00
+
+looks like a buffer problem
+
+yep
+setting the buffer bytes to zero gives this after one key press:
+
+90 30 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 90 30 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 90 30 00 
+
+
+doing just this works fine:
+
+: foo begin midi> drop again
+
+so it looks like read or write pointers get overwritten.  let's run it
+in the sim with a watchpoint.
+
+found it: period is declared as a variable but used as a 2variable.
