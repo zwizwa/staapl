@@ -50,7 +50,7 @@ forth
 : midi>
     begin midi-ready? until
     midi-buf>
-    dup px
+    \ dup px
     ;
     
 : init-midi-buf

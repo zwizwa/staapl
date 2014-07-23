@@ -84,7 +84,7 @@ load synth/mainloop.f
 \ load synth/example.f
 \ load synth/sounds.f    \ collection of sounds
 
-load debug.f
+\ load debug.f
 
 macro
 : fosc 48000000 ;
