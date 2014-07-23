@@ -65916,3 +65916,26 @@ so it looks like read or write pointers get overwritten.  let's run it
 in the sim with a watchpoint.
 
 found it: period is declared as a variable but used as a 2variable.
+
+
+Entry: Some things to fix
+Date: Wed Jul 23 18:14:32 EDT 2014
+
+- Allow for asynchronous console output, i.e. while running the
+  interpreter in poll mode.  This would be handy for debugging
+  background tasks.  I can see this getting messy though when bolted
+  on top of the current approach.  It already conflicts with console
+  serial device being closed at the host's end to allow for more
+  graceful reboots.
+
+- Do we need a console configuration?  It might be useful to allow
+  things like open sound control.
+
+- I'm looking for an excuse to build a DTF forth.  Maybe that's what I
+  should do really - open up that gate as well.  Let's build that in
+  the sim.
+
+- I'd like to keep the different example kernel configurations
+  maintainable and accessible.  Make a little board containing all?
+
+

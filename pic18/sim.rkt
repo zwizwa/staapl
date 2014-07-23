@@ -78,12 +78,12 @@
 (jit (make-jit))
 
 ;; stack
-(define (push x)
+(define (stack-push x)
   (let* ((p (add1 (stkptr))))
     (stkptr (band #x1F p)) ;; FIXME
     (vector-set! (stack) p x)
     ))
-(define (pop)
+(define (stack-pop)
   (let* ((rv (tos-read)))
     (stkptr (band #x1F (sub1 (stkptr)))) ;; FIXME
     rv))
@@ -368,13 +368,30 @@
       (make-parameter
        `((name . ,name) ...)))))
 
-(define (rot8<<< byte bits #:flags! [set-flags #f])
-  (let* ((x (band #xFF byte))
-         (rv (band #xFF
+
+;; Core for 9 and 8 bit shift.
+(define (~rot<<< totalbits byte bits)
+  (let* ((m  (bitmask totalbits))
+         (x  (band m byte))
+         (rv (band m
                    (bior (>>> x (- 8 bits))
                          (<<< x bits)))))
+    rv))
+
+(define (rot8<<< byte bits #:flags! [set-flags #f])
+  (let ((rv (~rot<<< 8 byte bits)))
     (when set-flags (N/Z! rv))
     rv))
+
+(define (rot8<<<c byte bits)
+  (let* ((byte-c (bior (<<< byte 1)
+                       (bool->bit (C))))
+         (rv-c (~rot<<< 9 byte-c bits))
+         (rv (band #xFF (>>> rv-c 1))))
+    (C (bit->bool (band 1 rv-c)))
+    (N/Z! rv)
+    rv))
+
 
 (define (bitC) (bool->bit (C)))
 (define rmw read-modify-write)
@@ -390,16 +407,16 @@
   ((bzi i rel) (bp Z i rel))  ;; hangs it on synth code
 
   ((bra   rel)  (ipw-rel rel))
-  ((rcall rel)  (push (ip)) (bra rel))
+  ((rcall rel)  (stack-push (ip)) (bra rel))
   
   ((goto lo hi) (ipw (lohi lo hi)))
   ((call s lo hi)
    (unless (zero? s) (raise 'call-shadow=1))
-   (push (ip))
+   (stack-push (ip))
    (goto lo hi))
   ((return s)
    (unless (zero? s) (raise 'call-shadow=1)) ;; shadow
-   (ip (pop)))
+   (ip (stack-pop)))
 
   ((retfie s)
    ;; (printf "WARNING: retfie as return\n")
@@ -408,6 +425,9 @@
   ((retlw l)
    (wreg l)
    (return 0))
+
+  ((pop) (stack-pop))
+   
 
   ((btfssi inv reg bit a)
    (let ((v (load reg a)))
@@ -452,6 +472,8 @@
   ((swapf  f d a) (rmw (lambda (x) (rot8<<< x 4 #:flags! #f)) f d a))
   ((rlncf  f d a) (rmw (lambda (x) (rot8<<< x 1 #:flags! #t)) f d a))
   ((rrncf  f d a) (rmw (lambda (x) (rot8<<< x 7 #:flags! #t)) f d a))
+  ((rlcf   f d a) (rmw (lambda (x) (rot8<<<c x 1)) f d a))
+  ((rrcf   f d a) (rmw (lambda (x) (rot8<<<c x 7)) f d a))
   
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
   ((andlw l)      (wreg (logic! band (wreg) l)))
@@ -567,7 +589,7 @@
 (define (call-word addr)
   (let ((addr (if (number? addr) addr
                   (* 2 (target-word-address addr)))))
-    (push (make-uninitialized)) ;; termination mark
+    (stack-push (make-uninitialized)) ;; termination mark
     (ip addr)
     (while (not (uninitialized? (ip)))
       (execute-next))))

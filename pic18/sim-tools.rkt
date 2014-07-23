@@ -1,6 +1,7 @@
 #lang racket/base
 (require "../tools.rkt"
-         racket/dict)
+         racket/dict
+         staapl/tools)
 (provide (all-defined-out))
 
 ;; Reusable tools for writing machine emulators.
@@ -160,3 +161,12 @@
       (write-notify addr vold vnew)))
   (make-memory read write))
 
+
+(define (memory-dump ram addrs)
+  (let ((rd (memory-read ram)))
+    (for ((p (in-hex-printer 0 3 2 16 (lambda _ ".")))
+          (i (in-range #x200)))
+      (p (rd i)))))
+
+
+;; 

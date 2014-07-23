@@ -5,11 +5,6 @@ staapl pic18/cond
 staapl pic18/compose-macro
 
 
-\ FIXME: put this somewhere else
-: usb>io
-    [ stdin -> console-EP OUT> ] i/c
-    [ stdout -> console-EP >IN ] i/c
-    [ stdout-flush -> console-EP IN-flush ] i/c ;
 
 : terminal> i> ;
 : >terminal

@@ -31,14 +31,31 @@ require-file dtc-desc.rkt  \ scheme file with descriptor tables
 staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
+staapl pic18/serial-debug
     
-load debug.f    
+load debug.f
+load line-editor.f
 
+    
+\ FIXME: put this somewhere else
+: usb>io
+    [ stdin -> console-EP OUT> ] i/c
+    [ stdout -> console-EP >IN ] i/c
+    [ stdout-flush -> console-EP IN-flush ] i/c ;
+
+: serial>io
+    [ stdin -> async.rx> ] i/c
+    [ stdout -> async.>tx ] i/c
+    [ stdout-flush -> ] i/c
+    
+
+    
 macro
 : fosc 48000000 ;
 : monitor-EP 1 ;  \ ttyACM0 staapl monitor (binary)
 : console-EP 3 ;  \ ttyACM1 serial command interface
 : total-EP 4 ;
+: service-lo ;    
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
 
