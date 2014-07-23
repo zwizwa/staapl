@@ -65831,3 +65831,25 @@ spec, word -> instantiate more words
 
 so it looks like this needs extra functionality to abstract out completely.
 
+
+Entry: Macro quirks
+Date: Wed Jul 23 01:47:44 EDT 2014
+
+Trying out some abstract iterator macros.  Basic idea is to create a
+begin .. end construct which pushes a value to the stack, or pops one
+in the case of a consumer.  Though state machines (inverted loops)
+might be a lot easer to work with as I'm already using those a lot..
+
+
+: _st-print
+    st-first @
+    begin
+        dup st-mark? if drop ; then
+        dup px st-@
+    again
+
+macro
+: st[ st-first @ begin dup st-mark? if drop exit then dup ;
+: ]st st-@ again ;
+forth
+: st-print st[ px ]st    
