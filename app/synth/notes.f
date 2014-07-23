@@ -1,4 +1,4 @@
-
+staapl pic18/cond
 \ Keep track of the keys pressed and the order they are pressed in.
 \ This can be used for:
 \
@@ -45,31 +45,20 @@ forth
 
 
 \ load debug.f
-\ : print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
-\ : fill-notes 1 5 for dup notes-add 1 + next drop ;    
-\ : print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
+: print-notes a!notes nb-notes @ nz? if for a> px next else drop then ;
+: fill-notes 1 5 for dup notes-add 1 + next drop ;    
+: print-stacks  FSR0L @ px FSR1L @ px #x0A emit ;
     
 : notes-last \ -- note
-    nb-notes @ 0 = if
-        #xFF
-    else 
-        a!notes-endx 1a-! a>
-    then 
-    \ ` last: .sym ts
-    \ print-notes
-    ;
-    
-    
+    nb-notes @ 0 = if #xFF ; then
+    a!notes-endx 1a-! a> ;
+
 : notes-add \ note --
-    \ ` add: .sym ts
-    \ print-notes
-    nb-notes @ nb-notes-max = if drop ; then 
-    dup notes-index #xFF = if
-        a!notes-endx >a
-        1 nb-notes +!
-    else
-        drop
-    then ;
+    dup notes-remove              \ make sure it's not there
+    nb-notes @ nb-notes-max = if  \ no room? remove oldest
+        a!notes a> notes-remove
+    then
+    a!notes-endx >a 1 nb-notes +! ;
 
 : 2drop drop drop ;    
 : notes-index \ note -- i
@@ -84,7 +73,6 @@ forth
         drop
     next
     drop #xFF ;
-
     
 : notes-pop \ index --
     dup >r 1 + a!notes+       \ point past first element to remove

@@ -43,6 +43,11 @@ macro
 : ]st st-@ again ;
 forth
 
+
+variable ~st
+: st-start st-first ~st @! ;  
+: st> ~st @ st-@ dup ~st ! ;
+  
 : _st-print
     st-first @
     begin
@@ -53,12 +58,19 @@ forth
 : st-print st[ px ]st    
   
 : st-add \ el --
+    dup st-@ st-mark? not if dup st-remove then \ remove if exists
     dup >r st-first @ r> st-! \ link new head to old head
     st-first ! ;              \ store new head
 
 \ To remove, find the element
 
-: st-remove drop ;
+: st-remove
+    st-start
+    
+    
+    st[ 
+    
+    ]st
     
 \ variable st-last    
 \ : st-remove \ el --

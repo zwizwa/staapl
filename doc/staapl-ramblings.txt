@@ -65837,8 +65837,9 @@ Date: Wed Jul 23 01:47:44 EDT 2014
 
 Trying out some abstract iterator macros.  Basic idea is to create a
 begin .. end construct which pushes a value to the stack, or pops one
-in the case of a consumer.  Though state machines (inverted loops)
-might be a lot easer to work with as I'm already using those a lot..
+in the case of a consumer.  Though state machines / generators /
+sequences (inverted loops) might be a lot easer to work with as I'm
+already using those a lot, but they require a variable.
 
 
 : _st-print
@@ -65853,3 +65854,18 @@ macro
 : ]st st-@ again ;
 forth
 : st-print st[ px ]st    
+
+
+There's another problem here that's been playing up a lot in generic
+algorithms: there is no skip jump around any of the loop constructs to
+handle the 0 iteration case.
+
+This is one of those crazy chuck ideas that go a bit too far in
+premature optimization.  It is efficient as it avoids an operation
+that isn't necessary for many applications.
+
+
+Entry: chord.f abort?
+Date: Wed Jul 23 02:01:52 EDT 2014
+
+It really isn't much simpler!
