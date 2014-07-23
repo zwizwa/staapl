@@ -35,7 +35,7 @@ variable period
 \ Guard: aborts caller if incorrect channel.
 : ~chan m0 #x0F and 0 = if ; then xdrop ;
     
-: 9x ~chan  m1 notes-add    play-last ;
+: 9x ~chan  m1 m2 0 = if notes-remove else notes-add then play-last ;
 : 8x ~chan  m1 notes-remove play-last ;
 : Bx ~chan  continuous-controller  ;
 : Cx ~chan  m1 program-change ;    
@@ -43,7 +43,6 @@ variable period
     
 
 : play-last
-    \ print-notes
     notes-last #xFF = if silence ; then
     notes-last midi-note
     _dup period 2!

@@ -65868,4 +65868,8 @@ that isn't necessary for many applications.
 Entry: chord.f abort?
 Date: Wed Jul 23 02:01:52 EDT 2014
 
-It really isn't much simpler!
+The sorted set approach really isn't much simpler!  And a 128 note
+arpeggio might be a bit much.
+
+Let's take home what was learned:
+- if buffer is full, delete last note and add a new one.

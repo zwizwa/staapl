@@ -17,8 +17,8 @@ staapl pic18/afregs
     begin
         poll-interpreter
         af[ \ protect a&f state used in interpreter
-          \ poll-usb-midi
-          poll-hw-midi
+          poll-usb-midi
+          \ poll-hw-midi
         ]af
     again
 
