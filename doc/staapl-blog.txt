@@ -4934,3 +4934,13 @@ Relative part of synth-sim.rkt:
   (send-byte! #xF8 n))
 
  
+
+
+Entry: BeagleBone Black BRU
+Date: Thu Jul 24 11:58:27 EDT 2014
+
+The PRUs on the BeagleBone Black (TI Sitara AM335x) might be an
+interesting target for staapl.
+
+[1] entry://../electronics/20140724-000847
+
