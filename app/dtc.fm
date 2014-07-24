@@ -46,7 +46,7 @@ load line-editor.f
 : serial>io
     [ stdin -> async.rx> ] i/c
     [ stdout -> async.>tx ] i/c
-    [ stdout-flush -> ] i/c
+    [ stdout-flush -> ] i/c ;
     
 
     

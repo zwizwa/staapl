@@ -61,6 +61,7 @@
  (status (N OV Z DC C))
  (pir1   (SPPIF ADIF RCIF TXIF SSPIF CCP1IF TMR2IF TMR1IF))
  (pir2   (OSCFIF CMIF USBIF EEIF BCLIF HLVDIF TMR3IF CCP2IF))
+ (rcsta  (RCSTA7 RCSTA6 RCSTA5 RCSTA4 RCSTA3 RCSTA2 RCSTA1 RCSTA0)) ;; FIXME
  )
 
 
@@ -303,6 +304,7 @@
     ,(sfr-ram #xF8D) ;; LATE
     (#xFAE . ,rcreg)
     (#xFAD . ,txreg)
+    (#xFAB . ,(make-param-register rcsta))
     (#xFA1 . ,pir2)
     (#xF9E . ,pir1)
     (#xF6d . ,(make-ni-register 'UCON))
@@ -426,7 +428,8 @@
    (wreg l)
    (return 0))
 
-  ((pop) (stack-pop))
+  ((pop)  (stack-pop))
+  ((push) (stack-push (ip)))
    
 
   ((btfssi inv reg bit a)

@@ -22,13 +22,14 @@
 
 (define empty (make-uninitialized))
 (define *ram* (vector-memory (make-vector #x1000 empty)))
-(define (dump) (memory-dump *ram* (in-range #x200)))
+(define (dump) (memory-dump *ram* #x200 #x300))
 
 ;; Note that on PIC the RCIF flag is cleared after reading the buffer.
 ;; In the sim this doesn't happen, so we set it just once.
 (define (send-string line)
   (RCIF #t)
-  (eusart-read (sequence->generator line)))
+  (rcsta 0)
+  (eusart-read (sequence->generator line)))  ;; fixme: characters->ints
          
 (define (test1)
   (reload)

@@ -162,10 +162,10 @@
   (make-memory read write))
 
 
-(define (memory-dump ram addrs)
+(define (memory-dump ram from to)
   (let ((rd (memory-read ram)))
-    (for ((p (in-hex-printer 0 3 2 16 (lambda _ ".")))
-          (i (in-range #x200)))
+    (for ((p (in-hex-printer from 3 2 16 (lambda _ ".")))
+          (i (in-range from to)))
       (p (rd i)))))
 
 
