@@ -4944,3 +4944,42 @@ interesting target for staapl.
 
 [1] entry://../electronics/20140724-000847
 
+
+Entry: Debugging
+Date: Thu Jul 24 12:17:11 EDT 2014
+
+Is debugging deeply embedded software just about perseverance?
+
+Staapl was started in blissful ignorance and full youthful arrogance:
+"Let's fix debugging".  This of course did not happen.
+
+Live interaction helps.
+Modularity helps.
+Trace logging helps.
+Device simulation helps.
+Using a solid host system/language helps.
+Using professional test equipment helps.
+Sleeping helps.
+Doing something else for a while helps.
+
+But sticking to just one tool is definitely not going to cut it.
+
+In the end, debugging is about disproving a deep belief
+
+                "This really can't be wrong!"
+
+It is trying to make things visible to expose that incorrect
+assumption that prevents clearly seeing the problem.  This involves
+coming up with a simple question that would give more insight, and
+find a way to test it.  Then iterate until the problem is obvious.
+
+It doesn't seem that there is any way to automate that process.  What
+works is to build special purpose tools that can look at highly
+specific facets of the system, and to learn to get more creative in
+using those tools.
+
+This need for creative perseverance is probably what makes embedded
+software development so addictive!
+
+
+
