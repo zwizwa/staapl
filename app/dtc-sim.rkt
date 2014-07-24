@@ -15,9 +15,11 @@
          racket/generator
          (file "dtc.fm"))
 
+(define *out* '())
 (define (reload)
   (reg-defaults!)     ;; initializes registers and ram
   (flash-from-code!)  ;; initialize flash from the compiler's code output
+  (eusart-write (lambda (v) (push! *out* v)))
   (trace '()))        ;; reset tracing
 
 (define empty (make-uninitialized))
@@ -40,7 +42,7 @@
   (reload)
   (ram *ram*)
   (trace print-trace-item) ;; use immediate trace instead of list
-  (send-string "hello\r\n")
+  (send-string "hello\r")
   (call-word target/serial>io)
   (call-word target/line-editor))
 

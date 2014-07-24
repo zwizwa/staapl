@@ -61,7 +61,7 @@
 (define (make-r-register read)
   (make-rw-register read (lambda (v) (error 'read-only))))
 
-(define (make-w-register read)
+(define (make-w-register write)
   (make-rw-register (lambda () (error 'write-only)) write))
 
 (define (make-param-register param)
