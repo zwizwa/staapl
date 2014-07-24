@@ -65938,4 +65938,18 @@ Date: Wed Jul 23 18:14:32 EDT 2014
 - I'd like to keep the different example kernel configurations
   maintainable and accessible.  Make a little board containing all?
 
+- But probably best to stop procrastinating and continue on the synth
+  envelopes and parameter mappings.
+
+
+Entry: Parameter mappings
+Date: Wed Jul 23 22:32:55 EDT 2014
+
+Will need some computation.  How to make these as simple as possible?
+Also, still thinking about making table lookup exponentials instead of
+using floating point.  The only multiplication then would be linear
+interpolation.
+
+This is a morning thing..
+
 

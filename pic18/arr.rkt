@@ -3,7 +3,6 @@ provide-all
 \ Circular buffer macros. Config is two compile time words: buffer
 \ address and log2 size.  
 
-\ Typical use: see sorted-set.f
 
 macro
 : arr-buf   | buf | buf #xFF and buf 8 >>> a!! ; \ buf -- 
@@ -14,3 +13,12 @@ macro
 forth
 : a!fill    for dup !a+ next drop ; \ el n -- | n>0, a=buf
 
+
+\ Typical use: 
+\ macro
+\ : st-spec  #x180 5 ;  \ 2^5 = 32 byte
+\ forth
+\ : st-box   st-spec arr-box ;        \ index --  | a=box
+\ : st-!     st-box !a  ;             \ el index --
+\ : st-@     st-box @a  ;             \ index -- el
+\ : st-init  0 st-spec arr-fill ;     \ --
