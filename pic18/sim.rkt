@@ -62,6 +62,7 @@
  (pir1   (SPPIF ADIF RCIF TXIF SSPIF CCP1IF TMR2IF TMR1IF))
  (pir2   (OSCFIF CMIF USBIF EEIF BCLIF HLVDIF TMR3IF CCP2IF))
  (rcsta  (SPEN RX9 SREN CREN ADDEN FERR CERR RX9D))
+ (txsta  (CSRC TX9 TXEN SYNC SENDB BRGH TRMT TX9D))
  )
 
 
@@ -304,6 +305,7 @@
     ,(sfr-ram #xF8D) ;; LATE
     (#xFAE . ,rcreg)
     (#xFAD . ,txreg)
+    (#xFAC . ,(make-param-register txsta))
     (#xFAB . ,(make-param-register rcsta))
     (#xFA1 . ,pir2)
     (#xF9E . ,pir1)

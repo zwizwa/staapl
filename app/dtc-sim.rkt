@@ -29,11 +29,20 @@
 (define (send-string line)
   (RCIF #t)
   (rcsta 0)
-  (eusart-read (sequence->generator line)))  ;; fixme: characters->ints
+  (txsta 0)
+  (TRMT #t)
+  (eusart-read
+   (sequence->generator
+    (map char->integer
+         (string->list line)))))
          
 (define (test1)
   (reload)
   (ram *ram*)
   (trace print-trace-item) ;; use immediate trace instead of list
-  (send-string "hello\n"))
- 
+  (send-string "hello\r\n")
+  (call-word target/serial>io)
+  (call-word target/line-editor))
+
+
+;; (current-directory "/home/tom/staapl/app") (enter! (file "dtc-sim.rkt")) (test1)
