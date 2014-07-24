@@ -4964,14 +4964,15 @@ Doing something else for a while helps.
 
 But sticking to just one tool is definitely not going to cut it.
 
-In the end, debugging is about disproving a deep belief
+In the end, debugging is about disproving the deep belief that
 
                 "This really can't be wrong!"
 
 It is trying to make things visible to expose that incorrect
 assumption that prevents clearly seeing the problem.  This involves
 coming up with a simple question that would give more insight, and
-find a way to test it.  Then iterate until the problem is obvious.
+find a way to test it.  Then iterate until the problem becomes
+obvious.
 
 It doesn't seem that there is any way to automate that process.  What
 works is to build special purpose tools that can look at highly
@@ -4980,6 +4981,4 @@ using those tools.
 
 This need for creative perseverance is probably what makes embedded
 software development so addictive!
-
-
 
