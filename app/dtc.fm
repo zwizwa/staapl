@@ -1,5 +1,12 @@
 #lang staapl/pic18 \ -*- forth -*-
 
+\ App: DTC Forth.  There are many layers this.  The main ones are:
+\ - Inner interpreter + memory model.
+\ - Outer interpreter + dictionary
+\ The latter can be done on the host for now.  Should be easy to bolt
+\ on eForth once a core kernel is running.
+
+\ Board:
 \ PIC DIP40 MINI KIT - PIC Developmen​t Board kit for DIP40 PIC with 18F4550 + 4Mhz XTAL
 \ http://100mhz.com/pic-dspic-pic32-pic24/development-boards/pic-18f4550-usb-demo-development-board-pic18f4550-microcontroller-1074.html
 

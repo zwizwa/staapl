@@ -65953,3 +65953,20 @@ interpolation.
 This is a morning thing..
 
 
+
+Entry: Using many-register machines
+Date: Thu Jul 24 14:06:42 EDT 2014
+
+What about this approach:
+
+- make a forth VM using only a couple of registers: TOS, DP, RP and
+  possibly one or two reserved pointer registers to move data around.
+  this VM will run the management red tape.
+
+- reserve all the other registers for state machines that run in ISRs,
+  and use a flat dataflow language to compile for them.
+
+This shared-nothing approach would eliminate context switch time while
+avoiding the stack machine vs. register machine impedance mismatch.
+
+
