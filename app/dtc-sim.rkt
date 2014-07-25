@@ -44,7 +44,7 @@
          (string->list line)))))
 
 
-(define (test1)
+(define (test0)
   (reload)
   (ram *ram*)
   (trace print-trace-item) ;; use immediate trace instead of list
@@ -53,6 +53,9 @@
   (call-word target/line-editor))
 
 
+(define (test1)
+  (reload)
+  (call-word target/test1))
 
 
 ;; (current-directory "/home/tom/staapl/app") (enter! (file "dtc-sim.rkt")) (test1)

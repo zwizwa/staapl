@@ -106,7 +106,7 @@
 (define (tos-write val [n #f])
   (if (not n)
       (vector-set! (stack) (stkptr) (ai: band #x1FFFFF val))
-      ((masked-writer tos-read tos-write 3 8 #:ai ai:) n)))
+      ((masked-writer tos-read tos-write 3 8 #:ai ai:) n val)))
 
 (define (tos-register n)
   (make-rw-register
@@ -115,6 +115,21 @@
 
 
 ;; tblptr
+(define (tblptr-read [n #f])
+  (let ((v (tblptr)))
+    (if (not n)
+        (ai: band #x1FFFFF v)
+        ((masked-reader tblptr-read 3 8 #:ai ai:) n))))
+
+(define (tblptr-write val [n #f])
+  (if (not n)
+      (tblptr (ai: band #x1FFFFF val))
+      ((masked-writer tblptr-read tblptr-write 3 8 #:ai ai:) n val)))
+  
+(define (tblptr-register n)
+  (make-rw-register
+   (lambda ()  (tblptr-read n))
+   (lambda (v) (tblptr-write v n))))
 
   
 ;; ram
@@ -210,21 +225,16 @@
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 
-
-(define (fsr-reader f) (lambda ()  (vector-ref (fsr) f)))
-(define (fsr-writer f) (lambda (v) (vector-set! (fsr) f v)))
-
-
 (define (fsr-register f i)
-  (let ((read  (fsr-reader f))
-        (write (fsr-writer f)))
+  (let ((read  (lambda ()  (fsr-ref f)))
+        (write (lambda (v) (fsr-set! f v))))
     (make-rw-register
      (lambda ()  ((masked-reader read       2 8 #:ai ai:) i))
      (lambda (v) ((masked-writer read write 2 8 #:ai ai:) i v)))))
 
 
-(define (indirect f [pre void] [post void])
-  (define (reg)      (data-register (fsr-ref f)))  ;; Abstract accessor to reg.
+(define (indirect f [pre void] [post void] [offset (lambda () 0)])
+  (define (reg)      (data-register (+ (fsr-ref f) (offset))))  ;; Abstract accessor to reg.
   (define (pp thunk) (pre) (let ((v (thunk))) (post) v))
   (define (read)     (pp (lambda () ((register-read (reg))))))
   (define (write v)  (pp (lambda () ((register-write (reg)) v))))
@@ -238,7 +248,7 @@
 (define (postdec f) (indirect f void (fsr-update f dec)))
 (define (postinc f) (indirect f void (fsr-update f inc)))
 (define (indf f)    (indirect f void void))
-
+(define (plusw f)   (indirect f void void wreg))
 
     
     
@@ -258,7 +268,6 @@
 (define rcreg (make-r-register (lambda () ((eusart-read)))))
 (define txreg (make-w-register (lambda (v) ((eusart-write) v))))
 
-(define (tblptr-reg n) (make-ni-register 'TBLPTR))
 
 ;; FIXME get names from machine const def modules
 (define sfrs
@@ -266,16 +275,17 @@
     (#xFFE . ,(tos-register 1))
     (#xFFD . ,(tos-register 0))
     (#xFFC . ,(make-param-register stkptr))
-    (#xFF8 . ,(tblptr-reg 2))
-    (#xFF7 . ,(tblptr-reg 1))
-    (#xFF6 . ,(tblptr-reg 0))
-    ,(sfr-ram (make-param-register tablat))
+    (#xFF8 . ,(tblptr-register 2))
+    (#xFF7 . ,(tblptr-register 1))
+    (#xFF6 . ,(tblptr-register 0))
+    (#xFF5 . ,(make-param-register tablat))
     ,(sfr-ram #xFF4) ;; PRODH
     ,(sfr-ram #xFF3) ;; PRODL
     (#xFEF . ,(indf    0))
     (#xFEE . ,(postinc 0))
     (#xFED . ,(postdec 0))
     (#xFEC . ,(preinc  0))
+    (#xFEB . ,(plusw   0))
     (#xFE8 . ,(make-param-register wreg))
     (#xFE7 . ,(indf    1))
     (#xFE6 . ,(postinc 1))
@@ -478,7 +488,10 @@
   ((clrf reg a)   (store reg a 0) (Z #t))
 
   ((lfsr f l h)   (fsr-set! f (lohi l h)))
-  ((tblrd*+) (store #xF5 0 0)) ;; FIXME
+  ((tblrd*+)
+   (let ((p (tblptr)))
+     (tablat (flash-ref p))
+     (tblptr-write (add1 p))))
   )
 
 
@@ -614,6 +627,7 @@
     (stack (make-stack))
     (ram (make-ram))
     (fsr (vector d-stack r-stack 0))
+    (tblptr 0)
     ((register-write status) 0)
     ((register-write pir1) 0)
     ((register-write pir2) 0)
