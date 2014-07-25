@@ -1,10 +1,5 @@
 #lang racket/base
 
-;; Example of how to use the pic18 sim.
-;; 2014-JUL-20
-
-;; While the sim is not feature complete wrt. peripheral device
-;; simulation, it seems useful enough to run individual words / isrs.
 
 (require staapl/pic18/sim
          staapl/pic18/sim-tools
@@ -23,7 +18,13 @@
   (flash (flash-extend (flash) #x8000 (make-vector #x4000 #f)))
   (eusart-write (lambda (v) (push! *out* v)))
   ;; (trace '()) ;; reset tracing
-  (trace print-trace-item) ;; use immediate trace instead of list
+  (trace
+   (lambda args
+     (apply print-trace-item args) ;; use immediate trace instead of list
+     ;; (printf "WREG ~x\n" (wreg))
+     (pretty-print (ds))
+     ))
+     
   )
   
 

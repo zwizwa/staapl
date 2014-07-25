@@ -635,10 +635,10 @@
     (stack (make-stack))
     (ram (make-ram))
     (fsr (vector d-stack r-stack 0))
-    (tblptr 0)
     ((register-write status) 0)
     ((register-write pir1) 0)
     ((register-write pir2) 0)
+    (tblptr 0)
     )
     
 (define (flash-from-code!)

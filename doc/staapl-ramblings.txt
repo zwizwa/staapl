@@ -66018,3 +66018,23 @@ of table read stuff.
 
 
 
+Entry: plusw
+Date: Fri Jul 25 13:05:13 EDT 2014
+
+Reminder that there is `pick' to index elements off the data stack.
+The same can be done for the r stack.  This means that it is possible
+to compile a parameter language to forth as long as we keep track of
+what's currently on the stack.
+
+
+
+Entry: Simulator: don't throw away original assembly
+Date: Fri Jul 25 13:28:59 EDT 2014
+
+For pretty-printing it's probably best to keep the flash structure
+operating on target words so the asm can be displayed as it went into
+the compiler, i.e. with symbolic names.
+
+This would also allow anotating of address -> containing word.
+
+
