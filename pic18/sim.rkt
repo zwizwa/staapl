@@ -101,25 +101,20 @@
   (let ((v (vector-ref (stack) (stkptr))))
     (if (not n)
         (ai: band #x1FFFFF v)
-        (ai: band #xFF (>>> v (* n 8))))))
+        ((masked-reader tos-read 3 8 #:ai ai:) n))))
 
 (define (tos-write val [n #f])
-  (vector-set!
-   (stack) (stkptr) 
-   (if (not n)
-       val
-       (for/fold
-           ((a 0))
-           ((i '(0 1 2)))
-         (let ((byte (if (= n i) val (tos-read i)))
-               (shift (* i 8)))
-           (bior a (<<< byte shift)))))))
+  (if (not n)
+      (vector-set! (stack) (stkptr) (ai: band #x1FFFFF val))
+      ((masked-writer tos-read tos-write 3 8 #:ai ai:) n)))
+
 (define (tos-register n)
   (make-rw-register
    (lambda ()  (tos-read n))
    (lambda (v) (tos-write v n))))
 
 
+;; tblptr
 
   
 ;; ram
