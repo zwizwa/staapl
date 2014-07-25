@@ -52,6 +52,7 @@
         debug-script
         dict-suffix
         debug-suffix
+        version-tag
         )
 
 ;; Defaults
@@ -69,6 +70,9 @@
     #:once-each
     [("-o" "--output-hex") filename "Output Intel HEX file."
      (output-hex filename)]
+
+    [("--version-tag") filename "Version tag."
+     (version-tag filename)]
 
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
@@ -203,6 +207,7 @@
     (let* ((reqs (requirements (filename)))
            (boot-run
             `(begin
+               (define version-tag ',(version-tag))
                ,(console-spec)
                (require readline/rep)
                (param-to-toplevel 'command repl-command-hook)

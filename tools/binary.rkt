@@ -230,4 +230,11 @@
                     (ai: band pmask svalue)))))))
   
 
+(define (hex-string->bytes str)
+  (for/list ((i (in-range (/ (string-length str) 2))))
+    (let* ((str-byte (string-append "#x" (substring str i (+ 2 i)))))
+      (string->number str-byte))))
 
+;; (hex-string->bytes  "c0f017a214853d147fc06469fd8089499e42c3f8")
+           
+      

@@ -54,7 +54,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 %.app: %.fm $(F_LIB)
 	rm -f compiled/$*_fm.*
 	$(COMP) -vk $<
-	$(STAAPLC) $(STAAPLC_FLAGS) --output-code $*.sx --output-asm $*.asm $< 
+	$(STAAPLC) $(STAAPLC_FLAGS) --version-tag $(shell git rev-parse HEAD) --output-code $*.sx --output-asm $*.asm $< 
 	chmod +x $*.dict
 	ls -l $*.hex $*.dict >$@
 
