@@ -1,6 +1,10 @@
 #lang racket/base
 (require "../tools.rkt"
+         "../target/rep.rkt"
          racket/dict
+         racket/control
+         racket/match
+         
          )
 (provide (all-defined-out))
 
@@ -172,4 +176,47 @@
       (p (rd i)))))
 
 
-;; 
+;; Lowlevel Flash datastructure.
+
+;; "Binary" files are (list-of (list-of addr (list-of byte)))
+;; The way they come out of code->binary.
+(define (load-binary filename)
+  (read (open-input-file filename)))
+;; Translate lists to vectors for faster access.
+(define (binary->flash code-chunks)
+  (apply vector
+         (for/list ((chunk code-chunks))
+           (list (list-ref chunk 0)
+                 (apply vector (list-ref chunk 1))))))
+
+(define (flash-extend flash a v)
+  (apply vector
+         (cons (list a v)
+               (vector->list flash))))
+
+;; Support target words and (listof byte-addr vector)
+(define (chunk-addr chunk)
+  (if (target-word? chunk)
+      (2* (target-word-address chunk))
+      (car chunk)))
+(define (chunk-length chunk)
+  (if (target-word? chunk)
+      (error 'chunk-length)
+      (vector-length (cadr chunk))))
+(define (chunk-ref chunk offset)
+  (if (target-word? chunk)
+      (error 'chunk-ref)
+      (vector-ref (cadr chunk) offset))) 
+
+
+(define (flash-ref-word flash addr)
+  (prompt
+   (for ((chunk flash))
+     (let ((offset (- addr (chunk-addr chunk))))
+       (when (and (>= offset 0) 
+                  (< offset (chunk-length chunk)))
+         (let ((lo (chunk-ref chunk offset))
+               (hi (chunk-ref chunk (add1 offset))))
+           (abort (+ lo (* #x100 hi)))))))
+   ;; Should be empty but parser reads ahead.
+   #xFFFF))

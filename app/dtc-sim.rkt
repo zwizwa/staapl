@@ -5,6 +5,7 @@
          staapl/pic18/sim-tools
          staapl/target/rep
          staapl/tools
+         staapl/code
          racket/dict
          racket/pretty
          racket/generator

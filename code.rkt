@@ -14,6 +14,7 @@
 
 ;; CODE REGISTRY
 (provide
+ code-chain-list
  code-append-postponed!
  code-compile!
  code-debug
@@ -107,6 +108,8 @@
   (set! *postponed-macro-stack* '()) 
   (set! *postponed* '())
   (set! *cfg* '()))
+
+(define (code-chain-list) *cfg*)
 
 ;; Instead of going through the namespace, get target words (including
 ;; temporaries) from the CFG itself.  Note that this is a debugging

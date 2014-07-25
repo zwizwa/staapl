@@ -141,41 +141,9 @@
 
 
 ;; flash
-
-;; "Binary" files are (list-of (list-of addr (list-of byte)))
-;; The way they come out of code->binary.
-(define (load-binary filename)
-  (read (open-input-file filename)))
-;; Translate lists to vectors for faster access.
-(define (binary->flash code-chunks)
-  (apply vector
-         (for/list ((chunk code-chunks))
-           (list (list-ref chunk 0)
-                 (apply vector (list-ref chunk 1))))))
-
-(define (flash-extend flash a v)
-  (apply vector
-         (cons (list a v)
-               (vector->list flash))))
-
-
-(define (flash-ref addr [word #f])
-  (prompt
-   (for ((chunk (flash)))
-     (let-values (((chunk-addr chunk-data) (apply values chunk)))
-       (let ((offset (- addr chunk-addr)))
-         (when (and (>= offset 0) 
-                    (< offset (vector-length chunk-data)))
-           (let ((lo (vector-ref chunk-data offset)))
-             (abort
-              (if word
-                  (let ((hi (vector-ref chunk-data (add1 offset))))
-                    (+ lo (* #x100 hi)))
-                  lo)))))))
-   ;; Should be empty but parser reads ahead.
-   (if word
-       #xFFFF
-       #xFF)))
+(define (flash-ref addr word-access)
+  (let ((w (flash-ref-word (flash) addr)))
+    (if word-access w (band #xFF w))))
 
 (define (next-word)
   (let ((w (flash-ref (ip) #t)))
@@ -498,7 +466,7 @@
   ((lfsr f l h)   (fsr-set! f (lohi l h)))
   ((tblrd*+)
    (let ((p (tblptr)))
-     (tablat (flash-ref p))
+     (tablat (flash-ref p #f))
      (tblptr-write (add1 p))))
   )
 
