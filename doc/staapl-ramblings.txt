@@ -65970,3 +65970,19 @@ This shared-nothing approach would eliminate context switch time while
 avoiding the stack machine vs. register machine impedance mismatch.
 
 
+
+
+Entry: Mapping
+Date: Thu Jul 24 18:49:07 EDT 2014
+
+Quite simple, let's get it done.
+Linear -> exponential.
+
+Since that map needs to be implemented for midi, let's just forget
+about using floating point map for envelopes and go to lookup tables.
+
+How to make a good lookup table with linear interpolation?
+Or maybe something else like this[1].
+
+[1] entry://../math/20130326-093401
+
