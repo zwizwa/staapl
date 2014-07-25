@@ -3,6 +3,7 @@
 
 (require staapl/pic18/sim
          staapl/pic18/sim-tools
+         staapl/pic18/double-math
          staapl/target/rep
          staapl/tools
          staapl/code
@@ -23,7 +24,7 @@
    (lambda args
      (apply print-trace-item args) ;; use immediate trace instead of list
      ;; (printf "WREG ~x\n" (wreg))
-     (pretty-print (ds))
+     ;; (pretty-print (ds))
      ))
      
   )

@@ -119,9 +119,6 @@
 (define (in/b)       ((comm-in)))
 (define (out/b byte) ((comm-out) byte))
 
-;; word/byte lists
-(define (bytes->words lst) (join-nibble-list  lst 0 8))
-(define (words->bytes lst) (split-nibble-list lst 0 8))
 
 ;; values
 (define (void/values lst)

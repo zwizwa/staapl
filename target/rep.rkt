@@ -23,6 +23,7 @@
  word?->name
  instruction->string
  (struct-out target-word)
+ target-word-offsets
  target-word->error-string
 
  ;; expression evaluation
@@ -296,3 +297,13 @@
                   (cdr c)))))))
 
 
+(define (target-word-offsets w)
+  (let-values
+      (((size offsets)
+        (for/fold
+            ((offset 0)
+             (offsets '()))
+            ((b (reverse (target-word-bin w))))
+          (values (+ offset (length b))
+                  (cons offset offsets)))))
+    offsets))

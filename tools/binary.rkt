@@ -137,6 +137,7 @@
 (check (split-nibble-list '(#x102 #xFFAA) 0 8)
        => '(#x02 #x01 #xAA #xFF))
 
+
 ;; (post) inverse  of above
 (define (join-nibble-list lst left right)
   (if (= 1 (bitwise-and 1 (length lst)))
@@ -161,7 +162,9 @@
 (check (join-nibble-list '(#x01 #x02 #x03 #x04) 0 8)
        => '(#x201 #x403))
 
-
+;; word/byte lists: specific to little endian 16bit words
+(define (bytes->words lst) (join-nibble-list  lst 0 8))
+(define (words->bytes lst) (split-nibble-list lst 0 8))
 
 ;; FIXME: it's probably easier to use the bin and binchunk
 ;; comprehensions for code that needs this..

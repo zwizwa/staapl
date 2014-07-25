@@ -66037,4 +66037,6 @@ the compiler, i.e. with symbolic names.
 
 This would also allow anotating of address -> containing word.
 
+Ok, done.
+A little fidgeting though due to representation of chains/words.
 

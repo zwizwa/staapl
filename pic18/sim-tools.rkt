@@ -4,7 +4,7 @@
          racket/dict
          racket/control
          racket/match
-         
+         racket/pretty
          )
 (provide (all-defined-out))
 
@@ -184,15 +184,13 @@
   (read (open-input-file filename)))
 ;; Translate lists to vectors for faster access.
 (define (binary->flash code-chunks)
-  (apply vector
-         (for/list ((chunk code-chunks))
-           (list (list-ref chunk 0)
-                 (apply vector (list-ref chunk 1))))))
+  (for/list ((chunk code-chunks))
+    (list (list-ref chunk 0)
+          (apply vector (list-ref chunk 1)))))
 
 (define (flash-extend flash a v)
-  (apply vector
-         (cons (list a v)
-               (vector->list flash))))
+  (cons (list a v) flash))
+  
 
 ;; Support target words and (listof byte-addr vector)
 (define (chunk-addr chunk)
@@ -201,22 +199,48 @@
       (car chunk)))
 (define (chunk-length chunk)
   (if (target-word? chunk)
-      (error 'chunk-length)
+      (2* (apply + (map length (target-word-bin chunk))))
       (vector-length (cadr chunk))))
+
+(define (target-word->bytes w)
+  (words->bytes (reverse (apply append (target-word-bin w)))))
+
+    
+      
+
 (define (chunk-ref chunk offset)
+  ;; Memoize? Probably not necessary since code is jitted.
   (if (target-word? chunk)
-      (error 'chunk-ref)
+      (list-ref (target-word->bytes chunk) offset)
       (vector-ref (cadr chunk) offset))) 
 
 
+(define (flash-find-chunk flash addr)
+  (define (find)
+    (prompt
+     (for ((chunk flash))
+       (let ((offset (- addr (chunk-addr chunk))))
+         (when (and (>= offset 0) 
+                    (< offset (chunk-length chunk)))
+           (abort (list chunk offset)))))
+     '(#f #f)))
+  (apply values (find)))
+
 (define (flash-ref-word flash addr)
-  (prompt
-   (for ((chunk flash))
-     (let ((offset (- addr (chunk-addr chunk))))
-       (when (and (>= offset 0) 
-                  (< offset (chunk-length chunk)))
-         (let ((lo (chunk-ref chunk offset))
-               (hi (chunk-ref chunk (add1 offset))))
-           (abort (+ lo (* #x100 hi)))))))
-   ;; Should be empty but parser reads ahead.
-   #xFFFF))
+  (let-values (((chunk offset) (flash-find-chunk flash addr)))
+    (if chunk
+        (let ((lo (chunk-ref chunk offset))
+              (hi (chunk-ref chunk (add1 offset))))
+          (+ lo (* #x100 hi)))
+        ;; Should be empty but parser reads ahead.
+        #xFFFF)))
+
+(define (flash-code flash addr)
+  (let-values (((chunk offset) (flash-find-chunk flash addr)))
+    (if (not (target-word? chunk)) #f
+        (let* ((offsets (map 2* (target-word-offsets chunk)))
+               (code    (target-word-code chunk))
+               (dict    (reverse (map cons offsets code))))
+          (dict-ref dict offset)))))
+          
+

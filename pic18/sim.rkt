@@ -483,7 +483,7 @@
   (if (number? addr)
       (match (vector-ref (jit) (2/ addr))
         ((struct ins-jit (op args ip+ words))
-         (print-dasm words ip+)))
+         (print-dasm words ip+ [flash-code (flash) addr])))
       ;; Allow user to add tags to trace.
       (pretty-print addr)))
 
@@ -520,15 +520,19 @@
                      (list w0 w1)
                      here))))))
 ;; see tsee in tethered.rkt
-(define (print-dasm words ip+)
-  (let ((ip (- ip+ (<< (length words)))))
+(define (print-dasm words ip+ [dasm #f])
+  (let ((addr (- (2/ ip+) (length words))))
     (print-target-word
-     (disassemble->word dasm-collection+dw
-                        words
-                        (2/ ip)
-                        16
-                        (lambda (addr) (format "~x" addr))
-                        ))))
+     (if dasm
+         (new-target-word #:address addr
+                          #:code (list dasm)
+                          #:bin  (list (reverse words)))
+         (disassemble->word dasm-collection+dw
+                            words
+                            addr
+                            16
+                            (lambda (addr) (format "~x" addr))
+                            )))))
 (define (execute-next)
   (let* ((ip-prev (ip))
          (jit-index (2/ ip-prev))
@@ -610,7 +614,10 @@
     )
     
 (define (flash-from-code!)
-  (flash (binary->flash (code->binary))))
+  (flash
+   (apply append (map target-chain->list (code-chain-list)))
+   ;; (binary->flash (code->binary))
+   ))
 
 ;; Data stack access.
 (define (>d v)
