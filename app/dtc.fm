@@ -40,8 +40,8 @@ staapl pic18/afregs
 staapl pic18/vector
 staapl pic18/serial-debug
     
-load debug.f
-load line-editor.f
+\ load debug.f
+\ load line-editor.f
 
     
 \ FIXME: put this somewhere else
@@ -54,6 +54,9 @@ load line-editor.f
     [ stdin -> async.rx> ] i/c
     [ stdout -> async.>tx ] i/c
     [ stdout-flush -> ] i/c ;
+    
+staapl pic18/dtc    
+    
     
 
     

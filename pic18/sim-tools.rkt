@@ -1,7 +1,7 @@
 #lang racket/base
 (require "../tools.rkt"
          racket/dict
-         staapl/tools)
+         )
 (provide (all-defined-out))
 
 ;; Reusable tools for writing machine emulators.

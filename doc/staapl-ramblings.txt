@@ -66003,3 +66003,9 @@ So how to compile threaded code?  Straightforward as:
 but what about things like _if ?
 this can still be done with labels from staapl.
 
+dtc.rkt has a problem: that compile will compile a jump to _word, not
+an address.  how to convert a macro to a target value?
+
+i believe there is a path from macro -> (cw word) -> word.. 
+maybe define an "uncall" word?
+
