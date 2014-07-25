@@ -30,7 +30,7 @@
  
  ((m>)              (macro-prim: ctrl> literal))
  (([qw a]  >m)      (macro-prim: ',a >ctrl))
- (([cw a]  word>m)  (macro-prim: ',a >ctrl))
+ (([cw a]  word>m)  (macro-prim: ',a >ctrl))  ;; used for dtc
 
 
  )

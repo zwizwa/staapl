@@ -39,6 +39,12 @@ staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
 staapl pic18/serial-debug
+staapl pic18/double-math
+staapl pic18/double-pred
+staapl pic18/execute
+staapl pic18/mem16
+staapl pic18/cond
+staapl pic18/compose-macro
     
 \ load debug.f
 \ load line-editor.f
@@ -55,8 +61,8 @@ staapl pic18/serial-debug
     [ stdout -> async.>tx ] i/c
     [ stdout-flush -> ] i/c ;
     
-staapl pic18/dtc    
-    
+\ staapl pic18/dtc    
+\ load dtc.f  
     
 
     

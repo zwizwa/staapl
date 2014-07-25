@@ -1,37 +1,35 @@
-#lang staapl/pic18 \ -*- forth -*-
-provide-all
-
 staapl pic18/double-math
 staapl pic18/double-pred
 staapl pic18/execute
+staapl pic18/mem16
+staapl pic18/cond
+staapl pic18/compose-macro
 
 
 \ A direct threaded Forth using native code primitives.  NEXT is
 \ procedure return to an explicit interpreter loop.
 
-: _IP!
-    fh ! fl ! ;
-: _exit
-    r> fh !      
-    r> fl ! ;  
-: _dolit
-    @f+ @f+ ;    
-: _jump
-    @f+ fl !
-    @f+ fh ! ;
-: _0jump
-    or z? if drop _jump ; then
-    drop @f+ drop @f+ drop ;
+\ This is a DTC variant, so no execution from RAM on the PIC.
+\ Execution tokens are 16 bit Flash byte addresses.
+
+\ Going for simple code here.  Can be made faster.
+
+
+: IP@    fl @ fh @ ;  \ -- lo hi
+: IP!    fh ! fl ! ;  \ lo hi --
+: _exit  _r> IP! ;    \ --
+: fetch  @f+ @f+ ;    \ -- lo hi
+: ~jump   fetch IP! ;  \ --
+: 0jump  or nfdrop z? if ~jump ; then fetch _drop ; \ lo hi --
     
-: enter 
-    fl @ >r
-    fh @ >r   
+: enter
+    IP@ _>r
     TOSL fl @!  \ TOS cannot be movff dst, but src is ok       
     TOSH fh @!
     pop ;   
   
 : continue
-    begin @f+ @f+ execute/b again
+    begin fetch execute/b again
 
 : _bye
     _exit  \ remove DTC continuation
@@ -52,9 +50,10 @@ staapl pic18/execute
 \  _foo is a macro then use as is
 \  _foo is a target word then replace with:  ' _foo _compile
 macro
-: _compile  i word>m m> ,, ;
-: _literal  >m ' _dolit _compile m> ,, ;     
-: _if       ' _0jump _compile make-label dup >m ,, ;
+: cw>xt     word>m m> 2 * ;
+: _compile  i cw>xt ,, ;
+: _literal  >m ' fetch _compile m> ,, ;     
+: _if       ' 0jump _compile make-label dup >m ,, ;
 : _then     then ;  \ note that end: is called here  (see compiler-unit.rkt)
 forth
     
@@ -73,5 +72,18 @@ forth
 
 
         
+macro
+: lohi | x | x x 8 >>> ;  
+: idtc i/c cw>xt lohi interpret ;
+forth
+
+: test1 [ enter #x1234 _literal ' _dup _compile ' _exit _compile ] idtc ;
+
+: ~test2 enter _if 1 _literal _then ' _exit _compile
+: test2 ' ~test2 idtc ; \ works for nonzero argument, not for zero
+
+: ~test3 enter _if 1 _literal ' _exit compile _then 2 _literal ' _exit _compile
+: test3 ' ~test3 idtc ; \ doesnt work
     
 
+    
