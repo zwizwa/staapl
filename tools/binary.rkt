@@ -200,3 +200,34 @@
    ((list? x)   x)
    (else (error 'byte-list "~a" x))))
       
+
+;; Expose components of a single parameter bye performing masked read/write.
+;; Application is parameterized to allow for abstract interpretation, e.g. propagation of undefined values.
+
+(define (check-word-index size index)
+  (when (or (negative? index) (>= index size))
+    (error 'word-index "~s ~s" size index)))
+
+(define (masked-reader read size bits
+                       #:ai [ai: (lambda (fn . args) (apply fn args))])
+  (let ((mask (bitmask bits)))
+    (lambda (index)
+      (check-word-index size index)
+      (ai: band mask
+           (ai: >>> (read) (* index bits))))))
+
+(define (masked-writer read write size bits
+                       #:ai [ai: (lambda (fn . args) (apply fn args))])
+  (let ((mask (bitmask bits)))
+    (lambda (index value)
+      (check-word-index size index)
+      (let* ((shift  (* index bits))
+             (svalue (ai: <<< (ai: band mask value) shift))
+             (pmask  (<<< mask shift))
+             (nmask  (bxor -1 pmask)))
+        (write (ai: bior
+                    (ai: band nmask (read))
+                    (ai: band pmask svalue)))))))
+  
+
+

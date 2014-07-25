@@ -66009,3 +66009,12 @@ an address.  how to convert a macro to a target value?
 i believe there is a path from macro -> (cw word) -> word.. 
 maybe define an "uncall" word?
 
+This is can use the existing word>m macro.
+
+
+So after tinkering a bit i got stuck.  Probably time to run it in the
+simulator again and see where it goes wrong.  Requires implementation
+of table read stuff.
+
+
+

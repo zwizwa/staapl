@@ -19,8 +19,8 @@ staapl pic18/compose-macro
 : IP!    fh ! fl ! ;  \ lo hi --
 : _exit  _r> IP! ;    \ --
 : fetch  @f+ @f+ ;    \ -- lo hi
-: ~jump   fetch IP! ;  \ --
-: 0jump  or nfdrop z? if ~jump ; then fetch _drop ; \ lo hi --
+: jump   fetch IP! ;  \ --
+: 0jump  or nfdrop z? if jump ; then fetch _drop ; \ lo hi --
     
 : enter
     IP@ _>r
@@ -73,7 +73,7 @@ forth
 
         
 macro
-: lohi | x | x x 8 >>> ;  
+\ : lohi | x | x x 8 >>> ;  
 : idtc i/c cw>xt lohi interpret ;
 forth
 

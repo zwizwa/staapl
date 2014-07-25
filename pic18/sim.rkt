@@ -51,6 +51,9 @@
  fsr    ;; fsr pointers (vector-of byte)
  bsr    ;; bank select register
 
+ tablat
+ tblptr
+
  ;; simulate EUSART input/output stream
  eusart-read  
  eusart-write
@@ -67,6 +70,12 @@
 
 
 (define ui (make-uninitialized))
+
+;; Propagate uninitialized values  (behaves +- like Maybe monad)
+(define (ai: fun . args)
+  (prompt
+   (for ((a args)) (when (uninitialized? a) (abort a)))
+   (apply fun args)))
 
 (define (make-stack) (make-vector 31 ui))
 (define (make-fsr)   (make-vector 3  ui))
@@ -90,11 +99,9 @@
     rv))
 (define (tos-read [n #f])
   (let ((v (vector-ref (stack) (stkptr))))
-    ;; (printf "tos ~s, stack ~s\n" v (stack))
-    (if (uninitialized? v) v
-        (if (not n)
-            (band #x1FFFFF v)
-            (band #xFF (>>> v (* n 8)))))))
+    (if (not n)
+        (ai: band #x1FFFFF v)
+        (ai: band #xFF (>>> v (* n 8))))))
 
 (define (tos-write val [n #f])
   (vector-set!
@@ -208,30 +215,18 @@
 (define (fsr-update f upd)
   (lambda () (fsr-set! f (upd (fsr-ref f)))))
 
-(define (fsr-lref f)
-  (let ((v (fsr-ref f)))
-    (if (uninitialized? v) v
-        (band #xFF v))))
 
-(define (fsr-href f)
-  (let ((v (fsr-ref f)))
-    (if (uninitialized? v) v
-        (band #xFF (>>> v 8)))))
+(define (fsr-reader f) (lambda ()  (vector-ref (fsr) f)))
+(define (fsr-writer f) (lambda (v) (vector-set! (fsr) f v)))
 
-(define (fsr-lhset! f l h)
-  (if (or (uninitialized? l)
-          (uninitialized? h))
-      (fsr-set! f (make-uninitialized))
-      (fsr-set! f (lohi l h))))
 
-(define (fsrl f)
-  (make-rw-register
-   (lambda ()  (fsr-lref f))
-   (lambda (v) (fsr-lhset! f v (fsr-href f)))))
-(define (fsrh f)
-  (make-rw-register
-   (lambda ()  (fsr-href f))
-   (lambda (v) (fsr-lhset! f (fsr-lref f) v))))
+(define (fsr-register f i)
+  (let ((read  (fsr-reader f))
+        (write (fsr-writer f)))
+    (make-rw-register
+     (lambda ()  ((masked-reader read       2 8 #:ai ai:) i))
+     (lambda (v) ((masked-writer read write 2 8 #:ai ai:) i v)))))
+
 
 (define (indirect f [pre void] [post void])
   (define (reg)      (data-register (fsr-ref f)))  ;; Abstract accessor to reg.
@@ -268,6 +263,7 @@
 (define rcreg (make-r-register (lambda () ((eusart-read)))))
 (define txreg (make-w-register (lambda (v) ((eusart-write) v))))
 
+(define (tblptr-reg n) (make-ni-register 'TBLPTR))
 
 ;; FIXME get names from machine const def modules
 (define sfrs
@@ -275,10 +271,10 @@
     (#xFFE . ,(tos-register 1))
     (#xFFD . ,(tos-register 0))
     (#xFFC . ,(make-param-register stkptr))
-    ,(sfr-ram #xFF8) ;; TBLPTRU
-    ,(sfr-ram #xFF7) ;; TBLPTRH
-    ,(sfr-ram #xFF6) ;; TBLPTRL
-    ,(sfr-ram #xFF5) ;; TABLAT
+    (#xFF8 . ,(tblptr-reg 2))
+    (#xFF7 . ,(tblptr-reg 1))
+    (#xFF6 . ,(tblptr-reg 0))
+    ,(sfr-ram (make-param-register tablat))
     ,(sfr-ram #xFF4) ;; PRODH
     ,(sfr-ram #xFF3) ;; PRODL
     (#xFEF . ,(indf    0))
@@ -295,8 +291,8 @@
     (#xFDE . ,(postinc 2))
     (#xFDD . ,(postdec 2))
     (#xFDC . ,(preinc  2))
-    (#xFDA . ,(fsrh    2))
-    (#xFD9 . ,(fsrl    2))
+    (#xFDA . ,(fsr-register 2 1))
+    (#xFD9 . ,(fsr-register 2 0))
     (#xFD8 . ,status)
     ,(sfr-ram #xF92) ;; TRISA
     ,(sfr-ram #xF93) ;; TRISB
@@ -360,12 +356,8 @@
                (bit-set? carries 7))))
     rv))
 (define (N/Z! v)
-  (if (uninitialized? v)
-      (begin (N v) (Z v))
-      (begin
-        (N (bit-set? v 7))
-        (Z (zero? v)))))
-
+  (N (ai: bit-set? v 7))
+  (Z (ai: zero? v)))
 
 (define (skip!)
   (ip (+ 2 (ip))))
@@ -383,7 +375,7 @@
   (let* ((m  (bitmask totalbits))
          (x  (band m byte))
          (rv (band m
-                   (bior (>>> x (- 8 bits))
+                   (bior (>>> x (- totalbits bits))
                          (<<< x bits)))))
     rv))
 

@@ -76,8 +76,9 @@ forth
             begin drop terminal> 1st 6 high? until \ CSI
             drop ; then
         \ Otherwise it's a 2-byte code
-        terminal> px
-        terminal> px ;
+        terminal> drop \ px
+        terminal> drop \ px
+        ;
     then
 
     \ ignore all non-ascii characters

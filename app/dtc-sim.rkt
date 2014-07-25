@@ -10,11 +10,11 @@
          staapl/pic18/sim-tools
          staapl/target/rep
          staapl/tools
-         staapl/pic18/dtc
          racket/dict
          racket/pretty
          racket/generator
-         (file "dtc.fm"))
+         (file "dtc.fm")
+         )
 
 (define *out* '())
 (define (reload)
@@ -22,7 +22,10 @@
   (flash-from-code!)  ;; initialize flash from the compiler's code output
   (flash (flash-extend (flash) #x8000 (make-vector #x4000 #f)))
   (eusart-write (lambda (v) (push! *out* v)))
-  (trace '()))        ;; reset tracing
+  ;; (trace '()) ;; reset tracing
+  (trace print-trace-item) ;; use immediate trace instead of list
+  )
+  
 
 (define empty (make-uninitialized))
 (define *ram* (vector-memory (make-vector #x1000 empty)))

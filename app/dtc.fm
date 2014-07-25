@@ -47,7 +47,7 @@ staapl pic18/cond
 staapl pic18/compose-macro
     
 \ load debug.f
-\ load line-editor.f
+load line-editor.f
 
     
 \ FIXME: put this somewhere else
@@ -62,7 +62,7 @@ staapl pic18/compose-macro
     [ stdout-flush -> ] i/c ;
     
 \ staapl pic18/dtc    
-\ load dtc.f  
+load dtc.f  
     
 
     
