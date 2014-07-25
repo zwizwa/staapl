@@ -20,12 +20,12 @@ staapl pic18/cond
 \ no previous stack frame top pop, don't pop it!
 
 \ FIXME: should this restore a&f?  (should bp save them?)
-: continue  STKPTR @ 3 >= if pop pop then ;
+: resume  STKPTR @ 3 >= if pop pop then ;
 
 
 \ After issuing RPC packet, fall into interpreter.  During the RPC
 \ call the host can use us as a resource.  When host is done it will
-\ issue 'continue' to break the interpreter loop.
+\ issue 'resume' to break the interpreter loop.
 : tx-end-rpc tx-end interpreter ;
   
   

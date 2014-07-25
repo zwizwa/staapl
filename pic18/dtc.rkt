@@ -64,3 +64,8 @@ staapl pic18/execute
     
         
     
+macro
+: _if    make-label dup ' _0jump compile , ;
+: _then  label: ;
+forth
+

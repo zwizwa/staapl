@@ -10,6 +10,7 @@
          staapl/pic18/sim-tools
          staapl/target/rep
          staapl/tools
+         staapl/pic18/dtc
          racket/dict
          racket/pretty
          racket/generator
@@ -19,6 +20,7 @@
 (define (reload)
   (reg-defaults!)     ;; initializes registers and ram
   (flash-from-code!)  ;; initialize flash from the compiler's code output
+  (flash (flash-extend (flash) #x8000 (make-vector #x4000 #f)))
   (eusart-write (lambda (v) (push! *out* v)))
   (trace '()))        ;; reset tracing
 
@@ -37,7 +39,8 @@
    (sequence->generator
     (map char->integer
          (string->list line)))))
-         
+
+
 (define (test1)
   (reload)
   (ram *ram*)
@@ -45,6 +48,8 @@
   (send-string "hello\r")
   (call-word target/serial>io)
   (call-word target/line-editor))
+
+
 
 
 ;; (current-directory "/home/tom/staapl/app") (enter! (file "dtc-sim.rkt")) (test1)

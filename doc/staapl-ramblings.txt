@@ -65986,3 +65986,20 @@ Or maybe something else like this[1].
 
 [1] entry://../math/20130326-093401
 
+
+
+Entry: Direct threaded forth in dtc.rkt
+Date: Thu Jul 24 21:15:39 EDT 2014
+
+So there seems to be some working code.  The interpreter is a
+combination of direct threading with next implemented as subroutine
+return into an explicit interpreter loop.  This allows primitives to
+be reused easily from staapl code.
+
+So how to compile threaded code?  Straightforward as:
+
+' _word compile
+
+but what about things like _if ?
+this can still be done with labels from staapl.
+

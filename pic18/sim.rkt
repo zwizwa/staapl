@@ -72,7 +72,6 @@
 (define (make-fsr)   (make-vector 3  ui))
 (define (make-ram)   (vector-memory (make-vector #x1000 ui)))
 (define (make-jit)   (make-vector (2/ flash-nb-bytes) #f))
-(define (make-flash) (make-vector flash-nb-bytes ui))
 
 ;; These can be initialized for global use.  Keep other params at #f
 ;; to force manual init.  Just clear jit buffer when loading code.
@@ -137,7 +136,13 @@
          (for/list ((chunk code-chunks))
            (list (list-ref chunk 0)
                  (apply vector (list-ref chunk 1))))))
-  
+
+(define (flash-extend flash a v)
+  (apply vector
+         (cons (list a v)
+               (vector->list flash))))
+
+
 (define (flash-ref addr [word #f])
   (prompt
    (for ((chunk (flash)))
@@ -621,7 +626,6 @@
     (stkptr 0)
     (stack (make-stack))
     (ram (make-ram))
-    (flash (make-flash))
     (fsr (vector d-stack r-stack 0))
     ((register-write status) 0)
     ((register-write pir1) 0)
