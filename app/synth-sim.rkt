@@ -60,8 +60,7 @@
 
 
 
-(define empty (make-uninitialized))
-(define *ram* (make-vector #x1000 empty))
+(define *ram* (make-vector #x1000 (make-empty)))
 (define (dump)
   (for ((p (in-hex-printer 0 3 2 16 (lambda _ ".")))
         (i (in-range #x200)))

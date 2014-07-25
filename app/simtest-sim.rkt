@@ -25,7 +25,7 @@
 (define (test1)
   (reload)
   (trace print-trace-item) ;; use immediate trace instead of list
-  (fsr-set! 2 (make-uninitialized))
+  (fsr-set! 2 (make-empty))
   (call-word target/test1))
 
 (define (test2 in)

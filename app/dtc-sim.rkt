@@ -27,8 +27,7 @@
   )
   
 
-(define empty (make-uninitialized))
-(define *ram* (vector-memory (make-vector #x1000 empty)))
+(define *ram* (vector-memory (make-vector #x1000 (make-empty))))
 (define (dump) (memory-dump *ram* #x200 #x300))
 
 ;; Note that on PIC the RCIF flag is cleared after reading the buffer.
@@ -55,7 +54,8 @@
 
 (define (test1)
   (reload)
-  (call-word target/test1))
+  (call-word target/test1)
+  (pretty-print (ds)))
 
 
 ;; (current-directory "/home/tom/staapl/app") (enter! (file "dtc-sim.rkt")) (test1)

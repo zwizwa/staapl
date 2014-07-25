@@ -69,17 +69,16 @@
  )
 
 
-(define ui (make-uninitialized))
 
-;; Propagate uninitialized values  (behaves +- like Maybe monad)
+;; Propagate empty values  (behaves +- like Maybe monad)
 (define (ai: fun . args)
   (prompt
-   (for ((a args)) (when (uninitialized? a) (abort a)))
+   (for ((a args)) (when (empty? a) (abort a)))
    (apply fun args)))
 
-(define (make-stack) (make-vector 31 ui))
-(define (make-fsr)   (make-vector 3  ui))
-(define (make-ram)   (vector-memory (make-vector #x1000 ui)))
+(define (make-stack) (make-vector 31 (make-empty)))
+(define (make-fsr)   (make-vector 3  (make-empty)))
+(define (make-ram)   (vector-memory (make-vector #x1000 (make-empty))))
 (define (make-jit)   (make-vector (2/ flash-nb-bytes) #f))
 
 ;; These can be initialized for global use.  Keep other params at #f
@@ -173,7 +172,7 @@
                   (let ((hi (vector-ref chunk-data (add1 offset))))
                     (+ lo (* #x100 hi)))
                   lo)))))))
-   ;; Should be uninitialized but parser reads ahead.
+   ;; Should be empty but parser reads ahead.
    (if word
        #xFFFF
        #xFF)))
@@ -270,7 +269,7 @@
 
 
 ;; FIXME get names from machine const def modules
-(define sfrs
+(define *sfrs*
   `((#xFFF . ,(tos-register 2))
     (#xFFE . ,(tos-register 1))
     (#xFFD . ,(tos-register 0))
@@ -286,16 +285,22 @@
     (#xFED . ,(postdec 0))
     (#xFEC . ,(preinc  0))
     (#xFEB . ,(plusw   0))
+    (#xFEA . ,(fsr-register 0 1))
+    (#xFE9 . ,(fsr-register 0 0))
     (#xFE8 . ,(make-param-register wreg))
     (#xFE7 . ,(indf    1))
     (#xFE6 . ,(postinc 1))
     (#xFE5 . ,(postdec 1))
     (#xFE4 . ,(preinc  1))
+    (#xFE3 . ,(plusw   1))
+    (#xFE2 . ,(fsr-register 1 1))
+    (#xFE1 . ,(fsr-register 1 0))
     (#xFE0 . ,(make-param-register bsr))
     (#xFDF . ,(indf    2))
     (#xFDE . ,(postinc 2))
     (#xFDD . ,(postdec 2))
     (#xFDC . ,(preinc  2))
+    (#xFDB . ,(plusw   2))
     (#xFDA . ,(fsr-register 2 1))
     (#xFD9 . ,(fsr-register 2 0))
     (#xFD8 . ,status)
@@ -317,8 +322,11 @@
     (#xF9E . ,pir1)
     (#xF6d . ,(make-ni-register 'UCON))
     ))
+
+(define sfrs (make-parameter *sfrs*))
+
 (define (sfr reg)
-  (dict-ref sfrs reg
+  (dict-ref (sfrs) reg
             (lambda ()
               (error 'sfr-not-found "~x" reg))))
 
@@ -599,9 +607,9 @@
 (define (call-word addr)
   (let ((addr (if (number? addr) addr
                   (* 2 (target-word-address addr)))))
-    (stack-push (make-uninitialized)) ;; termination mark
+    (stack-push (make-empty)) ;; termination mark
     (ip addr)
-    (while (not (uninitialized? (ip)))
+    (while (not (empty? (ip)))
       (execute-next))))
 
 (define (with-local-context thunk)

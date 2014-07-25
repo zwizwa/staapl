@@ -85,9 +85,9 @@
           (error 'flag-type "~s" v))
         (bior s (<<< (bool->bit (f)) b)))))
   (define (write bits)
-    (if (uninitialized? bits)
+    (if (empty? bits)
         (for ((f flags))
-          (f (make-uninitialized)))
+          (f (make-empty)))
         (for ((b (in-naturals))
               (f flags))
           (f (bit->bool (band 1 (>>> bits b)))))))
@@ -95,10 +95,13 @@
 
 
 ;; Some macros for defining machine state parameters.
-(define-struct uninitialized ())
+;; Was called uninitialized but that name is just too long.
+
+
+(define-struct empty ())
 (define (undefined-params lst)
   (apply values (for/list ((e lst))
-                  (make-parameter (uninitialized)))))
+                  (make-parameter (empty)))))
 
 (define-syntax-rule (params . ps)
   (define-values ps (undefined-params 'ps)))
