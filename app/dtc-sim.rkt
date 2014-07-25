@@ -14,19 +14,30 @@
          )
 
 (define *out* '())
+
+(define (stack->string s)
+  (apply string-append
+         (for/list ((n (reverse s)))
+           (pad-string
+            (if (number? n)
+                (hex->string 2 n)
+                ".") 3))))
+
 (define (reload)
   (reg-defaults!)     ;; initializes registers and ram
   (flash-from-code!)  ;; initialize flash from the compiler's code output
   (flash (flash-extend (flash) #x8000 (make-vector #x4000 #f)))
   (eusart-write (lambda (v) (push! *out* v)))
   ;; (trace '()) ;; reset tracing
-  (trace
-   (lambda args
-     (apply print-trace-item args) ;; use immediate trace instead of list
-     ;; (printf "WREG ~x\n" (wreg))
-     ;; (pretty-print (ds))
-     ))
-     
+  (trace-post
+   (lambda (addr) ;; use trace function instead of list
+     (let ((asm
+            (with-output-to-string
+              (lambda ()
+                (print-trace-item addr)))))
+       (printf "~a~a\n"
+               (pad-string (substring asm 0 (sub1 (string-length asm))) 54)
+               (stack->string (ds))))))
   )
   
 
@@ -49,7 +60,7 @@
 (define (test0)
   (reload)
   (ram *ram*)
-  (trace print-trace-item) ;; use immediate trace instead of list
+  (trace-post print-trace-item) ;; use immediate trace instead of list
   (send-string "hello\r")
   (call-word target/serial>io)
   (call-word target/line-editor))
@@ -58,6 +69,13 @@
 (define (test1)
   (reload)
   (call-word target/test1)
+  (pretty-print (ds)))
+
+(define (test3 x)
+  (reload)
+  (>d x)
+  (>d 0)
+  (call-word target/test3)
   (pretty-print (ds)))
 
 

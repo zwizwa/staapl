@@ -40,7 +40,6 @@
 (define r-stack #xA0)
 
 (params
- trace  ;; instruction trace addresses
  jit    ;; cache of scheme op lookups (about 10x speedup?)
  flash  ;; chunked flash memory: (list-of (addr (vector-of byte)))
  ip     ;; next instruction to execute.  updated before executing op
@@ -57,6 +56,10 @@
  ;; simulate EUSART input/output stream
  eusart-read  
  eusart-write
+
+ ;; pre and post execute traces
+ trace-pre
+ trace-post
  )
 
 ;; Define bool flag parameters and 8bit register.
@@ -83,7 +86,8 @@
 
 ;; These can be initialized for global use.  Keep other params at #f
 ;; to force manual init.  Just clear jit buffer when loading code.
-(trace '())
+(trace-pre  #f)
+(trace-post #f)
 (jit (make-jit))
 
 ;; stack
@@ -457,6 +461,8 @@
   ((rrncf  f d a) (rmw (lambda (x) (rot8<<< x 7 #:flags! #t)) f d a))
   ((rlcf   f d a) (rmw (lambda (x) (rot8<<<c x 1)) f d a))
   ((rrcf   f d a) (rmw (lambda (x) (rot8<<<c x 7)) f d a))
+
+  ((iorwf  f d a) (rmw (lambda (x) (logic! bior x (wreg))) f d a))
   
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
   ((andlw l)      (wreg (logic! band (wreg) l)))
@@ -473,11 +479,12 @@
 
 (define-struct ins-jit (op args ip+ words))
 
-(define (trace! x)
+(define (trace! x trace)
   (let ((t (trace)))
-    (if (procedure? t) ;; allow for abstract trace
-        (t x)
-        (trace (cons x t)))))
+    (cond
+     ((not t) (void))
+     ((procedure? t) (t x)) ;; allow for abstract trace
+     (trace (cons x t)))))
 
 (define (print-trace-item addr)
   (if (number? addr)
@@ -487,7 +494,7 @@
       ;; Allow user to add tags to trace.
       (pretty-print addr)))
 
-(define (print-trace [n #f])
+(define (print-trace [n #f] [trace trace-pre])
   (unless (list? (trace))
     (error 'trace-type-error "~s" (trace)))
   (let* ((full (trace))
@@ -563,8 +570,10 @@
                    (values op args)
                    )))
               )))
-      (trace! ip-prev)
-      (apply op args))))
+      (trace! ip-prev trace-pre)
+      (apply op args)
+      (trace! ip-prev trace-post)
+      )))
       
 (define (run)
   (execute-next)
