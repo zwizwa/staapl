@@ -78,5 +78,9 @@
   (call-word target/test3)
   (pretty-print (ds)))
 
+(define (test4)
+  (reload)
+  (call-word target/test4)
+  (pretty-print (ds)))
 
 ;; (current-directory "/home/tom/staapl/app") (enter! (file "dtc-sim.rkt")) (test1)

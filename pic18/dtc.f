@@ -50,11 +50,15 @@ staapl pic18/compose-macro
 \  _foo is a macro then use as is
 \  _foo is a target word then replace with:  ' _foo _compile
 macro
-: cw>xt     word>m m> 2 * ;
-: _compile  i cw>xt ,, ;
+: cw>label  word>m m> ;
+: label,    2 * ,, ; \ store byte addresses    
+: _compile  i cw>label label, ;
 : _literal  >m ' fetch _compile m> ,, ;     
-: _if       ' 0jump _compile make-label dup >m ,, ;
+: _if       ' 0jump _compile make-label dup >m label, ;
 : _then     then ;  \ note that end: is called here  (see compiler-unit.rkt)
+: _begin    begin ;
+: _again    ' jump  _compile m> label, ;
+: _until    ' 0jump _compile m> label, ;    
 forth
     
     
@@ -74,7 +78,7 @@ forth
         
 macro
 \ : lohi | x | x x 8 >>> ;  
-: idtc i/c cw>xt lohi interpret ;
+: idtc i/c cw>label 2 * lohi interpret ;
 forth
 
 : test1 [ enter #x1234 _literal ' _dup _compile ' _exit _compile ] idtc ;
@@ -82,8 +86,10 @@ forth
 : ~test2 enter _if 1 _literal _then ' _exit _compile
 : test2 ' ~test2 idtc ; \ works for nonzero argument, not for zero
 
-: ~test3 enter _if 1 _literal ' _exit compile _then 2 _literal ' _exit _compile
+: ~test3 enter _if 1 _literal ' _exit _compile _then 2 _literal ' _exit _compile
 : test3 ' ~test3 idtc ; \ doesnt work
-    
 
+: ~test4 enter _begin _again   
+: test4 ' ~test4 idtc ;
+    
     
