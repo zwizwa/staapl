@@ -28,15 +28,6 @@ staapl pic18/compose-macro
     TOSH fh @!
     pop ;   
   
-: continue
-    begin fetch execute/b again
-
-: _bye
-    _exit  \ remove DTC continuation
-    pop ;  \ break the "continue" loop
-
-
-
 \ Return stack
 : _>r    >r >r ;
 : _r>    r> r> ;    
@@ -55,41 +46,26 @@ macro
 : _compile  i cw>label label, ;
 : _literal  >m ' fetch _compile m> ,, ;     
 : _if       ' 0jump _compile make-label dup >m label, ;
-: _then     then ;  \ note that end: is called here  (see compiler-unit.rkt)
-: _begin    begin ;
+: _then     then ;  \ includes end:
+: _begin    begin ; \ includes enter:
 : _again    ' jump  _compile m> label, ;
 : _until    ' 0jump _compile m> label, ;    
 forth
     
     
 \ Trampoline entry from native code.  The 'interpret' word will run a
-\ dtc primitive or primitive wrapped program.
-    
-    
+\ dtc primitive or primitive wrapped program as "<xt> bye"
+: interpret     \ ( lo hi -- )
+    bye>r       \ push original IP, IP=bye
+    execute/b   \ invoke the XT (primitive or high level word's enter)
+    thread-loop ;
+: thread-loop   \ execute token thread
+    begin fetch execute/b again
 : bye>r
     enter
     ' _bye _compile ;
-: interpret     \ ( lo hi -- )
-    bye>r       \ install continuation into dtc code "bye ;"
-    execute/b   \ invoke the primitive (might be enter = wrapped program)
-    continue ;  \ invoke threaded continuation
+: _bye
+    _exit  \ pop original IP
+    pop ;  \ break out of thread-loop
 
 
-        
-macro
-\ : lohi | x | x x 8 >>> ;  
-: idtc i/c cw>label 2 * lohi interpret ;
-forth
-
-: test1 [ enter #x1234 _literal ' _dup _compile ' _exit _compile ] idtc ;
-
-: ~test2 enter _if 1 _literal _then ' _exit _compile
-: test2 ' ~test2 idtc ; \ works for nonzero argument, not for zero
-
-: ~test3 enter _if 1 _literal ' _exit _compile _then 2 _literal ' _exit _compile
-: test3 ' ~test3 idtc ; \ doesnt work
-
-: ~test4 enter _begin _again   
-: test4 ' ~test4 idtc ;
-    
-    

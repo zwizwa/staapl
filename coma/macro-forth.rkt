@@ -90,7 +90,9 @@
 
 ;; Similar to 'macro: but for a toplevel form.  Initialize dictionary
 ;; in 'forth' mode, but make sure the first line is invalid.
-(define-syntax-rule (forth-begin/init init code ...)
+
+;; Now expanded in macro-forth-sig.rkt
+#;(define-syntax-rule (forth-begin/init init code ...)
   (rpn-parse (forth-compile-dictionary
               (macro)     
               scat-apply  

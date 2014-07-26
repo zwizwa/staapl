@@ -1,3 +1,4 @@
-#lang staapl/pic18/dtc \ -*- forth -*-
-\ :macro foo 123 ;
-1 2 3
+#lang staapl/pic18/dtc
+\ -*- forth -*-
+provide-all
+: foo 123    

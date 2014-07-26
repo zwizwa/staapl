@@ -1,5 +1,6 @@
 #lang racket/unit
 (require
+ "op.rkt"
  "../macro.rkt"
  "macro-forth-sig.rkt"
  "../sig.rkt"
@@ -25,3 +26,6 @@
 ;; Hack around trouble with syntax certificats for allot.
 (define (mf:wrap-variable n l c)
   (label:wrap-variable n l (macro: ,c ,label:allot)))
+
+(define (mf:lit datum)
+  (lit datum))

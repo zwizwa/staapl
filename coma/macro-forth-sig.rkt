@@ -5,6 +5,7 @@
          "../tools/signature-forms.rkt"
          "../rpn/rpn-signature-forms.rkt"
          "../forth/forth-lex.rkt"
+         "../macro.rkt"
          (for-syntax
           "macro-forth-tx.rkt"
           "../tools/stx.rkt"
@@ -49,10 +50,24 @@
    mf:wrap-word
    mf:wrap-variable  ;; Note this is different than label:allot from label^
    mf:compile!
+   mf:lit
+
+   ;; Not using `macro-push' from rpn-macro.rkt to allow
+   ;; implementation of normal lit and DTC lit using the same Forth
+   ;; language.
+   (define-syntax-rule (mf:macro-push val p sub)
+     (let ((p ((mf:lit val) p))) sub))
    
    (define-syntax-rule (mf:forth-begin . code)
-     (forth-begin/init (forth-word mf:reg mf:wrap-word #f rpn-lambda) . code))
-
+     (rpn-parse (forth-compile-dictionary
+                 (macro)     
+                 scat-apply
+                 mf:macro-push
+                 mf:macro-push
+                 macro:
+                 (forth-word mf:reg mf:wrap-word #f rpn-lambda)) ;; init
+                . code))
+   
    (define-syntaxes-ns (macro)
      (:macro :forth :variable : expand) 
      (values

@@ -226,14 +226,16 @@
      '(#f #f)))
   (apply values (find)))
 
-(define (flash-ref-word flash addr)
+(define (flash-ref flash addr)
   (let-values (((chunk offset) (flash-find-chunk flash addr)))
     (if chunk
-        (let ((lo (chunk-ref chunk offset))
-              (hi (chunk-ref chunk (add1 offset))))
-          (+ lo (* #x100 hi)))
-        ;; Should be empty but parser reads ahead.
-        #xFFFF)))
+        (chunk-ref chunk offset)
+        #xFF)))
+(define (flash-ref-word flash addr)
+  (let ((lo (flash-ref flash addr))
+        (hi (flash-ref flash (add1 addr))))
+    (+ lo (* #x100 hi))))
+
 
 (define (flash-code flash addr)
   (let-values (((chunk offset) (flash-find-chunk flash addr)))

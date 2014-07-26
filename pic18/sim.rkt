@@ -144,19 +144,6 @@
   ((memory-read (ram)) addr))
 
 
-;; flash
-(define (flash-ref addr word-access)
-  (let ((w (flash-ref-word (flash) addr)))
-    (if word-access w (band #xFF w))))
-
-(define (next-word)
-  (let ((w (flash-ref (ip) #t)))
-    (ip (+ (ip) 2))
-    w))
-
-
-
-
 
 
 ;; Map data address space to ram or sfrs.
@@ -453,8 +440,6 @@
 
   ((addwfc f d a) (rmw (lambda (x) (add x (+ (wreg) (bitC)) #:flags! #t)) f d a))
 
-  ((bsfi i f b a) (rmw (lambda (x) (bit-set x b (bxor i 1))) f 1 a))
-
   
   ((swapf  f d a) (rmw (lambda (x) (rot8<<< x 4 #:flags! #f)) f d a))
   ((rlncf  f d a) (rmw (lambda (x) (rot8<<< x 1 #:flags! #t)) f d a))
@@ -462,17 +447,23 @@
   ((rlcf   f d a) (rmw (lambda (x) (rot8<<<c x 1)) f d a))
   ((rrcf   f d a) (rmw (lambda (x) (rot8<<<c x 7)) f d a))
 
+  ((andwf  f d a) (rmw (lambda (x) (logic! band x (wreg))) f d a))
   ((iorwf  f d a) (rmw (lambda (x) (logic! bior x (wreg))) f d a))
+  ((xorwf  f d a) (rmw (lambda (x) (logic! bxor x (wreg))) f d a))
   
   ((addlw l)      (wreg (add (wreg) l #:flags! #t)))
+
   ((andlw l)      (wreg (logic! band (wreg) l)))
+  ((iorlw l)      (wreg (logic! bior (wreg) l)))
+  ((xorlw l)      (wreg (logic! bxor (wreg) l)))
   
   ((clrf reg a)   (store reg a 0) (Z #t))
-
+  ((bsfi i f b a) (rmw (lambda (x) (bit-set x b (bxor i 1))) f 1 a))
   ((lfsr f l h)   (fsr-set! f (lohi l h)))
+  
   ((tblrd*+)
    (let ((p (tblptr)))
-     (tablat (flash-ref p #f))
+     (tablat (flash-ref (flash) p))
      (tblptr-write (add1 p))))
   )
 
@@ -518,8 +509,8 @@
 (define (dasm-ip)
   (let* ((here (ip))
          ;; Feed the dasm two words of context
-         (w0 (flash-ref here #t))
-         (w1 (flash-ref (+ 2 here) #t)))
+         (w0 (flash-ref-word (flash) here))
+         (w1 (flash-ref-word (flash) (+ 2 here))))
     (car ;; only interested in first instruction
       (parameterize ((dasm-pcr-enable #f)) ;; turn off PC-relative to abs translation
         (ll->l

@@ -66040,3 +66040,163 @@ This would also allow anotating of address -> containing word.
 Ok, done.
 A little fidgeting though due to representation of chains/words.
 
+
+
+Entry: DTC running
+Date: Fri Jul 25 22:01:42 EDT 2014
+
+Main problem was still compiling word addresses and some typos.
+
+
+Entry: DTC next?
+Date: Sat Jul 26 15:17:06 EDT 2014
+
+Some structured procrastination.  The synth requires some willpower so
+maybe do something that comes more natural first..
+
+Not sure about future of DTC.  It's definitely useful to have the
+inner interpreter around.  I'm not sure though about writing a
+traditional Forth outer interpreter running on the target.  Might be
+better to first explore this stack:
+- staapl 8bit,
+- calling 16bit primitives from 8bit
+- foreign hosted compiler for dtc
+- self-hosted
+
+I started a dtc lang so let's see where that ended last time.
+
+So booting that up again, there is the lexer called from the
+lang/dtc.rkt module which seems to work.  It dumps a string of tokens
+into the `forth-module-begin' word which I believe translates them
+into a scheme form that looks like a collection of name-value bindings.
+
+`forth-module-begin' is defined in macro-forth-sig.rkt and is a "unit
+border macro" for ignorance of more appropriate name, i.e. it is
+defined in terms of abstract names in the unit.  The lang/dtc.rkt
+module binds this signature to dtc-forth-unit.rkt
+
+From then on it gets a bit confusing how the units and modules work
+together.  I think the idea was to keep the tie into the compiler
+abstract.
+
+The signature exports the 'macro/:' identifier, so why does compiling
+": foo 123" give an error?
+
+Let's look at the differnce between pic18/lang.rkt and pic18/dtc-lang.rkt
+( The reader.rkt are basically the same, referring to the files above. )
+
+Adding this provide to dtc-lang.rkt solves that.
+
+(provide macro/:)
+
+How to provide the whole lot?
+
+I'm guessing there is no explicit way to do this, but this gets taken
+care of by a (all-defined-out) somewhere because it acts as a local
+instantiation?
+
+Yes replacing it by (provide (all-defined-out)) seems to fix it.
+
+
+This is what comes out of the expand form.  The forth-module-begin
+form is similar but only works at module level, not in the geiser
+repl.
+
+ (syntax->datum (expand '(forth-begin |:| foo 123)))
+'(begin
+   (begin
+     (#%app
+      (#%app forth-dictionary-log)
+      '((forth-word mf:reg mf:wrap-word "#f" rpn-lambda)
+        (forth-word mf:reg mf:wrap-word foo rpn-lambda (macro-push 123))))
+     (begin
+       (define-values
+        (label wrapper inline)
+        (#%app mf:wrap-word '#f '#f (lambda (p) p)))
+       (begin)
+       (begin)
+       (begin)
+       (#%app mf:reg inline))
+     (begin
+       (define-values
+        (label wrapper inline)
+        (#%app
+         mf:wrap-word
+         'foo
+         '#f
+         (lambda (p) (let-values (((p) (#%app (#%app lit '123) p))) p))))
+       (define-values (target/foo) label)
+       (define-values (macro/foo) wrapper)
+       (define-values (inline/foo) inline)
+       (#%app mf:reg inline)))
+   (#%app mf:compile!))
+racket@dtc-test.rkt> 
+
+
+So it seems straightforward, but where to I actually change the
+meaning of the macros?  I.e. 'macro/+' should be something like this:
+
+macro
+: + ' _+ _compile ;
+forth
+
+So it seems that dtc-lang.rkt will have to make that translation.
+
+So let's ride that wave for a bit see where it goes..
+
+
+Looking at macro-forth-unit.rkt it seems that the trick is to delegate
+to the core functons with some modification:
+
+(wrap-functions
+ (mf:compile!      compile!)
+ (mf:reg           label:append!)
+ (mf:wrap-macro    label:wrap-macro)
+ (mf:wrap-word     label:wrap-word))
+
+What's the second argument of the wrap words?
+Location.  See compiler-unit.rkt
+
+
+Patching the dtc mf: functions through to modified label: functions
+seems to work, but there's another place to patch: the `macro:' form.
+
+Macro stepper in drracket seems broken for #lang staapl/pic18/dtc
+So use this manually:
+
+(define (x n form)
+  (if (zero? n)
+      (syntax->datum form)
+      (x (sub1 n) (expand-once form))))
+
+
+So forth-module-begin needs to be changed.
+
+From macro-forth.rkt:
+(define-syntax-rule (forth-begin/init init code ...)
+  (rpn-parse (forth-compile-dictionary
+              (macro)     
+              scat-apply  
+              macro-push
+              macro-push
+              macro:
+              init)
+             code ...))
+
+
+It's getting to be a bit blurry, but at least it seems that
+forth-begin needs to be parameterized by the forth-begin/init
+function.
+
+So it seems that because `forth-begin/init' appears hardcoded in the
+macro signature, there isn't much to be done about it?  Macros and
+units don't seem to mix.
+
+So let's push it through.  It should be possible to add a transformer
+function into macro-forth^ that can then be used to postprocess
+individual macros.
+
+Step 1: eliminate forth-begin/init and expand its definition into the
+signature.
+
+
