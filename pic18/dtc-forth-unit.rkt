@@ -30,6 +30,8 @@
           (macro: ',invoke _compile)
           wrapped-inline))
 
+(define (mf:lit datum)
+  (macro: ',datum _literal))
 
 (define (mf:reg inline) (label:append! inline))
 (define (mf:compile!)   (compile!))

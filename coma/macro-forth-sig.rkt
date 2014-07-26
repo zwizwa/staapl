@@ -50,7 +50,7 @@
    mf:wrap-word
    mf:wrap-variable  ;; Note this is different than label:allot from label^
    mf:compile!
-   mf:lit
+   mf:lit  ;; compile literal to macro
 
    ;; Not using `macro-push' from rpn-macro.rkt to allow
    ;; implementation of normal lit and DTC lit using the same Forth
