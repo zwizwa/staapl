@@ -1,7 +1,10 @@
 #lang racket/base
 
 (require
- "../tools.rkt")
+ "../tools.rkt"
+ "../ns.rkt"
+ "../macro.rkt"
+ "dtc.rkt")
 
 (require/provide
  racket/pretty
@@ -17,6 +20,7 @@
 ;;(provide macro/:) 
 (provide
  macro/:
+ |macro/;|
  macro/provide-all)
 
 (define-syntax-rule (dtc-module-begin . words)
@@ -24,4 +28,8 @@
 (provide
  (rename-out (dtc-module-begin #%module-begin))
  (except-out (all-from-out racket/base) #%module-begin))
+
+
+;; Map primitives.
+(ns (macro) (define |;| (macro: ',(macro: _exit) _compile)))
 

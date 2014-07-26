@@ -1,4 +1,3 @@
-#lang staapl/pic18/dtc
-\ -*- forth -*-
+#lang staapl/pic18/dtc \ -*- forth -*-
 provide-all
-: foo 123    
+: foo 123 ;   
