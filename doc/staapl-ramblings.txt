@@ -66200,3 +66200,18 @@ Step 1: eliminate forth-begin/init and expand its definition into the
 signature.
 
 
+
+
+Entry: Self hosting?
+Date: Sat Jul 26 20:59:39 EDT 2014
+
+So what is required to self-host?
+
+- Implement all macros as words.
+- Implement dictionary
+
+However, the Staapl compiler might be able to compile an existing
+self-hosted interpreter.  Next procrastination exercise?
+
+
+
