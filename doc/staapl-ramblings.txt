@@ -66298,4 +66298,17 @@ Date: Sun Jul 27 11:09:05 EDT 2014
 target-find-code delegates (eventually) to code-find.  This is exposes
 too much for the dtc.
 
-Next: figure out namespace issues for dtc console.
+
+Entry: dtc console underscore hack
+Date: Sun Jul 27 16:23:38 EDT 2014
+
+FIXME: Figure out namespace issues for dtc console.
+For now it also looks in the "underscore namespace".
+
+
+
+Entry: next?
+Date: Sun Jul 27 16:34:17 EDT 2014
+
+A bit of a frenzy these last couple of days.  Got a bit obsessed..
+Next probably time for some applications.  Back to thinking slowly.
