@@ -232,7 +232,7 @@
 
 
 
-(define (words-list)
+(define (code-list)
   (define lst '())
   (for ((w (map car (code-labels))))
     ;; Don't print anonymous labels
@@ -241,13 +241,7 @@
         (push! lst str))))
   lst)
 
-(define (macros-list)
-  (define lst '())
-  (for ((w (namespace-mapped-symbols)))
-    (let* ((str (symbol->string w))
-           (m (regexp-match #px"macro/(.*)" str)))
-      (when m
-        (push! lst (list-ref m 1)))))
-  lst)
 
 
+(define (ns-list ns)
+  (map symbol->string (ns-mapped-symbols ns)))

@@ -53,7 +53,7 @@
 ;; taking precedence over anything defined in (target) or (macro).
 ;; These words are never overridden by any target/macro definition and
 ;; are safe for target->host RPC calls.
-(define-syntax-rule (host-words . defs)
+(define-syntax-rule (host-compositions . defs)
   (compositions (host) live: . defs))
 
 ;; Word size for passing parameters to host words.
@@ -72,16 +72,27 @@
 (define (tw>) (byte/word t> _t>))
 (define (s)   (byte/word ts _ts))
 
-(define-values (words macros)
+;; Print dictionaries
+(define-values (words
+                macros
+                target-words
+                host-words
+                scat-words
+                scheme-words)
   (let ((print-list
          (lambda (lst)
            (lambda ()
-             (for ((str (lst))) (printf "~a " str))
+             (for ((str (sort (lst) string-ci<=?))) (printf "~a " str))
              (newline)))))
-    (values (print-list words-list)
-            (print-list macros-list))))
+    (values (print-list code-list)
+            (print-list (lambda () (ns-list '(macro))))
+            (print-list (lambda () (ns-list '(target))))
+            (print-list (lambda () (ns-list '(host))))
+            (print-list (lambda () (ns-list '(scat))))
+            (print-list (lambda () (map symbol->string (namespace-mapped-symbols))))
+            )))
 
-(host-words
+(host-compositions
  ;; Memory access is never overridden by target implementation. FIXME:
  ;; why is this?  The 'access-bank functionality can probably be
  ;; implemented as a concatenative macro.
@@ -89,8 +100,8 @@
  (!      tw> tw> swap access-bank t!)
  (|.|    tw> p))
 
-(define-syntax-rule (1cmd:  cmd ...) (host-words (cmd tw> cmd) ...))
-(define-syntax-rule (_1cmd: cmd ...) (host-words (cmd t> t> hilo> cmd) ...))
+(define-syntax-rule (1cmd:  cmd ...) (host-compositions (cmd tw> cmd) ...))
+(define-syntax-rule (_1cmd: cmd ...) (host-compositions (cmd t> t> hilo> cmd) ...))
 
 (1cmd:  kb a! f! abd fbd apd bd p px ps pc erase-block erase-from-block client target!)
 (_1cmd: _p _px _ps)
