@@ -66266,3 +66266,27 @@ input.
 
 So don't get rid of live: it's an essential part.
 
+
+Entry: Interactive dtc
+Date: Sun Jul 27 10:56:23 EDT 2014
+
+Seems it's solved by distinguising between these in the .dict file:
+staapl/live-pic18
+staapl/live-pic18-dtc
+
+Note that the target kernel needs to have the pic18/dtc module loaded
+to be able to interpret code.
+
+Major changes: parameterize rpn-target.rkt and commands.rkt wrt how
+they handle data push/pop and code execution.
+
+
+I'm thinking this might be an interesting way to bootstrap new chips.
+Write a minimal assembler/compiler and do most of the work in dtc?
+
+It's remarkable that this is all so easy to do.  Granted there is a
+lot of (over-)abstraction going on resulting from trying out different
+ideas.  So it's actually not simple, but the structure does seem to be
+robust against modifications in practice.
+
+Maybe it's time to start an M0 port?

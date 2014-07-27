@@ -7,6 +7,7 @@
 (require
  racket/match
  racket/control
+ racket/pretty
  "../tools.rkt"
  "../scat.rkt"
  "../rpn.rkt"
@@ -55,15 +56,52 @@
 (define-syntax-rule (host-words . defs)
   (compositions (host) live: . defs))
 
+;; Word size for passing parameters to host words.
+;; E.g. when running DTC the wordsize seen by the user is 2 bytes,
+;; while the underlying native Forth is still 1 byte.
+(define live-wordsize (make-parameter 1))
+(define (error-wordsize) (error 'live-wordsize "~x" (live-wordsize)))
+
+(define (byte/word b w . args)
+  (case (live-wordsize)
+    ((1) (apply b args))
+    ((2) (apply w args))
+    (else (error-wordsize))))
+
+(define (>tw) (byte/word >t _>t))
+(define (tw>) (byte/word t> _t>))
+(define (s)   (byte/word ts _ts))
+
+(define (words)
+  (for ((w (map car (code-labels))))
+    ;; Don't print anonymous labels
+    (let ((str (symbol->string w)))
+      (unless (eq? #\. (string-ref str 0))
+        (printf "~a " str))))
+  (newline))
+
+(define (macros)
+  (define prefix "macro/")
+  (define plen (string-length prefix))
+  (for ((w (namespace-mapped-symbols)))
+    (let ((str (symbol->string w)))
+      (when
+          (and (>= (string-length str) plen)
+               (equal? prefix (substring str 0 plen)))
+        (printf "~a " (substring str plen))))))
+
+        
+
+
 (host-words
  ;; Memory access is never overridden by target implementation. FIXME:
  ;; why is this?  The 'access-bank functionality can probably be
  ;; implemented as a concatenative macro.
- (@      t> access-bank t@ >t)
- (!      t> t> swap access-bank t!)
- (|.|    t> p))
+ (@      tw> access-bank t@ >tw)
+ (!      tw> tw> swap access-bank t!)
+ (|.|    tw> p))
 
-(define-syntax-rule (1cmd:  cmd ...) (host-words (cmd t> cmd) ...))
+(define-syntax-rule (1cmd:  cmd ...) (host-words (cmd tw> cmd) ...))
 (define-syntax-rule (_1cmd: cmd ...) (host-words (cmd t> t> hilo> cmd) ...))
 
 (1cmd:  kb a! f! abd fbd apd bd p px ps pc erase-block erase-from-block client target!)
