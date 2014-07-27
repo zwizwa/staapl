@@ -200,3 +200,29 @@
   (define defined? (make-ns-defined? sym))
   (cond ((defined? '(host)) => (lambda (x) x))
         (else (eval `(live: ,sym)))))
+
+
+
+;; Compile forth code.
+
+;; Log interactive state.  Because it's impossible to serialize the
+;; the state built up during interactive compilation, we provide a way
+;; to log the subset of the evaluations that lead to definitions, so
+;; they can be replayed on next start.
+
+(define eval-log-file
+  (make-parameter "staapl.log"))
+
+(define forth-namespace (make-parameter #f))
+(define forth-begin-prefix (make-parameter '()))
+
+(define (eval-forth forth-expr [log #t])
+  ;; Eval before logging in case there is an error.
+  (eval
+   `(forth-begin ,@(forth-begin-prefix) ,@forth-expr)
+   (or (forth-namespace) (current-namespace)))
+  (when log
+    (with-output-to-file
+        (eval-log-file)
+      (lambda () (write forth-expr) (newline))
+      #:exists 'append)))

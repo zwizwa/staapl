@@ -66243,3 +66243,19 @@ compiler: just have interaction pick things out of a different
 namespace.
 
 
+Entry: dtc todo
+Date: Sun Jul 27 01:28:14 EDT 2014
+
+- get rid of the cheap underscore prefix hack in rpn-target-dtc
+- create a separate scheme namspace for DTC interaction
+
+
+Entry: commands.rkt
+Date: Sun Jul 27 01:33:58 EDT 2014
+
+Maybe time to clean up that file and remove things that are no longer
+used or are redundant.
+
+I don't remember why scat-wrap-dynamic is used and not a t> dynamic word.
+
+
