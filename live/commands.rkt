@@ -73,8 +73,8 @@
 (define (s)   (byte/word ts _ts))
 
 ;; Print dictionaries
-(define-values (words
-                macros
+(define-values (code-words
+                macro-words
                 target-words
                 host-words
                 scat-words

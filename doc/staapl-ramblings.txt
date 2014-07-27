@@ -66298,3 +66298,4 @@ Date: Sun Jul 27 11:09:05 EDT 2014
 target-find-code delegates (eventually) to code-find.  This is exposes
 too much for the dtc.
 
+Next: figure out namespace issues for dtc console.
