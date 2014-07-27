@@ -4,7 +4,8 @@
  "../tools.rkt"
  "../ns.rkt"
  "../macro.rkt"
- "dtc.rkt")
+ "dtc.rkt"
+ "double-math.rkt")
 
 (require/provide
  racket/pretty
@@ -19,9 +20,11 @@
 ;; identifiers from this module.
 ;;(provide macro/:) 
 (provide
- macro/:
- |macro/;|
- macro/provide-all)
+ (all-defined-out)
+ ;macro/:
+ ;|macro/;|
+ ;macro/provide-all
+ )
 
 (define-syntax-rule (dtc-module-begin . words)
   (forth-module-begin . words))
@@ -30,6 +33,26 @@
  (except-out (all-from-out racket/base) #%module-begin))
 
 
-;; Map primitives.
-(ns (macro) (define |;| (macro: ',(macro: _exit) _compile)))
+(define (wrap-macro m) m)
+(define (wrap-word  m) (macro: ',m _compile))
 
+;; Map primitives.
+(define-syntax-rule (define-wrapped wrapper (out in) ...)
+  (begin (ns (macro) (define out (wrapper (macro: in)))) ...))
+
+(define-wrapped wrap-macro
+  (begin _begin)
+  (again _again)
+  (until _until))
+
+;; Fixme: it's probably better to snarf all names with underscore
+;; prefixes from a collection of modules.
+
+(define-wrapped wrap-word
+  (|;| _exit)
+  (>r  _>r)
+  (r>  _r>)
+  (dup _dup))
+
+  
+  

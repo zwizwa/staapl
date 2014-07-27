@@ -11,12 +11,19 @@
 (import)
 (export macro-forth^)
 
-;; The idea is to feed the syntax back into the native 8bit pic18
-;; compiler extended with a dtc interpreter.
+;; The DTC language is implemented on top of the native PIC18 Forth.
 
-;; Two kinds of wrapping need to be done:
-;; - Individual words need to be wrapped like this:  (+) = (' _+ _compile)
-;; - Definitions need to be wrapped to prefix `enter'
+;; It reuses the macro-forth^ infrastructure, which is a collection of
+;; Scheme macros tied to a collection of compiler words.  The
+;; implementation for the DTC delegates to the native PIC18 compiler
+;; with a couple of modifications.
+;;
+;; - Invokation words are abstracted as (macro: ',invoke _compile).
+;;   In dtc-lang.rkt the primitives are wrapped in a similar way.
+;;
+;; - Each definition needs to be prefixed with the `enter' word.
+;;
+;; - Literals are implemented differently
 
 (define (mf:wrap-word name loc inline)
   (printf "dtc mf:wrap-word ~a\n" name)
@@ -33,6 +40,7 @@
 (define (mf:lit datum)
   (macro: ',datum _literal))
 
+;; Delegate to native compiler.
 (define (mf:reg inline) (label:append! inline))
 (define (mf:compile!)   (compile!))
 
