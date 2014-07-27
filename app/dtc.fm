@@ -42,7 +42,6 @@ staapl pic18/serial-debug
 staapl pic18/double-math
 staapl pic18/double-pred
 staapl pic18/execute
-staapl pic18/mem16
 staapl pic18/cond
 staapl pic18/compose-macro
     
@@ -78,7 +77,7 @@ macro
         
 macro
 \ : lohi | x | x x 8 >>> ;  
-: idtc i/c cw>label 2 * lohi interpret ;
+: idtc i/c cw>label 2 * lohi execute/dtc ;
 forth
 
 : test1 [

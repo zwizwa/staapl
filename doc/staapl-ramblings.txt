@@ -66214,4 +66214,9 @@ However, the Staapl compiler might be able to compile an existing
 self-hosted interpreter.  Next procrastination exercise?
 
 
+Entry: Interactive dtc
+Date: Sat Jul 26 22:34:20 EDT 2014
+
+This needs the live language + some of the words in tethered.rkt need
+to be parameterized.
 
