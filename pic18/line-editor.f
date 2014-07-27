@@ -3,6 +3,7 @@ staapl pic18/stdout
 staapl pic18/vector
 staapl pic18/cond
 staapl pic18/compose-macro
+staapl pic18/table
 
 
 

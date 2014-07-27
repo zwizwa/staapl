@@ -54,6 +54,7 @@
         debug-suffix
         version-tag
         live-module
+        dtc-enable
         )
 
 ;; Defaults
@@ -61,7 +62,7 @@
 (baud #f)
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
-(live-module "staapl/live-pic18")
+(live-module #f)
 
 
 (define (get-arguments)
@@ -122,13 +123,21 @@
   (let-values (((base name _) (split-path path)))
     base))
 
+(define (req-live-module)
+  (with-handlers ((void void))
+    (spec-from-source dtc-enable 'dtc-enable))
+  (or (live-module)
+      (if (dtc-enable)
+          "staapl/live-pic18-dtc"
+          "staapl/live-pic18")))
+
 (define (requirements kernel-path)
   `(require
     (prefix-in sim- staapl/pic18/sim)
     (file ,(path->string kernel-path))
     ;; FIXME: if prev doesn't include dtc.rkt live-pic18-dtc doesn't
     ;; seem to pull in code properly.
-    ,(string->symbol (live-module))
+    ,(string->symbol (req-live-module))
     ))
 
 
@@ -149,22 +158,23 @@
   (apply printf args))
 
 
+(define (spec-from-source param id)
+  (unless (param)
+    (let ((v (eval `(macro-constant ',id))))
+      (when v (param v)))))
+
 ;; Figure out console config
 (define (console-spec)
 
   ;; Unless overridden by command line arguments, get the console
   ;; specs from the Forth source files.
-  (define (spec-from-source param id)
-    (unless (param)
-      (let ((v (eval `(macro-constant ',id))))
-        (when v (param v)))))
 
   (define (device-string x)
     (if (symbol? x) (symbol->string x) x))
 
-  (spec-from-source console 'console-type)
-  (spec-from-source device  'console-device)
-  (spec-from-source baud    'console-baud)
+  (spec-from-source console    'console-type)
+  (spec-from-source device     'console-device)
+  (spec-from-source baud       'console-baud)
   
   `(console ',(console) ,(device-string (device)) ,(baud)))
 

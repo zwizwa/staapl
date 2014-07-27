@@ -10,6 +10,7 @@ staapl pic18/route
 staapl pic18/compose-macro
 staapl pic18/afregs
 staapl pic18/cond
+staapl pic18/string
 
 \ --------------- DRIVER --------------
 

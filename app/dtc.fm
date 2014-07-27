@@ -1,10 +1,16 @@
 #lang staapl/pic18 \ -*- forth -*-
 
-\ App: DTC Forth.  There are many layers this.  The main ones are:
-\ - Inner interpreter + memory model.
-\ - Outer interpreter + dictionary
-\ The latter can be done on the host for now.  Should be easy to bolt
-\ on eForth once a core kernel is running.
+\ App: DTC Forth.
+
+\ There is dtc support Staapl, both as a compiler (pic18-dtc.rkt and
+\ #lang staapl/pic18/dtc) and as an interactive console
+\ (live-pic18-dtc.rkt).  This module produces a dictionary that uses
+\ both.
+
+\ Additionally, a stand-alone forth could be built on top of the core
+\ DTC implementation, with outer interpreter and immediate words
+\ running on the target.  Some preliminary code is included for
+\ console input.
 
 \ Board:
 \ PIC DIP40 MINI KIT - PIC Developmen​t Board kit for DIP40 PIC with 18F4550 + 4Mhz XTAL
@@ -35,21 +41,21 @@ require-file dtc-desc.rkt  \ scheme file with descriptor tables
 : configuration-descriptor 'scheme configs usb-descriptors
 : string-descriptor        'scheme strings usb-descriptors
 
-staapl pic18/string
-staapl pic18/afregs
+\ If staapl/live-pic18-dtc is used for interaction, the DTC
+\ interpreter needs to be compiled manually.
+staapl pic18/dtc
+\ load dtc-test.f
+    
+\ serial console input line editor
+load line-editor.f
+    
+\ stdin / stdout config
 staapl pic18/vector
 staapl pic18/serial-debug
-staapl pic18/double-math
-staapl pic18/double-pred
-staapl pic18/execute
-staapl pic18/cond
 staapl pic18/compose-macro
     
 \ load debug.f
-load line-editor.f
-
     
-\ FIXME: put this somewhere else
 : usb>io
     [ stdin -> console-EP OUT> ] i/c
     [ stdout -> console-EP >IN ] i/c
@@ -59,17 +65,10 @@ load line-editor.f
     [ stdin -> async.rx> ] i/c
     [ stdout -> async.>tx ] i/c
     [ stdout-flush -> ] i/c ;
-    
 
-\ If staapl/live-pic18-dtc is used for interaction, the DTC
-\ interpreter needs to be compiled manually.
-    
-staapl pic18/dtc
-
-    
-\ load dtc-test.f
-    
+\ config macros    
 macro
+: dtc-enable 1 ; \ used by compiler to enable staapl/live-pic18-dtc
 : fosc 48000000 ;
 : monitor-EP 1 ;  \ ttyACM0 staapl monitor (binary)
 : console-EP 3 ;  \ ttyACM1 serial command interface
@@ -79,9 +78,6 @@ macro
 : hello 0 LATB ! pause #xF LATB ! ;
 
         
-    
-    
-    
 : init-board     \ FIXME
     #xF0 TRISB ! \ low nibble is LED1-LED4
     0 TRISA !   \ FIXME: check these
