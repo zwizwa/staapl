@@ -4,7 +4,11 @@
           "../label-sig.rkt"
           "dtc.rkt"
           (only-in "../pic18.rkt" ;; Tie into the full pic18 compiler.
+                   macro/<<
+                   macro/dw>
+                   label:allot
                    label:wrap-word
+                   label:wrap-variable
                    label:append!
                    compile!)
           racket/pretty)
@@ -40,16 +44,33 @@
 (define (mf:lit datum)
   (macro: ',datum _literal))
 
+
+(define (mf:wrap-variable name loc code)
+  (define-values (label
+                  invoke
+                  wrapped-inline)
+    (label:wrap-variable name
+                         loc
+                         (macro: ,code
+                                 ;; Here the size is already compiled
+                                 ;; as a literal which for dtc is just
+                                 ;; a raw word.  Undo that and pass it
+                                 ;; on to native allot.
+                                 dw>
+                                 ,label:allot)))
+  (values label
+          (macro: ,invoke _literal)
+          wrapped-inline))
+                         
+
 ;; Delegate to native compiler.
 (define (mf:reg inline) (label:append! inline))
 (define (mf:compile!)   (compile!))
 
-;; Macros and variables not implemented yet.
-(define (NI tag)
-  (lambda args
-    (pretty-print (cons 'NI (cons tag args)))
-    (void)))
-(define mf:wrap-macro    (NI 'wrap-macro))
-(define mf:wrap-variable (NI 'wrap-variable))
+;; Macros are not yet necessary.  Might not need much wrapping except
+;; for getting the ';' word to work properly.
+(define (mf:wrap-macro name loc code)
+  (error 'mf:wrap-macro "not implemented"))
+  
 
  
