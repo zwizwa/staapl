@@ -52,7 +52,8 @@
 ;; taking precedence over anything defined in (target) or (macro).
 ;; These words are never overridden by any target/macro definition and
 ;; are safe for target->host RPC calls.
-(define-syntax-rule (host-words . defs) (compositions (host) live: . defs))
+(define-syntax-rule (host-words . defs)
+  (compositions (host) live: . defs))
 
 (host-words
  ;; Memory access is never overridden by target implementation. FIXME:

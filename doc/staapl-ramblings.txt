@@ -66259,3 +66259,14 @@ used or are redundant.
 I don't remember why scat-wrap-dynamic is used and not a t> dynamic word.
 
 
+
+Entry: Getting rid of 'live:' ?
+Date: Sun Jul 27 01:45:38 EDT 2014
+
+Hmm maybe not..
+The way this ties into the rpn parser makes it actually a shortcut.
+
+Currently I lack the insight but it seems that separating "host view"
+and "target view" is a good idea.
+
+
