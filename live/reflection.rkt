@@ -53,6 +53,8 @@
 
   )
 
+;; FIXME: this might be too general for DTC: many of the low-level
+;; primitives are accessible on the toplevel.
 (define (target-find-code sym)  (target-find-realm sym 'code))
 (define (target-find-data sym)  (target-find-realm sym 'data))
 
@@ -226,3 +228,26 @@
         (eval-log-file)
       (lambda () (write forth-expr) (newline))
       #:exists 'append)))
+
+
+
+
+(define (words-list)
+  (define lst '())
+  (for ((w (map car (code-labels))))
+    ;; Don't print anonymous labels
+    (let ((str (symbol->string w)))
+      (unless (eq? #\. (string-ref str 0))
+        (push! lst str))))
+  lst)
+
+(define (macros-list)
+  (define lst '())
+  (for ((w (namespace-mapped-symbols)))
+    (let* ((str (symbol->string w))
+           (m (regexp-match #px"macro/(.*)" str)))
+      (when m
+        (push! lst (list-ref m 1)))))
+  lst)
+
+

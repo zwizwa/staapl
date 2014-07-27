@@ -66290,3 +66290,11 @@ ideas.  So it's actually not simple, but the structure does seem to be
 robust against modifications in practice.
 
 Maybe it's time to start an M0 port?
+
+
+Entry: code-find
+Date: Sun Jul 27 11:09:05 EDT 2014
+
+target-find-code delegates (eventually) to code-find.  This is exposes
+too much for the dtc.
+

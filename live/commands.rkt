@@ -72,26 +72,14 @@
 (define (tw>) (byte/word t> _t>))
 (define (s)   (byte/word ts _ts))
 
-(define (words)
-  (for ((w (map car (code-labels))))
-    ;; Don't print anonymous labels
-    (let ((str (symbol->string w)))
-      (unless (eq? #\. (string-ref str 0))
-        (printf "~a " str))))
-  (newline))
-
-(define (macros)
-  (define prefix "macro/")
-  (define plen (string-length prefix))
-  (for ((w (namespace-mapped-symbols)))
-    (let ((str (symbol->string w)))
-      (when
-          (and (>= (string-length str) plen)
-               (equal? prefix (substring str 0 plen)))
-        (printf "~a " (substring str plen))))))
-
-        
-
+(define-values (words macros)
+  (let ((print-list
+         (lambda (lst)
+           (lambda ()
+             (for ((str (lst))) (printf "~a " str))
+             (newline)))))
+    (values (print-list words-list)
+            (print-list macros-list))))
 
 (host-words
  ;; Memory access is never overridden by target implementation. FIXME:
