@@ -66312,3 +66312,32 @@ Date: Sun Jul 27 16:34:17 EDT 2014
 
 A bit of a frenzy these last couple of days.  Got a bit obsessed..
 Next probably time for some applications.  Back to thinking slowly.
+
+
+Entry: eforth.f
+Date: Sun Jul 27 17:25:12 EDT 2014
+
+Been looking at eforth.f again, and realizing that Staapl is really
+different due to the different flavor of macros.  I'm not even sure
+how to bootstrap this without cross-compiling using a standard Forth.
+
+So might be better to just start from scratch, then once there is a
+standard-ish forth running on the PIC, use it to compile eForth?
+
+So what are the missing pieces?
+
+- a dictionary
+- compilation to flash
+
+The latter should probably be done to ram first, then to seal compile
+to flash?  Trouble is really the back-patching for labels.
+
+The rest seems straightforward.
+
+
+
+The thing is that looking some more I really don't want to get into it
+any longer!  Visceral reaction there to forth's CT weirdness :)
+
+
+
