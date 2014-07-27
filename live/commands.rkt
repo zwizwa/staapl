@@ -163,7 +163,7 @@
  ;; Switch to compile mode for 2 words.  Instead we might try to run
  ;; the (macro) namespace parser directly?  This won't work for ":" as
  ;; it is not terminated.
- ((declare: parser name)  (inline-code (parser name)))
+ ((two-words: parser name)  (inline-code (parser name)))
 
  ;; Switch to compile mode for the rest of the line.
  ((compile-line:)  (slurp inline-code))
@@ -185,7 +185,7 @@
 ;; If any of these words are encountered, one extra word is parsed and
 ;; the result is passed to the compiler.
 (prefix-parsers-wrapped
- (target) declare:
+ (target) two-words:
  (variable 2variable load require planet staapl require-file))
 
 ;; If any of these words are encountered, the entire line is parsed
