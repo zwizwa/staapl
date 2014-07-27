@@ -4984,32 +4984,37 @@ software development so addictive!
 
 
 
-Entry: The 16-bit Threaded Forth is working
+Entry: The 16-bit Threaded Code is working
 Date: Sat Jul 26 20:20:10 EDT 2014
 
-This required only a single modification to the macro-forth^ signature
-to also allow parameterization of the representation of literals.
+Implementing a TC target required only a single modification to the
+macro-forth^ signature to also allow parameterization of the
+representation of literals.
 
 The rest is all just module composition, where the compiler for the
-#lang staapl/pic18/dtc piggy-backs on the compiler for staapl/pic18.
+#lang staapl/pic18/dtc piggy-backs on the compiler for staapl/pic18 by
+just slightly modifying behavior.
 
-- The interpreter and primitive are written in the pic18 Forth
+Some properties:
+
+- The TC interpreter and primitive are written in the pic18 Forth
   dialect.
 
-- The interpreter is DTC with `next' implemented as native procedure
-  return, so not strictly a DTC.  This currently requires two extra
-  jumps per primitive.
+- The interpreter is DTC (Direct Threading) with `next' implemented as
+  native procedure return where XT fetching and executing is run from
+  an interpreter loop.  This is not strictly a DTC and currently
+  requires two extra jumps per primitive.
 
-- The above choice does allow for a smoother impedance match between
-  the native Forth and the threaded one.  16bit primitives can be
+- The above choice does allow for a smoother interoperation between
+  the native Forth and the TC Forth.  I.e. 16bit TC primitives can be
   called directly from the 8 bit Forth.
 
-- Threaded words can be constructed manually in the native Forth.
+- Threaded words can be constructed manually in the native Forth.  The
+  macros to do this are re-used in the macro-forth^ wrappers.
 
 - Threaded Forth's macros are just native macros.
 
 - Exposing functionality through the #lang staapl/pic18/dtc form just
   requires wrapping of native primitives to macros that compile
   threaded code.  This can be largely automated.
-
 
