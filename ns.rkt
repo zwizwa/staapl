@@ -35,8 +35,8 @@
 
 (define-syntax ns ns-tx)
 
-
-
+;; Used for DTC
+(define-syntax underscore underscore-tx)
 
 ;; Reflection
 

@@ -6,7 +6,8 @@
 (provide
  ns-tx
  ns-prefixed
- name->identifier)
+ name->identifier
+ underscore-tx)
 
 (require
  racket/pretty
@@ -15,7 +16,11 @@
   racket/unit
   racket/base))
 
-    
+(define (underscore-tx name)
+  (datum->syntax
+   name
+   (string->symbol
+    (printf "_~a" (syntax->datum name)))))
 
 (define ns-separator "/")
 
@@ -48,6 +53,7 @@
    (prefix-id (ns->prefix ns)
               (name->identifier name))
    name (current-code-inspector) #f))
+
 
 
 ;; The syntax-property stuff doesn't work yet.  The point is to get

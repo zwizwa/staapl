@@ -26,6 +26,11 @@ provide-all
     WREG comf d=reg
     2nd comf d=reg ;
 
+: _not
+    or z? if drop #xFF dup ; then
+    drop #x00 dup ;
+    
+    
 
 \ these leave carry flag intact, but not the zero flag
 : _1+

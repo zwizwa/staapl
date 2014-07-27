@@ -30,18 +30,46 @@
   (begin (ns (macro) (define out (wrapper (macro: in)))) ...))
 
 (define-wrapped wrap-macro
-  (begin _begin)
-  (again _again)
-  (until _until))
-
-;; Should this snarf all names with underscore prefixes? Otoh, an
-;; explicit list is useful for reference.
+  (begin  _begin)
+  (again  _again)
+  (until  _until)
+  (do     _do)
+  (while  _while)
+  (repeat _repeat)
+  (if     _if)
+  (else   _else)
+  (then   _then)
+  )
 
 (define-wrapped wrap-word
-  (|;| _exit)
-  (>r  _>r)
-  (r>  _r>)
-  (dup _dup))
+  (|;|    _exit)
+  (exit   _exit)
+  (>r     _>r)
+  (r>     _r>)
+  (r      _r)
+  (rdrop  _rdrop)
+  (@      _@)
+  (!      _!)
+  (ram@   _ram@)
+  (ram!   _ram!)
+  (rom@   _rom@)
+  (dup    _dup)
+  (drop   _drop)
+  (2drop  _2drop)
+  (+      _+)
+  (-      _-)
+  (invert _invert)
+  (negate _negate)
+  (not    _not)
+  (1+     _1+)
+  (1-     _1-)
+  (and    _and)
+  (or     _or)
+  (xor    _xor)
+  (lohi   _lohi)
+  )
+
+
 
   
   

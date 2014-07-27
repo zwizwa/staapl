@@ -53,6 +53,7 @@
         dict-suffix
         debug-suffix
         version-tag
+        live-module
         )
 
 ;; Defaults
@@ -60,6 +61,8 @@
 (baud #f)
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
+(live-module "staapl/live-pic18")
+
 
 (define (get-arguments)
   (filename
@@ -74,6 +77,9 @@
     [("--version-tag") filename "Version tag."
      (version-tag filename)]
 
+    [("--live-module") module "Live interaction module."
+     (live-module module)]
+    
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
     
@@ -118,9 +124,12 @@
 
 (define (requirements kernel-path)
   `(require
-    staapl/live-pic18
     (prefix-in sim- staapl/pic18/sim)
-    (file ,(path->string kernel-path))))
+    (file ,(path->string kernel-path))
+    ;; FIXME: if prev doesn't include dtc.rkt live-pic18-dtc doesn't
+    ;; seem to pull in code properly.
+    ,(string->symbol (live-module))
+    ))
 
 
 (define (process-arguments)

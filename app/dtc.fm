@@ -60,11 +60,14 @@ load line-editor.f
     [ stdout -> async.>tx ] i/c
     [ stdout-flush -> ] i/c ;
     
-\ staapl pic18/dtc    
-\ load dtc.f  
 
-staapl pic18/dtc   
+\ If staapl/live-pic18-dtc is used for interaction, the DTC
+\ interpreter needs to be compiled manually.
+    
+staapl pic18/dtc
 
+    
+\ load dtc-test.f
     
 macro
 : fosc 48000000 ;
@@ -76,38 +79,6 @@ macro
 : hello 0 LATB ! pause #xF LATB ! ;
 
         
-macro
-\ : lohi | x | x x 8 >>> ;  
-: idtc i/c cw>label 2 * lohi execute/dtc ;
-forth
-
-: test1 [
-    enter
-    #x1234 _literal
-    ' _dup _compile
-    ' _exit _compile
-    ] idtc ;
-
-: ~test2
-    enter
-    _if
-    1 _literal
-    _then
-    ' _exit _compile
-: test2 ' ~test2 idtc ; \ works for nonzero argument, not for zero
-
-: ~test3
-    enter
-    _if
-    1 _literal
-    ' _exit _compile
-    _then
-    2 _literal
-    ' _exit _compile
-: test3 ' ~test3 idtc ; \ doesnt work
-
-: ~test4 enter _begin _again   
-: test4 ' ~test4 idtc ;
     
     
     

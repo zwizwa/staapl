@@ -54,16 +54,19 @@ staapl pic18/afregs
 \  _foo is a target word then replace with:  ' _foo _compile
 macro
 : cw>label word>m m> ;
-: label, 2 * ,, ; \ store byte addresses
+: label,   2 * ,, ; \ store byte addresses
 : _compile i cw>label label, ;
 : _literal >m ' fetch _compile m> ,, ;
-: _if ' 0jump _compile make-label dup >m label, ;
-: _then then ; \ includes end:
-: _begin begin ; \ includes enter:
-: _again ' jump _compile m> label, ;
-: _until ' 0jump _compile m> label, ;
+: _if      ' 0jump _compile make-label dup >m label, ;
+: _else    '  jump _compile make-label dup >m label, m-swap _then ; 
+: _then    then ; \ includes end:
+: _begin   begin ; \ includes enter:
+: _again   ' jump _compile m> label, ;
+: _until   ' 0jump _compile m> label, ;
+: _do      _begin ;
+: _while   _if ;
+: _repeat  m-swap _again _then ;     
 forth
-    
     
 \ Trampoline entry from native code will run a dtc primitive or
 \ primitive wrapped program as "<xt> bye"
