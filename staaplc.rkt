@@ -212,7 +212,11 @@
                (require readline/rep)
                (param-to-toplevel 'command repl-command-hook)
                (param-to-toplevel 'break   repl-break-hook)
-               (forth-begin-prefix '(library "pic18")) ;; add library path
+               ;; connect live/commands.rkt to Forth compiler
+               ;; code is already tokenized.
+               (forth-namespace (current-namespace))
+               (forth-begin-prefix '(library "pic18"))
+               
                ;; After loading the .fm file the code buffer
                ;; contains target kernel code.  Pass it on to the
                ;; emulator.

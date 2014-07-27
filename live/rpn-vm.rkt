@@ -1,5 +1,8 @@
 #lang racket/base
 
+;; FIXME: is this still useful afer rpn-target-dtc and #lang support
+;; for the dtc?
+
 (require
  "reflection.rkt"
  "rpn-target.rkt"

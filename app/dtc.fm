@@ -61,8 +61,9 @@ load line-editor.f
     [ stdout-flush -> ] i/c ;
     
 \ staapl pic18/dtc    
-load dtc.f  
-    
+\ load dtc.f  
+
+staapl pic18/dtc   
 
     
 macro

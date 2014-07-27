@@ -157,24 +157,21 @@
             (eval-forth expr #f)
             (next))))))
   (commit))
-      
-;; We use the forth-begin macro forth parser, but allow our user to
-;; specify an init string, i.e. '(library "pic18").  Currently this is
-;; attached to the .dict file by staaplc.rkt
+
+
+(define forth-namespace (make-parameter #f))
 (define forth-begin-prefix (make-parameter '()))
 
 (define (eval-forth forth-expr [log #t])
   ;; Eval before logging in case there is an error.
-  (eval `(forth-begin ,@(forth-begin-prefix) ,@forth-expr))
-   
+  (eval
+   `(forth-begin ,@(forth-begin-prefix) ,@forth-expr)
+   (or (forth-namespace) (current-namespace)))
   (when log
     (with-output-to-file
         (eval-log-file)
       (lambda () (write forth-expr) (newline))
       #:exists 'append)))
-  
-
-
 
 (prefix-parsers
  (target)

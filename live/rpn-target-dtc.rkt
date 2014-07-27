@@ -3,6 +3,7 @@
 ;; 16bit DTC variant of rpn-target.rkt
 
 (require
+ 
  "../target.rkt"
  "../scat.rkt"
  "../ns.rkt"
@@ -19,7 +20,7 @@
 
 (provide (all-defined-out))
 
-(define-syntax-rule (dtc-target-push  im p sub)
+(define-syntax-rule (target-dtc-push  im p sub)
   (let ((p ((live: 'im _>t) p))) sub))
 
 ;; FIXME: use different convention for primitives, which are callable
@@ -28,8 +29,8 @@
 (define (underscore sym)
   (string->symbol (format "_~a" sym)))
 
-(define (dtc-target-interpret sym)
-  (define (dbg dict x) (printf "dtc-target-interpret: ~a ~a ~a\n" sym dict x))
+(define (target-dtc-interpret sym)
+  (define (dbg dict x) '(printf "target-dtc-interpret: ~a ~a ~a\n" sym dict x))
   (define _sym (underscore sym))
   (define defined? (make-ns-defined? sym))
   (cond
@@ -38,36 +39,27 @@
    ((target-find-data sym)  => (lambda (x) (dbg 'data x)  (live: ',x _>t)))
    (else                                   (dbg 'live #f) (live-interpret sym))))
 
-; 426 = 1AA
-
 (define-syntax-rule (target id)
-  (dtc-target-interpret 'id))
+  (target-dtc-interpret 'id))
 
-;; Abstracted out: used in other target-like language parsers.
-(define-syntax-rule (dtc-target-parse (ns push) code ...)
+(define-syntax-rule (target-dtc: code ...)
   (make-word
    (rpn-parse (rpn:-compile
-               ns
+               (target)
                scat-apply
-               push
+               target-dtc-push
                scat-push    ;; Program quotations are not used in target language,
                scat:        ;; so they escape to scat.
                (rpn-lambda)
                ) code ...)))
-  
-(define-syntax-rule (dtc-target: code ...)
-  (dtc-target-parse ((target)
-                     dtc-target-push)
-                    code ...))
 
-;; State is not persistent.
-(define-syntax-rule (dtc-target> code ...)
+(define-syntax-rule (target-dtc> code ...)
   (begin
-    '(printf "(dtc-target> . ~s)\n" '(code ...))
-    (void ((dtc-target: code ...) (state:stack)))))
+    '(printf "(target-dtc> . ~s)\n" '(code ...))
+    (void ((target-dtc: code ...) (state:stack)))))
 
 (define-syntax-rule (dtc-forth-command str)
-  (forth-lex-string/cps dtc-target> str))
+  (forth-lex-string/cps target-dtc> str))
 
 
 

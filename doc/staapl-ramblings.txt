@@ -66220,3 +66220,26 @@ Date: Sat Jul 26 22:34:20 EDT 2014
 This needs the live language + some of the words in tethered.rkt need
 to be parameterized.
 
+
+(define (x form n)
+  (if (zero? n)
+      (syntax->datum form)
+      (x (expand-once form) (sub1 n))))
+
+
+So live part works fine, but hooking into the compiler is an
+interesting problem.  The compiler pulls in target code, so it's
+probably better that the `dtc-forth-begin' macro is imported as part
+of the .fm
+
+
+A major issue here is namespaces.  While everything works fine in
+"module mode", in interactive mode the namespace has all the pic18
+words in it, so that needs to be handled as well.
+
+If everything happens in a separate namespace it should be fine.  So
+it's not necessary to parameterize command line interpreter and
+compiler: just have interaction pick things out of a different
+namespace.
+
+

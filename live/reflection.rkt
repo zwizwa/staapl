@@ -120,8 +120,7 @@
 ;; disappearing.
 
 (define (run
-         [startup void]
-         [eval-line 'forth-command])    
+         [startup void])
   (define (con) (eval `((comm-reconnect))))
   (define (dis) (eval `((comm-close))))
 
@@ -153,7 +152,7 @@
           ;; (printf "cmd: ~a\n" cmd)
           (with-connection
            (lambda ()
-             (eval `(,eval-line ,cmd))))))
+             (eval `(forth-command ,cmd))))))
   )
 
 
