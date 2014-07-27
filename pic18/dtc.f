@@ -54,7 +54,7 @@ staapl pic18/afregs
 \  _foo is a target word then replace with:  ' _foo _compile
 macro
 : cw>label word>m m> ;
-: label,   2 * ,, ; \ store byte addresses
+: label,   >m 2 m> * ,, ; \ store byte addresses
 : _compile i cw>label label, ;
 : _literal >m ' fetch _compile m> ,, ;
 : _if      ' 0jump _compile make-label dup >m label, ;

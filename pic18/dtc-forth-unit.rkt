@@ -30,7 +30,7 @@
 ;; - Literals are implemented differently
 
 (define (mf:wrap-word name loc inline)
-  (printf "dtc mf:wrap-word ~a\n" name)
+  ;;(printf "dtc mf:wrap-word ~a\n" name)
   (define-values (label
                   invoke
                   wrapped-inline)  ;; inlining macro

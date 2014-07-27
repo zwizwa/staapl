@@ -37,7 +37,7 @@ apps: $(APPS)
 # STAAPLC_FLAGS = -c uart -d /dev/ttyACM0 --baud 0
 # STAAPLC_FLAGS = -c uart -d /dev/tty-FT9FP1Z6 --baud 9600
 
-# STAAPLC_FLAGS = --live-module staapl/live-pic18-dtc
+STAAPLC_FLAGS = --live-module staapl/live-pic18-dtc
 
 # make sure this works without the "staaplc" command line app wrapper installed
 STAAPLC = $(INTERP) -l staapl/staaplc --
