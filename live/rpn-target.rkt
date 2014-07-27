@@ -18,14 +18,24 @@
 (provide (all-defined-out))
 
 ;; Native code + DTC on top of native.
-(define (native-data data) (live: ',data >t))
-(define (native-code code) (live: ',code texec/b))
+(define (native-push data) (live: ',data >t))
+(define (native-exec code) (live: ',code texec/b))
 
-(define (dtc-data data) (live: ',data _>t))
-(define (dtc-code code) (live: ',code _>t ',(target-find-code 'execute/dtc) texec/b))
+(define (dtc-push data) (live: ',data _>t))
+(define (dtc-exec code) (live: ',code _>t ',(target-find-code 'execute/dtc) texec/b))
+(define (dtc-find sym) 
+  (or
+   ;; HACK to access primitives which are all defined with
+   ;; underscores.  To fix this, find a good way to present a
+   ;; collection of names to the live interaction while hiding core
+   ;; 8bit words.
+   (target-find-code (string->symbol (format "_~a" sym))) 
+   (target-find-code sym)))
 
-(define live-data (make-parameter native-data))
-(define live-code (make-parameter native-code))
+(define live-push (make-parameter native-push))
+(define live-exec (make-parameter native-exec))
+(define live-find (make-parameter target-find-code))
+
 
 ;; The target: language provides a simulation of a Forth console that
 ;; is running on the target machine.  The target: form produces a scat
@@ -33,7 +43,7 @@
 
 ;; LITERALS are moved to the target parameter stack.
 (define-syntax-rule (target-push  im p sub)
-  (let ((p (((live-data) im) p))) sub))
+  (let ((p (((live-push) im) p))) sub))
 
 
 ;; IDENTIFIERS refer to one of
@@ -75,8 +85,8 @@
 
   (cond
    ((defined? '(host))     => (lambda (x) x))
-   ((target-find-code sym) => (lambda (x) (dbg 'code)  ((live-code) x)))
-   ((target-find-data sym) => (lambda (x) (dbg 'data)  ((live-data) x)))
+   (((live-find) sym)      => (lambda (x) (dbg 'code)  ((live-exec) x)))
+   ((target-find-data sym) => (lambda (x) (dbg 'data)  ((live-push) x)))
    ;; ((defined? '(macro)) => (lambda (x) (dbg 'macro) (live: ',x tsim)))
    ((defined? '(macro))    => (lambda (x) (dbg 'macro) (target-compile-macro sym) (target-interpret sym)))
    (else                                  (dbg 'live)  (live-interpret sym))))
