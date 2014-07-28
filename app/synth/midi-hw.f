@@ -1,5 +1,5 @@
 \ staapl pic18/serial
-staapl pic18/serial-debug
+staapl pic18/serial
 staapl pic18/compose-macro
 staapl pic18/vector
 staapl pic18/stdin

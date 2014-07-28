@@ -65,7 +65,7 @@ staapl pic18/double-math
 staapl pic18/execute
 staapl pic18/prom \ FIXME: sti
 staapl pic18/route
-staapl pic18/serial-debug    
+staapl pic18/serial
 staapl pic18/_table
 staapl pic18/task
 staapl pic18/vector    
@@ -78,6 +78,7 @@ load synth/notes.f     \ note memory
 load synth/midi-nrpn.f \ direct parameter access
 load synth/midi.f      \ midi control
 load synth/midi-hw.f   \ midi serial hw support
+load synth/midi-usb.f  \ midi usb support
 load synth/mainloop.f
     
 \ load synth/patch.f     \ old patch stuff
@@ -97,6 +98,7 @@ macro
 \ handle UART input in kernel low-pri isr.  STATUS is already saved,
 \ normal return or macro.
 : service-lo service-midi ;
+: poll-midi  poll-usb-midi ;    
 
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;

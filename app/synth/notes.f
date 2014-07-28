@@ -1,4 +1,6 @@
 staapl pic18/cond
+staapl pic18/afregs
+
 \ Keep track of the keys pressed and the order they are pressed in.
 \ This can be used for:
 \

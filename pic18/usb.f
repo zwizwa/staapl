@@ -115,19 +115,7 @@ variable buf
     
   
 
-\ PIC18 specific (since USB is also PIC specific): use rot<<, indirect
-\ addressing using a register, and assumption that >r and r> can span
-\ across procedures.
 
-\ The 'a' pointer reg is used as "current RAM data stream", either for
-\ in or output.  The 'f' pointer register is used for current,
-\ input-only, "Flash data stream".
-macro
-: a> @a+ ;
-: >a !a+ ;
-: f> @f+ ;
-forth
-  
 
 \ ep -- bd    
 : IN    rot<< 1 + ;

@@ -1,4 +1,6 @@
 
+staapl pic18/task
+
 \ the nicest paradigm for controlling sounds is that of virtual
 \ samples: splitting up the sound generation in two tasks gives a more
 \ natural way of describing sound:

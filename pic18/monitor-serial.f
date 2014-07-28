@@ -23,6 +23,8 @@ macro
   
 : interactive?
     debug-serial? ;
+: cmd-ready?
+    async.rx-ready? ;
 
  
 : init-comm
@@ -32,6 +34,7 @@ macro
 : console-type   ` uart ;
 : console-device ` /dev/ttyUSB0 ;
 : console-baud   baud ;
+
     
 forth
   

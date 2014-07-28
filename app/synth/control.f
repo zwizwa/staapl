@@ -1,5 +1,6 @@
 \ sheepsint control module
 
+staapl pic18/_table
 
 \ CONTROL
 

@@ -1,5 +1,4 @@
-#lang staapl/pic18
-\ -*- forth -*-
+#lang staapl/pic18 \ -*- forth -*-
 provide-all
 
 \  target : PIC18F1220 (or compatible, like 1330)
