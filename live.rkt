@@ -75,16 +75,15 @@
           
 
 (define (empty/run module-list
-                   anchor
-                   mark)
+                   anchor)
+  (define mark (code-mark))
   (define (load)
     (current-namespace
      (make-live-namespace module-list anchor)))
   (reload
    (lambda ()
      (load)
-     ;; 'empty' is run with tethering connection active
-     (code-pointers-set! mark)
+     (code-empty! mark)
      (clear-flash)))
   (load)
   (run empty))

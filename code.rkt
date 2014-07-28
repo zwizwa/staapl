@@ -20,6 +20,8 @@
  code-debug
  code-print
  code-pointers
+ code-mark
+ code-empty!
  code-pointers-set!
  code->binary
  code-clear!
@@ -53,6 +55,7 @@
 ;; should not be used for name resolution in code as it might contain
 ;; duplicate or protected names.
 (define *labels* '())
+
 (define (code-labels) *labels*)
 (define (code-resolve addr [realm 'code])
   (let next ((l *labels*))
@@ -108,6 +111,14 @@
   (set! *postponed-macro-stack* '()) 
   (set! *postponed* '())
   (set! *cfg* '()))
+
+(define (code-mark)
+  (list *labels* *pointers*))
+(define (code-empty! mark)
+  (apply (lambda (labels pointers)
+           (set! *labels*   labels)
+           (set! *pointers* pointers))
+         mark))
 
 (define (code-chain-list) *cfg*)
 

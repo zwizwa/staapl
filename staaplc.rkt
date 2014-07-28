@@ -226,14 +226,12 @@
            (boot-run
             `(begin
                (define version-tag ',(version-tag))
-               (define mark (code-pointers))
                (define-namespace-anchor anchor)
                ,(console-spec)
                (forth-begin-prefix '(library "pic18"))
                (empty/run
                 ',(requirements (filename))
-                anchor
-                mark)))
+                anchor)))
 
                 ;; FIXME: no longer supported
                 ;; Load host debug script into toplevel namespace on
