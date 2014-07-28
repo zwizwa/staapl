@@ -5019,3 +5019,18 @@ Some properties:
   threaded code.  This can be largely automated.
 
 
+
+Entry: empty
+Date: Mon Jul 28 01:47:04 EDT 2014
+
+A long-standing itch: there is now a proper `empty' word which will
+reset interactive code action on host and target to reflect the state
+of a fresh kernel.
+
+This was already possible by just reloading racket but quite
+cumersome.  Now it is practically instantaneous.
+
+The solution was to create a namespace for evaluation anchored to the
+main .dict module which prevents re-instantiation on reconstruction.
+On top of that some state in code.rkt needs to be reset: code pointers
+and word list.
