@@ -7,7 +7,11 @@ all: dev
 
 # MZSCHEME=racket
 MZSCHEME=mzscheme
-RACO=raco
+
+# multiple tasks doesn't seem to make it faster, and -v doesn't work.
+# RACO_MAKE=raco make -j 4 -v   # 20s
+# RACO_MAKE=raco make -v
+RACO_MAKE=mzc -vk
 
 unlink:
 	$(RACO) pkg remove staapl
@@ -29,14 +33,14 @@ install:
 # setup-plt does, and is a quick way to prevent problems when packaging.
 
 all-modules: planet-version.txt
-	cd staapl && mzc -vk `find -name '*.rkt'` 
-	cd app && mzc -vk `find -name '*.fm'` 
+	cd staapl && $(RACO_MAKE) `find -name '*.rkt'` 
+	cd app && $(RACO_MAKE) `find -name '*.fm'` 
 
 pic18:
-	mzc -vk pic18.rkt
-	mzc -vk pic18/sim.rkt
-	mzc -vk live.rkt
-	mzc -vk staaplc.rkt
+	$(RACO_MAKE) pic18.rkt
+	$(RACO_MAKE) pic18/sim.rkt
+	$(RACO_MAKE) live.rkt
+	$(RACO_MAKE) staaplc.rkt
 
 # use planet instead
 install-collects:

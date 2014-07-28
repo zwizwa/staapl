@@ -58,6 +58,8 @@
   (2drop  _2drop)
   (+      _+)
   (-      _-)
+  (*      _*)
+  (um*    _um*)
   (invert _invert)
   (negate _negate)
   (not    _not)

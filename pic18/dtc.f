@@ -83,4 +83,15 @@ forth
     _exit \ pop original IP
     pop ; \ break out of thread-loop
 
+\ Multiplication
 
+load mul16.f
+variable X0 variable X1
+variable Y0 variable Y1
+variable R0 variable R1 variable R2 variable R3 variable R4
+
+: >umul>R Y! X! umul>R ;
+: _*      >umul>R RL@ ;
+: _um*    _* RH@ ; 
+
+\ fixme : also do signed and fixedpoint
