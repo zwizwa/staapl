@@ -1,7 +1,9 @@
 #lang racket/base
 (require
  racket/match
- "tools.rkt")
+ "tools.rkt"
+ "code.rkt")
+
 (require/provide
  "live/tethered.rkt"    ;; Scat code for host<->target interaction.
  
@@ -48,3 +50,41 @@
            ('uart       (comm-uart dev baud))
            ('pickit2    (comm-pickit2 dev baud))
            ('simulator  (comm-simulator)))))
+
+
+;; Run interaction, sharing all interaction, compiler and kernel code
+;; for fast restart.
+
+(define reload (make-parameter void))
+(define (empty) ((reload)))
+
+(define (make-live-namespace module-list anchor)
+  (let ([ns (make-base-namespace)]
+        [nsa (namespace-anchor->namespace anchor)])
+    ;; Attach makes sure a subsequent require uses the same instance
+    ;; of the module while require exposes the identifiers of the
+    ;; instantiated module, or instantiates one if it's not found in
+    ;; the registry.
+    (for ((m module-list))
+      (namespace-attach-module nsa m ns))
+    (parameterize ([current-namespace ns])
+      (for ((m module-list))
+        (eval `(require ,m)))
+      (code-clear!))
+    ns))
+          
+
+(define (empty/run module-list
+                   anchor
+                   mark)
+  (define (load)
+    (current-namespace
+     (make-live-namespace module-list anchor)))
+  (reload
+   (lambda ()
+     (load)
+     ;; 'empty' is run with tethering connection active
+     (code-pointers-set! mark)
+     (clear-flash)))
+  (load)
+  (run empty))

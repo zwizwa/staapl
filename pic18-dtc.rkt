@@ -10,6 +10,8 @@
           target-byte-address))
 
 (require/provide
+ "asm.rkt"
+ "pic18/asm.rkt"
  "pic18/dtc.rkt"
  "pic18/double-math.rkt"
  "coma/macro-forth.rkt"
@@ -19,6 +21,8 @@
 (provide
  (all-defined-out)
  target-byte-address)
+
+(define-dasm-collection dasm-collection)
 
 (define/invoke (macro-forth^) (dtc-forth@))
 

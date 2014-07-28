@@ -22,11 +22,14 @@
 
 (provide (all-defined-out))
 
+(define (eval-ws exp)
+  (eval exp))
+
 
 ;; Code labels
 
 (define (target-byte-addr address realm)
-  ((eval 'target-byte-address) address realm))
+  ((eval-ws 'target-byte-address) address realm))
 
 (define (word-not-found? ex)
   (and (pair? ex)
@@ -60,7 +63,7 @@
 
 ;; Macro constants
 (define (macro-constant . code)
-  (eval `(with-handlers ((void (lambda _ #f)))
+  (eval-ws `(with-handlers ((void (lambda _ #f)))
            (state->value
             ((macro: ,@code) (init-state))
             (ns (op ? qw))))))
@@ -70,11 +73,11 @@
   (for-each*
    (lambda (name realm address)
      (let ((word
-            (eval
+            (eval-ws
              `(new-target-word #:name ',name
                                #:realm ',realm
                                #:address ,address))))
-       (eval
+       (eval-ws
         `(begin
            (ns (target) (define ,name ,word))
            (ns (macro)  (define ,name
@@ -123,8 +126,8 @@
 
 (define (run
          [startup void])
-  (define (con) (eval `((comm-reconnect))))
-  (define (dis) (eval `((comm-close))))
+  (define (con) (eval-ws `((comm-reconnect))))
+  (define (dis) (eval-ws `((comm-close))))
 
   (define (with-connection thunk)
     (with-handlers
@@ -154,7 +157,7 @@
           ;; (printf "cmd: ~a\n" cmd)
           (with-connection
            (lambda ()
-             (eval `(forth-command ,cmd))))))
+             (eval-ws `(forth-command ,cmd))))))
   )
 
 
@@ -180,19 +183,19 @@
 (define (load-dictionary file)
   (let-values (((info reqs init)
                 (with-input-from-file file read-dictionary)))
-    (eval info)
-    (eval reqs)
-    (eval init)))
+    (eval-ws info)
+    (eval-ws reqs)
+    (eval-ws init)))
 
 
 (define (print-tword sym)
-  (eval `(print-target-word (ns (target) ,sym))))
+  (eval-ws `(print-target-word (ns (target) ,sym))))
 
 
 (define (target-compile-macro sym)
-  (let ((macro (eval `(ns (macro) ,sym))))
+  (let ((macro (eval-ws `(ns (macro) ,sym))))
     ;; (printf "macro: ~s ~s\n" sym macro)
-    (eval `(target> : ,sym ',macro compile exit))))
+    (eval-ws `(target> : ,sym ',macro compile exit))))
 
 ;; Used for target->host RPN.  Like target-interpret but without all
 ;; the target dictionaries.  FIXME: this should not be here but in
@@ -201,7 +204,7 @@
 (define (host-interpret sym)
   (define defined? (make-ns-defined? sym))
   (cond ((defined? '(host)) => (lambda (x) x))
-        (else (eval `(live: ,sym)))))
+        (else (eval-ws `(live: ,sym)))))
 
 
 
@@ -220,9 +223,8 @@
 
 (define (eval-forth forth-expr [log #t])
   ;; Eval before logging in case there is an error.
-  (eval
-   `(forth-begin ,@(forth-begin-prefix) ,@forth-expr)
-   (or (forth-namespace) (current-namespace)))
+  (eval-ws
+   `(forth-begin ,@(forth-begin-prefix) ,@forth-expr))
   (when log
     (with-output-to-file
         (eval-log-file)
@@ -245,3 +247,5 @@
 
 (define (ns-list ns)
   (map symbol->string (ns-mapped-symbols ns)))
+
+

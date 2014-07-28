@@ -66341,3 +66341,8 @@ any longer!  Visceral reaction there to forth's CT weirdness :)
 
 
 
+Entry: Faster "empty"
+Date: Sun Jul 27 20:08:49 EDT 2014
+
+Need to find a way to reset the namespace quicker.
+Is there a way to copy a namespace?

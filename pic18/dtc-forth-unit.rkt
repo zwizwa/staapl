@@ -36,7 +36,10 @@
                   wrapped-inline)  ;; inlining macro
     (label:wrap-word name
                      loc
-                     (macro: enter ,inline)))
+                     (if name
+                         (macro: enter ,inline)
+                         inline) ;; skip words before first ':'
+                     ))
   (values label
           (macro: ',invoke _compile)
           wrapped-inline))
