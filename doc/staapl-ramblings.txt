@@ -66346,3 +66346,6 @@ Date: Sun Jul 27 20:08:49 EDT 2014
 
 Need to find a way to reset the namespace quicker.
 Is there a way to copy a namespace?
+
+Ok, fixed.  All quite simple actually, just have to find the right
+segment in the docs!
