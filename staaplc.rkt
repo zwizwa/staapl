@@ -132,12 +132,11 @@
           "staapl/live-pic18")))
 
 (define (requirements kernel-path)
-  `(require
-    (prefix-in sim- staapl/pic18/sim)
-    (file ,(path->string kernel-path))
-    ;; FIXME: if prev doesn't include dtc.rkt live-pic18-dtc doesn't
+  `((file ,(path->string kernel-path))
+    ;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
     ;; seem to pull in code properly.
     ,(string->symbol (req-live-module))
+    readline/rep
     ))
 
 
@@ -202,7 +201,7 @@
         (make-base-namespace)))
 
     ;; Load necessary code.
-    (eval (requirements (filename)))
+    (eval `(require ,@(requirements (filename))))
 
     ;; Optionally print assembler code.
     (when (output-asm)
@@ -223,35 +222,24 @@
 
       
     ;; Save interaction script.
-    (let* ((reqs (requirements (filename)))
+    (let* ((reqs `(require ,@(requirements (filename))))
            (boot-run
             `(begin
                (define version-tag ',(version-tag))
+               (define mark (code-pointers))
+               (define-namespace-anchor anchor)
                ,(console-spec)
-               (require readline/rep)
-               (param-to-toplevel 'command repl-command-hook)
-               (param-to-toplevel 'break   repl-break-hook)
-               ;; connect live/commands.rkt to Forth compiler
-               ;; code is already tokenized.
-               (forth-namespace (current-namespace))
                (forth-begin-prefix '(library "pic18"))
-               
-               ;; After loading the .fm file the code buffer
-               ;; contains target kernel code.  Pass it on to the
-               ;; emulator.
-               (sim-flash (code->binary))
-               ;; Then get rid of it since it's already on the
-               ;; target through the .hex programming.
-               (code-clear!)
-               (run
-                (lambda ()
-                  ;; Delete all target scratch buffer code past the
-                  ;; 'code pointer to bring it into a known state.
-                  (clear-flash)
-                  ;; Load host debug script into toplevel namespace on
-                  ;; a clean target.
-                  (when-file ',(path->string (debug-script)) load)))))
-            
+               (empty/run
+                ',(requirements (filename))
+                anchor
+                mark)))
+
+                ;; FIXME: no longer supported
+                ;; Load host debug script into toplevel namespace on
+                ;; a clean target.
+                ;; (when-file ',(path->string (debug-script)) load)))))
+      
            (save-module
             (lambda ()
               (save "#!/usr/bin/env racket")
