@@ -302,8 +302,9 @@ forth
     IPR1 TMR1IP high
     IPR1 TMR2IP high
     IPR2 TMR3IP high
+    init-tcons \ config in .fm
     \ init-tcons-scale1
-    init-tcons-scale4
+    \ init-tcons-scale4
     \ init-tcons-scale8/16
     RCON IPEN high      \ enable priority levels
     #x3F PR2 !          \ TMR2 period (31.25 kHz)

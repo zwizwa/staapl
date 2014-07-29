@@ -112,6 +112,9 @@ macro
     hello       \ remove if doesn't fit in bootloader
     ;
 
+: init-tcons init-tcons-scale4 ;    
+
+    
 \ B:2/3 : audio output
     
 forth

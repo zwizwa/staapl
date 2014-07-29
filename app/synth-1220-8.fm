@@ -35,7 +35,15 @@ macro
 : fosc 8000000 ; \ internal osc
 : baud 38400 ;
 : poll-midi  poll-hw-midi ;    
-    
+: init-tcons init-tcons-scale1 ;    
+
+: init-board
+    TRISB 1 low
+    TRISB 2 low ;
 forth
 
 load monitor-serial.f
+
+
+' isr init-isr-hi
+  
