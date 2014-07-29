@@ -66349,3 +66349,57 @@ Is there a way to copy a namespace?
 
 Ok, fixed.  All quite simple actually, just have to find the right
 segment in the docs!
+
+
+Entry: synth-1220-8.fm
+Date: Mon Jul 28 21:21:57 EDT 2014
+
+Re-arranged synth code.  Some problems:
+- serial port already used for debugging
+- clock frequency config
+
+
+Entry: Debug on bit-banged master SPI
+Date: Mon Jul 28 22:07:51 EDT 2014
+
+Problem: 1220 uses UART for MIDI.  How to connect to the interpreter?
+
+One solution is a bit-banged SPI with clock sent from the 1220.  This
+way there are no real-time constraints, and data can be clocked in at
+whatever pace makes sense.
+
+Trouble is that SPI needs some encapsulation as it pretty much behaves
+as a continuous bi-directional stream.  The master's initiation could
+be seen as an event, but there is no such thing in the other direction.
+
+The PK2 protocol had this problem too and some ad-hoc event signaling
+was used.
+
+
+
+Pitfall... Can it be avoided?  Send it console data over MIDI?  Why
+not, it will just be slow.
+
+Wait this also needs proper segmentation of messages.  Can't have a
+blocking read interfere with processing of midi data.
+
+So it might be better to first debug this on the 4550.  Get message
+transfer over MIDI working.
+
+Not an easy thing either.
+
+What about console on real serial and a bit-banged midi input?  Or
+tunnel midi over console?  The latter might be simplest: feed the midi
+state machine through console comm.
+
+Anyway it might not be necessary.  Let's see if it works just like this.
+
+
+
+Well maybe it does work:
+- pic polls a byte.
+- 0 -> release chip select, start new poll
+- n -> allow interpreter to read message, then send reply
+
+the chip select allows slave device to sync up
+
