@@ -524,7 +524,8 @@ End:\" construct).")
 			)) 
 		    mapped)))
     (let ((result (cons regexp sub-list)))
-      (byte-compile 'result)
+      (when 'result
+        (byte-compile 'result))
       result)))
 
 (defun forth-compile-words ()
