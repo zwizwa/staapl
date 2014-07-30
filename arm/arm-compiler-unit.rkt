@@ -1,16 +1,15 @@
 #lang racket/unit
 
 (require
+ racket/pretty
  "../sig.rkt"
  "asm.rkt"
  "../asm/assembler.rkt"
  "../asm.rkt"
  "../code.rkt")
 
-(import instantiate^) ;; postproc^)
+(import instantiate^ postproc^)
 (export compiler^)
-
-(define (postproc . a) (error 'postproc))
 
 (define (compile!)
   (code-compile! compile-words  ;; instantiate^
@@ -20,3 +19,4 @@
 (code-pointers-set!
  '((code #x0022)
    (data #x0000)))
+

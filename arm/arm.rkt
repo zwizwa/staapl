@@ -14,6 +14,7 @@
  "arm-forth-unit.rkt"
  "arm-macro-unit.rkt"
  "arm-compiler-unit.rkt"
+ "../code.rkt"
  "../asm.rkt"
  "../coma/macro-forth.rkt"
  "../coma/macro-forth-sig.rkt"
@@ -43,11 +44,8 @@
 ;; The full pic18 dictionary.
 (define-sigdict arm^^
   (stack^
-   ; stack-extra^
-   ; memory-extra^
    ram^
    comma^
-   ; comma-extra^
    code^
    jump^
    cjump^
@@ -57,28 +55,15 @@
    org^
    machine^
    instantiate^
-   ; postproc^
    
    ;; Target code CFG support
    label^
    
-   ;; PIC18 specific language
-   ; pic18-assembler^
-   ; pic18-extra^
-   ; pic18-const^    ;; macros
-   ; pic18-const-id^ ;; Scheme identifiers
-
    ;; top-level code compilation
    compiler^
 
    ;; Prefix parser Forth syntax
    macro-forth^
-
-   ;; State extension words.
-   state-tag^
-
-   ;; Shallow coroutines
-   ; scr^
    ))
 
 (define/invoke-sigdict arm^^

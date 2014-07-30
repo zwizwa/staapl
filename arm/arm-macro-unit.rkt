@@ -7,7 +7,7 @@
  "../coma/macro.rkt"
  "../control/op.rkt"
  "../ns.rkt"
- ;"../comp/postprocess.rkt"
+ "../comp/postprocess.rkt"
  )
 
 (import)
@@ -16,6 +16,7 @@
         comma^
         cjump^
         rstack^
+        postproc^
         ) 
 
 
@@ -35,3 +36,18 @@
  ;; rstack^
  for next >r r> swap>r r- +r rdrop rl rh
  )
+
+(patterns
+ (arm-post)
+ (([exit] pseudo)  ()) ;; fixme
+ ((pseudo)         ())
+ )
+
+;; postproc^
+;; See pic18 code
+(define postproc
+  (apply compose
+   (map macro->postprocess
+        (list 
+         (ns (arm-post) pseudo)  ;; eliminate other pseudo ops
+         ))))
