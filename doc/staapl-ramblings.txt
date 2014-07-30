@@ -66414,3 +66414,19 @@ Entry: standalone forth
 Date: Tue Jul 29 00:28:55 EDT 2014
 
 what about starting with a read-only one for commands?
+
+
+
+Entry: stubs for arm
+Date: Tue Jul 29 23:36:02 EDT 2014
+
+added some stubs:
+- assembler (add, sub)
+- #lang staapl/asm and necessary unit support
+- arm-macro-unit.rkt with stubs for machine-specific words
+
+looks like this isn't hard at all - bordering at boring even.
+
+let's tinker on this a bit and then add a PRU branch as well
+for PRU i mainly need some doc with binary opcodes
+
