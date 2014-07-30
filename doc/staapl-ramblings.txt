@@ -66403,3 +66403,14 @@ Well maybe it does work:
 
 the chip select allows slave device to sync up
 
+so the board has a panel port.  this can be used as an i/o port,
+leaving the programmer and the serial cable plugged in.
+
+it needs 4 lines: /cs, miso, mosi, sda
+
+
+
+Entry: standalone forth
+Date: Tue Jul 29 00:28:55 EDT 2014
+
+what about starting with a read-only one for commands?
