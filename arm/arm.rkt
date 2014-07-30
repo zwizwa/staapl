@@ -12,6 +12,8 @@
  "asm.rkt"
  "macro.rkt"
  "arm-forth-unit.rkt"
+ "arm-macro-unit.rkt"
+ "arm-compiler-unit.rkt"
  "../asm.rkt"
  "../coma/macro-forth.rkt"
  "../coma/macro-forth-sig.rkt"
@@ -19,6 +21,15 @@
  "../scat.rkt"
  "../coma/macro.rkt"
  "../coma/macro-eval.rkt"
+ "../sig.rkt"
+
+ 
+ "../coma/comma-unit.rkt"       ;; comma^
+ "../coma/code-unit.rkt"        ;; code^
+ "../control/control-unit.rkt"  ;; control^ 
+ "../comp/compiler-unit.rkt"    ;; jump^
+ "../label-unit.rkt"
+ "../label-sig.rkt"
 ) 
 
 
@@ -29,7 +40,61 @@
 ;(define-dasm-collection dasm-collection)
 ;(define/invoke (macro-forth^) (arm-forth@))
 
+;; The full pic18 dictionary.
+(define-sigdict arm^^
+  (stack^
+   ; stack-extra^
+   ; memory-extra^
+   ram^
+   comma^
+   ; comma-extra^
+   code^
+   jump^
+   cjump^
+   control^
+   cfg^
+   rstack^
+   org^
+   machine^
+   instantiate^
+   ; postproc^
+   
+   ;; Target code CFG support
+   label^
+   
+   ;; PIC18 specific language
+   ; pic18-assembler^
+   ; pic18-extra^
+   ; pic18-const^    ;; macros
+   ; pic18-const-id^ ;; Scheme identifiers
 
+   ;; top-level code compilation
+   compiler^
+
+   ;; Prefix parser Forth syntax
+   macro-forth^
+
+   ;; State extension words.
+   state-tag^
+
+   ;; Shallow coroutines
+   ; scr^
+   ))
+
+(define/invoke-sigdict arm^^
+  (;; Shared
+   comma@
+   code@
+   compiler@
+   control@
+   label@
+   ;; Specific
+   arm-macro@
+   arm-compiler@
+   arm-forth@
+   ))
+
+;; OLD NOTES see old/
 
 ;; Getting to know the ARM architecture.
 ;; Best place to start is to write a small frontend for the assembler.

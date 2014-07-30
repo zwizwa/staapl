@@ -37,6 +37,7 @@ all-modules: planet-version.txt
 	cd app && $(RACO_MAKE) `find -name '*.fm'` 
 
 pic18:
+	$(RACO_MAKE) arm/arm.rkt
 	$(RACO_MAKE) pic18.rkt
 	$(RACO_MAKE) pic18/sim.rkt
 	$(RACO_MAKE) live.rkt
