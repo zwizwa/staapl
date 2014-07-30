@@ -66408,6 +66408,10 @@ leaving the programmer and the serial cable plugged in.
 
 it needs 4 lines: /cs, miso, mosi, sda
 
+EDIT: There are 4 pins available, but requires unplugging the ICD
+connector.  There has to be a simpler way.
+
+http://zwizwa.be/archive/sheep-schem.ps.gz
 
 
 Entry: standalone forth
@@ -66430,3 +66434,50 @@ looks like this isn't hard at all - bordering at boring even.
 let's tinker on this a bit and then add a PRU branch as well
 for PRU i mainly need some doc with binary opcodes
 
+
+
+Entry: Simple 1-wire
+Date: Wed Jul 30 13:02:02 EDT 2014
+
+Revive the 1-wire debug bus?  I'd like to debug the old synth board
+but there's just one pin for debug.
+
+What do I have?  A low-priority polled mainloop that has access to a
+counter that's updated at a fixed rate (31.25kHz).  So if it's slow
+enough it can probably work.
+
+Actually if this is done with device as master it might be run as a
+state machine from ISR as well.
+
+The only thing that's necessary is the other side to pull a line low.
+
+So basically, line is a bus with pullup.  Master (1220) pulls the line
+low to initiate a bit transfer.
+
+phase
+0     start-of-frame  master pulls line down
+1     slave-send      master releases line, slave can pull line line down to send a 0
+2     master-read     master reads line, will see slave's 1 or 0
+3                     slave releases line
+etc.. but wait!
+
+This can be done to make it compatible with a uart.
+Master sends out the frames, slave will pull bits low inside that frame.
+( There must be some reference online for this since it's so simple.. )
+
+Then when slave is sending, it will just pull down.
+
+Direction is handled in data protocol.
+
+Unfortunate that an idle line is a 0xFF byte: a 0x00 protocol byte is
+already the empty packet so that would have been nice..
+
+Anyway maybe there is a case where it's actually good to have some
+redundancy.
+
+To run this as a state machine:
+
+Clock it at twice the baud rate.
+
+It can use the pin RA4 / T0CKI
+( Ha a clock input.  That's why I used that pin! )
