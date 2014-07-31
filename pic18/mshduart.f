@@ -1,9 +1,10 @@
-#lang staapl/pic18 \ -*- forth -*-
-provide-all
+\ #lang staapl/pic18 \ -*- forth -*-
+\ provide-all
 \ master-slave half-duplex uart
 
 
-staapl pic18/compile-macro
+staapl pic18/compose-macro
+staapl pic18/route
 
 
 
@@ -19,14 +20,16 @@ macro
 forth
 
 variable data
-: out data 0 high? if HIZ else LOW ;
-: in  port high? if clc else stc data rot>>c! ;
+: out data 0 high? if HIZ else LOW then ;
+: in  port   high? if stc else clc then data rot>>c! ;
+
         
 : init-master
-    H #xFF data !
-    lat low \ switch between LOW and HIZ
+    HIZ #xFF data !
+    lat low ; \ switch between LOW and HIZ
   
-\ Reset happens in master-tick  
+
+variable state
 : state+
     state @ state 1+! ;
 : state-reset
@@ -35,21 +38,28 @@ variable data
     #xFF data !
     0 state ! ;    
 
-\ State machine clocked at double the bit rate.  Even phases are
-\ writes, odd phases are reads.
+\ State machine clocked at twice the bit rate.
+\ Even phases are writes, odd phases are reads.
 
 \ Imp: it seems that jump tables are still the simplest approach to
 \ implementing simple state machines: State acts as instruction
-\ pointer.  The bit out / in states are just duplicated 8 times.  Hard
-\ to write code that makes up for 16 bytes of "wasted" flash :)
-: master-tick
+\ pointer.  The bit out / in states are just duplicated 8 times.
+    
+\ Difference between master and slave is who generates the start bit.
+\ Slave will sync on 1->0 edge and clock the machine 20 times.
+
+macro    
+: start LOW ; \ master
+\ : start HIZ ; \ slave  
+forth
+    
+: tick
     state+ route
-        LOW  nop \ start bit
-        byte     \ out, in, repeated 8 times
-        HIGH nop \ stop bit
+        start nop   \ start bit
+        byte        \ out, in, repeated 8 times
+        HIZ nop     \ stop bit
         
         \ fallthrough
         state-reset
-        master-tick ;
-
+        tick ;
 
