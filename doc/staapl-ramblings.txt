@@ -66503,3 +66503,56 @@ i.e. say we want to just keep the top 8 bits to add to a 16bit number
 that's a 1/256 accuracy.
 
 not the right track..
+
+
+
+Entry: Loosing track...
+Date: Wed Jul 30 23:28:15 EDT 2014
+
+A bit too many tracks here:
+
+- half duplex uart
+- synth 1220 MIDI
+- dying to try the pic18 dtf on something
+- arm forth in progress
+- beagleboard arrived, PRU luring
+
+Most important right this second is the 1220 MIDI.  I have
+realistically about 1 hour and I'm quite tired.
+
+1. Memory map: buffers probably don't fit.  But are buffers still
+necessay?  Yes, especially at 8MHz.  So step one is to move the buffer.
+
+2. ISR routine for uart.
+
+Those I can't get to run.
+What I can get to run is the old controller.
+
+
+
+Entry: Master/slave uart
+Date: Thu Jul 31 00:08:25 EDT 2014
+
+- Half-duplex
+- direction part of protocol layer
+- master generates start bit
+- master or slave can pull data bits low
+
+master side: 1/2 bit ticks
+
+1 = high-Z,  R pulls up
+0 = assert 0
+
+- 0 : start bit
+- nop
+- x : data0 out
+- data0 in
+- x : data1 out
+- data1 in
+...
+- data7 out
+- data7 in
+- stopbit 1 out
+- nop
+- clock ...
+
