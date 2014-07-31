@@ -87,3 +87,9 @@
      (clear-flash)))
   (load)
   (run empty))
+
+;; FIXME: this just picks first argument
+(define (command-line-tty)
+  (let ((a (current-command-line-arguments)))
+    (and (> (vector-length a) 0)
+         (vector-ref a 0))))

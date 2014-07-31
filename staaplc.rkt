@@ -174,8 +174,11 @@
   (spec-from-source console    'console-type)
   (spec-from-source device     'console-device)
   (spec-from-source baud       'console-baud)
+
   
-  `(console ',(console) ,(device-string (device)) ,(baud)))
+  `(begin
+     (define console-device (or (command-line-tty) ,(device-string (device))))
+     (console ',(console) console-device ,(baud))))
 
 
 ;; formatting
