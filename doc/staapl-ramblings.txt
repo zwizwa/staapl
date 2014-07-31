@@ -66481,3 +66481,25 @@ Clock it at twice the baud rate.
 
 It can use the pin RA4 / T0CKI
 ( Ha a clock input.  That's why I used that pin! )
+
+
+
+Entry: Linear interpolation
+Date: Wed Jul 30 19:18:35 EDT 2014
+
+It seems best to encode the tables to make the computation as simple
+as possible, i.e. as   a x + b,   where x is the fractional component
+
+does that make sense?
+
+number of table components doubles, but that isn't really an issue.
+
+the problem is really the fractional point.
+how many bits are needed anyway?  say theres a 12-step power of 2 table.
+
+wait, what about picking the table size based on the needed precision?
+
+i.e. say we want to just keep the top 8 bits to add to a 16bit number
+that's a 1/256 accuracy.
+
+not the right track..
