@@ -98,7 +98,7 @@ macro
 \ handle UART input in kernel low-pri isr.  STATUS is already saved,
 \ normal return or macro.
 : service-lo service-midi ;
-: poll-midi  poll-usb-midi ;    
+: poll-midi  poll-hw-midi ; \ poll-usb-midi ;    
 
 : pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
 : hello 0 LATB ! pause #xF LATB ! ;
@@ -114,12 +114,17 @@ macro
 
 : init-tcons init-tcons-scale4 ;    
 
+: application mainloop ;    
     
 \ B:2/3 : audio output
     
 forth
 
-  
+\ Install timer interrupt handler.  
 ' isr init-isr-hi
+
+
+    
+
   
 

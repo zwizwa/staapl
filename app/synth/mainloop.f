@@ -7,11 +7,11 @@ staapl pic18/afregs
 
 
 \ poll midi and command console    
-: main/i
+: mainloop/i
     \ command console: acknowledge current command.
     \ remaining commands are handled by poll-interpret.
     ack
-: main    
+: mainloop
     init-synth
     init-midi
     begin

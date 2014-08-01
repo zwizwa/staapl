@@ -34,21 +34,10 @@ forth
 
 
 : _cold
-    \ Install boot vector to jump here.
-    ' _cold boot-vector!
-
-    \ Cold start chip and VM.
     init-cold
+    application ;
 
-    \ testi
-    
-    \ 0 for 0 for 0 for next next next testi
 
-    interpreter ; \ FIXME
+\ Install boot vector
+' _cold boot-vector!
     
-    \ Start if tether is attached
-    interactive? if interpreter ; then
-    
-    \ Else fall into application..
-    \ testi
-
