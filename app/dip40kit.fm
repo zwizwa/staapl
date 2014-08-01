@@ -50,7 +50,8 @@ macro
     0 TRISE !
     hello       \ remove if doesn't fit in bootloader
     ;
-    
+
+: application interpreter ;    
 forth
 
 

@@ -40,6 +40,7 @@ macro
 : init-board
     TRISB 1 low
     TRISB 2 low ;
+: application mainloop ;    
 forth
 
 load monitor-serial.f

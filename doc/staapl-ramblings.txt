@@ -66556,3 +66556,12 @@ master side: 1/2 bit ticks
 - nop
 - clock ...
 
+
+
+See code in busuart.f
+
+
+Entry: next
+Date: Fri Aug  1 18:12:55 EDT 2014
+
+

@@ -1,7 +1,11 @@
 \ #lang staapl/pic18 \ -*- forth -*-
 \ provide-all
-\ master-slave half-duplex uart
 
+\ master-slave half-duplex uart
+\ single line with pullup resistor
+\ master provides start bit and transmits 0xFF (all release) as idle / poll
+\ slave syncs to start bit and can pull data bits low
+\ stata machine, easy to include in real-time system
 
 staapl pic18/compose-macro
 staapl pic18/route
@@ -49,17 +53,17 @@ variable state
 \ Slave will sync on 1->0 edge and clock the machine 20 times.
 
 macro    
-: start LOW ; \ master
-\ : start HIZ ; \ slave  
-forth
-    
-: tick
+: tick | start |
     state+ route
-        start nop   \ start bit
-        byte        \ out, in, repeated 8 times
-        HIZ nop     \ stop bit
+        ' start i nop  \ start bit
+        byte           \ out, in, repeated 8 times
+        HIZ nop        \ stop bit
         
         \ fallthrough
         state-reset
         tick ;
-
+\ instantiate one of these        
+: tick-master ' LOW tick ;        
+: tick-slave  ' HIZ tick ;        
+forth
+      

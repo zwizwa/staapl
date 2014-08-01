@@ -86,6 +86,10 @@ macro
     0 TRISE !
     hello       \ remove if doesn't fit in bootloader
     ;
+
+\ dtc uses 8bit interpreter interface    
+: application
+    interpreter ;    
     
 forth
 
