@@ -1,11 +1,12 @@
 #!/bin/bash
 HERE=$(dirname $0)
 ELF=kernel.elf
-# PORT=1234
 PORT=3333
 
-# HACK: qemu doesn't (yet) supprt cortex-m4, so we run the code in a
-# cortex-a8 which supports thumb2 DSP instruction set.
+# The versatilepb system is arm926.  Why does -cpy cortex-m3 work as well?
+# http://zwizwa.be/-/staapl/20140801-214528
+# https://github.com/hackndev/qemu/blob/master/hw/versatilepb.c
+
 GDB="gdb --args"
 GDB=
 exec $GDB qemu-system-arm \
@@ -13,11 +14,12 @@ exec $GDB qemu-system-arm \
     -cpu cortex-m3 \
     -nographic \
     -monitor null \
-    -serial stdio \
+    -serial pty \
     -semihosting \
     -kernel $ELF \
     -gdb tcp::$PORT \
     -m 1 \
     "$@"
+
 
 

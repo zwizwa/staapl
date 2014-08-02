@@ -55,6 +55,7 @@
         version-tag
         live-module
         dtc-enable
+        target
         )
 
 ;; Defaults
@@ -63,7 +64,7 @@
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
 (live-module #f)
-
+(target "pic18")
 
 (define (get-arguments)
   (filename
@@ -72,8 +73,12 @@
     #:program "staaplc"
     
     #:once-each
+    
     [("-o" "--output-hex") filename "Output Intel HEX file."
      (output-hex filename)]
+
+    [("--target") name "Target architecture."
+     (target name)]
 
     [("--version-tag") filename "Version tag."
      (version-tag filename)]
@@ -124,13 +129,17 @@
     base))
 
 (define (req-live-module)
-  (with-handlers ((void void))
-    (spec-from-source dtc-enable 'dtc-enable))
-  (or (live-module)
-      (if (dtc-enable)
-          "staapl/live-pic18-dtc"
-          "staapl/live-pic18")))
-
+  (case (string->symbol (target))
+    ((pic18)
+     (with-handlers ((void void))
+       (spec-from-source dtc-enable 'dtc-enable))
+     (or (live-module)
+         (if (dtc-enable)
+             "staapl/live-pic18-dtc"
+             "staapl/live-pic18")))
+    ((arm)
+     "staapl/live-arm")))
+    
 (define (requirements kernel-path)
   `((file ,(path->string kernel-path))
     ;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
@@ -231,7 +240,7 @@
                (define version-tag ',(version-tag))
                (define-namespace-anchor anchor)
                ,(console-spec)
-               (forth-begin-prefix '(library "pic18"))
+               (forth-begin-prefix '(library ,(target)))
                (empty/run
                 ',(requirements (filename))
                 anchor)))
