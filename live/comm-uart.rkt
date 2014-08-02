@@ -69,8 +69,8 @@
        (write-byte (d: "uart-out ~x\n" b) out)))
     (comm-close
      (lambda ()
-       (when out (close-output-port (d: "close-output-port ~s" out)) (set! out #f))
-       (when in  (close-input-port  (d: "close-output-port ~s" in))  (set! in  #f))
+       (when out (close-output-port (d: "close-output-port ~s\n" out)) (set! out #f))
+       (when in  (close-input-port  (d: "close-input-port  ~s\n" in))  (set! in  #f))
        ))
     (comm-reconnect
      (lambda ()

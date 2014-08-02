@@ -26,9 +26,13 @@
 
 
 ;; Debug
+(define tethered-debug (make-parameter #f))
+(define (debug-on)  (tethered-debug #t))
+(define (debug-off) (tethered-debug #f))
+
 (define-syntax-rule (d: fmt . e)
   (let ((val (begin . e)))
-    ;; (printf fmt val)
+    (when (tethered-debug) (printf fmt val))
     val))
 
 
@@ -770,12 +774,9 @@
 
 
 ;; INCREMENTAL UPLOAD
-(define *debug* #f)
-(define (debug-on)  (set! *debug* #t))
-(define (debug-off) (set! *debug* #f))
 (define (commit [bin (code->binary)])
   (unless (null? bin)
-    (when *debug* (code-print))
+    (when (tethered-debug) (code-print))
     (upload-bytes bin)
     (code-clear!)))
 
