@@ -135,7 +135,9 @@
                  (let ((ex-pretty
                         (cond
                          ((not (exn? ex)) ex)
-                         ((exn:fail:filesystem? ex) "Can't open console device.")
+                         ((exn:fail:filesystem? ex)
+                          (format "Can't open console device: ~a"
+                                  (eval-ws `(comm-spec))))
                          (else (exn-message ex)))))
                    (printf "ERROR: ~a\n" ex-pretty))
                  (dis)

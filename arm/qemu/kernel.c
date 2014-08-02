@@ -43,25 +43,12 @@ void uart_putchar(pl011_t *u, char c) {
     while(u->FR & TXFF);
     u->DR = c;
 }
-void uart_puts(pl011_t *u, const char *c) {
-    while(*c) {uart_putchar(u, *c++);}
-    uart_putchar(u, '\n');
-    uart_putchar(u, '\r');
-}
 int uart_getchar(pl011_t *u) {
     while ((u->FR & RXFE) != 0);
     return u->DR;
 }
-void uart_echo(pl011_t *u) {
-    while(1) {
-        char c = uart_getchar(u);
-        if (c == '\r')
-            uart_putchar(u, '\n');
-        // if (c == 4) return;
-        uart_putchar(u, c);
-    }
-}
 void uart_ack(pl011_t *u) {
+    uart_putchar(u, 0xFF); // return address
     uart_putchar(u, 0); // zero size reply
 }
 void uart_interpret_packet(pl011_t *u, int size) {
@@ -100,8 +87,7 @@ void uart_interpreter(pl011_t *u) {
 }
 
 void reset(void) {
-    uart_puts(uart0, ME "reset()");
-    uart_echo(uart0);
+    uart_interpreter(uart0);
 }
 
 __attribute__ ((section(".vectors")))

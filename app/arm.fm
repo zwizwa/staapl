@@ -1,0 +1,10 @@
+#lang staapl/arm \ -*- forth -*-
+provide-all
+
+
+macro
+: console-type ` uart ;  
+: target       ` arm ;
+forth
+
+: foo 1 2 3 add ;

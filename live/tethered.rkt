@@ -77,6 +77,7 @@
 (define (off) ((comm-off)))
 (define (reconnect) ((comm-reconnect)))
 
+(define comm-spec (make-parameter (lambda _ '(none))))
 
 
 ;; Daisy-chain serial.  Abstract this.
@@ -529,8 +530,13 @@
 (define f-block-size (make-parameter 64))
 
 (define (check-block)
-  (texec/sym 'chkblk)
-  (t>))
+  (with-handlers
+      ((void
+        (lambda _
+          (printf "chkblk not implemented\n")
+          #xFF)))
+    (texec/sym 'chkblk)
+    (t>)))
 
 
 (define (bf! n) (f! (* (f-block-size) n)))

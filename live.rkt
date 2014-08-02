@@ -46,6 +46,7 @@
                (printf "Error opening console ~a:\n" type)
                (display ex)
                (newline))))
+    (comm-spec (list type dev baud))
     (match type
            ('uart       (comm-uart dev baud))
            ('pickit2    (comm-pickit2 dev baud))

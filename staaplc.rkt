@@ -64,7 +64,7 @@
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
 (live-module #f)
-(target "pic18")
+; (target 'pic18)
 
 (define (get-arguments)
   (filename
@@ -78,7 +78,7 @@
      (output-hex filename)]
 
     [("--target") name "Target architecture."
-     (target name)]
+     (target (string->symbol name))]
 
     [("--version-tag") filename "Version tag."
      (version-tag filename)]
@@ -129,24 +129,28 @@
     base))
 
 (define (req-live-module)
-  (case (string->symbol (target))
+  ;; (printf "target: ~a\n" (target))
+  (case (target)
     ((pic18)
-     (with-handlers ((void void))
-       (spec-from-source dtc-enable 'dtc-enable))
      (or (live-module)
          (if (dtc-enable)
              "staapl/live-pic18-dtc"
              "staapl/live-pic18")))
     ((arm)
-     "staapl/live-arm")))
+     "staapl/arm/live")))
     
-(define (requirements kernel-path)
+(define (requirements-compile kernel-path)
   `((file ,(path->string kernel-path))
-    ;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
-    ;; seem to pull in code properly.
-    ,(string->symbol (req-live-module))
-    readline/rep
-    ))
+    staapl/live))
+
+(define (requirements-live kernel-path)
+  (append
+   (requirements-compile kernel-path)
+   `(;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
+     ;; seem to pull in code properly.
+     ,(string->symbol (req-live-module))
+     readline/rep
+     )))
 
 
 (define (process-arguments)
@@ -169,7 +173,13 @@
 (define (spec-from-source param id)
   (unless (param)
     (let ((v (eval `(macro-constant ',id))))
-      (when v (param v)))))
+      (when v
+        (printf "~a = ~a\n" id v)
+        (param v)))))
+
+(define (spec-from-source/optional param id)
+  (with-handlers ((void void))
+    (spec-from-source param id)))
 
 ;; Figure out console config
 (define (console-spec)
@@ -179,10 +189,6 @@
 
   (define (device-string x)
     (if (symbol? x) (symbol->string x) x))
-
-  (spec-from-source console    'console-type)
-  (spec-from-source device     'console-device)
-  (spec-from-source baud       'console-baud)
 
   
   `(begin
@@ -207,14 +213,23 @@
     (printf "input file not found: ~a\n" (filename))
     (exit 1))
 
-
   (parameterize
       ((current-namespace
         (make-base-namespace)))
 
     ;; Load necessary code.
-    (eval `(require ,@(requirements (filename))))
+    (eval `(require ,@(requirements-compile (filename))))
 
+    ;; Get config from source macros
+    (spec-from-source            console     'console-type)
+    (spec-from-source            device      'console-device)
+    (spec-from-source            baud        'console-baud)
+    (spec-from-source/optional   dtc-enable  'dtc-enable)  ;; default 0
+    (spec-from-source            target      'target)      ;; default pic18
+
+    ;; Load live libray for target
+    (eval `(require ,@(requirements-live (filename))))
+    
     ;; Optionally print assembler code.
     (when (output-asm)
       (with-output-to-file/safe
@@ -234,15 +249,15 @@
 
       
     ;; Save interaction script.
-    (let* ((reqs `(require ,@(requirements (filename))))
+    (let* ((reqs `(require ,@(requirements-live (filename))))
            (boot-run
             `(begin
                (define version-tag ',(version-tag))
                (define-namespace-anchor anchor)
                ,(console-spec)
-               (forth-begin-prefix '(library ,(target)))
+               (forth-begin-prefix '(library ,(symbol->string (target))))
                (empty/run
-                ',(requirements (filename))
+                ',(requirements-live (filename))
                 anchor)))
 
                 ;; FIXME: no longer supported
