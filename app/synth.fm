@@ -88,6 +88,7 @@ load synth/mainloop.f
 \ load debug.f
 
 macro
+: live-module ` staapl/pic18/live ;  
 : fosc 48000000 ;
 : init-tcons init-tcons-scale4 ;    
     

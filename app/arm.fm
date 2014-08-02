@@ -4,7 +4,7 @@ provide-all
 
 macro
 : console-type ` uart ;  
-: target       ` arm ;
+: live-module  ` staapl/arm/live ;
 forth
 
 : foo 1 2 3 add ;

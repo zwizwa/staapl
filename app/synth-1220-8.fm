@@ -32,6 +32,7 @@ load synth/mainloop.f
 
 \ Setup info.    
 macro
+: live-module ` staapl/pic18/live ;
 : fosc 8000000 ; \ internal osc
 : baud 38400 ;
 : poll-midi  poll-hw-midi ;    

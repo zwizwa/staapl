@@ -55,7 +55,6 @@
         version-tag
         live-module
         dtc-enable
-        target
         )
 
 ;; Defaults
@@ -64,7 +63,6 @@
 (dict-suffix ".dict")
 (debug-suffix ".rkt")
 (live-module #f)
-; (target 'pic18)
 
 (define (get-arguments)
   (filename
@@ -77,14 +75,11 @@
     [("-o" "--output-hex") filename "Output Intel HEX file."
      (output-hex filename)]
 
-    [("--target") name "Target architecture."
-     (target (string->symbol name))]
-
     [("--version-tag") filename "Version tag."
      (version-tag filename)]
 
     [("--live-module") module "Live interaction module."
-     (live-module module)]
+     (live-module (string->symbol module))]
     
     [("--output-code") filename "Output s-expression code dump."
      (output-code filename)]
@@ -128,17 +123,6 @@
   (let-values (((base name _) (split-path path)))
     base))
 
-(define (req-live-module)
-  ;; (printf "target: ~a\n" (target))
-  (case (target)
-    ((pic18)
-     (or (live-module)
-         (if (dtc-enable)
-             "staapl/live-pic18-dtc"
-             "staapl/live-pic18")))
-    ((arm)
-     "staapl/arm/live")))
-    
 (define (requirements-compile kernel-path)
   `((file ,(path->string kernel-path))
     staapl/live))
@@ -148,10 +132,18 @@
    (requirements-compile kernel-path)
    `(;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
      ;; seem to pull in code properly.
-     ,(string->symbol (req-live-module))
+     ,(live-module)
      readline/rep
      )))
 
+(define (library)
+  (case (live-module)
+    ((staapl/pic18/live
+      staapl/pic18/live-dtc) `(library "pic18"))
+    ((staapl/arm/live)       `(library "arm"))
+    (else '())))
+
+      
 
 (define (process-arguments)
   (out output-hex (filename) ".hex")
@@ -177,9 +169,6 @@
         (printf "~a = ~a\n" id v)
         (param v)))))
 
-(define (spec-from-source/optional param id)
-  (with-handlers ((void void))
-    (spec-from-source param id)))
 
 ;; Figure out console config
 (define (console-spec)
@@ -220,12 +209,11 @@
     ;; Load necessary code.
     (eval `(require ,@(requirements-compile (filename))))
 
-    ;; Get config from source macros
-    (spec-from-source            console     'console-type)
-    (spec-from-source            device      'console-device)
-    (spec-from-source            baud        'console-baud)
-    (spec-from-source/optional   dtc-enable  'dtc-enable)  ;; default 0
-    (spec-from-source            target      'target)      ;; default pic18
+    ;; Get config from source macros if not defined.
+    (spec-from-source console     'console-type)
+    (spec-from-source device      'console-device)
+    (spec-from-source baud        'console-baud)
+    (spec-from-source live-module 'live-module)
 
     ;; Load live libray for target
     (eval `(require ,@(requirements-live (filename))))
@@ -255,7 +243,7 @@
                (define version-tag ',(version-tag))
                (define-namespace-anchor anchor)
                ,(console-spec)
-               (forth-begin-prefix '(library ,(symbol->string (target))))
+               (forth-begin-prefix ',(library))
                (empty/run
                 ',(requirements-live (filename))
                 anchor)))

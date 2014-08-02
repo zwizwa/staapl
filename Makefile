@@ -43,8 +43,8 @@ pic18:
 	$(RACO_MAKE) pic18/sim.rkt
 	$(RACO_MAKE) live.rkt
 	$(RACO_MAKE) staaplc.rkt
-	$(RACO_MAKE) live-pic18.rkt
-	$(RACO_MAKE) live-pic18-dtc.rkt
+	$(RACO_MAKE) pic18/live.rkt
+	$(RACO_MAKE) pic18/live-dtc.rkt
 
 # use planet instead
 install-collects:
