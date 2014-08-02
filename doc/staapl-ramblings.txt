@@ -66564,4 +66564,62 @@ See code in busuart.f
 Entry: next
 Date: Fri Aug  1 18:12:55 EDT 2014
 
+- arm seems to be within reach.  (pun shunned ;).  let's see where
+  that goes.  what to do with word size?  it seems that adding a
+  split/unsplit operator to the interpreter would probably be enough
+  to handle wordlength issues.  that and extending all pointer sizes
+  to 24 or 32bit?
+
+
+
+Entry: Instantiating static objects
+Date: Fri Aug  1 18:43:36 EDT 2014
+
+Probably units are best for this:
+
+Parameterize a piece of code defining a collection of words with a
+collection of macros.
+
+How to map that interface?
+
+ 
+
+Entry: ARM dev
+Date: Fri Aug  1 21:45:28 EDT 2014
+
+Plenty of ARM boards but I think I'd like an emulator for getting the
+ARM interaction bootstrapped.  There is QEMU Cortex M3.  How does its
+serial port work?
+
+Better: where is this in the QEMU source?  (here: [6])
+
+Angel interface[2][3] emulates Arm PrimeCell PL011 UART.
+
+-M versatilepb
+
+This seems to work [7].
+
+What is really needed is a special purpose "staapl machine" for qemu.
+Yeah why not tie this into Racket directly?  Doesn't really need a
+staapl machine, just a working serial port on stdout and 
+
+[1] http://balau82.wordpress.com/2010/02/28/hello-world-for-bare-metal-arm-using-qemu/
+[2] http://balau82.wordpress.com/2010/11/04/qemu-arm-semihosting/
+[3] http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0040d/CIHDEDAE.html
+[4] http://git.savannah.gnu.org/cgit/qemu.git/tree/hw/pl011.c
+[5] http://balau82.wordpress.com/2010/11/30/emulating-arm-pl011-serial-ports/
+[6] https://github.com/hackndev/qemu/blob/master/hw/versatilepb.c
+[7] http://zwizwa.be/git/armdev/qemu-m3
+
+
+
+Entry: ARM roadmap
+Date: Fri Aug  1 23:27:48 EDT 2014
+
+- Build a bootstrap interpreter in C.  This would allow to get the
+  basic infrastructure up for interactive development of assembler and
+  compiler.  Basically: open port = boot qemu with kernel.
+
+- Keep as much of the PIC approach if possible.  How far can this 8bit
+  / 32bit cross-platform thing be stretched?
 

@@ -3,6 +3,9 @@
 staapl pic18/stdin
 staapl pic18/stdout
 
+\ NOTE: This protocol will not be kept backwards compatible.
+\ The main goal is to be simple and support all targets.
+
 \ Protocol: half-duplex ping/pong transaction, accessible as a byte
 \ stream with explicit sync points to allow for data-ready or
 \ packet buffering.
