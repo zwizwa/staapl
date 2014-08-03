@@ -66686,3 +66686,10 @@ call =
 return =
      bx lr
      
+
+
+Entry: CCs for synth
+Date: Sun Aug  3 11:14:54 EDT 2014
+
+Problems are all related to fixed point multiplication.
+

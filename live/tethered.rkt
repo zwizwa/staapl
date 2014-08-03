@@ -287,8 +287,8 @@
           (printf "texec/sym ~a: failed.  ignoring.\n" sym))))
     (texec/sym-try)))
 
-(define (erase)   (texec/sym-try 'ferase)) ;; erase current flash block
-(define (program) (texec/sym-try 'fprog))  ;; program current flash line
+(define (erase)   (texec/sym 'ferase)) ;; erase current flash block
+(define (program) (texec/sym 'fprog))  ;; program current flash line
 
 (define (ts-copy)
   (reverse (a>/b (stacksize)

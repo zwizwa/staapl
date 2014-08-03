@@ -54,7 +54,10 @@ variable synth-save
 
 \ Controllers should set meaningful high level values.  The synth
 \ engine is already fully controllable through NRPN.
-    
+
+2variable cc00 : init-cc00 cc00 -> drop ;  \ For development.
+
+: CC00 cc00 invoke ;
 : CC57 midi-note mod1 2! ;
 : CC58 
 : CC59 
@@ -66,7 +69,7 @@ variable synth-save
 : continuous-controller
     m2 m1 #x7F and route
         \  0      1      2      3      4      5      6      7      8      9      A      B      C      D      E      F
-        ____ . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
+        CC00 . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 1
         ____ . ____ . ____ . ____ . ____ . ____ . CC26 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 2 
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 3
@@ -139,7 +142,9 @@ variable synth-save
 
 : init-synth
     square synth @ synth-save ! silence
-    init-notes engine-on ;
+    init-cc00
+    init-notes
+    engine-on ;
     
 
     

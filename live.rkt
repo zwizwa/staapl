@@ -1,6 +1,7 @@
 #lang racket/base
 (require
  racket/match
+ racket/pretty
  "tools.rkt"
  "code.rkt")
 
@@ -59,6 +60,20 @@
 (define reload (make-parameter void))
 (define (empty) ((reload)))
 
+
+(define (namespace-copy! src dst)
+  (define (ns-ref ns sym)
+    (with-handlers ((void (lambda _ #f)))
+      (namespace-variable-value sym #t #f ns)))
+  (define (ns-set! ns sym val)
+    (namespace-set-variable-value! sym val #f ns))
+  (for ((sym (namespace-mapped-symbols src)))
+    (let ((val-dst (ns-ref dst sym))
+          (val-src (ns-ref src sym)))
+      (when (and val-src (not val-dst))
+        ;; (printf " ~s ~s\n" sym val-src)
+        (ns-set! dst sym val-src)))))
+
 (define (make-live-namespace module-list anchor)
   (let ([ns (make-base-namespace)]
         [nsa (namespace-anchor->namespace anchor)])
@@ -71,7 +86,13 @@
     (parameterize ([current-namespace ns])
       (for ((m module-list))
         (eval `(require ,m)))
-      (code-clear!))
+      (code-clear!)
+      ;; Import private symbols from read-only kernel module namespace
+      ;; into the working namespace.
+      (let* ((kernel-module (car module-list))
+             (mod-ns (eval `(module->namespace ',kernel-module))))
+        (namespace-copy! mod-ns ns))
+      )
     ns))
           
 
