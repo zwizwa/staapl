@@ -89,9 +89,9 @@
       (code-clear!)
       ;; Import private symbols from read-only kernel module namespace
       ;; into the working namespace.
-      (let* ((kernel-module (car module-list))
-             (mod-ns (eval `(module->namespace ',kernel-module))))
-        (namespace-copy! mod-ns ns))
+      (for ((mod (list (car module-list)))) ;; FIXME: only kernel?
+        (let ((mod-ns (eval `(module->namespace ',mod))))
+          (namespace-copy! mod-ns ns)))
       )
     ns))
           
