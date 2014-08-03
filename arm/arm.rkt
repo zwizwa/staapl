@@ -9,8 +9,8 @@
  )
 
 (require/provide
+ "sig.rkt"
  "asm.rkt"
- "macro.rkt"
  "arm-forth-unit.rkt"
  "arm-macro-unit.rkt"
  "arm-compiler-unit.rkt"
@@ -55,15 +55,10 @@
    org^
    machine^
    instantiate^
-   
-   ;; Target code CFG support
    label^
-   
-   ;; top-level code compilation
    compiler^
-
-   ;; Prefix parser Forth syntax
    macro-forth^
+   arm-assembler^
    ))
 
 (define/invoke-sigdict arm^^
@@ -79,21 +74,8 @@
    arm-forth@
    ))
 
-;; OLD NOTES see old/
-
-;; Getting to know the ARM architecture.
-;; Best place to start is to write a small frontend for the assembler.
-
-;; Goal: make something that can actually run, say an initialization
-;; sequence as is used in the OpenOCD debugger:
-
-;; 1. Start with an assembly file + linker script that actually runs
-;; on a bare-bones AT91SAM7 (ARM7TMDI)
-
-;; 2. Generate it from s-expression
-;; ...
-
-;; Currently the low-level part is moved to libprim/arm
-;; Sun Jun 12 16:02:47 CEST 2011
+;; This non-hygienic form collects all disassembler functions visible
+;; in this module namespace.  This is used during live interaction.
+(define-dasm-collection dasm-collection)
 
 

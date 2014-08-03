@@ -16,7 +16,8 @@
                  postproc       ;; postproc^
                  assemble!))    ;; assembler code
 
+;; FIXME: see arm/qemu
 (code-pointers-set!
- '((code #x0022)
-   (data #x0000)))
+ '((code #x1000)
+   (data #x2000)))
 

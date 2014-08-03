@@ -15,5 +15,4 @@
    pic18-generic@  ;; generic PIC18 code
    ))
 
-(define macro/target (macro: 'pic18))
 

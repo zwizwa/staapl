@@ -5,5 +5,5 @@
  "../live.rkt"          ;; toplevel interaction
  "../code.rkt"          ;; target code registry
  "../port/ihex.rkt"     ;; write-ihex
- "../pic18.rkt"         ;; base language
+ "arm.rkt"              ;; base language
 )

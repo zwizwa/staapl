@@ -66623,3 +66623,37 @@ Date: Fri Aug  1 23:27:48 EDT 2014
 - Keep as much of the PIC approach if possible.  How far can this 8bit
   / 32bit cross-platform thing be stretched?
 
+
+
+Entry: Exploding..
+Date: Sun Aug  3 10:01:08 EDT 2014
+
+Practically, most important at this point is to get synth to run on
+1220 and have it do some reasonable CCs.
+
+For 1220 I have a procrastination going on to make this uart bus
+thing..  It's touching on enough infrastructure things that are
+screaming for updates..
+
+One thing I'd like to do however is to figure out how to attach a
+state machine to a running pic.
+
+So this doesn't seem the right moment to do a bunch of electronics.
+Mind is on something else.  I'm just going to ride the wave until the
+focus comes back.
+
+
+Entry: ARM stuff
+Date: Sun Aug  3 10:32:03 EDT 2014
+
+So basic interpreter is running in QEMU on pts serial port.  Next this
+needs a way to do programming.
+
+[master] tom@zoo:~/staapl/app$ ./arm.dict /dev/pts/8
+chkblk not implemented
+Press ctrl-D to quit.
+OK
+: foo 1 2 3 add 
+.ERROR: texec/sym: fprog
+OK
+
