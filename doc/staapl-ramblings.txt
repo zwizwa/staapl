@@ -66693,3 +66693,10 @@ Date: Sun Aug  3 11:14:54 EDT 2014
 
 Problems are all related to fixed point multiplication.
 
+Trying to map CC00 to p1 gives two problems:
+- not mapped in a meaningful low->high freq way
+- too jumpy: needs smoothing
+
+For smoothing we need:
+- control rate processing
+

@@ -190,7 +190,6 @@ variable oct
 
 
 : midi>bassnote \ notenumer -- bassnote  | oct contains octave
-    24 - \ FIXME: find correct note and clip range
     0 oct !
     begin
         12 <? if drop ; then
@@ -199,7 +198,10 @@ variable oct
     again 
 
 : midi-note
+    24 max 24 - \ shift down 2 octaves
+: midi-ctrl-freq
     midi>bassnote note ;
+
     
     
 \ CONTROL TIMER
