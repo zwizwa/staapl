@@ -1,6 +1,8 @@
 #lang staapl/arm \ -*- forth -*-
 provide-all
 
+: fprog ;
+
 
 macro
 : console-type ` uart ;  

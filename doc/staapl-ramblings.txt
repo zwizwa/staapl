@@ -66657,3 +66657,32 @@ OK
 .ERROR: texec/sym: fprog
 OK
 
+Ignorign that fprog for now makes upload work after setting proper
+code pointer.  Disassembly also works after adding defs in the
+arm/arm.rkt module
+
+
+Entry: Subroutine return on ARM
+Date: Sun Aug  3 10:57:41 EDT 2014
+
+Interesting because ARM uses a link register.  Using this efficiently
+is a non-local operation.
+
+local:
+  - save lr before every call
+
+non-local:
+  - save lr at procedure entry,
+  - but only if there are no calls inside the body
+
+Let's leave the non-local variant as an open problem for now.  Use the
+local approach.
+
+call = 
+     push {lr}
+     bl <...>
+     pop {lr}
+
+return =
+     bx lr
+     
