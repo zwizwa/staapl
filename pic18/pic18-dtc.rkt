@@ -3,20 +3,20 @@
 ;; Threaded Forth for PIC18.
 
 (require
- "tools.rkt"
- "ns.rkt"
- "macro.rkt"
+ "../tools.rkt"
+ "../ns.rkt"
+ "../macro.rkt"
  (only-in "pic18.rkt"
           target-byte-address))
 
 (require/provide
+ "../asm.rkt"
  "asm.rkt"
- "pic18/asm.rkt"
- "pic18/dtc.rkt"
- "pic18/double-math.rkt"
- "coma/macro-forth.rkt"
- "coma/macro-forth-sig.rkt"
- "pic18/dtc-forth-unit.rkt")
+ "dtc.rkt"
+ "double-math.rkt"
+ "../coma/macro-forth.rkt"
+ "../coma/macro-forth-sig.rkt"
+ "dtc-forth-unit.rkt")
 
 (provide
  (all-defined-out)

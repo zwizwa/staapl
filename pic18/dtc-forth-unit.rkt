@@ -3,7 +3,7 @@
           "../macro.rkt"
           "../label-sig.rkt"
           "dtc.rkt"
-          (only-in "../pic18.rkt" ;; Tie into the full pic18 compiler.
+          (only-in "pic18.rkt" ;; Tie into the full pic18 compiler.
                    macro/<<
                    macro/dw>
                    label:allot

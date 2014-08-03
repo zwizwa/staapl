@@ -4,54 +4,54 @@
 
 
 (require
- "tools.rkt")
+ "../tools.rkt")
 
 (require/provide
- "tools.rkt"
+ "../tools.rkt"
 
  ;; Concatenative macro languge.
- "coma/macro.rkt"
+ "../coma/macro.rkt"
  
  
  ;; ASSEMBLER
+ "../asm.rkt"
  "asm.rkt"
- "pic18/asm.rkt"
 
 
 
  ;; LANGUAGE
 
  ;; Generic interfaces + implementations
- "sig.rkt"                   ;; generic language
+ "../sig.rkt"                   ;; generic language
  
- "coma/comma-unit.rkt"       ;; comma^
- "coma/code-unit.rkt"        ;; code^
- "control/control-unit.rkt"  ;; control^ 
- "comp/compiler-unit.rkt"    ;; jump^
- "label-sig.rkt"   
- "label-unit.rkt"
+ "../coma/comma-unit.rkt"       ;; comma^
+ "../coma/code-unit.rkt"        ;; code^
+ "../control/control-unit.rkt"  ;; control^ 
+ "../comp/compiler-unit.rkt"    ;; jump^
+ "../label-sig.rkt"   
+ "../label-unit.rkt"
  
  ;; PIC18 interfaces + implementations
- "pic18/pic18-macro-unit.rkt"
- "pic18/pic18-control-unit.rkt"
- "pic18/sig.rkt"             ;; pic18 language
+ "pic18-macro-unit.rkt"
+ "pic18-control-unit.rkt"
+ "sig.rkt"             ;; pic18 language
 
 
  ;; COMPILER + ASSEMBLER
- "pic18/pic18-compiler-unit.rkt"
+ "pic18-compiler-unit.rkt"
  
 
  ;; FORTH SYNTAX
- "coma/macro-forth-sig.rkt"
- "coma/macro-forth-unit.rkt"
- "coma/macro-forth.rkt"         ;; rpn prefix parsing words bound to macro.ss
+ "../coma/macro-forth-sig.rkt"
+ "../coma/macro-forth-unit.rkt"
+ "../coma/macro-forth.rkt"         ;; rpn prefix parsing words bound to macro.ss
 ;; "pic18/forth.rkt"              ;; PIC18 specific
 
  ;; TARGET CODE HANDLING
- "code.rkt"
+ "../code.rkt"
 
  ;; SHALLOW COROUTINES
- "pic18/scr-unit.rkt"
+ "scr-unit.rkt"
  
  )
 

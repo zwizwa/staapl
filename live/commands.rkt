@@ -68,9 +68,9 @@
     ((2) (apply w args))
     (else (error-wordsize))))
 
-(define (>tw) (byte/word >t _>t))
-(define (tw>) (byte/word t> _t>))
-(define (s)   (byte/word ts _ts))
+(define (>tw a) (byte/word >t _>t a))
+(define (tw>)   (byte/word t> _t>))
+(define (s)     (byte/word ts _ts))
 
 ;; Print dictionaries
 (define-values (code-words

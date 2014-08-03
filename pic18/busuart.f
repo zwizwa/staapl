@@ -1,7 +1,7 @@
 \ #lang staapl/pic18 \ -*- forth -*-
 \ provide-all
 
-\ master-slave half-duplex uart
+\ master-slave half-duplex uart on RA4
 \ single line with pullup resistor
 \ master provides start bit and transmits 0xFF (all release) as idle / poll
 \ slave syncs to start bit and can pull data bits low
@@ -10,12 +10,10 @@
 staapl pic18/compose-macro
 staapl pic18/route
 
-
-
 macro
-: tris  TRISB 7 ;
-: lat   LATB  7 ;
-: port  PORTB 7 ;    
+: tris  TRISA 4 ;
+: lat   LATA  4 ;
+: port  PORTA 4 ;    
 : LOW   tris low ;
 : HIZ   tris high ;
 : bit   out . in . ;
@@ -52,18 +50,19 @@ variable state
 \ Difference between master and slave is who generates the start bit.
 \ Slave will sync on 1->0 edge and clock the machine 20 times.
 
+
 macro    
-: tick | start |
-    state+ route
-        ' start i nop  \ start bit
-        byte           \ out, in, repeated 8 times
-        HIZ nop        \ stop bit
-        
-        \ fallthrough
-        state-reset
-        tick ;
-\ instantiate one of these        
-: tick-master ' LOW tick ;        
-: tick-slave  ' HIZ tick ;        
+: start LOW ; \ slave
+\ : start HIZ ; \ slave
 forth
+    
+: tick
+    state+ route
+        start nop    \ start bit
+        byte         \ out, in, repeated 8 times
+        HIZ nop      \ stop bit
+            
+        \ fallthrough
+        start
+        tick ;
       

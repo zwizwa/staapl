@@ -7,7 +7,7 @@
  "../live.rkt"            ;; toplevel interaction
  "../code.rkt"            ;; target code registry
  "../port/ihex.rkt"       ;; write-ihex
- "../pic18-dtc.rkt"       ;; pic18 dtc compiler
+ "pic18-dtc.rkt"          ;; pic18 dtc compiler
  )
 
 ;; Change outer interpreter to use on-target 16bit DTC.

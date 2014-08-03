@@ -228,10 +228,11 @@ forth
   
 : isr
     OSCF-flag ' fixed do-isr
-    
+
     OSC0-flag ' osc0  do-isr
     OSC1-flag ' osc1  do-isr
     OSC2-flag ' osc2  do-isr
+
     
     reset  \ fallthrough
 
@@ -282,21 +283,26 @@ forth
 \ the fixed rate interrupt by default runs at FOSC/256, which is 7812
 \ Hz. this increments a 32bit timer that can be used for control
 \ sync. use PER2 to set the frequency to FOSC/(PER2+1)
+
     
 : fixed
     dup WREG subwf  \ 0 stc
     dup tick0 ++!
     dup tick1 ++!
     dup tick2 ++!
-        tick3 ++! ;
+        tick3 ++!
+    fixed-tick invoke ;  \ add custom RT clocked state machines
 
-
-
+\ set fixed-tick after calling init-timers and before engine-on    
+2variable fixed-tick
+: fixed-tick-reset
+    fixed-tick -> ;     
 
 \ enable everything except the global interrupt flags which are used
 \ to switch the synth on/off
     
 : init-timers
+    fixed-tick-reset
 
     INTCON2 TMR0IP high \ TMR0: high priority    
     IPR1 TMR1IP high
@@ -367,7 +373,6 @@ forth
 \ : ion-f   OSCF-enable high ;    
 
 
-    
     
 \ FIXME: programming enables interrupts
 : _engine-on
