@@ -124,17 +124,21 @@
     base))
 
 (define (requirements-compile kernel-path)
-  `((file ,(path->string kernel-path))
-    staapl/live))
+  (let ((forms
+         `((file ,(path->string kernel-path))
+           staapl/live)))
+    forms))
 
 (define (requirements-live kernel-path)
-  (append
-   (requirements-compile kernel-path)
-   `(;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
-     ;; seem to pull in code properly.
-     ,(live-module)
-     readline/rep
-     )))
+  (let ((forms
+         (append
+          (requirements-compile kernel-path)
+          `(;; FIXME: if kernel doesn't include dtc.rkt live-pic18-dtc doesn't
+            ;; seem to pull in code properly.
+            ,(live-module)
+            readline/rep
+            ))))
+    forms))
 
 (define (library)
   (case (live-module)
@@ -165,8 +169,8 @@
 (define (spec-from-source param id)
   (unless (param)
     (let ((v (eval `(macro-constant ',id))))
+      (printf "~a = ~a\n" id v)
       (when v
-        (printf "~a = ~a\n" id v)
         (param v)))))
 
 

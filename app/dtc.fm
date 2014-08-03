@@ -68,7 +68,7 @@ staapl pic18/compose-macro
 
 \ config macros    
 macro
-: dtc-enable 1 ; \ used by compiler to enable staapl/live-pic18-dtc
+: live-module ` staapl/pic18/live-dtc ;
 : fosc 48000000 ;
 : monitor-EP 1 ;  \ ttyACM0 staapl monitor (binary)
 : console-EP 3 ;  \ ttyACM1 serial command interface

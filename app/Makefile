@@ -106,6 +106,8 @@ test: $(DIFF)
 %.dasm: %.hex
 	gpdasm -p 18F1220 $<  >$@
 
+# Currently being worked on.  Others might be broken due to compiler or library changes.
+current: dtc.app synth.app synth-1220-8.app dip40kit.app
 
 # We diff the hex instead of the dasm as gpdasm produces output
 # dependent on 32bit or 64bit host.

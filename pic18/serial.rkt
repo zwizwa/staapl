@@ -1,5 +1,5 @@
 #lang racket/base
-(require "../pic18.rkt")
+(require "pic18.rkt")
 (provide (all-defined-out))
 
 ;; FIXME: experimental s-expression based word/variable defs.

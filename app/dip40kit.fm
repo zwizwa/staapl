@@ -35,6 +35,7 @@ staapl pic18/vector
 load debug.f    
 
 macro
+: live-module ` staapl/pic18/live ;
 : fosc 48000000 ;
 : monitor-EP 1 ;
 : total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3
