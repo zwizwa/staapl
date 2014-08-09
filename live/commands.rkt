@@ -71,6 +71,8 @@
 (define (>tw a) (byte/word >t _>t a))
 (define (tw>)   (byte/word t> _t>))
 (define (s)     (byte/word ts _ts))
+(define (ss)    (byte/word tss _tss))
+(define (sx)    (byte/word tsx _tsx))
 
 ;; Print dictionaries
 (define-values (code-words

@@ -66700,3 +66700,44 @@ Trying to map CC00 to p1 gives two problems:
 For smoothing we need:
 - control rate processing
 
+
+Roadmap?  Control rate processing.  These would mostly be
+interpolation state machines.  Question is: IIR or linear
+interpolation?
+
+IIR is probably easier to manage.
+- subtract target from state
+- multiply
+- add
+
+Still doing this stuff in forth is fidgety.
+What about making a small asm dialect to do this properly.
+
+
+
+
+Entry: One poles
+Date: Sun Aug  3 17:01:46 EDT 2014
+
+Problem is this needs a new routine.
+Design it for:
+- signed operation (increment can be negative)
+- arbitrary poles in [0,1]
+
+Probably best to use the existing 16x16 multiplication and taylor it
+for fixed point.
+
+Having a hard time not to prematurely optimize this..
+
+
+Feeling a little thick headed as well.
+
+Anyways, going for the signed stuff.  Trouble is that picking the high
+word allows only values in [-0.5,+0.5]
+
+So let's pick a different multiply: signed x unsigned -> signed.
+
+See _*>>16 in dtc.f
+
+Still using this to do any DSP is an excercise in moving bytes
+around..  How to make that better?

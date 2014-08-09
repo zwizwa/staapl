@@ -85,13 +85,24 @@ forth
 
 \ Multiplication
 
-load mul16.f
+load mul16.f  
 variable X0 variable X1
 variable Y0 variable Y1
 variable R0 variable R1 variable R2 variable R3 variable R4
 
-: >umul>R Y! X! umul>R ;
-: _*      >umul>R RL@ ;
-: _um*    _* RH@ ; 
+: XY!  Y! X! ;
+: R01@ R0 @ R1 @ ;   
+: R23@ R2 @ R3 @ ;   
+: _*   XY! umul R01@ ;
+: _um* _* R23@ ;
+
+
+\ for s/u Y is unsigned = top argument
+    
+    
+\ Fractional multiplication is signed x unsigned -> signed
+\ Seems most useful for DSP.
+: _*>>16  XY! sumul R23@ ;
+: _*>>8   XY! sumul R1 @ R2 @ ;
 
 \ fixme : also do signed and fixedpoint

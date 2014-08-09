@@ -27,7 +27,7 @@ macro
 
 forth
 
-: umul>R 
+: umul 
 
     X0 @ Y0 mulwf        \ low terms
     PRODL R0 movff
@@ -53,20 +53,23 @@ forth
 \ be subtracted. same goes for Y1 being negative.
     
     
-    
-: smul>R
-    umul>R
-
+\ X: signed
+\ Y: unsigned    
+: sumul
+    umul
     X1 7 high? if
 	Y0 @ R2 -!
         Y1 @ R3 --!
-    then
+    then ;
 
+: smul
+    sumul
     Y1 7 high? if
 	X0 @ R2 -!
         X1 @ R3 --!
     then ;
 
+    
 : R-saturate-signed 
     R3 @ \ save highest byte
 
