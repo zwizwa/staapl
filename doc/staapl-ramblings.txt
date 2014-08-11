@@ -66741,3 +66741,27 @@ See _*>>16 in dtc.f
 
 Still using this to do any DSP is an excercise in moving bytes
 around..  How to make that better?
+
+
+Entry: bootstrapping forth
+Date: Sat Aug  9 22:00:18 EDT 2014
+
+Sidestepping standard Forth bootstrap interpreter by binary
+translation of existing image.
+
+[1] http://www.calcentral.com/~forth/forth/eforth/eF22a-dev.zip
+
+
+Entry: Threading
+Date: Sun Aug 10 09:18:25 EDT 2014
+
+Because "enter" can become a 2-byte instruction, it seems best to
+solve it somewhere else.  There's an unused bit in the threaded code
+which can be used to distinguish between a primitive and a high level
+word.
+
+Alternatively, use an indirect threaded Forth, but that requires all
+primitives to be wrapped.
+
+What about placing the address of NEXT on the return stack?
+
