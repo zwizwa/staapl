@@ -12,12 +12,13 @@ MZSCHEME=mzscheme
 # RACO_MAKE=raco make -j 4 -v   # 20s
 # RACO_MAKE=raco make -v
 RACO_MAKE=mzc -vk
+RACO_PKG =raco pkg
 
 unlink:
 	$(RACO) pkg remove staapl
 
 link:
-	cd $$(readlink -f .)/.. ; $(RACO) pkg install --link staapl
+	cd $$(readlink -f .)/.. ; $(RACO_PKG) install --link staapl
 
 gitbuf:
 	$(RACO) pkg install github://github.com/zwizwa/staapl/master
