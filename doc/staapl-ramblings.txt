@@ -66765,3 +66765,30 @@ primitives to be wrapped.
 
 What about placing the address of NEXT on the return stack?
 
+
+
+Entry: gdb stub / cortex m
+Date: Thu Nov 20 23:29:50 EST 2014
+
+I've been exploring Staapl ideas through a gdb stub.  Esstentially, if
+you stop thinking about gdb as a thing that sets breakpoints and steps
+through code, and start thinking of it as a thing that interactively
+executes functions and inspects datastructures, you're halfway there.
+
+The stub runs the GDB RSP protocol over USB CDCACM, polled from a main
+loop that executes the low priority event loop of the microcontroller
+application.  This mainloop keeps running while GDB is attached.  The
+"stopped thread" that GDB sees is an empty stack frame that can be
+used by GDB to evaluate code.  It is fake in the sense that stepping
+through or continuing this current thread makes no sense.
+
+Breakpoints and the continue command are only implemented to the point
+that they are necessary to implement the on-target function call
+mechanism.
+
+This mechanism would probably be a good candidate for bootstrapping
+Staapl on Cortex M.  However, I wonder if it is actually meaningful to
+re-implement the interactive protocol.  The only part that is
+necessary is a compiler, and maybe a frontend for gdb.
+
+
