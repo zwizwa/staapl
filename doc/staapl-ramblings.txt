@@ -66792,3 +66792,32 @@ re-implement the interactive protocol.  The only part that is
 necessary is a compiler, and maybe a frontend for gdb.
 
 
+
+
+Entry: Thermometers
+Date: Sun Dec 21 17:45:12 EST 2014
+
+So I have an application in mind: ad-hoc sensor boards.  It seems
+simplest to decouple host (any connectivity to USB host) and sensor
+board (USB client).
+
+In order to make this practical, a "highlevel" Forth is probably best.
+No real-time requirements, but remote access and remote code upgrade
+would be a nice feature.
+
+
+This approach should also work for other "management software"
+e.g. for the analog synth.  Really what I need at this point in time
+is a way to look at Staapl in a different light.  The bias towards
+speed and small size on PIC18 has made it hard to write practical
+code.  Time to take a step back and look at things from the software
+design perspective.
+
+
+Entry: Bootloader
+Date: Sun Dec 21 18:00:08 EST 2014
+
+Writing the USB stub I wonder if it's a good idea to rewrite it in
+Staapl as a first Cortex M application.  It has some nice possible
+simplifications that would allow its memory and code use to be very
+small.
