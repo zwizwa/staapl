@@ -5034,3 +5034,25 @@ The solution was to create a namespace for evaluation anchored to the
 main .dict module which prevents re-instantiation on reconstruction.
 On top of that some state in code.rkt needs to be reset: code pointers
 and word list.
+
+
+
+Entry: The split
+Date: Fri Dec 26 20:17:19 EST 2014
+
+1. Peephole optimizing macro Forth.
+
+2. Threading on top of 1.
+
+
+Basically, 1. is fast (essentially assembler) but a pain to code in
+while 2. is more regular and user-friendly as a language, but more
+inefficient.
+
+I actually miss writing "regular Forth".  All effort in Staapl
+development went into the "premature optimization hole" of 1.
+
+Time to formally split.
+
+This also opens up ways to experiment with threading mechanisms.
+

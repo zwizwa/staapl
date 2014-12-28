@@ -66821,3 +66821,103 @@ Writing the USB stub I wonder if it's a good idea to rewrite it in
 Staapl as a first Cortex M application.  It has some nice possible
 simplifications that would allow its memory and code use to be very
 small.
+
+
+
+Entry: Bored..
+Date: Fri Dec 26 19:34:17 EST 2014
+
+How to make a small bootloader / gdb stub?
+
+I have a bunch of STM32F103C8 boards with limited memory.  A gdb stub
+is a good example of an application where it pays off greatly to keep
+the code small.
+
+How small can it get?  What about using this as a challenge?
+
+Most of the code seems to go in the USB driver..  Pulling this out of
+the libopencm3 library code would be tedious manual error-prone work.
+Maybe not a good use of time after all..
+
+
+
+Entry: Small C code
+Date: Fri Dec 26 19:45:48 EST 2014
+
+Target: ARM Cortex M.
+How to get the smallest code possible?
+
+Using a forth-like approach seems appropriate.  How do native code,
+threaded code and huffman threaded code compare?
+
+What is needed to make a huffman threaded interpreter?
+
+One thing is clear: everything needs to be written from scratch.  No
+code reuse.
+
+Maybe this is a niche of existence for Staapl?
+
+
+Essentially I'm still trying to convince myself to not give up the
+PIC18 architecture.  Bottom line is that it is still easier to work
+with from a hardware pov.
+
+I want too much: both using cool 32 bit cortex processors, *and* being
+able to continue working on Staapl.
+
+
+So what is, again, the niche?
+
+- Code size -> huffman-threaded Forth interpreter.
+
+- RPN macro assembler with peephole optimizer.
+
+
+The peephole optimizer for PIC18 is working.  Building one for ARM
+seems like too much work at this point.
+
+
+
+Entry: Huffman decoder
+Date: Fri Dec 26 20:03:04 EST 2014
+
+Essentially this is just a binary tree.  How to encode?
+
+A leaf is an execution token, which is either:
+- a native code address
+- the (bit) address of huffman-threaded code
+- a literal word (16 bit?)
+
+
+Primitives will be written in assembler.  What I've seen in the past
+is that there are a *lot* of local optimizations to be done here
+making small space/speed tradeoffs -- i.e. where a huge execution
+penalty is made for only a small gain in code efficiency and vise
+versa.  It would be good to be able to make those explicit.
+
+Let's not worry too much about the primitives.  Assume these are
+given, then once everything works it's probably obvious how to analyze
+further.
+
+To be able to do bit-addressing, 3 bits need to be reserved for
+addressing within a byte, leaving 13 bits or 8K bytes.  Using 24 bit
+words gives 2^21 = 2M bytes.
+
+So this makes sense for uCs up to 16k of flash, leaving half of the
+memory for threaded code and the other half for primitives and
+constants.
+
+
+
+Entry: Flash size vs. power tradeoff
+Date: Fri Dec 26 20:21:13 EST 2014
+
+Regarding power, to compress memory usage a lot more power is spent in
+decoding.  Does this counter the lower power use when there is less
+Flash?
+
+However, there is another trade-off.  In many embedded systems, most
+code is for setup/teardown of some "steady-state" processing.  This
+management code is run infrequently compared to the steady-state code.
+From this perspective, encoding makes makes sense wrt. power
+consumption.

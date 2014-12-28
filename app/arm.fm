@@ -10,3 +10,11 @@ macro
 forth
 
 : foo 1 2 3 add ;
+
+
+    \ staapl/arm/qemu$ make
+    \ staapl/arm/qemu$ ./qemu.sh
+    \ staapl/app$ racket arm.live /dev/pts/6
+
+    
+    
