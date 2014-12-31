@@ -66921,3 +66921,12 @@ code is for setup/teardown of some "steady-state" processing.  This
 management code is run infrequently compared to the steady-state code.
 From this perspective, encoding makes makes sense wrt. power
 consumption.
+
+
+Entry: Next
+Date: Mon Dec 29 20:41:05 EST 2014
+
+- Staapl on ARM.  (application: GDB stub)
+- Thermometer node.
+- Multitasking in DTC  (too hard in native: hw stack..)
+
