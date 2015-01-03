@@ -66930,3 +66930,163 @@ Date: Mon Dec 29 20:41:05 EST 2014
 - Thermometer node.
 - Multitasking in DTC  (too hard in native: hw stack..)
 
+
+
+Entry: Assisted mapping: bottom-up code development.
+Date: Wed Dec 31 18:43:06 EST 2014
+
+E.g. maybe time to get the PIC24/33 to work due to lack of open source
+C compiler?  Anyways... ARM probably better.
+
+
+
+
+
+Entry: State machine compiler
+Date: Fri Jan  2 12:36:05 EST 2015
+
+So how to distinguish state from input?  Let's see if we can learn
+something from erlang.  Is it possible to model input as a message,
+i.e. have a "receive" block in the loop?
+
+
+
+Entry: A path
+Date: Fri Jan  2 12:39:59 EST 2015
+
+- Build the state machine compiler emulating erlang style state
+  machines.
+
+- Map it on top of DTC Forth
+
+- Test it as part of MIDI and control-rate code for analog synth
+
+
+
+Entry: Statically compiling actor networks
+Date: Fri Jan  2 17:39:46 EST 2015
+
+So basic idea: assume that it is possible to compile the event
+response of an actor network as a synchronous state machine.
+I.e. collapse it into a single actor.
+
+As long as there aren't too many conditional branches this should be
+tractable.
+
+
+Entry: Too much
+Date: Fri Jan  2 18:01:08 EST 2015
+
+So lots of ideas came in today, but this is really too much.  Let's
+split it up in two distinct parts:
+
+- Write a simple round-robin scheduler in the DTC forth using proper
+  tasks.  Possibly compliment that with static stack depth analysis to
+  perform better allocation.
+
+- Create partial actor evaluator that compiles actor networks to DAGs
+  based on a known set of input events.
+
+
+Entry: Forth tasks
+Date: Fri Jan  2 18:04:23 EST 2015
+
+Been down this path before.  Previous attempt was coroutines /
+generators, i.e. synchronous unidirectional / bi-directional message
+passing.
+
+Let's try asynchronous message passing.
+
+And let's try to get this to work in the emulator first.
+
+And let's forget about Forth and do this in a more general language
+that can be "instantiated" into fixed structures.
+Or let's not and keep it simple..
+
+What is a task?  It has:
+outside:
+- a pid
+- a mailbox
+inside:
+- a data stack
+- a return stack
+- local storage
+
+Should local storage be read-only like erlang?
+
+What does a message look like?
+
+What can we do without garbage collection?  Try with a simpler
+representation first.
+
+
+- Messages are bytes.  
+- Mail boxes are circular buffers.
+- Buffer & stack overrun causes system reset.
+- Scheduler is round-robin
+- Tasks and their buffers & stacks are statically allocated
+- Named variables go on the return stack
+
+
+
+Entry: A new language
+Date: Fri Jan  2 18:27:23 EST 2015
+
+Doing the tasks needs some compiler support that's hard to do in
+straight up Forth, even if it's DTC.  Let's reuse just the DTC
+language primitives and compile this to call-threaded code.
+
+Should the language be Scheme-like or Forth-like?
+
+If functions take arguments it's probably best to keep it Scheme like.
+
+Sending a message is just copying stuff into a buffer.  Arity needs to
+be encoded also.  So it needs type tagging.
+
+Is it possible to statically encode all message tags to also include
+their arity?  Probably yes.  This means the main task to solve is to
+perform packing / unpacking of messages and function calls.
+
+So is a function call just a message?
+
+This is one of the conceptial "flaws" of erlang it seems: to both have
+function calls and message passing.  Or let's call it an optimization
+maybe..  Still in love :)
+
+
+So: how to parse a message.
+
+
+One thing though: I'm not going to survive the desire for having more
+that flat messages.  Eventually, this will need a GCd heap.
+
+So let's get the bag of abstractions right first.  Keep it simple.
+
+
+Entry: Languages
+Date: Fri Jan  2 18:51:30 EST 2015
+
+- Dynamic Erlang.  Needs heap and GC, proper datastructures, ...  This
+  won't work on PIC but might be feasible on ARM.
+
+- Static Erlang.  (Static tasks, stacks, no heap, flat messages).
+  Does this produce a usable primitive set for programming?
+
+- Full actor language, partually evaluated to synchronous state
+  machine.  E.g. don't speficy "compilable subset".  See this as a
+  compile time test (works / wont work, here's why).
+
+- More traditional Forth multitasking / coroutines.
+
+
+
+Which one is the more interesting approach?  I'd say the full actor
+model.  There is an implementation of this in Scheme but since it
+might be necessary to take the scheduler into the abstract
+interpretation loop let's write it from scratch.
+
+
+
+
+
+

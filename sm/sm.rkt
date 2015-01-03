@@ -138,6 +138,42 @@
 
 (compile-machine state1)
 
+;; Practically useful machine: a UART.
+
+;; This consists of two state machines "clocked" at different rates.
+;; There is the machine that listens to the start bit transition and
+;; subsequently calls the shift register at the reduced clock rate.
+
+;; To handle input we use erlang-style messages.  Synchronous at first
+;; and later possibly a-synchronous.
+
+;; Don't implement pattern matching.  Keep it simple at first: input
+;; structure is static.
+
+
+
+;; (define (uart-start prev-in)
+;;   (_let* ((in (_receive)))
+;;       (_if (= in prev-in)
+;;          (uart-start in)
+;;          (uart-shift baud
+;;                      (+ baud
+;;                         (>> baud 2))
+;;                      8
+;;                      0))))
+
+;; (define (uart-shift baud tick bits sr)
+  
+;;   (_let* ((in (_receive))) ;; 
+;;   (_if (= tick 0)
+       
+         
+    
+  
+  
+
+
+
 
 
 ;; Register allocation: at each point in the code, it's clear what
