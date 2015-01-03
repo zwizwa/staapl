@@ -14,7 +14,7 @@
 (define processes (make-parameter (make-queue)))
 
 ;; All tasks run until they block in a receive statement.
-(define (receive alist)
+(define (receive/suspend alist)
   (set-process-handlers! (self) alist))
   
 ;; Dumb scheduler.  Run the whole queue once.
@@ -70,32 +70,100 @@
 
 ;; ------------- TEST --------------
 
+;; Allow sequential code to continue after a receive block.  The low
+;; level representation uses a closure to represent the resume point
+;; explicitly.
 
-(define (test)
+;; Implementation leaks thunks due to improper tail calls being used.
+;; This only works for finite runs!
+
+(define-syntax seq
+  (syntax-rules (receive)
+    ((_) (void))
+    ((_ (receive ((tag . args) body ...) ...) . rest)
+     (let ((rest-thunk (fun () . rest)))
+       (receive/suspend
+        `((tag . ,(fun args
+                       body ...
+                       (rest-thunk)))
+          ...))))
+    ((_ statement . rest)
+     (begin
+       statement
+       (seq . rest)))))
+
+(define-syntax-rule (fun args . body)
+  (lambda args
+    (seq . body)))
+
+
+(define (test1)
   (letrec
       ((alice
         (spawn
          (lambda ()
            (printf "alice boot\n")
            (send (bob) '(hi from-alice))
-           (receive
+           (receive/suspend
                `((hi . ,(lambda args
                           (printf "got hi ~a\n" args)
-                          (receive
+                          (receive/suspend
                               `((_ . ,(lambda args (error 'alice-not-reached))))))))))
          '()))
        (bob
         (spawn
          (lambda ()
            (printf "bob boot\n")
-           (receive
+           (receive/suspend
                `((hi .
                      ,(lambda args
                         (printf "got hi ~a\n" args)
                         (send (alice) '(hi from-bob))
-                        (receive
+                        (receive/suspend
                             `((_ . ,(lambda args (error 'bob-not-reached))))))))))
          '())))
     (run)))
 
-(test)
+
+
+
+(define (test2)
+  (letrec
+      ((alice
+        (spawn
+         (fun ()
+              (printf "alice boot\n")
+              (send (bob) '(hi from-alice))
+              (receive
+                  ((hi . args)
+                   (printf "got hi ~a\n" args)))
+              (receive
+                  ((_)
+                   (error 'alice-not-reached))))
+         '()))
+       (bob
+        (spawn
+         (fun ()
+              (printf "bob boot\n")
+              (receive
+                  ((hi . args)
+                   (printf "got hi ~a\n" args)
+                   (send (alice) '(hi from-bob))))
+              (receive
+                  ((_)
+                   (error 'bob-not-reached))))
+         '())))
+    (run)))
+  
+
+
+
+;(test2)
+
+;; (define test3
+;;   (fun ()
+;;        (receive ((_)))
+;;        (receive ((_)))
+;;        ))
+       
+       
