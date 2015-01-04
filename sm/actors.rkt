@@ -2,8 +2,13 @@
 (require data/queue
          racket/match)
 
+;; FIXME: forgot essential element.  It needs to be possible to pick
+;; messages out-of-order from the message queue.  This is a simple way
+;; to allow waiting for multiple messages using nested receive
+;; statements.
 
-;; Actor evalutation.
+
+;; Actor evaluation.
 
 ;; Note sure where this is going next.  The idea is to distill state
 ;; machine DAGs from the collection of events that can be passed into
@@ -111,7 +116,7 @@
 
 ;; ------------- TEST --------------
 
-
+;; boot and message pass
 (define (test1)
   (letrec
       ((alice

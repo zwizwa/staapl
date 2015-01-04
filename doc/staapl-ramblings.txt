@@ -67087,6 +67087,54 @@ interpretation loop let's write it from scratch.
 
 
 
+Entry: actors.rkt
+Date: Fri Jan  2 21:06:10 EST 2015
+
+So just to get a little more insight I've implemented a bare-bones
+actor language.  The question is how to translate this to state
+machines and fixed control flow.
+
+Maybe to have this implement an example state machine is the way to
+go.  The UART seems to be a good example.
+
+
+
+Entry: From actors to dataflow
+Date: Fri Jan  2 21:14:29 EST 2015
+
+Let's simplify this into a dataflow network.
+
+Assume that each message send (append to queue) is actually a single
+variable store.  I.e. inboxes are dataflow variables.
+
+Not the same model..  There needs to be a receive-multiple primitive
+that continues after a set of messages have been received.
+
+
+It's going off the rails again...
+
+
+
+Abstract interpretation can only do scheduling.  All the function
+abstractions need to be compiled explicitly to state machines.
+
+I wonder if I'm chasing a ghost here.  Seems so...  Time to let it sit
+for a bit.
+
+
+
+Entry: Where is this going?
+Date: Fri Jan  2 21:49:53 EST 2015
+
+Nowhere.
+What is the missing ingredient?
+Task representation.
+
+This needs to sit a bit.  Basic idea is still to make something that
+can compile to an efficient state machine in C.
+
+
+
 
 
 
