@@ -5089,4 +5089,10 @@ To change to native: just change:
 
 Looks like _ts is hardcoded to 16bit.  's' is mapped to ts or _ts.
 
+Basically the command line thing works.
+
+What about writing modules?
+
+
+
 

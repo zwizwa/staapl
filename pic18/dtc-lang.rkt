@@ -5,7 +5,7 @@
 
 (require/provide
  racket/pretty
- "../pic18-dtc.rkt")
+ "pic18-dtc.rkt")
 
 (provide
  (all-defined-out))
