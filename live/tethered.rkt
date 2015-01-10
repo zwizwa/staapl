@@ -423,7 +423,7 @@
                  ;; execution.  Target saves a & f so host can
                  ;; clobber.
                  (host-rpc id payload)
-                 (texec/sym 'continue ~texec/b)
+                 (texec/sym 'resume ~texec/b)
                  (again))))
 
         ;; Unknown address

@@ -5056,3 +5056,37 @@ Time to formally split.
 
 This also opens up ways to experiment with threading mechanisms.
 
+
+
+Entry: continue
+Date: Sat Jan 10 17:32:27 EST 2015
+
+Why is this line in target-service/b ?
+(texec/sym 'continue ~texec/b)
+
+Can't find a reference in the forth code.
+
+Is this supposed to be 'resume ?
+
+
+
+Entry: dtc, how does it work?
+Date: Sat Jan 10 17:36:56 EST 2015
+
+So a dtc is essentially just a normal Staapl native code kernel with a
+dtc interpreter.  To interact with it, the live mode needs to know
+it's talking dtc.
+
+So really, the option should be there to talk both.
+
+Currently the .dict contains the live mode to use.
+See dict.fm
+
+To change to native: just change:
+-     staapl/pic18/live-dtc
++     staapl/pic18/live
+
+
+Looks like _ts is hardcoded to 16bit.  's' is mapped to ts or _ts.
+
+

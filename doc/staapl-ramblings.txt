@@ -67134,7 +67134,8 @@ This needs to sit a bit.  Basic idea is still to make something that
 can compile to an efficient state machine in C.
 
 
+Entry: GDB stubs
+Date: Fri Jan  9 22:28:48 EST 2015
 
-
-
-
+So after playing with this for a bit it seems better to put the GDB
+stub on the host, and put a simpler binary protocol on the target.
