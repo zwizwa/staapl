@@ -5092,6 +5092,164 @@ Looks like _ts is hardcoded to 16bit.  's' is mapped to ts or _ts.
 Basically the command line thing works.
 
 What about writing modules?
+Works after path fix.
+
+#lang staapl/pic18/dtc \ -*- forth -*-
+
+Ok, so let's write some code!
+
+
+Entry: Tasks
+Date: Sat Jan 10 18:07:43 EST 2015
+
+One of the main (retrofitted) reasons to get the DTC working is to
+allow multitasking / concurrency.
+
+What model to use?  I played with this in packetforth days but don't
+really remember exactly what the trade-offs are.  Some things:
+
+PROGRAMMING MODEL:
+
+- Generators (a-symmetric coroutines: call / yield).
+
+- Coroutines (symmetric coroutines: yield / yield)
+
+- Independent tasks (send / receive)
+
+- Fixed dataflow networks.  Nodes can be tasks but this seems to make
+  more sense in a functional setting (either pure or with state
+  feedback).
+
+
+CONTROL FLOW:
+
+- Push: events come in and cause code to execute, possibly producing
+  output events.
+
+- Pull: a client requests data and blocks (recursively) until events
+  are ready.
+
+
+
+Overall I think I came to the conclusion that a-symmetric coroutines
+are a useful programming model.  Inputs are consumed when they are
+needed and execution blocks until inputs are ready.  This is
+essentially a pull model.
+
+Independent tasks (a la Erlang) are most general, but also need a
+strategy for managing message queues and messages.
+
+Symmetric coroutines are somewhat harder to work with as it also
+assumes a single thread of control as with symmetric coroutines, but
+the control flow is more "strange".  ( Explain this )
+
+Data flow networks are function compositions with an idea of time /
+simultaneity. For microcontroller apps these seem most useful.  The
+flexibility of dynamic tasks is usually not necessary.
+
+
+
+So, concurrency on a DTC Forth.  What to do?  What do I want to do?
+Create testability of stream processing tasks.  I want to write a
+function (in Forth or Scheme) that can be tested independently and
+then plugged into a low-level system and just work.
+
+Example: stream parsers that need to block.  (Midi, whatever else).
+
+So main principle: each task has one or more inputs which can block,
+and one or more outputs which syncrhonously cause other tasks to
+consume inputs.  When is buffering necessary?  It is a topological
+problem.
+
+
+
+
+Entry: Simplified Erlang
+Date: Sat Jan 10 18:58:33 EST 2015
+
+Simplifications:
+
+- messages -> synchronous input streams
+  (Add buffers if "data joins" are necessary.  In practice these are rare.)
+
+- static tasks that can be reset / restarted.
+
+Implementation:
+
+- use abstract interpretation to determine memory usage.
+
+
+
+The core here is task switching with data passing.  pic18/task.rkt
+contains old task switching code for independent tasks (no
+communication).
+
+
+What I need is a primitive to switch data stacks, passing data from
+one to the other.  Bonus points for a variable number of words /
+bytes.
+
+This primitive by itself can also be used for native tasks.
+
+So really, why not just keep the data stack as parameter passing
+mechanism as well?
+
+
+
+Entry: Just return stacks
+Date: Sat Jan 10 20:22:10 EST 2015
+
+If write / read are synchronous, why not implement message passing as
+leaving the data stack where it is?
+
+What flavor of multitasking is this?
+
+Basically it means that when I do "write", my datastack might
+disappear completely.  However, let's just make this into a contract:
+"write" consumes a predictable number of words, which means that from
+the sender's perspective it looks like a predictable operation.
+
+From the reader's end, "read" will produce a predictable amount of
+data as well.  But what happens with the rest of the stack?
+
+Tasks can't assume anything about that data.  So what this needs is
+just another stack for message passing.
+
+write: copy data from DS to MS (message stack)
+read:  copy data from MS to DS
+
+This is equivalent to copying the data from one stack to another if
+the calls are synchronous.  If they are not, then this is asynchronous
+message passing.
+
+
+
+So what is needed is a ds switcher with message copy.
+On top of that it's easy to also switch return stacks.
+
+So what about not copying the message, but loading a pointer to it
+into the a reg.  If sending is synchronous then the data is guaranteed
+to exist until the receiver blocks again.
+
+
+Confused now..
+How to make this simple again?
+
+
+Entry: Multitasking and Forth
+Date: Sat Jan 10 21:03:13 EST 2015
+
+Maybe Forth is just not the right tool here.  What I find most useful
+in Erlang style programming is pattern matching.
+
+So really, what am I trying to accomplish?
+A Forth with lexical scope and single assignment?
+
+Maybe the gap is just too big.  Forth is organized assembler.
+
+I should focus on tools for abstract interpretation and testing, not
+inventing new broken languages.  As for things to bolt on top of
+Forth, they will show up by themselves working bottom up.
 
 
 
