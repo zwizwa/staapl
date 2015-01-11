@@ -106,3 +106,5 @@ variable R0 variable R1 variable R2 variable R3 variable R4
 : _*>>8   XY! sumul R1 @ R2 @ ;
 
 \ fixme : also do signed and fixedpoint
+
+
