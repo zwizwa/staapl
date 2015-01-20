@@ -67139,3 +67139,63 @@ Date: Fri Jan  9 22:28:48 EST 2015
 
 So after playing with this for a bit it seems better to put the GDB
 stub on the host, and put a simpler binary protocol on the target.
+
+EDIT: this needs:
+- read RAM
+- write RAM
+- call function with arguments, retrieve return
+- erase flash block
+- write flash block
+
+That's pretty much all there is to it.
+
+This can fit even in 64 byte USB requests: no need for chunking
+anything.
+
+
+Entry: Async USB
+Date: Fri Jan 16 22:37:54 EST 2015
+
+So does it make sense to use an async protocol for USB communication?
+Collection of independent tasks?  Might..
+
+
+
+Entry: STM32F103C8
+Date: Sat Jan 17 17:11:59 EST 2015
+
+I've been using the STM32F103C8 for work and I am very pleased with
+the chip and the workflow.  I am considering (again) to move the
+(commercial) synth development to C on ARM.  For the simple reason
+that I can't do both: develop a reasonably functional experimental
+idiosyncratic Forth system and at the same time get a real synth out
+the door.
+
+So let's look at that again.  What are the real reasons?
+- Math efficiency
+- Not distracted by premature optimization
+- Faster turnaround.  C really is easier to use for me.
+
+It pains me.  The efficiency is a platform thing I can't do anything
+about.  The latter two are realities of my workflow that I don't like
+to admit..
+
+I like C because I've found a way to work with it that doesn't suck so
+much.  Names are important for organizing code: C structs, functions
+and (a limited number of) static variables per file work well enough
+for embedded work.  Take this together with GDB being able to call
+functions and print data structures, and that all hardware is
+optimized for running C well, this is a lost cause.
+
+
+
+So where is the purpose for Staapl?  I find I need a little bit of
+meaning, even if it is a delusion that's only temporary.  It has to be
+in heavily factored, slow running compact code.
+
+So embrace the slow?
+
+And focus on protocol-oriented programming?  ( An old idea of
+designing protocols such that they are easy to parse in a single pass
+from left to right, avoiding the need for serialized data buffers. ).
+

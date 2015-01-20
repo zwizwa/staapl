@@ -1,4 +1,8 @@
-\ Startup code shared by monitor-serial.f monitor-icsp.f
+\ Startup code shared byst
+\ - monitor-serial.f
+\ - monitor-icsp.f
+\ - monitor-usbserial.f
+
 \ The interpreter uses: init-warm, init-abort, init-quit for warm, abort, quit.
 
 : init-abort
