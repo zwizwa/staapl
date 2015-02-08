@@ -67199,3 +67199,42 @@ And focus on protocol-oriented programming?  ( An old idea of
 designing protocols such that they are easy to parse in a single pass
 from left to right, avoiding the need for serialized data buffers. ).
 
+
+Entry: fig notes
+Date: Thu Feb  5 16:18:26 EST 2015
+
+http://www.forth.org/svfig/kk/11-2014.html
+
+09:35 Converting Stack Code to Efficient Register Code - Samuel
+      A. Falvo II Sam will briefly illustrate how to convert stack
+      code inside a single "basic block" into static-single-assignment
+      form, which when used together with conventional register
+      allocation algorithms, results in near optimal register-based
+      code.
+
+
+
+Entry: PIC vs ARM
+Date: Sat Feb  7 13:05:06 EST 2015
+
+Diving into Cortex M3 assembly and finding out that a lot of
+instruction cycles are needed to just set a bit in a device register.
+Here, clearing the timer interrupt bit (TIM2.SR.UIF bit on STM32F103).
+Comment is cycle count.
+
+        .thumb
+        .syntax unified
+tim2_isr:       
+        ldr	r3, tim2_sr     @; 2
+	ldr	r2, [r3, #0]    @; 2
+        bic	r2, r2, #1      @; 1
+        str	r2, [r3, #0]    @; 2
+        bx	lr
+.align       
+tim2_sr:
+        .word 0x40000010
+
+Re-appreciating PIC18's single cycle bit set/clear instructions.
+
+EDIT: Maybe this can be fixed with bit banding?
+
