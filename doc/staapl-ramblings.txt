@@ -67238,3 +67238,15 @@ Re-appreciating PIC18's single cycle bit set/clear instructions.
 
 EDIT: Maybe this can be fixed with bit banding?
 
+
+
+Entry: A correct language
+Date: Sat Feb 21 14:15:10 EST 2015
+
+How hard would it be to build a correct language running on a PIC?
+Apart from side-channels, it would be ineteresting to seriously tackle
+the protocol problem of hiding a secret on a PIC.  Something that is
+as strong as its crypto.
+
+
+
