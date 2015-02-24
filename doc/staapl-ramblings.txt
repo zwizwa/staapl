@@ -67244,9 +67244,30 @@ Entry: A correct language
 Date: Sat Feb 21 14:15:10 EST 2015
 
 How hard would it be to build a correct language running on a PIC?
-Apart from side-channels, it would be ineteresting to seriously tackle
+Apart from side-channels, it would be interesting to seriously tackle
 the protocol problem of hiding a secret on a PIC.  Something that is
 as strong as its crypto.
 
+
+
+Entry: Pots and nets
+Date: Sun Feb 22 19:52:12 EST 2015
+
+Some things to solve: reading out pots to very high resolution based
+on random readout to decorrelate (as noise is probably not going to be
+white).
+
+
+
+Entry: SLIP vs. prefix coding
+Date: Tue Feb 24 13:32:32 EST 2015
+
+Prefix coding (sending the size of the message first) makes the code
+simpler, but has a problem when it comes to recovering due to
+communication errors.  Once sync is lost it likely won't recover.
+
+SLIP can help with this.  It automatically resynchronizes producing
+bad but segmented frames.  Adding error detection can filter out the
+bad packets.
 
 
