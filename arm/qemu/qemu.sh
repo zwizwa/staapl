@@ -8,7 +8,11 @@ PORT=3333
 
 GDB="gdb --args"
 GDB=
-exec $GDB qemu-system-arm \
+
+# cpulimit -l 10 -- \
+
+exec \
+$GDB qemu-system-arm \
     -M versatilepb \
     -cpu cortex-m3 \
     -nographic \

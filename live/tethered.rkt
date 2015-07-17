@@ -544,7 +544,7 @@
   (with-handlers
       ((void
         (lambda _
-          (printf "chkblk not implemented\n")
+          ;;(printf "chkblk not implemented\n")
           #xFF)))
     (texec/sym 'chkblk)
     (t>)))

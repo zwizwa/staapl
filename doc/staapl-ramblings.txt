@@ -67159,6 +67159,9 @@ Date: Fri Jan 16 22:37:54 EST 2015
 So does it make sense to use an async protocol for USB communication?
 Collection of independent tasks?  Might..
 
+EDIT: Did this for work. Makes a lot of sense to have an Erlang-style
+unidirectional approach, with state machines running on the uC(s) and
+Erlang on the host.
 
 
 Entry: STM32F103C8
@@ -67284,3 +67287,20 @@ From implementing a stub, it makes sense to do only the bare
 essentials on the uC and do the TCP side in a high level language as
 GDB RSP is quite crufty.
 
+
+Entry: Structured Procrastination
+Date: Fri Jul 17 17:44:40 EDT 2015
+
+Can't get myself to get closer to actually making music, so let's just
+do the second best thing using stuff that's active already..  Make a
+an ARM or dsPIC Forth.
+
+ARM might be more useful, and there's already some in there...
+
+
+
+Entry: ARM
+Date: Fri Jul 17 18:31:27 EDT 2015
+
+So pretty much this is ready to be edited, running in qemu.
+Though probably better to run it on real HW.
