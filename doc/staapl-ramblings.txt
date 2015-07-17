@@ -67271,3 +67271,16 @@ bad but segmented frames.  Adding error detection can filter out the
 bad packets.
 
 
+
+
+Entry: Next?
+Date: Thu Jul 16 11:11:46 EDT 2015
+
+After a couple of twitter likes I'm thinking maybe this deserves some
+love again?  What is next?  A way to integrate with the C platform.
+The most important there is a link to GDB.
+
+From implementing a stub, it makes sense to do only the bare
+essentials on the uC and do the TCP side in a high level language as
+GDB RSP is quite crufty.
+
