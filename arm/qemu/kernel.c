@@ -5,6 +5,7 @@
 // http://balau82.wordpress.com/2010/11/30/emulating-arm-pl011-serial-ports/
 // 
 
+#include "infof.c"  // stripped-down printf
 
 uint8_t stack[1024];
 uint8_t *sp = &stack[-1];
@@ -39,9 +40,9 @@ typedef volatile struct {
 
 CT_ASSERT_SIZE(pl011_t, 0x4C);
 
-pl011_t* const uart0 = (pl011_t *)0x101F1000;
-pl011_t* const uart1 = (pl011_t *)0x101F2000;
-pl011_t* const uart2 = (pl011_t *)0x101F3000;
+#define uart0 ((pl011_t *)0x101F1000)
+#define uart1 ((pl011_t *)0x101F2000)
+#define uart2 ((pl011_t *)0x101F3000)
 
 
 #define ME "staapl/arm/qemu: "
@@ -55,34 +56,29 @@ int u_rx(pl011_t *u) {
     return u->DR & 0xFF;
 }
 
-
-// Log console
-// ...
-const uint8_t hexdigit[] = "0123456789ABCDEF";
-void tx1(char c) { u_tx(uart1, c); }
-void px(uint8_t x) {
-    tx1(hexdigit[(x>>4)&0xF]);
-    tx1(hexdigit[x&0xF]);
-    tx1(' ');
-}  
-void cr(void) {
-    tx1('\n');
-    tx1('\r');
+int info_putchar(int c) {
+    u_tx(uart1, c);
+    return 0;
 }
 
-
 // Command console
+
+uint32_t tx_nb, rx_nb;
+char last_mode[] = "?";
+void info_mode(char mode) {
+    if (last_mode[0] == mode) return;
+    last_mode[0] = mode;
+    infof(" %s:",last_mode);
+}
 void tx(char c) {
-    tx1('T');
-    tx1(':');
-    px(c);
+    info_mode('T');
+    infof(" %02x(%d)", c, tx_nb++);
     u_tx(uart0, c);
 }
 uint8_t rx(void) {
     uint8_t c = u_rx(uart0);
-    tx1('R');
-    tx1(':');
-    px(c);
+    info_mode('R');
+    infof(" %02x(%d)", c, rx_nb++);
     return c;
 }
 
@@ -168,7 +164,7 @@ void interpret_packet(void) {
     case 10: nastore(); break;
     case 11: nfstore(); break;
     }
-    cr();
+    infof("\n");
 }
 
 void interpreter(void) {
@@ -186,6 +182,10 @@ void interpreter(void) {
 }
 
 void reset(void) {
+    /* FIXME: bss is not cleared? */
+    /* FIXME: re-ordering variables / calls to infof() changed behavior: bug? */
+    //infof(ME"%x %x\n",tx_nb,rx_nb);
+    infof(ME "interpreter()\n");
     interpreter();
 }
 
