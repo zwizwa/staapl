@@ -5,102 +5,192 @@
 // http://balau82.wordpress.com/2010/11/30/emulating-arm-pl011-serial-ports/
 // 
 
-#include "sm.h"
 
-/* Log console.  This is assumed to be non-blocking, i.e. not
-   requiring an SM suspend point. */
+uint8_t stack[1024];
+uint8_t *sp = &stack[-1];
+uint8_t *areg = 0;
+uint8_t *freg = 0;
+uint8_t *ireg = 0;
+
+#define CT_ASSERT_SIZE(type, size) \
+  typedef char ct_assert_size_##type[(sizeof(type)==size)?1:-1]
+
+#define TXFF (1 << 5)
+#define RXFE (1 << 4)
+
+typedef volatile struct {
+    /* 00 */ uint32_t DR;
+    /* 04 */ uint32_t RSR_ECR;
+    /* 08 */ uint8_t reserved1[0x10];
+    /* 18 */ const uint32_t FR;
+    /* 1C */ uint8_t reserved2[0x4];
+    /* 20 */ uint32_t LPR;
+    /* 24 */ uint32_t IBRD;
+    /* 28 */ uint32_t FBRD;
+    /* 2C */ uint32_t LCR_H;
+    /* 30 */ uint32_t CR;
+    /* 34 */ uint32_t IFLS;
+    /* 38 */ uint32_t IMSC;
+    /* 3c */ const uint32_t RIS;
+    /* 40 */ const uint32_t MIS;
+    /* 44 */ uint32_t ICR;
+    /* 48 */ uint32_t DMACR;
+} pl011_t;
+
+CT_ASSERT_SIZE(pl011_t, 0x4C);
+
+pl011_t* const uart0 = (pl011_t *)0x101F1000;
+pl011_t* const uart1 = (pl011_t *)0x101F2000;
+pl011_t* const uart2 = (pl011_t *)0x101F3000;
+
+
+#define ME "staapl/arm/qemu: "
+
+void u_tx(pl011_t *u, char c) {
+    while(u->FR & TXFF);
+    u->DR = c;
+}
+int u_rx(pl011_t *u) {
+    while ((u->FR & RXFE) != 0);
+    return u->DR & 0xFF;
+}
+
+
+// Log console
+// ...
 const uint8_t hexdigit[] = "0123456789ABCDEF";
+void tx1(char c) { u_tx(uart1, c); }
+void px(uint8_t x) {
+    tx1(hexdigit[(x>>4)&0xF]);
+    tx1(hexdigit[x&0xF]);
+    tx1(' ');
+}  
+void cr(void) {
+    tx1('\n');
+    tx1('\r');
+}
 
 
-/* SM version of Staapl interpreter */
-#define SM_VM_STACK_BYTES 1024
-struct sm_vm {
-    void *next;
-    uint32_t count;
-    uint8_t stack[SM_VM_STACK_BYTES];
-    uint8_t *sp;
-    uint8_t *areg;
-    uint8_t *freg;
-    uint8_t *ireg;
-    void *uart;
+// Command console
+void tx(char c) {
+    tx1('T');
+    tx1(':');
+    px(c);
+    u_tx(uart0, c);
+}
+uint8_t rx(void) {
+    uint8_t c = u_rx(uart0);
+    tx1('R');
+    tx1(':');
+    px(c);
+    return c;
+}
+
+void reply(uint8_t n) {
+    tx(0xFF); // return address
+    tx(n);    // size reply
+}
+void ack(void) {
+    reply(0);
+}
+void npush(void) {
+    int count = rx();
+    while(count--) { *++sp = rx(); }
+    return ack();
+}
+void npop(void) {
+    int count = rx();
+    reply(count);
+    while(count--) { tx(*sp--); }
+}
+uint32_t rx_word(int nb_bytes) {
+    uint32_t w = 0;
+    int i;
+    for (i = 0; i < nb_bytes; i++) {
+        w |= (rx() << (i * 8));
+    }
+    return w;
+}
+void * rx_ptr(int nb_bytes) {
+    return (void*)rx_word(nb_bytes);
+}
+void intr(void) {
+    ireg = rx_ptr(2);
+    return ack();
+}
+void jsr(void) {
+    intr();
+    return ack();
+}
+void lda(void) {
+    areg = rx_ptr(2);
+    return ack();
+}
+void ldf(void) {
+    freg = rx_ptr(3);
+    return ack();
+}
+void nafetch(void) {
+    int count = rx();
+    reply(count);
+    while (count--) tx(*areg++);
+}
+void nastore(void) {
+    int count = rx();
+    while (count--) *areg++ = rx();
+    return ack();
+}
+void nffetch(void) {
+    int count = rx();
+    reply(count);
+    while (count--) tx(*freg++);
+}
+void nfstore(void) {
+    int count = rx();
+    while (count--) *freg++ = rx();
+    return ack();
+}
+void interpret_packet(void) {
+    int size = rx(); // ignore.  protocol is self-terminating.
+
+    int command = rx();
+    switch(command & 0x0F) {
+    default:
+    case 0: ack(); break;
+    case 1: npush(); break;
+    case 2: npop(); break;
+    case 3: jsr(); break;
+    case 4: lda(); break;
+    case 5: ldf(); break;
+    case 7: intr(); break;
+    case 8: nafetch(); break;
+    case 9: nffetch(); break;
+    case 10: nastore(); break;
+    case 11: nfstore(); break;
+    }
+    cr();
+}
+
+void interpreter(void) {
+    while(1) {
+        int addr = rx();
+        if (addr) {
+            // not for us, just drop it.
+            int count = rx();
+            while (count--) rx();
+        }
+        else {
+            interpret_packet();
+        }
+    }
+}
+
+void reset(void) {
+    interpreter();
+}
+
+__attribute__ ((section(".vectors")))
+uint32_t vectors [] = {
+    0x10000,  // 64k
+    (uint32_t)(&reset)
 };
-
-void sm_vm_init(struct sm_vm *sm) {
-    sm->sp = &sm->stack[-1];
-    sm->areg = 0;
-    sm->freg = 0;
-    sm->ireg = 0;
-}
-
-/* These are macros because they contain suspend points, which need to
-   be flattened out into the containing _tick() function.
-
-   Macros are "non-hygienic", e.g. defined in sm context.  Doesn't
-   matter since they are not exported.
-
-   It's possible to factor this out a bit into sub-machines.
-*/
-
-#define TX(c) ({ SM_WAIT(sm, uart_tx_ready(sm->uart)); infof("T:%02x", c); uart_tx(sm->uart, c); })
-#define RX(c) ({ SM_WAIT(sm, uart_rx_ready(sm->uart)); uint8_t c = uart_rx(sm->uart); infof("R:%02x", c); c;})
-
-#define REPLY(m) ({ TX(0xFF), TX(n); })
-#define ACK()    ({ REPLY(0); })
-#define NPUSH()  ({ sm->count = RX(); while(sm->count--) { *++(sm->sp) = RX(); } ACK(); })
-#define NPOP()   ({ sm->count = RX(); REPLY(sm->count); while(sm->count--) { RX(*(sm->sp)--); } })
-#define RX_WORD(nb_bytes) ({         \
-    uint32_t w = 0;                  \
-    int i;                           \
-    for (i = 0; i < nb_bytes; i++) { \
-        w |= (RX() << (i * 8));      \
-    }                                \
-    w; })
-#define RX_PTR(nb_bytes) ((void*)RX_WORD(nb_bytes))
-#define INTR() ({sm->ireg = RX_PTR(2); ACK(); })
-#define JSR()  ({INTR(); ACLK(); })
-#define LDA()  ({sm->areg = RX_PTR(2); ACK(); })
-#define LDF()  ({sm->freg = RX_PTR(3); ACK(); })
-#define NAFETCH() ({ sm->count = RX(); REPLY(sm->count); while (sm->count--) TX(*(sm->areg)++); })
-#define NASTORE() ({ sm->count = RX(); while (sm->count--) *areg++ = rx(); ACK(); })
-#define NFFETCH() ({ sm->count = rx(); reply(sm->count); while (sm->count--) TX(*(sm->freg)++); })
-#define NFSTORE() ({ sm->count = rx(); while (sm->count--) *freg++ = rx(); return ack(); })
-
-#define INTERPRET_PACKET()  ({                                          \
-    /*int size =*/ RX(); /* ignore.  protocol is self-terminating. */   \
-                                                                        \
-    switch(RX() & 0x0F) {                                               \
-    default:                                                            \
-    case 0: ACK();      break;                                          \
-    case 1: NPUSH();    break;                                          \
-    case 2: NPOP();     break;                                          \
-    case 3: JSR();      break;                                          \
-    case 4: LDA();      break;                                          \
-    case 5: LDF();      break;                                          \
-    case 7: INTR();     break;                                          \
-    case 8: NAFETCH();  break;                                          \
-    case 9: NFFETCH() ; break;                                          \
-    case 10: NASTORE(); break;                                          \
-    case 11: NFSTORE(); break;                                          \
-    }                                                                   \
-    infof("\n");                                                        \
-})
-
-#define INTERPRETER() ({                        \
-    while(1) {                                  \
-        if (RX()) { /* ADDR */                  \
-            /* not for us, just drop it. */     \
-            sm->count = RX();                   \
-            while (sm->count--) RX();           \
-        }                                       \
-        else {                                  \
-            INTERPRET_PACKET();                 \
-        }                                       \
-    }                                           \
-})
-
-uint32_t sm_vm_tick(struct sm_vm *sm) {
-    SM_RESUME(sm);
-    INTERPRETER();
-    SM_HALT(sm);
-}
-
