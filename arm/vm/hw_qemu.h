@@ -1,5 +1,5 @@
-#ifndef QEMU_UART_H
-#define QEMU_UART_H
+#ifndef HW_QEMU_H
+#define HW_QEMU_H
 
 #ifndef CT_ASSERT_SIZE
 #define CT_ASSERT_SIZE(type, size) \
@@ -54,4 +54,4 @@ uint32_t vectors [] = {
 };
 
 
-#endif // QEMU_UART_H
+#endif // HW_QEMU_H

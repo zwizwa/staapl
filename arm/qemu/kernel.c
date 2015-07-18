@@ -115,7 +115,7 @@ void intr(void) {
     return ack();
 }
 void jsr(void) {
-    intr();
+ *    intr();
     return ack();
 }
 void lda(void) {
@@ -182,7 +182,7 @@ void interpreter(void) {
 }
 
 void reset(void) {
-    /* FIXME: bss is not cleared? */
+    /* FIXME: bss is not cleared? but qemu starts with all-zero image.*/
     /* FIXME: re-ordering variables / calls to infof() changed behavior: bug? */
     //infof(ME"%x %x\n",tx_nb,rx_nb);
     infof(ME "interpreter()\n");

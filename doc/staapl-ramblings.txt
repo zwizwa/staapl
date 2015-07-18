@@ -67306,3 +67306,13 @@ So pretty much this is ready to be edited, running in qemu.
 Though probably better to run it on real HW.
 
 
+Entry: Niche
+Date: Sat Jul 18 15:22:21 EDT 2015
+
+Looking at the output of a C compiler generating thumb code, there is
+definitely some room for improvement.
+
+However, to make this into a commerical product, some form of typing
+will be necessary: debugging is too hard to do otherwise.
+
+
