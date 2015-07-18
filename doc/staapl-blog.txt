@@ -5254,3 +5254,19 @@ Forth, they will show up by themselves working bottom up.
 
 
 
+Entry: Protocol Oriented Programming
+Date: Sat Jul 18 10:50:36 EDT 2015
+
+This is an idea that has been in the back of my head for a while but
+never really got very articulated.  Joe says it well!  A mix of Lisp
+and Forth to represent data on a wire UBF(A), and a simple language to
+express contracts UBF(B).
+
+The design principle of UBF(A) is to make messages easy to parse.  He
+calls it "recognition"[1].
+
+There is some more recent work here[2].
+
+[1] https://www.sics.se/~joe/ubf/site/ubf.pdf
+[2] http://ubf.github.io/ubf
+
