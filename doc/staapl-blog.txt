@@ -5267,6 +5267,12 @@ calls it "recognition"[1].
 
 There is some more recent work here[2].
 
+A difference with the PF wire format: PF stores tags before binary
+data.  This enables binary data to go "straight to its destination"
+instead of being buffered, then copied.  The difference between "POP"
+and UBF is in the prefixed element.
+
+
 [1] https://www.sics.se/~joe/ubf/site/ubf.pdf
 [2] http://ubf.github.io/ubf
 
