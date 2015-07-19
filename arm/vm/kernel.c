@@ -13,7 +13,7 @@
 // FIXME: still trying to find right calling convention.  It would be
 // nice to have R0-R3 passed in tail calls, but can't get there..
 // Looks like ASM is needed.
-
+// It's probably time to move to LLVM instead.
 
 #include <stdint.h>
 
@@ -50,7 +50,7 @@ union word {
     union word* pw;
     uint32_t    u32;
     uint8_t     u8;
-    code*       xt;
+    code*       xt;0
 };
 
 DEF(next) { (*ip++).xt(REGS); }

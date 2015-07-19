@@ -1,4 +1,4 @@
-OBJ = kernel.o
+OBJ = kernel.o hw_qemu.o infof.o
 all: kernel.elf
 
 PREFIX:=arm-none-eabi
