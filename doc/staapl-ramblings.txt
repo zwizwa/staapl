@@ -67305,6 +67305,7 @@ Date: Fri Jul 17 18:31:27 EDT 2015
 So pretty much this is ready to be edited, running in qemu.
 Though probably better to run it on real HW.
 
+EDIT: Also made qemu-user work (but not for cortex-m3, gcc wont let).
 
 Entry: Niche
 Date: Sat Jul 18 15:22:21 EDT 2015
