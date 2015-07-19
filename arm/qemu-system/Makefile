@@ -18,7 +18,7 @@ kernel.elf: $(OBJ)
 	$(OBJDUMP) -d $@
 
 %.o: %.c
-	$(GCC) $(CFLAGS) -o $@ -c $<
+	$(GCC) $(CFLAGS) -o $@ -c $$(readlink -f $<)
 
 %.o: %.S
 	$(GCC) $(CFLAGS) -o $@ -c $< 
