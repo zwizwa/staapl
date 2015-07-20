@@ -5276,3 +5276,37 @@ and UBF is in the prefixed element.
 [1] https://www.sics.se/~joe/ubf/site/ubf.pdf
 [2] http://ubf.github.io/ubf
 
+
+
+Entry: Why is Forth an Arrow?
+Date: Sun Jul 19 22:43:50 EDT 2015
+
+Quoting the post from [1]:
+
+
+    When I started out writing Staapl, I did not know Haskell, so
+    (without actually verifying) I assumed monads are any kind of
+    "behind the scenes data plumbing" mechanism.
+
+    However, it seems that the way the Staapl compiler is constructed
+    is more akin to an Arrow approach.
+
+    It would be interesting to formalize this a bit: find the natural
+    way of mapping a stack composition mechanism to/from Arrow.
+
+
+It is actually quite simple.  See wiki[2] for background on the Arrow
+abstraction.  The important part is:
+
+    first :: (Arrow a) => a b c -> a (b, d) (c, d)
+
+Basically, 'a' is the stuff you want to do to 'b' to produce 'c', but
+you don't do this in isolation: while doing 'a', there is some other
+stuff 'd' you want to save for later.
+
+Think of 'd' as what's on (any of the) stack(s).
+
+
+[1] entry://20111016-155257
+[2] https://wiki.haskell.org/Arrow_tutorial
+
