@@ -5310,3 +5310,26 @@ Think of 'd' as what's on (any of the) stack(s).
 [1] entry://20111016-155257
 [2] https://wiki.haskell.org/Arrow_tutorial
 
+
+
+Entry: Goals, revisited
+Date: Sun Oct 11 13:29:24 EDT 2015
+
+Facts:
+
+- Forth is hard to write / read, compared to applicative(1) languages.
+- Forth done well produces very compact code.
+
+(1) Here "applicative" means languages that use named function
+parameters and local variables.  Not necessarily a functional
+language.
+
+To make Forth practical, the following goals need to be accomplished:
+
+- Interoperate with C and existing tools (binutils, gcc, gdb, ...)
+- Allow for (partial) typing and/or abstract interpretation.
+
+
+
+
+

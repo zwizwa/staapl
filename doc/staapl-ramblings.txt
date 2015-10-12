@@ -67317,3 +67317,17 @@ However, to make this into a commerical product, some form of typing
 will be necessary: debugging is too hard to do otherwise.
 
 
+
+Entry: GDB & C
+Date: Sun Oct 11 13:01:32 EDT 2015
+
+So I have a GDB stub written in C / libopencm3 that can be used to
+bootstrap into a staapl protocol.  What is the next step?
+
+The stub can call C functions.  Make a small staapl ARM program that
+behaves as a C function.  E.g. add1().
+
+Now, going back to the existing code: an Staapl serial protocol
+handler is running in qemu.  Host this inside the libopencm3 GDB stub.
+
+
