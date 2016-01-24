@@ -67331,3 +67331,50 @@ Now, going back to the existing code: an Staapl serial protocol
 handler is running in qemu.  Host this inside the libopencm3 GDB stub.
 
 
+
+
+Entry: searching for colorforth on arm
+Date: Wed Jan 20 19:47:57 EST 2016
+
+http://comments.gmane.org/gmane.comp.lang.forth.colorforth/1522
+
+
+
+Entry: Why Forth?
+Date: Fri Jan 22 22:07:18 EST 2016
+
+Another one in the series.
+
+Forth gives up local namespaces.  In ordinary programming, there are
+two namepaces that are particularly part of contemporary programming
+lore:
+
+  - Lexically scoped variables.
+
+  - records / dictionaries / algebraic types.
+
+Arguably, both are very related.  E.g. think of pattern matching.
+
+Names give random access.  This in itself is very powerful.  Compared
+to point-free notation, the advantage to this encoding scheme comes up
+when the algorithm relies on this random access in an essential way.
+E.g. if the data flow graph is very "tangled".
+
+If the data flow graph can be "flattened", there is usually a
+(factored) encoding that is much more compact than.
+
+The "Forth Thesis" is then that in most cases, such a factoring exist.
+This is very much dependent on finding a good representation.
+
+In other words, the reliance on "tangled" graphs is a property of the
+solution, not of the problem.
+
+Forth will "win" when factorization can be pushed into the "Moore
+scale", which consists of definitions of about 5-7 words.
+
+
+
+Entry: mecrisp
+Date: Sat Jan 23 00:26:51 EST 2016
+
+http://sourceforge.net/projects/mecrisp/files/
