@@ -67378,3 +67378,41 @@ Entry: mecrisp
 Date: Sat Jan 23 00:26:51 EST 2016
 
 http://sourceforge.net/projects/mecrisp/files/
+
+
+Entry: Revisit
+Date: Sun Jan 24 19:48:12 EST 2016
+
+Forth fingers are itching again.  Some things I'd like to do:
+
+- Write up a new "why Forth" paper, this time without any hand-waving:
+  focus on things that really work, where the efforts and gains are.
+  Center around the "protocol oriented programming" ?
+
+- Finish the DTC forth for PIC18F, with emulator.
+  -> seems to work, see dtc.app
+  -> standalone? worth it?
+
+- Make a Cortex M Thumb Forth
+
+- Write documentation entry points
+
+- Revise old PDF papers.
+
+- Validate the optimizer
+
+- Do something with the GA144 board that's coming.
+
+
+
+Entry: One year gap
+Date: Sun Jan 24 20:31:05 EST 2016
+
+Too funny:
+
+[master] tom@tp:~/staapl/app$ ls -al *.dict
+ls -al *.dict
+-rwxr-xr-x 1 tom tom 580 Jan 24 19:42 dtc.dict
+-rwxr-xr-x 1 tom tom 576 Jan 24  2015 synth.dict
+
+

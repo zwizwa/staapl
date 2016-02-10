@@ -5333,3 +5333,8 @@ To make Forth practical, the following goals need to be accomplished:
 
 
 
+Entry: J1 forth
+Date: Sun Jan 24 18:30:23 EST 2016
+
+http://www.excamera.com/sphinx/fpga-j1.html
+http://www.excamera.com/files/j1.pdf
