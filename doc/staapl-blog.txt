@@ -5338,3 +5338,28 @@ Date: Sun Jan 24 18:30:23 EST 2016
 
 http://www.excamera.com/sphinx/fpga-j1.html
 http://www.excamera.com/files/j1.pdf
+
+
+
+Entry: Protocol oriented programming
+Date: Fri Feb 12 09:56:57 EST 2016
+
+The basic idea is to limit the complexity of the parser and the memory
+allocation strategies necessary to parse a stream.
+
+Some heuristics.  Avoid the need for:
+- Stream lookahed
+- Unknown buffer sizes
+
+Avoiding lookahead can be done by sending collection sizes before
+sending data.  Eliminating unknown buffer sizes is similar, but also
+needs "global" information.  To some extent there is a tradeoff
+between what the receiver allocator can do (its memory management
+strategy) and what kind of encoding is necessary.
+
+This makes it clear on how to define protocol oriented programming: it
+is conditional on the memory model.
+
+This is really about eliminating the complexity in the allocator.
+
+The "machine" is a message parser.

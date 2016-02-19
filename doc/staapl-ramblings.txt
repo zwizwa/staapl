@@ -67416,3 +67416,8 @@ ls -al *.dict
 -rwxr-xr-x 1 tom tom 576 Jan 24  2015 synth.dict
 
 
+Entry: Protocol oriented programming
+Date: Sun Feb 14 02:15:42 EST 2016
+
+TLV : tag, length, value
+http://joearms.github.io/2016/01/28/A-Badass-Way-To-Connect-Programs-Together.html
