@@ -67421,3 +67421,15 @@ Date: Sun Feb 14 02:15:42 EST 2016
 
 TLV : tag, length, value
 http://joearms.github.io/2016/01/28/A-Badass-Way-To-Connect-Programs-Together.html
+
+
+
+Entry: Protocol oriented programming
+Date: Mon Feb 22 13:21:57 EST 2016
+
+The point seems to be really about avoiding the need for lookahead.
+
+Parser structure simplifies a whole lot once you can throw away the
+end marker, e.g. if the end token is just an end token, and not also
+part of the beginning of the next symbol.
+
