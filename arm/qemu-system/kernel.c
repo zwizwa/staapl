@@ -106,6 +106,7 @@ void nfstore(void) {
 }
 void interpret_packet(void) {
     int size = rx(); // ignore.  protocol is self-terminating.
+    (void)size;
 
     int command = rx();
     switch(command & 0x0F) {
