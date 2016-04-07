@@ -106,7 +106,6 @@ void nfstore(void) {
 }
 void interpret_packet(void) {
     int size = rx(); // ignore.  protocol is self-terminating.
-    (void)size;
 
     int command = rx();
     switch(command & 0x0F) {
@@ -126,22 +125,18 @@ void interpret_packet(void) {
     infof("\n");
 }
 
-void interpret_route(void) {
-    int addr = rx();
-    if (addr) {
-        // not for us, just drop it.
-        int count = rx();
-        while (count--) rx();
-    }
-    else {
-        interpret_packet();
-    }
-}
-
 void interpreter(void) {
     infof(ME "interpreter()\n");
     while(1) {
-        interpret_route();
+        int addr = rx();
+        if (addr) {
+            // not for us, just drop it.
+            int count = rx();
+            while (count--) rx();
+        }
+        else {
+            interpret_packet();
+        }
     }
 }
 

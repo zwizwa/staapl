@@ -5,14 +5,7 @@
 #include <libopencm3/usb/usbd.h>
 #include <libopencm3/usb/cdc.h>
 
-
-/* CDCACM */
-void cdcacm_set_config_with_callbacks(usbd_device *, void*, void*);
-usbd_device *cdcacm_init(void *set_config, const char * const *usb_strings);
 usbd_device *usb_serial;
-static const char * usb_strings[] = {
-    "Zwizwa","Staapl-stm32f103","v1.0"
-};
 
 /* USB endpoint buffers. */
 static uint8_t  rx_buf[64];
@@ -22,7 +15,7 @@ static uint8_t  tx_buf[64];
 static uint32_t tx_w = 0;
 static uint32_t tx_sema;
 
-/* Block read/write */
+/* Buffer read/write */
 static void poll_tx(void) {
     if (tx_sema > 0) return; // USB busy
     if (tx_w) {
@@ -31,26 +24,26 @@ static void poll_tx(void) {
         tx_w = 0;
     }
 }
-static void data_tx_cb(usbd_device *usbd_dev, uint8_t ep) {
+static void tx_cb(usbd_device *usbd_dev, uint8_t ep) {
     if (usbd_dev != usb_serial) return;
     tx_sema--;
     poll_tx();
 }
-static void data_rx_cb(usbd_device *usbd_dev, uint8_t ep) {
+static void rx_cb(usbd_device *usbd_dev, uint8_t ep) {
     if (usbd_dev != usb_serial) return;
     rx_n = usbd_ep_read_packet(usb_serial, 0x01, rx_buf, sizeof(rx_buf));
     rx_r = 0;
     poll_tx();
 }
 
-/* Character read/write */
-void poll(void) {
+/* Character read/write. Used by kernel.c  */
+static void poll(void) {
     usbd_poll(usb_serial);
     poll_tx();
 }
 void comm_tx(char c) {
+    while(tx_w >= sizeof(tx_buf)) { poll(); }
     tx_buf[tx_w++] = c;
-    poll_tx();
 }
 uint8_t comm_rx(void) {
     for(;;) {
@@ -62,12 +55,16 @@ uint8_t comm_rx(void) {
 
 
 /* Callbacks & init */
+void cdcacm_set_config_with_callbacks(usbd_device *, void*, void*);
+usbd_device *cdcacm_init(void *set_config, const char * const *usb_strings);
+static const char * usb_strings[] = {
+    "Zwizwa","Staapl-stm32f103","v1.0"
+};
 static void usb_reset(void) {
-    //io = &comm_io;
 }
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue) {
     (void)wValue;
-    cdcacm_set_config_with_callbacks(usbd_dev, data_rx_cb, data_tx_cb);
+    cdcacm_set_config_with_callbacks(usbd_dev, rx_cb, tx_cb);
     usbd_register_reset_callback(usbd_dev, usb_reset);
 }
 void interpreter(void);

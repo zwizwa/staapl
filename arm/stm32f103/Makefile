@@ -1,4 +1,4 @@
-all: bl.core.elf
+all: monitor.core.elf
 
 C_LIB := \
 	vector.c \
