@@ -46,6 +46,7 @@ const struct serial_io echo_io = { .read  = echo_read, .write = echo_write };
 
 
 /* Staapl interface. */
+// this should use packet buffering in case host doesn't write() everything at once
 uint32_t comm_tx_n;
 uint32_t comm_rx_n;
 void interpret_route(void);
@@ -56,6 +57,10 @@ uint8_t comm_rx(void) {
     return rx_buf[comm_rx_n++];
 }
 static void comm_write(uint32_t n) {
+    //if (n && rx_buf[0] > 0) {
+    //    for(char *c = "Staapl binary messages only.\r\n"; *c; c++) comm_tx(*c);
+    //    return;
+    //}
     comm_rx_n = n;
     interpret_route();
 }
