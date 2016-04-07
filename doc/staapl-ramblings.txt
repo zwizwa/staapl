@@ -67433,3 +67433,20 @@ Parser structure simplifies a whole lot once you can throw away the
 end marker, e.g. if the end token is just an end token, and not also
 part of the beginning of the next symbol.
 
+
+
+Entry: arm roadmap
+Date: Thu Apr  7 16:00:58 EDT 2016
+
+What about giving up on the low level compiler?  For PIC it made
+sense, but I don't really feel that doing the same for other
+architectures is going to be of much use.  Especially with projects
+like LLVM around, it seems like a waste of time.
+
+Better to aim for a higher level of abstraction.
+
+Regarding LLVM, the most important bits are:
+- passing around stack pointers
+- optimizing tail calls
+
+
