@@ -126,18 +126,22 @@ void interpret_packet(void) {
     infof("\n");
 }
 
+void interpret_route(void) {
+    int addr = rx();
+    if (addr) {
+        // not for us, just drop it.
+        int count = rx();
+        while (count--) rx();
+    }
+    else {
+        interpret_packet();
+    }
+}
+
 void interpreter(void) {
     infof(ME "interpreter()\n");
     while(1) {
-        int addr = rx();
-        if (addr) {
-            // not for us, just drop it.
-            int count = rx();
-            while (count--) rx();
-        }
-        else {
-            interpret_packet();
-        }
+        interpret_route();
     }
 }
 
