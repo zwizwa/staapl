@@ -67449,4 +67449,7 @@ Regarding LLVM, the most important bits are:
 - passing around stack pointers
 - optimizing tail calls
 
+But then again... I don't know.  The whole idea of Staapl is bottom-up
+programming.  Let's leave it open..
+
 
