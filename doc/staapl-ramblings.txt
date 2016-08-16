@@ -67485,5 +67485,29 @@ While it's possible to run racket to access raw Staapl code, it might
 also make sense to generate a simple C adapter file that would connect
 to the serial console and send commands.
 
+This would keep everything bundled at compile time.
+
+
+The adaptation would be:
+
+npush:  00 <size> 01 <nb_bytes> .. .. ..
+npop:   00 <size> 02 <nb_bytes>
+jsr:    00 <size> 03 <lo> <hi>
+
+
+To get the address:
+
+(require "4-relay-module.fm")
+(require staapl/target/rep)
+(target-word-address target/relay!)
+
+Generation of this needs a list of commands that are supported.
+
+In first iteration it could be just a Forth, but it might make sense
+to turn this into a fixed prefix protocol.
+
+
+
+
 
 
