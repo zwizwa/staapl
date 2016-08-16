@@ -67453,3 +67453,37 @@ But then again... I don't know.  The whole idea of Staapl is bottom-up
 programming.  Let's leave it open..
 
 
+
+
+Entry: 4-relay-module
+Date: Mon Aug 15 22:35:16 EDT 2016
+
+2455 + 5V relays
+
+The PIC just does USB<->relay.  I want to control the relays from Erlang.
+What protocol to use?
+
+Binary is easy in Erlang so how to extend the interpreter such that it
+supports both dev mode and application messages?  Preferably without
+crashing.
+
+Jumpering the board would make most sense.
+
+Since this is only for debug, why not just run racket?
+Alternatively, just send the protocol and save a dictionary of words.
+
+Flow control is simple: read lines until "OK\n"
+
+The remaining problem is to distinguish the ttyACM nodes.
+
+
+
+Entry: Protocol adapter
+Date: Tue Aug 16 00:04:06 EDT 2016
+
+While it's possible to run racket to access raw Staapl code, it might
+also make sense to generate a simple C adapter file that would connect
+to the serial console and send commands.
+
+
+

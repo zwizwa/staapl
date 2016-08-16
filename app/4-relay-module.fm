@@ -1,6 +1,7 @@
 #lang staapl/pic18 \ -*- forth -*-
 
 \ PIC DIP28 MINI KIT - PIC Developmen​t Board kit for DIP28 PIC with 18F2550 + 4Mhz XTAL
+\ Connected to 4 Relay Module board
 
 
 provide-all
@@ -23,7 +24,7 @@ load p18f2550.f          \ chip macros
 load monitor-usbserial.f \ boot block + interactive monitor over USB ACM serial port
 
 load usb.f                     \ USB library
-require-file dip40kit-desc.rkt \ scheme file with descriptor tables       
+require-file 4-relay-module-desc.rkt \ scheme file with descriptor tables       
 : device-descriptor        'scheme device  usb-descriptor
 : configuration-descriptor 'scheme configs usb-descriptors
 : string-descriptor        'scheme strings usb-descriptors
@@ -32,7 +33,8 @@ staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
 
-load debug.f    
+load debug.f
+
 
 macro
 : live-module ` staapl/pic18/live ;
@@ -40,17 +42,34 @@ macro
 : monitor-EP 1 ;
 : total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3
 : service-lo ;  \ inlined in USB kernel lo-pri isr
-: pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
-: hello 0 LATB ! pause #xF LATB ! ;
-  
-: init-board     \ FIXME
-    #xF0 TRISA ! \ low nibble is LED1-LED4
-    0 TRISB !    \ FIXME: check these
+
+
+
+    
+: init-board  \ Turn everything off before enabling outputs
+    \ A: low nibble is LED1-LED4 active low
+    \ B: low nibble relay active high
+    
+    #x0F LATA !
+    0 LATB !
+    0 LATC !
+    
+    #xF0 TRISA !
+    0 TRISB !
     0 TRISC !
-    hello        \ remove if doesn't fit in bootloader
+
+    \ Blink LEDs on startup
+    hello
     ;
 
 : application interpreter ;    
 forth
 
+: pause 0 begin 0 begin 1+ c? until drop 1+ c? until drop ;
+: hello 0 LATA ! pause #xF LATA ! ;  
+: relay! #xF and LATB ! ;
+: 5pause 5 for pause next ;
+: diag      0 16 for dup            relay! 1 + 5pause next drop 0 relay! ;   
+: diag-grey 0 16 for dup dup >> xor relay! 1 + 5pause next drop 0 relay! ;     
+  
 
