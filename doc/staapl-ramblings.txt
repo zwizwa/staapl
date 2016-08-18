@@ -67509,5 +67509,96 @@ to turn this into a fixed prefix protocol.
 
 
 
+Entry: Staapl use
+Date: Wed Aug 17 18:23:24 EDT 2016
+
+I think I got over the disappointment that this is not a "real tool".
+The thing is, it is.  It just has a very specific set of constraints
+about when it is useful.
+
+Basically, it shines for building simple interfacing applications
+where an ARM processor would be overkill, and a DIP package is desired
+for ease of 1-off assembly.
+
+
+
+Entry: Remote access
+Date: Wed Aug 17 18:26:21 EDT 2016
+
+How to make it work, sealed into a package at the end of a cable?
+
+- RS485 serial line
+- Power, Ground, Reset.
+
+Use a 4-pair standard ethernet cable and use:
+1: RS485
+2: GND
+3: 5V
+4: reset current loop
+
+
+Alternatively, to eliminate the RS485, use two current loops, one for
+RX and one for TX.
+
+How to drive a current loop like this?
+
+Note that MIDI is supposed to be a current loop, but the current is
+not regulated other than using a fixed current limiting resistor.  If
+the cables become very long, the resistance increases and the current
+drops.
+
+What about making this compatible to MIDI, and for a fixed setup, make
+the divider resistors programmable so they can be tuned to the cable
+resistance.
+
+MIDI is:
+
+5V - 220R - cable - 220R - diode - cable - 220R - 5V/0V buffer.
+
+Likely also works with open collector.
+Typical 6N138 forward voltage is 1.4V
+
+Max current is (/ (- 5.0 1.4) (* 3 220)) -> 5mA
+
+Could be driven using open collector and NPN with emitter
+degeneration.
+
+What is the resistance of an Ethernet cable?
+1 Ohm for every 10 metres
+
+So there is no reason to make this use an active regulator.  Drive it
+from open collector PIC pin with a current limiting resistor.
+
+
+
+Entry: Remote node wire interface
+Date: Wed Aug 17 19:08:56 EDT 2016
+
+Using standard CAT5 cable.  Same as 
+
+- RX
+- TX
+- 5V
+- GND
+
+Should make it harmless if master or slave side of these gets plugged
+into an ethernet port.
+
+Serial signaling is a MIDI style current loop.
+
+Positive voltage of inbound data can be used as reset signal.  Use a
+capacitor to reduce noise level, and a resistor to dampen LC
+resonannces.
+
+Protocol: low baud rate after bringup.  Standard Staapl protocol.  Do
+not overwrite bootloader.  Use trampoline loader if bootloader upgrade
+is necessary.
+
+Reset switches to low baud rate, then up baud rate through commands.
+
+Make it compatible with MIDI (e.g. make the reset removable, or
+disable it in firmware).
+
+
 
 
