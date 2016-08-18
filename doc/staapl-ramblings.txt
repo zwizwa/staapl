@@ -67600,5 +67600,44 @@ Make it compatible with MIDI (e.g. make the reset removable, or
 disable it in firmware).
 
 
+Entry: current loops vs. rs485
+Date: Thu Aug 18 00:57:33 EDT 2016
+
+Can't find a very good comparison, but the main reason current loops
+are not used a lot is because they consume a lot of power.
+
+For sparse communication with idle=off this doesn't matter.
+
+Now for RS485, apparently RTS is supposed to be used as an enable signal.
+http://electronics.stackexchange.com/questions/23988/automatic-rts-control-for-rs-232-to-rs-485-converters
+
+FTDI chips have a direction pin.  Or use a monostable trigger on the
+TX start bit.
+
+EDIT: disadvantage of current loop is that it's single duplex (or
+needs transformer coupling).
+
+
+Entry: Bootloaders
+Date: Thu Aug 18 18:53:01 EDT 2016
+
+Coming back to the original assumption that an ICD connection is
+always available.  It is not.  It is necessary to be able to bootload
+these things over the main communication channel, otherwise
+development of networks is too cumbersome.
+
+Requirements for a bootloader / communication network.
+- never requires update (but has a risk-of-bricking emergency update uption)
+- remote reset
+
+Anything else seems not so important, as can be solved by code
+updates.
+
+Remote reset could be implemented using a software reset + a wire
+watchdog for backup, but that would require a keepalive.
+
+
+
+
 
 
