@@ -120,5 +120,5 @@ _test:
 # C file needs to be kept in sync with what's in the device's Flash memory.
 %.c: %.gen-c.rkt
 	racket $< >$@
-%.elf: %.c
+%.elf: %.c ../live/console.c
 	gcc -o $@ $<

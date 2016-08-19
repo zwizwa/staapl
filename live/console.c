@@ -34,6 +34,9 @@ void transaction(void *buf, int nb_bytes) {
     get();
     uint8_t n = get();
     for (int i = 0; i<n; i++) { get(); }
+}
+void prompt(void) {
+    printf("OK\n");
     fflush(stdout);
 }
 
@@ -43,6 +46,9 @@ int main(int argc, const char **argv) {
         console = argv[1];
     }
     if (!(console_file = fopen(console, "w+"))) return -1;
+
+    printf("Console on %s\n", console);
+    prompt();
 
     unsigned int size = 0;
     unsigned int nondigits = 0;
@@ -75,7 +81,7 @@ int main(int argc, const char **argv) {
                     transaction(msg,sizeof(msg));
                 }
                 if ('\n' == c) {
-                    printf("OK\n");
+                    prompt();
                 }
             }
             size = 0;
