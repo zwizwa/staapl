@@ -67501,6 +67501,9 @@ To get the address:
 (require staapl/target/rep)
 (target-word-address target/relay!)
 
+(require staapl/ns)
+(ns (target) relay!)
+
 Generation of this needs a list of commands that are supported.
 
 In first iteration it could be just a Forth, but it might make sense

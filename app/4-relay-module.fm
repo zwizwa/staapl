@@ -73,3 +73,8 @@ forth
 : diag-grey 0 16 for dup dup >> xor relay! 1 + 5pause next drop 0 relay! ;     
   
 
+\ Welcome to Racket v6.0.1.
+\ > (require staapl/live/c-console)
+\ > (require "4-relay-module.fm")
+\ > (struct-init relay!)
+\ #define WORDS {{.name="relay!",.addr=1267},}
