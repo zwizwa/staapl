@@ -10,12 +10,12 @@
              (w (list (ns (target) word) ...)))
     `(,n . ,(target-word-address w))))
 
-(define-syntax-rule (struct-init word ...)
-  (dict->struct-init (words->dict word ...)))
-
 ;; Generate C structure initializer from assoc list
-(define (dict->struct-init addrs)
-  (printf "#define WORDS {")
+(define (print-dictionary-struct-init addrs)
+  (printf "#define DICTIONARY {")
   (for ((item addrs))
     (printf "{.name=~s,.addr=~s}," (symbol->string (car item)) (cdr item)))
-  (printf "}\n"))
+  (printf "{}}\n"))
+
+
+;; See app/4-relay-module.gen-h.rkt

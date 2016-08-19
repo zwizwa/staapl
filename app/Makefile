@@ -117,4 +117,8 @@ current: dtc.app synth.app synth-1220-8.app dip40kit.app
 _test: 
 	make clean ; make test
 
-
+# C file needs to be kept in sync with what's in the device's Flash memory.
+%.c: %.gen-c.rkt
+	racket $< >$@
+%.elf: %.c
+	gcc -o $@ $<

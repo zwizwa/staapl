@@ -152,7 +152,10 @@
                file->forth-syntax
                stx->path
                (lambda (filename) ;; logger
-                 (printf " include ~s\n" (path->string filename))))))
+                 ;; Don't create stdout side effects on import - bad for c gen.
+                 ;; (printf " include ~s\n" (path->string filename))
+                 (void)
+                 ))))
 
 ;; Inline s-expressions.  Note that if your current lexer allows, once
 ;; inside this construct ordinary s-expressions can be used.

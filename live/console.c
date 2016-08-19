@@ -4,20 +4,21 @@
 #include <string.h>
 #include <stdint.h>
 
-/* Minimalistic console to interface textual commands to Staapl monitor. */
 
-#define BUF_SIZE 1024
-char buf[BUF_SIZE];
+/* Minimalistic console to interface textual commands to Staapl monitor. */
+/* See live/c-dictionary.rkt and 4-relay-module.gen-c.rkt */
 
 struct word {
     const char *name;
     unsigned int addr;
 };
+struct word dictionary[] = DICTIONARY;
 
-struct word word[] = {
-    {"relay!",1267},
-    {}
-};
+
+#define BUF_SIZE 1024
+char buf[BUF_SIZE];
+
+
 
 FILE *console_file;
 uint8_t get(void) {
@@ -33,7 +34,6 @@ void transaction(void *buf, int nb_bytes) {
     get();
     uint8_t n = get();
     for (int i = 0; i<n; i++) { get(); }
-    printf("OK\n");
     fflush(stdout);
 }
 
@@ -54,9 +54,9 @@ int main(int argc, const char **argv) {
             if (size > 0) {
                 if (nondigits) {
                     unsigned int addr = 0;
-                    for(int i=0; word[i].name; i++) {
-                        if (!strcmp(word[i].name, buf)) {
-                            addr = word[i].addr;
+                    for(int i=0; dictionary[i].name; i++) {
+                        if (!strcmp(dictionary[i].name, buf)) {
+                            addr = dictionary[i].addr;
                         }
                     }
                     //printf("word: %s %d\n", buf, addr);
@@ -73,6 +73,9 @@ int main(int argc, const char **argv) {
                     //printf("number: %d\n", byte);
                     uint8_t msg[] = {0, 3, 1, 1, byte};
                     transaction(msg,sizeof(msg));
+                }
+                if ('\n' == c) {
+                    printf("OK\n");
                 }
             }
             size = 0;
