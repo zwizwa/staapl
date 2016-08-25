@@ -67641,6 +67641,33 @@ watchdog for backup, but that would require a keepalive.
 
 
 
+Entry: Identity crisis
+Date: Thu Aug 25 10:54:56 EDT 2016
+
+Another round of "while obviously this is fun to work with, does it
+have any real practical value?".
+
+And the answer is mainly: simplicity.
+
+What does that really mean in the face of designing distributed
+systems?
+
+After building a real-life application structured as linux/erlang +
+custom ARM nodes, it is clear that the real problem is how to evolve a
+design, and how to properly test it.
+
+Evolving: make it easy to upgrade code, possibly without taking down
+the whole thing.
+
+Test: it seems almost impossible to avoid an object-oriented
+distributed state style because of physical constraints.  All that
+functional programming mumbo-jumbo is nice on a small scale, but
+regarding a full network it's really not applicable.
+
+To try this out, I started building a distributed Erlang system.  Next
+is to add some sensor/actuator nodes to that using Staapl or some
+other low-level state machine OS.
+
 
 
 
