@@ -67671,3 +67671,19 @@ other low-level state machine OS.
 
 
 
+Entry: Reliable reboot on USB?
+Date: Sun Sep  4 15:55:00 EDT 2016
+
+Currently doesn't work.  This needs a watchdog mechanism, with pings
+coming from across the USB.
+
+
+Entry: Watchdog
+Date: Sun Sep  4 16:03:38 EDT 2016
+
+Building a watchdog timer with power cycling using relay board.
+
+Wired in normally open configuration.  Board will power cycle main
+board after ping delay, and main board can power cycle the relay board
+for firmware upgrade.
+
