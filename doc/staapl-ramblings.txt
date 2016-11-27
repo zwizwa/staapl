@@ -67687,3 +67687,14 @@ Wired in normally open configuration.  Board will power cycle main
 board after ping delay, and main board can power cycle the relay board
 for firmware upgrade.
 
+
+
+Entry: chuck back to ga144
+Date: Fri Nov 25 21:38:59 EST 2016
+
+2:20
+https://www.youtube.com/watch?v=FeZ-40fxY48
+
+tried ios, apple and raspberry pi and is disappointed.
+currently into decompilation of object code
+
