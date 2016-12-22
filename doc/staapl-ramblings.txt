@@ -67698,3 +67698,14 @@ https://www.youtube.com/watch?v=FeZ-40fxY48
 tried ios, apple and raspberry pi and is disappointed.
 currently into decompilation of object code
 
+
+
+Entry: UBF
+Date: Thu Dec  8 11:19:10 EST 2016
+
+"One of the basic ideas of UBF of was to send programs not data
+structures. The programs were for a byte-coded stack machine. So
+instead of sending data structures between machines we send tiny
+programs which when evaluated create data structures."
+
+http://armstrongonsoftware.blogspot.com/2008/07/ubf-and-vm-opcocde-design.html
