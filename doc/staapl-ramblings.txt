@@ -67709,3 +67709,11 @@ instead of sending data structures between machines we send tiny
 programs which when evaluated create data structures."
 
 http://armstrongonsoftware.blogspot.com/2008/07/ubf-and-vm-opcocde-design.html
+
+
+Entry: 1kb challenge
+Date: Tue Jan  3 01:49:38 EST 2017
+
+https://hackaday.io/submissions/the-1kb-challenge/list
+https://hackaday.io/project/18552-joy232
+anything to submit?
