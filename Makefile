@@ -15,7 +15,7 @@ RACO_MAKE=mzc -vk
 RACO_PKG =raco pkg
 
 unlink:
-	$(RACO) pkg remove staapl
+	$(RACO_PKG) remove staapl
 
 link:
 	cd $$(readlink -f .)/.. ; $(RACO_PKG) install --link staapl
