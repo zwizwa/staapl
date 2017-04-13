@@ -61,7 +61,7 @@ Let's load the compiler and some debugging code used in the
 presentation.
 
 @ex[() 
-(require staapl/pic18
+(require staapl/pic18/pic18
          staapl/comp/debug)
 ]
 
