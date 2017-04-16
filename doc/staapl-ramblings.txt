@@ -67717,3 +67717,182 @@ Date: Tue Jan  3 01:49:38 EST 2017
 https://hackaday.io/submissions/the-1kb-challenge/list
 https://hackaday.io/project/18552-joy232
 anything to submit?
+
+
+
+Entry: Why did pic18.rkt disappear?
+Date: Thu Apr 13 13:49:21 EDT 2017
+
+git checkout 6f13f4db1a45e103de4fdb06f5940698b806bf20
+
+#lang racket/base
+
+;; Macro Forth for PIC18.
+
+(require "tools.rkt")
+(require/provide
+ "pic18-unlinked.rkt"         ;; All PIC18 code, not linked.
+ "pic18/pic18-const-unit.rkt" ;; Chip-specific config.
+)
+
+(provide (all-defined-out))
+
+(define/invoke-sigdict pic18^^ 
+  (pic18-const@    ;; constants provided by us
+   pic18-generic@  ;; generic PIC18 code
+   ))
+
+
+Entry: Rehash - things that sunk in
+Date: Thu Apr 13 14:00:56 EDT 2017
+
+"expand AND contract" : this is about partial evaluation.  There is
+nothing special about doing this in point-free vs. local variables
+form.  It is just easier to express maybe?
+
+This is an important point, because I always thought this was somehow
+special.  It is really just more convenient, right?
+
+Well, it is somewhat special in that the assembly output is used to
+incrementally optimize.
+
+Now, was this a good idea or not?
+This puts me right at the heart of an old fight-or-flight scenario :)
+
+
+So this is a two-pass system, which allows pseudo-instructions to be
+used.  How to decide which subsets are present in the several passes
+to eventually end up with real instructions?
+
+
+
+Entry: Keep FLUNK presentation for archive, turn it into compiler.scrbl
+Date: Thu Apr 13 14:02:55 EDT 2017
+
+The wording is steeped with depression!
+
+Dah I'm already getting discouraged just going over this again.  There
+are several points in Staapl where there is "almost a good idea".  But
+it never got distilled to its essence.
+
+
+
+
+Entry: The Central Question
+Date: Thu Apr 13 14:36:39 EDT 2017
+
+The main point of the compiler is the two-pass peephole optimization.
+How can a compiler be designed for a particular architecture?
+
+How do you pick the intermediate and eager optimizer steps?
+
+I'd like to capture this in a typed language, with some consistency
+guarantees.
+
+But on the other hand I don't really want to spend more time on it.
+It feels like regression.  Without a really good idea that would
+stretch further than this project, I think it makes little sense.
+
+It's nice to have this for PIC18, but that will be dead soon, and it
+might be better to focus the effort on LLVM.  The eternal
+what-to-do-next question..
+
+
+
+
+
+
+Entry: LLVM
+Date: Thu Apr 13 15:19:48 EDT 2017
+
+A more modern approach would be to write a macro language that exports
+to LLVM, and then to solve the factoring problem using some kind of
+additional optimizer: e.g. what to inline?
+
+I would be surprised that a compiler can't peephole-optimize better
+than what is done in Staapl, but it might have serious trouble finding
+a good factorization.
+
+
+
+Entry: Instantiation / refactoring engine
+Date: Fri Apr 14 10:10:45 EDT 2017
+
+After separating some main ideas (2-pass compiler, protocol oriented
+programming, the macro/code divide), it seems that there is a
+significant difference between applicative programming and the linear
+stack languages: it is much easier and almost arbitrary to introduce
+abstraction points.
+
+I.e. given a program (a b c), it can be written as (a (b c)) and ((a
+b) c), wher the inner word groups are separately abstracted words.
+
+Some forces that influence decisions here:
+- abstracted words and phrases can re-use the same code storage
+- words that are compiled in one unit can use optimization
+- calls are more expensive to execute than inlined functions
+
+
+
+Entry: Protocol oriented programming
+Date: Fri Apr 14 10:16:35 EDT 2017
+
+The difference between concatenative and applicative is that for
+applicative we tend to assume we're communicating "C structs".
+E.g. it is assumed that there is random access memory.
+
+For concatenative, we assume no such access: all access is sequential,
+with only the stack looking at the most recent data.
+
+What this allows, is to eliminate the van neumann bottleneck: there is
+no need for a memory bus, only for communication channels, which scale
+better.
+
+Something like that.  But this needs a lot of work to articulate.
+
+EDIT: This makes sense only when there are two processors with
+physical separation.  Not when implementing existing protocols.
+
+EDIT: Maybe it's good to study some GA144 code, as it seems that this
+principle will naturally unfold itself when writing code for the
+multi-processor architecture.
+
+What I'm interested in, is how to use this idea to design protocols.
+It is more about: what a message actually is on the receiving end.
+
+EDIT: I keep coming back to eliminating memory and buffering, by
+replacing it by distributed busses.
+
+
+Entry: What is a message?
+Date: Sat Apr 15 10:23:09 EDT 2017
+
+It's a goto. It's a single-ended continuation invocation. This is the
+original idea behind Scheme.
+
+In Forth it isn't much different from other languages.
+
+The main point is that "large" messages should be encoded in a way
+that allows them to be routed without being buffered.
+
+What is a large message?  It either contains a certain grouping of
+commands for one or more nodes, or it contains payload data that is to
+be delivered to some port.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

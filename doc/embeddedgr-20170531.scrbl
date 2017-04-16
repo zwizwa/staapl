@@ -1,6 +1,61 @@
+
+Topics:
+- the language (macros and instantiation)
+- the base language for pic18
+- the pic18 compiler (two-pass peephole optimizer)
+- forth and the "compression force" (factoring, protocol col oriented programming)
+
 TODO:
-- get the old tutorial working again
-- look at flunk presentation
+- synth: get a board working with MIDI
+- synth: get the old tutorial working again
+- language: get the old tutorial working again
+- compier: clean up flunk presentation for compiler part
+
+General guidelines:
+- keep the despair out of it -- the compiler is ad-hoc, period
+- don't linger on the "is this practical" point
+
+
+
+Compared to the C-world, Staapl can seem impractical.  What attracts
+me though is two important point I still seek to articulate better:
+
+- compiler is a little quirky but quite simple.  main interest in
+  driving this foward is to make the pattern matcher be typed.
+  especially: how to pick the pseudo instructions? the design stems
+  from a time at which i did not see the benefit of algebraic
+  datatypes wrt. future growth.
+
+- a forth program has a high degree of "inlinability" and
+  "refactorability".  much more so than a regular applicative program.
+  apart from all this, could the "corset" be used as a more general
+  funnel to have programmers write smaller code?
+
+- there is something about eliminating random access that is not fully
+  explored in industry.  in hardware, it is a serious bottleneck.
+  there is an echo of a solution to this problem in the idea of forth.
+
+Combination of both: toward a typed stack machine language.
+
+
+
+
+PIC18 as a proto-stack-machine
+
+This is about the ideas of radical simplicity coming out of the Forth
+world.  After an inititial infatuation phase, my goal has always been
+to extract Forths essential oil and find a way to mix it with today's
+de-facto ecosystem: C on ARM barebone or RTOS, and some Linux stack.
+
+The Staapl system is built with generality in mind, but is focused on
+the PIC18.  The PIC18 architecture is an evolution of the original PIC
+architecture, taylored for C.  Still, C is quite inefficient on this
+small chip.
+
+The approach taken in Staapl is to define a simple Stack language on
+top of the PIC18 architecture, resembling a "machine Forth".
+
+
 
 
 

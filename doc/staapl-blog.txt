@@ -5363,3 +5363,76 @@ is conditional on the memory model.
 This is really about eliminating the complexity in the allocator.
 
 The "machine" is a message parser.
+
+
+
+Entry: Rehash: the problems, and the future directions
+Date: Fri Apr 14 10:19:42 EDT 2017
+
+- compiler:
+
+  1. formalize the definition of the "pseudo language"
+  2. toss out the optimizer and rely on LLVM
+
+- protocol oriented programming:
+
+  this is really the idea of replacing random memory access with
+  communicating tasks, and making the messages take a form such that
+
+- code/macro and automatic refactoring
+
+  it seems that concatenative code is much easier to automatically
+  refactor into words and inlines.  or at least, have the human
+  perform hyper-factoring, and then have the machine perform inlines
+  towards a specified optimized goal
+
+- typed approach:
+
+  when the complexity of the compiler becomes larger, it is imperative
+  to catch the structure in a type system.  hence, building a haskell
+  model.
+
+
+All of this is "WRITE CODE SUCH THAT A STACK MACHINE CAN EXECUTE IT
+EFFICIENTLY".  Once you do that, a great simplification happens in
+implementation, and it only requires some mental gymnastics to express
+the problem in this framework.
+
+Why do we use applicative languages?  Because we know how to deal with
+a couple of named things at once.  The idea of "things in scope" comes
+natural to how we think. The price to be payed for this is large:
+random access is expensive in hardware.
+
+
+
+Entry: Protocol-oriented programming
+Date: Sat Apr 15 10:35:32 EDT 2017
+
+This is about eliminating buffering.  Some reasons buffering is needed:
+- Data dependencies in protocol are non-linear
+- Forwarding needs to be de-coupled in time
+
+It seems to me that when the whole system can be changed, it can be
+optimized to make buffers very small.
+
+EDIT: I need to let this go.  The principle is definitely there, but
+it will only start to make sense during writing an application
+according to these principles.
+
+
+
+Entry: Complexity
+Date: Sat Apr 15 10:43:28 EDT 2017
+
+Advantage of today's "acceptable complexity":
+- standards
+- mathematical (structural) models
+- automation of tedium caused by social structure / burocracy
+
+In the modern world, it's almost impossible to do anything without
+allowing some of the legacy accidental complexity to enter your own
+isolated world.
+
+It seems that, even if the state of the world is quite horrible, the
+benefits still outweigh the costs.
+
