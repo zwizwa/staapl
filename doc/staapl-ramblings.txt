@@ -67881,6 +67881,11 @@ be delivered to some port.
 
 
 
+Entry: llvm output
+Date: Tue Apr 18 19:38:33 EDT 2017
+
+Sticking to the main point being hyper-factoring, what format is
+needed to produce a workable language on arm?
 
 
 
