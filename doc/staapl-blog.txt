@@ -5403,6 +5403,10 @@ a couple of named things at once.  The idea of "things in scope" comes
 natural to how we think. The price to be payed for this is large:
 random access is expensive in hardware.
 
+EDIT: in most cases, the reduction in complexity isn't worth it, and
+it is hard to see what is optimal because current architectures are
+optimized to run C code.
+
 
 
 Entry: Protocol-oriented programming
@@ -5435,4 +5439,50 @@ isolated world.
 
 It seems that, even if the state of the world is quite horrible, the
 benefits still outweigh the costs.
+
+
+
+Entry: Peephole two-pass: arbitrary?
+Date: Wed May 10 12:05:13 EDT 2017
+
+Q:
+
+- Is there a way to formalize the ad-hoc structure of the peeophole
+optimizer?
+
+Probably, if the 2-pass nature is fixed.  Once that is fixed it might
+be worth to look at extending this to an arbitrary number of passes.
+
+- Why is it necessary to at least have two passes?
+
+Often the target language is not well-suited for easy incremental
+partial evaluation.  Solve this by inventing an intermediate language,
+then eliminate that in a final pass.
+
+- Is it worth decoupling the intermediate language from the target?
+
+Maybe.  If so, it is probably possible to model it after LLVM to be
+able to use that as a target.
+
+
+
+Entry: A way out: bring it closer to LLVM
+Date: Wed May 10 12:11:57 EDT 2017
+
+Look for a formal definition of an intermediate stack machine
+language.  I.e. create a proper VM.  Make this resemble LLVM to be
+able to use it as a backend for the final pass.
+
+Work the other way: Look for PIC18 instructions used in peephole
+rules, then create the VM architecture from this.  Once done, optimize
+that starting point.  Essentially, the PIC18 is good enough:
+
+- accumulator register
+- pointer registers for stacks and memory access
+
+
+Q: how does LLVM deal with flags?
+
+
+
 
