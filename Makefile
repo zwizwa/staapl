@@ -11,8 +11,9 @@ MZSCHEME=mzscheme
 # multiple tasks doesn't seem to make it faster, and -v doesn't work.
 # RACO_MAKE=raco make -j 4 -v   # 20s
 # RACO_MAKE=raco make -v
-RACO_MAKE=mzc -vk
-RACO_PKG =raco pkg
+RACKET_BIN=/usr/local/racket-6.1.1/bin
+RACO_MAKE=$(RACKET_BIN)/mzc -vk
+RACO_PKG=$(RACKET_BIN)/raco pkg
 
 unlink:
 	$(RACO_PKG) remove staapl

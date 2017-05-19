@@ -14,8 +14,9 @@ all:
 
 # INTERP=racket
 # COMP=???
-INTERP=mzscheme
-COMP=mzc
+RACKET_BIN=/usr/local/racket-6.1.1/bin
+INTERP=$(RACKET_BIN)/mzscheme
+COMP=$(RACKET_BIN)/mzc
 
 FMS := $(shell ls *.fm)
 APPS := $(FMS:.fm=.app)

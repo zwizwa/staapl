@@ -67889,15 +67889,35 @@ needed to produce a workable language on arm?
 
 
 
+Entry: upgrade breaks old code
+Date: Fri May 19 19:20:26 CEST 2017
+
+tom@core:~/staapl/app$ make synth.dict
+rm -f compiled/synth_fm.*
+mzc -vk synth.fm
+mzc v6.8 [3m], Copyright (c) 2004-2014 PLT Design Inc.
+"synth.fm":
+  making "/home/tom/staapl/app/synth.fm"
+compiled/expanded code out of context; cannot find exports to restore imported renamings for module: "/home/tom/staapl/app/pic18-const-unit.rkt" [during expansion]
+  compilation context...:
+   /home/tom/staapl/app/synth.fm
+  context...:
+   /usr/local/racket-6.8/collects/compiler/cm.rkt:363:0: compile-zo*
+   /usr/local/racket-6.8/collects/compiler/cm.rkt:572:26
+   /usr/local/racket-6.8/collects/compiler/cm.rkt:564:42
+   /usr/local/racket-6.8/collects/compiler/cm.rkt:644:2: do-check
+   /usr/local/racket-6.8/collects/compiler/cm.rkt:737:4
+   /usr/local/racket-6.8/share/pkgs/mzscheme-lib/compiler/main.rkt:452:7: for-loop
+   /usr/local/racket-6.8/share/pkgs/mzscheme-lib/compiler/main.rkt: [running body]
+
+https://groups.google.com/forum/#!topic/racket-users/_z8w6ha-FR0
 
 
+Might be an old compiler.
 
 
-
-
-
-
-
-
+Looks like this is because I'm doing something unclean with identifies
+that no longer works in the new macro system.  Switching back to 6.1.1
+which still works.  Proper fix will take some time.
 
 

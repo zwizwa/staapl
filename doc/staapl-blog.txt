@@ -5486,3 +5486,15 @@ Q: how does LLVM deal with flags?
 
 
 
+Entry: Serial adapter
+Date: Fri May 19 19:14:47 CEST 2017
+
+On the road, and in need of a USB<->TTL_3v3 adapter.  I have a Staapl
+board with UART.
+
+This could be an example of a stand-alone application with bootup
+console.  E.g. It could start up expecting a 0 byte to activate the
+monitor on CDC-ACM, else fall into application.
+
+- create adapter.fm from dip28kit.fm
+
