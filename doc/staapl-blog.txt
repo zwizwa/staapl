@@ -5498,3 +5498,17 @@ monitor on CDC-ACM, else fall into application.
 
 - create adapter.fm from dip28kit.fm
 
+- timing requirements
+
+Two concurrent tasks are necessary for two directions.  Flow control
+is not needed at the USB end: no new data will arrive until we've
+emptied the buffer.  For hw, there is only a 1 byte deep buffer.  So
+structure the code around serial input.
+
+The problem is that USB does not use double buffering.  So it is
+possible that we loose data while waiting for an IN buffer to be
+flushed out to the host.
+
+I need this for interactive console, so it is not going to be a
+practical problem, but for a proper uart <-> usb adapter, double
+buffering is needed.

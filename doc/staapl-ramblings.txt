@@ -67921,3 +67921,23 @@ that no longer works in the new macro system.  Switching back to 6.1.1
 which still works.  Proper fix will take some time.
 
 
+Entry: Usb serial: data ready?
+Date: Sat May 20 10:37:34 CEST 2017
+
+For the hardware serail port it is async.rx-ready? from pic18/serial
+
+For usb.f it seems to be bufready? or bufrem.
+
+
+
+
+
+Entry: Embedded GR
+Date: Sat May 20 10:50:55 CEST 2017
+
+Make a point about the frustrating low-level nature of this thing.
+While it's also fun if there is no stress to get things done, it is
+hard to get something done because everything needs to be re-invented.
+
+What this has shown me is that layered abstraction really is useful.
+And having "plenty of buffer memory" can make things easier.

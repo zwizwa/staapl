@@ -50,7 +50,8 @@ macro
     hello        \ remove if doesn't fit in bootloader
     ;
 
-: application interpreter ;    
+: application
+    interpreter ;    
 forth
 
 
