@@ -31,12 +31,14 @@ require-file dip40kit-desc.rkt \ scheme file with descriptor tables
 staapl pic18/string
 staapl pic18/afregs
 staapl pic18/vector
+staapl pic18/serial
 
 load debug.f    
 
 macro
 : live-module ` staapl/pic18/live ;
 : fosc 48000000 ;
+: baud 115200 ;
 : monitor-EP 1 ;
 : total-EP 4 ;  \ control:0, ACM data:1, ACM control:2, MIDI:3
 : service-lo ;  \ inlined in USB kernel lo-pri isr
@@ -48,9 +50,23 @@ macro
     0 TRISB !    \ FIXME: check these
     0 TRISC !
     hello        \ remove if doesn't fit in bootloader
+    baud fosc init-serial
     ;
 
-: application interpreter ;    
+: application
+    bridge
+    interpreter ;    
 forth
 
+
+: bridge
+    begin
+        async.rx-ready? if
+            async.rx> monitor-EP >IN
+            monitor-EP IN-flush
+        then
+        monitor-EP OUTrem if
+            monitor-EP OUT> async.>tx
+        then
+    again ;
 
