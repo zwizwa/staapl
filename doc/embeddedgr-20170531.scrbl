@@ -1,4 +1,9 @@
 
+Demo:
+- midi keyboard
+- pic18 board, hooked up to mixer & speakers
+- some sequence, composing?
+
 Topics:
 - the language (macros and instantiation)
 - the base language for pic18
