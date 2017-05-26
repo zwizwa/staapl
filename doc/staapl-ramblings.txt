@@ -67940,4 +67940,13 @@ While it's also fun if there is no stress to get things done, it is
 hard to get something done because everything needs to be re-invented.
 
 What this has shown me is that layered abstraction really is useful.
-And having "plenty of buffer memory" can make things easier.
+That there is already a lot of abstraction between the machine and a
+typical C program.  Also, having "plenty of buffer memory" can make
+things easier.
+
+
+
+Entry: Synth
+Date: Tue May 23 10:32:39 CEST 2017
+
+Midi control of sound stacking tricks.

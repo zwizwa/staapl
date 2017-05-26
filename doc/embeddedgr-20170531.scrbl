@@ -12,7 +12,7 @@ Topics:
 
 TODO:
 - synth: get a board working with MIDI
-- synth: get the old tutorial working again
+- synth: get the old tutorial working again -> extract basic ideas! (generators)
 - language: get the old tutorial working again
 - compier: clean up flunk presentation for compiler part
 
@@ -151,3 +151,41 @@ A Macro Forth
 
 
 Compression
+
+
+
+
+The sheep: basic principles
+
+- Use hardware to create something unique: pic18 has 3 x 16 bit timers
+  which can create fairly high resolution sound pitches.
+
+- No DSP, just events at 3 different time scales:
+
+  - There is not much room for traditional 8 or 16 bit DAC as this
+    would require processing at a fairly high rate (say 48kHz).
+    Instead, sound is generated purely by making transitions based on
+    interrupt events from the timers.
+
+    From a signal analysis p.o.v., the effective sampling rate of the
+    output signal is 2MHz (in the original 8MHz osc design), which
+    means there will not be much aliasing present.
+
+  - At around 200Hz, the synth's configuration can be updated to
+    perform timbre evolution.  (generator loops).
+
+  - At around 10Hz, rhythmic events can switch the configuration of
+    the timbre units.  These can be generated on-chip, or come from
+    MIDI.
+
+
+
+How to move this forward?
+
+- Complete the MIDI implementation
+
+- Add more sound generators, and/or write an interpreter for those
+  that can be updated over midi.
+
+- Add analog components
+
