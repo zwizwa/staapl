@@ -67916,9 +67916,15 @@ https://groups.google.com/forum/#!topic/racket-users/_z8w6ha-FR0
 Might be an old compiler.
 
 
-Looks like this is because I'm doing something unclean with identifies
-that no longer works in the new macro system.  Switching back to 6.1.1
-which still works.  Proper fix will take some time.
+Looks like this is because I'm doing something unclean with
+identifiers that no longer works in the new macro system.  Switching
+back to 6.1.1 which still works.  Proper fix will take some time.
+
+EDIT 5/29: 6.2 seems to have a problem as well.  Fixing this is not
+for now.  Fix it post presentation.  
+
+6.1.1 needs libgdk-x11-2.0.so.0 (apt-get install libgtk2.0-0)
+
 
 
 Entry: Usb serial: data ready?
@@ -67950,3 +67956,105 @@ Entry: Synth
 Date: Tue May 23 10:32:39 CEST 2017
 
 Midi control of sound stacking tricks.
+
+
+
+
+Entry: Staapl history, code archive history segments
+Date: Mon May 29 14:58:06 EDT 2017
+
+dev time         archive                
+----------------------------------------
+2004/3  - 2006/1 darcs/badnop           
+2006/2  - 2007/1 darcs/brood-2          
+2007/1  - 2008/5 darcs/brood-4          
+2008/2  - 2013/5 darcs/staapl (brood-5)
+2013/5  -        git/staapl
+
+packets: 2005-2007
+
+badnop has little documentation, just some files in doc/
+brood-2 has a separate ramblings.txt file  (merge with current staapl?)
+
+
+Reading some of this, it seems best to stay away from the process and
+stick to the current form as-is.  It has been redesigned quite a bit
+to get rid of old cruft.
+
+
+
+
+
+
+Entry: META II
+Date: Tue May 30 11:19:18 EDT 2017
+
+http://www.bayfronttechnologies.com/mc_tutorial.html
+
+
+
+Entry: Demo? MIDI + sequencing
+Date: Tue May 30 18:46:36 CEST 2017
+
+Sequencing is actually more interesting, so lets do that first.
+Assuming synth.fm is where to start..
+
+Mainloop runs:
+  poll-interpreter
+  poll-midi
+
+
+Likely this got a little out of sync.  Am I going to overwrite the
+code?  Probably should.
+
+Yes that was not a problem.
+
+Now, why does midi not work?
+Is output actually going to the midi out?
+
+Was connected backwards.  Easy to test with scope: pin6 of opto has
+3v3 serial out.
+
+Next: make some sounds selectable.  Fix the generators?
+
+It seems that both note on/off and cc work.  What to do with it?
+
+: play-last
+    notes-last #xFF = if silence ; then
+    notes-last midi-note
+    _dup period 2!
+    _p0
+
+Instead of silence and _p0, this should call user-defined functions.
+So step 1 is to vectorize these.
+
+Incremental development: 
+- make words that take a 2-byte period to select different generators.
+
+First: _pwm works
+Maybe it is because of stack underflows that it sometimes hangs?
+Restarting the interpreter seems to work.
+
+So it shouldn't be that hard now.  Only thing left is the encoding.
+Maybe put this in a separate file?
+
+
+
+
+Entry: midi voice control
+Date: Tue May 30 21:33:45 CEST 2017
+
+Voice update functions should be executed on each midi event:
+- note on
+- note off
+- cc
+
+Also, a 200kHz modulation tick might be good.
+
+The easiest way to implement is to cache the state in global
+variables, such that update functions for each voice can just use
+what's needed.
+
+First: program control.  This is standard midi.
+
+

@@ -5512,3 +5512,5 @@ flushed out to the host.
 I need this for interactive console, so it is not going to be a
 practical problem, but for a proper uart <-> usb adapter, double
 buffering is needed.
+
+EDIT: Double buffering wasn't needed.

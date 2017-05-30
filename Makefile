@@ -11,7 +11,14 @@ MZSCHEME=mzscheme
 # multiple tasks doesn't seem to make it faster, and -v doesn't work.
 # RACO_MAKE=raco make -j 4 -v   # 20s
 # RACO_MAKE=raco make -v
-RACKET_BIN=/usr/local/racket-6.1.1/bin
+
+# FIXME: racket's macro implementation changed in a way incompatible
+# to some workaround in staapl.  Currently version is kept at the last
+# working racket release.  6.2 has the breaking change.
+RACKET_VER=6.1.1
+#RACKET_VER=6.2
+
+RACKET_BIN=/usr/local/racket-$(RACKET_VER)/bin
 RACO_MAKE=$(RACKET_BIN)/mzc -vk
 RACO_PKG=$(RACKET_BIN)/raco pkg
 

@@ -71,14 +71,15 @@ staapl pic18/task
 staapl pic18/vector    
 
     
-load synth/core.f      \ core timer ISRs
-load synth/control.f   \ patch / period control
-load synth/soundgen.f  \ highlevel sounds
-load synth/notes.f     \ note memory
-load synth/midi-nrpn.f \ direct parameter access
-load synth/midi.f      \ midi control
-load synth/midi-hw.f   \ midi serial hw support
-load synth/midi-usb.f  \ midi usb support
+load synth/core.f       \ core timer ISRs
+load synth/control.f    \ patch / period control
+load synth/soundgen.f   \ highlevel sounds
+load synth/notes.f      \ note memory
+load synth/midi-nrpn.f  \ direct parameter access
+load synth/midi.f       \ midi control
+load synth/midi-hw.f    \ midi serial hw support
+load synth/midi-usb.f   \ midi usb support
+load synth/midi-voice.f \ midi voice control    
 load synth/mainloop.f
     
 \ load synth/patch.f     \ old patch stuff
