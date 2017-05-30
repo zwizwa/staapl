@@ -68058,3 +68058,10 @@ what's needed.
 First: program control.  This is standard midi.
 
 
+
+Entry: How does the midi parser work?
+Date: Tue May 30 22:11:53 CEST 2017
+
+It seems this is blocking...
+
+
