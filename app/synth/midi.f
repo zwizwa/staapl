@@ -16,11 +16,13 @@ variable midi-byte2 : m2 midi-byte2 @ ;
 2variable pitch-mod  \ low  byte from midi, shifted left one bit
 2variable mod1       
 
+
   
 \ Current MIDI state
-2variable period \ Period converted from midi note
-variable voice   \ Current MIDI program / synth voice
-
+2variable period  \ Period converted from midi note
+variable voice    \ Current MIDI program / synth voice
+variable modwheel \ CC1
+  
 : m-interpret \ --
     m0 midi-cmd route
         8x . 9x .    . Bx .
@@ -43,15 +45,16 @@ variable voice   \ Current MIDI program / synth voice
     notes-last #xFF = if silence ; then
     notes-last midi-note
     period 2!
-    voice-update ;
+    pitch-update ;
 
 
 \ Controllers should set meaningful high level values.  The synth
 \ engine is already fully controllable through NRPN.
 
 2variable cc00 : init-cc00 cc00 -> drop ;  \ For development.
-
+    
 : CC00 cc00 invoke ;
+: CC01 modwheel ! control-update ;    
 : CC47 midi-ctrl-freq _p1 ; \ FIXME: needs interpolation
 : CC57 midi-note mod1 2! ;
 : CC58 
@@ -66,7 +69,7 @@ variable voice   \ Current MIDI program / synth voice
     m1 #x7F and \ cc 0-127
     route
         \  0      1      2      3      4      5      6      7      8      9      A      B      C      D      E      F
-        CC00 . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
+        CC00 . CC01 . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 1
         ____ . ____ . ____ . ____ . ____ . ____ . CC26 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 2 
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 3
