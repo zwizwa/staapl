@@ -17,10 +17,6 @@ variable midi-byte2 : m2 midi-byte2 @ ;
 2variable mod1       
 
   
-\ During silence we need to save synth config.
-variable synth-save    
-
-
 \ Current MIDI state
 2variable period \ Period converted from midi note
 variable voice   \ Current MIDI program / synth voice
@@ -46,12 +42,9 @@ variable voice   \ Current MIDI program / synth voice
 : play-last
     notes-last #xFF = if silence ; then
     notes-last midi-note
-    _dup period 2!
-    _p0
-    \ square
-: restore-synth    
-    synth-save @ synth !
-    ;
+    period 2!
+    voice-update ;
+
 
 \ Controllers should set meaningful high level values.  The synth
 \ engine is already fully controllable through NRPN.
@@ -137,14 +130,9 @@ variable voice   \ Current MIDI program / synth voice
 : midi>m12 midi>m1 midi>m2 ;
     
 
-
-
-        
-
-
-
 : init-synth
-    square synth @ synth-save ! silence
+    0 voice !
+    silence
     init-cc00
     init-notes
     engine-on ;
