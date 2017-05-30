@@ -23,7 +23,7 @@ variable synth-save
 
 \ Current MIDI state
 2variable period \ Period converted from midi note
-variable patch   \ Current MIDI program / synth patch
+variable voice   \ Current MIDI program / synth voice
 
 : m-interpret \ --
     m0 midi-cmd route
@@ -39,7 +39,7 @@ variable patch   \ Current MIDI program / synth patch
 : 9x ~chan  m1 m2 0 = if notes-remove else notes-add then play-last ;
 : 8x ~chan  m1 notes-remove play-last ;
 : Bx ~chan  continuous-controller  ;
-: Cx ~chan  m1 patch ! ;
+: Cx ~chan  m1 voice ! ;
 : Ex ~chan  m1 m2 pitch-mod 2! ;
     
 
@@ -69,7 +69,9 @@ variable patch   \ Current MIDI program / synth patch
     
 \ jump table is sparse but we have plenty of room in Flash
 : continuous-controller
-    m2 m1 #x7F and route
+    m2 \ value
+    m1 #x7F and \ cc 0-127
+    route
         \  0      1      2      3      4      5      6      7      8      9      A      B      C      D      E      F
         CC00 . ____ . ____ . ____ . ____ . ____ . CC06 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 0
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 1
@@ -116,7 +118,6 @@ variable patch   \ Current MIDI program / synth patch
 \ D 1 channel-pressure
 \ E 2 pitch-bend
         
-\ NOT TESTED       
 : midi>m \ --
     midi>
     1st 7 low? if midi-continuation ; then \ not a new command byte

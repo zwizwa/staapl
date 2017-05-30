@@ -68063,5 +68063,37 @@ Entry: How does the midi parser work?
 Date: Tue May 30 22:11:53 CEST 2017
 
 It seems this is blocking...
+Look into this later.  For now it seems to work well enough.
+
+
+
+Entry: Store CC values?
+Date: Tue May 30 22:46:49 CEST 2017
+
+Problem is how to express.
+
+Cache would make it easy: no interface necessary - patch just
+retrieves the controller values.
+
+Alternatively, route them to code when they arrive.  Hmm.. not much
+difference apart from requiring a cache.  This seems acceptable, as
+most updates likely need a couple of values at once to recompute synth
+params.
+
+
+
+Entry: Events
+Date: Tue May 30 23:09:05 CEST 2017
+
+- keep note-off at silence
+
+- note-on should take into account new note number or period, and set
+  up synth based on current controller values.  cc should do the same.
+  so change note-on to 2-step: save period value + call v-update
+
+
+
+
+
 
 
