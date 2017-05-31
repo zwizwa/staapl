@@ -19,9 +19,11 @@ variable midi-byte2 : m2 midi-byte2 @ ;
 
   
 \ Current MIDI state
-2variable period  \ Period converted from midi note
-variable voice    \ Current MIDI program / synth voice
-variable modwheel \ CC1
+2variable period   \ Period converted from midi note
+variable voice     \ Current MIDI program / synth voice
+variable modwheel  \ CC1
+variable cutoff    \ CC74
+variable resonance \ CC71
   
 : m-interpret \ --
     m0 midi-cmd route
@@ -54,8 +56,10 @@ variable modwheel \ CC1
 2variable cc00 : init-cc00 cc00 -> drop ;  \ For development.
     
 : CC00 cc00 invoke ;
-: CC01 modwheel ! control-update ;    
-: CC47 midi-ctrl-freq _p1 ; \ FIXME: needs interpolation
+: CC01 modwheel  ! control-update ;    
+: CC47 resonance ! control-update ;
+: CC4A cutoff    ! control-update ;
+\ : CC47 midi-ctrl-freq _p1 ; \ FIXME: needs interpolation
 : CC57 midi-note mod1 2! ;
 : CC58 
 : CC59 
@@ -73,7 +77,7 @@ variable modwheel \ CC1
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 1
         ____ . ____ . ____ . ____ . ____ . ____ . CC26 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 2 
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 3
-        ____ . ____ . ____ . ____ . ____ . ____ . ____ . CC47 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 4
+        ____ . ____ . ____ . ____ . ____ . ____ . ____ . CC47 . ____ . ____ . CC4A . ____ . ____ . ____ . ____ . ____ . \ 4
         ____ . ____ . ____ . ____ . ____ . CC57 . ____ . CC57 . CC58 . CC59 . CC5A . ____ . ____ . ____ . ____ . ____ . \ 5
         ____ . ____ . CC62 . CC63 . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . \ 6
         ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ . ____ ; \ 7

@@ -68094,6 +68094,11 @@ Date: Tue May 30 23:09:05 CEST 2017
 
 
 
+Entry: Midi control of formant synthesis.
+Date: Wed May 31 10:24:09 EDT 2017
 
+Recap: osc2 is envelope (reso), and is one-shot if sync 0->2 is active.
+
+Can user midi CC74: vcf, CC71: reso
 
 
