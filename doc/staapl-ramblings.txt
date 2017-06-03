@@ -68102,3 +68102,57 @@ Recap: osc2 is envelope (reso), and is one-shot if sync 0->2 is active.
 Can user midi CC74: vcf, CC71: reso
 
 
+
+Entry: onward
+Date: Sat Jun  3 08:43:12 EDT 2017
+
+Preparing for the EGR presentation left me with a working system,
+ready for incremental improvement.  I'm going to leave the analog bits
+to the side for now, possibly replace the PIC with a STM32 and do the
+DSP in RAI.
+
+The digital synth can (and should) be a thing onto itself.
+
+"Limitation-driven development".
+
+done:
+- program change and CC
+- USB midi (minor bug on startup)
+
+todo dev:
+- 200Hz modulation programs
+- arpeggio
+- poly + linear mixer: 2 + 1 (xmod + square), 3 x square
+
+
+
+todo cleanup:
+- allow for usb-only firmware update without need for pk2
+
+
+
+Entry: usb midi
+Date: Sat Jun  3 08:56:33 EDT 2017
+
+Enabled in code.  How to patch midi devices on linux?
+
+aconnect 20:0 24:0
+
+It starts up with a stuck note for some reason.
+
+
+
+Entry: formant mode sounds dirty
+Date: Sat Jun  3 09:16:15 EDT 2017
+
+Not sure what's going on.  Maybe look on the scope.
+
+
+Entry: Linear mixer
+Date: Sat Jun  3 09:32:51 EDT 2017
+
+Connecting 3 pins in star configuration with the same resistor R, the
+midpoint V and endpoints V_i have the following relation (current sums
+to 0).
+
+\sum V_i - V = 0
