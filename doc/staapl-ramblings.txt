@@ -68120,7 +68120,7 @@ done:
 - USB midi (minor bug on startup)
 
 todo dev:
-- 200Hz modulation programs
+- 200Hz modulation programs (soundgen.f / sound.f)
 - arpeggio
 - poly + linear mixer: 2 + 1 (xmod + square), 3 x square
 
@@ -68156,3 +68156,40 @@ midpoint V and endpoints V_i have the following relation (current sums
 to 0).
 
 \sum V_i - V = 0
+
+
+Entry: restoring old synth files
+Date: Sat Jun  3 09:46:42 EDT 2017
+
+tom@core:~/staapl/app/synth$ git commit -am 'move old synth files to app/synth/old'
+[master e30e6ae] move old synth files to app/synth/old
+ 11 files changed, 58 insertions(+), 6 deletions(-)
+ rename app/synth/{ => old}/31note.f (100%)
+ rename app/synth/{ => old}/catkit.f (100%)
+ rename app/synth/{ => old}/demo.f (100%)
+ rename app/synth/{ => old}/demo2.f (100%)
+ rename app/synth/{ => old}/patch.f (100%)
+ rename app/synth/{ => old}/soundgen.f (100%)
+ rename app/synth/{ => old}/sounds.f (100%)
+ rename app/synth/{ => old}/synth-example.f (100%)
+ rename app/synth/{ => old}/synth.f (100%)
+
+
+The most interesting one here is soundgen.f / sounds.f
+
+
+Entry: usb midi note on aconnect?
+Date: Sat Jun  3 09:55:33 EDT 2017
+
+90 OK
+midi-byte1 @ px
+3B OK
+midi-byte2 @ px
+4D OK
+
+That's B, note 59.
+
+
+This is more likely an initialization problem of the note stack.
+
+
