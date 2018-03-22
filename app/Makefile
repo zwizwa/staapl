@@ -13,10 +13,11 @@ all:
 .DELETE_ON_ERROR:
 
 # INTERP=racket
-# COMP=???
+# MZC=???
 RACKET_BIN=/usr/local/racket-6.1.1/bin
 INTERP=$(RACKET_BIN)/mzscheme
-COMP=$(RACKET_BIN)/mzc
+MZC=$(RACKET_BIN)/mzc
+RACKET=$(RACKET_BIN)/racket
 
 FMS := $(shell ls *.fm)
 APPS := $(FMS:.fm=.app)
@@ -54,7 +55,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 # The rm is a hack to include .f dependencies from F_LIB.
 %.app: %.fm $(F_LIB)
 	rm -f compiled/$*_fm.*
-	$(COMP) -vk $<
+	$(MZC) -vk $<
 	$(STAAPLC) $(STAAPLC_FLAGS) --version-tag $(shell git rev-parse HEAD) --output-code $*.sx --output-asm $*.asm $< 
 	chmod +x $*.dict
 	ls -l $*.hex $*.dict >$@
@@ -79,7 +80,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 # the device before connecting.
 
 %.live: %.dict %.flash
-	$(COMP) -vk ../live.rkt
+	$(MZC) -vk ../live.rkt
 	@while echo -ne '\nrestarting $@\nPress ctrl-C to quit'; do sleep 1; echo -ne '\r                    \n'; $(INTERP) $*.dict; done
 
 
@@ -120,6 +121,6 @@ _test:
 
 # C file needs to be kept in sync with what's in the device's Flash memory.
 %.c: %.gen-c.rkt
-	racket $< >$@
+	$(RACKET) $< >$@
 %.elf: %.c ../live/console.c
 	gcc -o $@ $<

@@ -68193,3 +68193,38 @@ That's B, note 59.
 This is more likely an initialization problem of the note stack.
 
 
+
+
+Entry: Reviving 4-relay module
+Date: Thu Mar 22 13:08:36 EDT 2018
+
+Elf is gone
+(gw@zoo)7> gpio: ~/staapl/app/4-relay-module.elf: "Console on /dev/ttyACM0"
+
+build is broken on panda
+It uses racket-6.1.1 from nix
+
+TODO: fix build
+
+Looks like both /usr/local/racket-6.1.1 and
+/home/tom/.nix-profile/bin/racket 6.11 are installed
+
+Ok there was a naked "racket" invocation in app/Makefile
+
+
+
+Entry: I need a standalone solution.
+Date: Thu Mar 22 13:14:30 EDT 2018
+
+Having that .elf console driver is too much work in practice.  Devices
+should be stand-alone.
+
+
+
+Entry: How to connect to a serial port on a different host?
+Date: Thu Mar 22 14:42:13 EDT 2018
+
+This is a problem that keeps popping up.
+For now, just run it on the host.
+
+

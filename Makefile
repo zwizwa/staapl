@@ -5,8 +5,6 @@ PACKAGE = staapl.plt
 
 all: dev
 
-# MZSCHEME=racket
-MZSCHEME=mzscheme
 
 # multiple tasks doesn't seem to make it faster, and -v doesn't work.
 # RACO_MAKE=raco make -j 4 -v   # 20s
@@ -21,6 +19,7 @@ RACKET_VER=6.1.1
 RACKET_BIN=/usr/local/racket-$(RACKET_VER)/bin
 RACO_MAKE=$(RACKET_BIN)/mzc -vk
 RACO_PKG=$(RACKET_BIN)/raco pkg
+MZSCHEME=$(RACKET_BIN)/mzscheme
 
 unlink:
 	$(RACO_PKG) remove staapl
