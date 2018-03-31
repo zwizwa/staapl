@@ -68228,3 +68228,38 @@ This is a problem that keeps popping up.
 For now, just run it on the host.
 
 
+
+Entry: How do things keep breaking like that?
+Date: Thu Mar 22 14:56:04 EDT 2018
+
+stty: /dev/ttyACM2: Inappropriate ioctl for device
+ERROR: in-range: contract violation
+
+tom@zoe:/i/tom/staapl$ stty -F /dev/ttyACM2 115200 raw min 1 -echo
+stty: /dev/ttyACM2: Inappropriate ioctl for device
+
+fuck this bloody shitfest
+
+root@zoe:/usr/local# ls -al /dev/ttyACM?
+crw-rw---- 1 root dialout 166, 0 Mar 22 14:51 /dev/ttyACM0
+crw-rw---- 1 root dialout 166, 1 Mar 22 14:00 /dev/ttyACM1
+-rw-rw-rw- 1 root root       902 Mar 22 14:56 /dev/ttyACM2
+
+This happened before...
+
+
+Entry: Relay board debugging
+Date: Thu Mar 22 16:42:08 EDT 2018
+
+It works now, but trouble down the road.  Some devices seem to glitch
+the uC when plugged into the hub.
+
+I believe there is a problem with the uC setup.  Changing it such that
+the uC is on the upstream USB bus seems to work.
+
+
+Entry: Serial port need USB serial numbers
+Date: Mon Mar 26 22:30:29 EDT 2018
+
+Otherwise, too hard to distinguish.
+
