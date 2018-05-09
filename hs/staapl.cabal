@@ -1,0 +1,15 @@
+name: staapl
+version: 1.0.0
+cabal-version: >= 1.18
+build-type: Simple
+license: BSD3
+
+executable billing
+    build-depends: base, parsec, pretty-simple, text, sqlite-simple
+    main-is: staapl.hs
+    default-language: Haskell2010
+
+Test-Suite test-hours
+    type:       exitcode-stdio-1.0
+    main-is:    test-staapl.hs
+    build-depends: base, parsec

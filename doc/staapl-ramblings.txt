@@ -68269,3 +68269,38 @@ Entry: Removed relay board
 Date: Sun Apr  1 12:13:27 EDT 2018
 
 Not reliable.  Not sure why.  Replaced with C on STM32 board.
+
+
+
+Entry: Converting to Haskell?
+Date: Wed May  9 18:25:33 EDT 2018
+
+Some developments:
+
+- I don't want to do USB on a PIC.  I spent a lot of effort getting
+  somewhere, but it definitely is a pain to work with.  Reason? Data
+  structures are meant to be used with C or some kind of structured
+  data language.  These days, USB 32-bit uCs are ubiquitous, so there
+  is really no reason to bother with this.
+
+- Forth is still nice to do "protocol-oriented development".  I'd like
+  to look at that idea more, especially because it makes sense in
+  hardware.
+
+- I'm really done with dynamically typed languages.  I'm just getting
+  too old.  I've tasted types, and I really don't want to go back
+  unless I have to.  DTs are nice for writing one-off scripts where no
+  real complexity is created, and the types are iffy anyway.  DTs are
+  for messy glue that never needs to come loose.
+
+
+With this in mind, Staapl still has a purpose.
+
+So only simple byte-oriented busses (SPI,UART), and only from-scratch
+protocols optimized for byte-level parsing.
+
+And btw, I'll be designing a monster 16-port high-rate RS485 hub, so
+there might be some use for this!
+
+So, how to get started?
+
