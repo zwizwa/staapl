@@ -1,3 +1,8 @@
+import Pic18
+
 main = do
-  putStrLn "test-staapl"
+  putStrLn $ show $ addwf 3 1 1
+  
+  
+
   

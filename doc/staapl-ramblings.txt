@@ -68304,3 +68304,54 @@ there might be some use for this!
 
 So, how to get started?
 
+EDIT: Find representations for the assembler and the peephole
+optimizer.  The rest will follow.
+
+Avoid Template Haskell.  If code generation is needed, do it in a way
+that generates code explicitly, such that it will be easier to
+cross-compile.
+
+This means we're building a collection of compilers.  Some of those
+are only there to compile the machine specification, which eventually
+will not change such that the generated code is a constant and can go
+into version control.  The only purpose of the compiler is to allow
+evolutionary design.
+
+
+
+
+
+Entry: Types
+Date: Thu May 10 09:57:23 EDT 2018
+
+Made the first draft of an assembler, represented as functions from
+Int to bit fields represented as (size,value) contained in a list.
+
+But that is only a very small part of the core.  Digging into this, I
+do see there is a lot burried in the details, e.g. the multiple
+compiler passes.
+
+What would be interesting to find out, is how to encode the basic
+structure into a generic typed framework.  Essentially this is the
+peephole optimizer, together with some control flow stuff I no longer
+understand.
+
+If I am to learn something from this, it would be mostly how to encode
+the semantics of the processor's instruction set in a way that
+rewriting rules can be implemented.
+
+Maybe take a look at TLA+?
+
+There, the idea is also to capture the semantics of an imperative
+program.
+
+
+https://en.wikipedia.org/wiki/Action_language
+
+An action language is a language for specifying state transition
+systems, and is commonly used to create formal models of the effects
+of actions on the world.
+
+At the very least, I have to know about the general principles.
+
+

@@ -1,3 +1,3 @@
 main = do
-  putStrLn "staapl"
+  putStrLn "staapl.hs"
   

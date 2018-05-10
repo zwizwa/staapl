@@ -4,12 +4,13 @@ cabal-version: >= 1.18
 build-type: Simple
 license: BSD3
 
-executable billing
-    build-depends: base, parsec, pretty-simple, text, sqlite-simple
+executable staapl
+    build-depends: base
     main-is: staapl.hs
     default-language: Haskell2010
 
 Test-Suite test-hours
+    build-depends: base
     type:       exitcode-stdio-1.0
     main-is:    test-staapl.hs
-    build-depends: base, parsec
+    build-depends: base
