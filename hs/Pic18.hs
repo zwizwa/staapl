@@ -73,7 +73,8 @@ setf    = opDAF "0110 10"
 negf    = opDAF "0110 11"
 
 -- (movff (s d) "____ ssss ssss ssss" "1111 dddd dddd dddd")
-movff s d = [opc "1100", (12,s), opc "1111", (12,d)]
+second n a b = [(n, a), opc "1111", (12, b)] -- 1111 is nop
+movff s d = [opc "1100"] ++ second 12 s d
 
 
 -- bit-oriented file register operations
@@ -122,10 +123,10 @@ bovi = opBP "1110 010"
 bzi  = opBP "1110 000"
 
 
-long v = [(8, v .&. 255), opc "1111", (12, shift v 8)] -- 1111 is nop
+addr a = second 8 (a .&. 255) (shift a 8)
 
-call s a   = [opc "1110 110", (1, s)] ++ long a
-goto a     = [opc "1110 1111"] ++ long a
+call s a   = [opc "1110 110", (1, s)] ++ addr a
+goto a     = [opc "1110 1111"] ++ addr a
 
 bra r      = [opc "1101 0", (11, r)]
 rcall r    = [opc "1101 1", (11, r)]
