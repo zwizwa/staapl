@@ -68355,3 +68355,24 @@ of actions on the world.
 At the very least, I have to know about the general principles.
 
 
+
+Entry: PIC18 with programmable logic cells
+Date: Thu May 10 18:33:56 EDT 2018
+
+PIC18F25K42
+http://www.microchip.com/design-centers/8-bit/peripherals/core-independent/configurable-logic-cell
+
+
+
+Entry: What is an assembly language?
+Date: Sat May 12 08:59:56 EDT 2018
+
+I feel there is something to learn here.
+
+At the syntactic level, it is a tuble of a couple of numbers.  The
+opcode number determines the meaning of the other numbers.
+
+At the Haskell level, the meaning can be captured in a Monad.
+Different meanings could be associated with different concrete monads,
+all hidden behind an interface class.
+

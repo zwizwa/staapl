@@ -9,7 +9,7 @@ executable staapl
     main-is: staapl.hs
     default-language: Haskell2010
 
-Test-Suite test-hours
+Test-Suite test-staapl
     build-depends: base
     type:       exitcode-stdio-1.0
     main-is:    test-staapl.hs

@@ -2,6 +2,7 @@
 # See https://github.com/Gabriel439/haskell-nix
 # This needs nix, cabal2nix, nix-prefetch-git:
 # $ curl https://nixos.org/nix/install | sh
+# $ nix-env -i cabal-install
 # $ nix-env -i cabal2nix
 # $ nix-env -i nix-prefetch-git
 

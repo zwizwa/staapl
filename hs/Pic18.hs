@@ -94,45 +94,53 @@ btg   = opBT "0111"
 -- (_ (i f b a) "100i bbba ffff ffff")
 
 -- (_ (i f b a) "___i bbba ffff ffff")
-bsfi   i f b a = [opc "100", (1,i), (3,b), (1,a), (8,f)]
-btfssi i f b a = [opc "101", (1,i), (3,b), (1,a), (8,f)]
+
+bitOP o i f b a = [opc o, (1,i), (3,b), (1,a), (8,f)]
+bsfi   i f b a = bitOP "100"
+btfssi i f b a = bitOP "101"
 
 
 -- control operations (original asm)
 -- (_ (n) "____ ____ nnnn nnnn")
-opC o r = [opc o, (8, r)]
-bc   = opC "1110 0010"
-bnc  = opC "1110 0011"
-bn   = opC "1110 0110"
-bnn  = opC "1110 0111"
-bov  = opC "1110 0100"
-bnov = opC "1110 0101"
-bz   = opC "1110 0000"
-bnz  = opC "1110 0001"
+opB o r = [opc o, (8, r)]
+bc   = opB "1110 0010"
+bnc  = opB "1110 0011"
+bn   = opB "1110 0110"
+bnn  = opB "1110 0111"
+bov  = opB "1110 0100"
+bnov = opB "1110 0101"
+bz   = opB "1110 0000"
+bnz  = opB "1110 0001"
 
 -- polarized control operators
 -- (_ (i r) "____ ____ nnnn nnnn")
 -- i = inverted
-opCP o i r = [opc o, (1, i), (8, r)]
-bci  = opCP "1110 001"
-bni  = opCP "1110 011"
-bovi = opCP "1110 010"
-bzi  = opCP "1110 000"
- 
+opBP o i r = [opc o, (1, i), (8, r)]
+bci  = opBP "1110 001"
+bni  = opBP "1110 011"
+bovi = opBP "1110 010"
+bzi  = opBP "1110 000"
+
+
+long v = [(8, v .&. 255), opc "1111", (12, shift v 8)] -- 1111 is nop
+
+call s a   = [opc "1110 110", (1, s)] ++ long a
+goto a     = [opc "1110 1111"] ++ long a
+
 bra r      = [opc "1101 0", (11, r)]
-call s l h = [opc "1110 110", (1, s), (8, l), opc "1111", (12, h)] -- h = high, l = low  (~nop h)
+rcall r    = [opc "1101 1", (11, r)]
+retfie s   = [opc "0000 0000 0001 000", (1, s)]
+retlw k    = [opc "0000 1100", (8, k)]
+return s   = [opc "0000 0000 0001 001", (1, s)]
+
+nop d      = [opc "1111", (12, d)] -- used for extra argument
+
 clrwdt     = [opc "0000 0000 0000 0100"]
 daw        = [opc "0000 0000 0000 0111"]
-goto l h   = [opc "1110 1111", (8, l), opc "1111", (12, h)] -- (~nop h)
 nop0       = [opc "0000 0000 0000 0000"]
-nop d      = [opc "1111", (12, d)] -- used for extra argument
 pop        = [opc "0000 0000 0000 0110"]
 push       = [opc "0000 0000 0000 0101"]
 reset      = [opc "0000 0000 1111 1111"]
-rcall r    = [opc "1101 1", (11,r)]
-retfie s   = [opc "0000 0000 0001 000", (1,s)]
-retlw k    = [opc "0000 1100", (4,k)]
-return s   = [opc "0000 0000 0001 001", (1,s)]
 sleep      = [opc "0000 0000 0000 0011"]
 
 -- literal operations
