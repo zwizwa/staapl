@@ -146,14 +146,14 @@ sleep      = [opc "0000 0000 0000 0011"]
 
 -- literal operations
 opLIT o l = [opc o, (8, l)]
-addlw k = opLIT "0000 1111"
-andlw k = opLIT "0000 1011"
-iorlw k = opLIT "0000 1001"
-movlb k = opLIT "0000 0001"
-movlw k = opLIT "0000 1110"
-mullw k = opLIT "0000 1101"
-sublw k = opLIT "0000 1000"
-xorlw k = opLIT "0000 1010"
+addlw = opLIT "0000 1111"
+andlw = opLIT "0000 1011"
+iorlw = opLIT "0000 1001"
+movlb = opLIT "0000 0001"
+movlw = opLIT "0000 1110"
+mullw = opLIT "0000 1101"
+sublw = opLIT "0000 1000"
+xorlw = opLIT "0000 1010"
 
 -- data memory <-> program memory operations
 -- * F (fetch)
