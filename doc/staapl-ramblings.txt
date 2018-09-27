@@ -68376,3 +68376,64 @@ At the Haskell level, the meaning can be captured in a Monad.
 Different meanings could be associated with different concrete monads,
 all hidden behind an interface class.
 
+
+
+Entry: Reboot
+Date: Sat Sep 15 10:08:35 EDT 2018
+
+I don't really want to mess with USB.  Let's say that USB is "glue
+logic", and the internals of whatever I'm going to build has enough
+with just RS485.
+
+So what I need is a bootloader on RS485.
+
+Staapl monitor is unidirectional, so is it possible to solve the logic
+level UART vs RS485 in hardware?  Maybe not necessary.  The code for
+RS485 will also work on UART.
+
+RS485 will allow it to go a little faster.
+
+
+Let's build a board.  I don't need to because I have those PIC USB
+boards.
+
+Anyways, just talking through to find the one thing to work on, that
+is both meaningful and realistic to do in an incremental way.  Trouble
+focusing...
+
+(see rtl.txt dsPIC)
+
+EDIT: Maybe this was a spike in the other direction.  Basically, I do
+not want to mess with this any more.  See next post.
+
+
+
+Entry: Moving to Haskell
+Date: Sun Sep 16 20:50:19 EDT 2018
+
+The reason is mostly that I'm now convinced that of all the approaches
+I've tried so far, the "tagless final" approach is superior.
+
+There has always been this tension between "normal languages" and
+DSLs.  You use a DSL when the problem is really specific, and you use
+a normal language for, well, normal things.
+
+
+Pro:
+
+- Embedding is straightforward: just model the target language.
+
+- Metaprogramming is trivial and of ultimate power: it is just
+  Haskell, and there is no limit to creativity.
+
+Cons:
+
+- Syntax is horrible.  Especially when the target language has
+  expressions, since it is sort of mandatory to flatten it down.  A
+  solution could be to use Conal's compiling to categories work.
+
+
+
+There are some questions to ask about what your base langauge is, but
+this can be largely determined on a case by case basis.
+
