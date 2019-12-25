@@ -19,6 +19,10 @@ INTERP=$(RACKET_BIN)/mzscheme
 MZC=$(RACKET_BIN)/mzc
 RACKET=$(RACKET_BIN)/racket
 
+#INTERP=mzscheme
+#MZC=mzc
+#RACKET=racket
+
 FMS := $(shell ls *.fm)
 APPS := $(FMS:.fm=.app)
 

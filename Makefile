@@ -21,6 +21,14 @@ RACO_MAKE=$(RACKET_BIN)/mzc -vk
 RACO_PKG=$(RACKET_BIN)/raco pkg
 MZSCHEME=$(RACKET_BIN)/mzscheme
 
+# 20191124: trying out racket 6.8, see default.nix
+# Has some errors, but in general seems to work with "make link ; make".
+# EDIT: No, compiling the binaries doesn't work.  This needs 6.1.1
+
+# RACO_MAKE=mzc -vk
+# RACO_PKG=raco pkg
+# MZSCHEME=mzscheme
+
 unlink:
 	$(RACO_PKG) remove staapl
 
