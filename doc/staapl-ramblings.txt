@@ -68437,3 +68437,33 @@ Cons:
 There are some questions to ask about what your base langauge is, but
 this can be largely determined on a case by case basis.
 
+
+
+Entry: build issues gone?
+Date: Sat Jul  8 01:47:10 PM CEST 2023
+
+Trying to compile with 8.4 from current nixos, and it did finish.
+What I did:
+
+make
+clear .cache/racket and do "make link"
+then do make again
+
+How does it start again?
+
+cd app
+make
+
+
+With
+
+     (find-ffi-lib
++     "/nix/store/8m4ics4fks08m46ni1qg94g753s9j6wa-libusb-compat-0.1.7/lib/libusb.so" ;; FIXME: use an env var
+      ...
+
+It actually runs until the end.
+Asm looks ok
+
+Cool!
+
+

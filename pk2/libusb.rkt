@@ -80,6 +80,7 @@
     [(unix)
      ;; FIXME: This is a generic one + Debian-specific.  Is there a better way?"
      (find-ffi-lib
+      "/nix/store/8m4ics4fks08m46ni1qg94g753s9j6wa-libusb-compat-0.1.7/lib/libusb.so" ;; FIXME: use an env var
       "/lib/libusb-0.1.so"
       "/lib/libusb-0.1.so.4"
       "/lib/x86_64-linux-gnu/libusb-0.1.so.4"

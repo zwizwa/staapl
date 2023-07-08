@@ -14,7 +14,9 @@ all:
 
 # INTERP=racket
 # MZC=???
-RACKET_BIN=/usr/local/racket-6.1.1/bin
+# RACKET_BIN=/usr/local/racket-6.1.1/bin
+RACKET_BIN:=$(shell dirname $$(which racket))
+
 INTERP=$(RACKET_BIN)/mzscheme
 MZC=$(RACKET_BIN)/mzc
 RACKET=$(RACKET_BIN)/racket
@@ -58,6 +60,7 @@ F_LIB := $(F_APP) $(F_PIC18)
 # Compile the module before instantiating it in staaplc.
 # The rm is a hack to include .f dependencies from F_LIB.
 %.app: %.fm $(F_LIB)
+	@echo "RACKET_BIN=$(RACKET_BIN)"
 	rm -f compiled/$*_fm.*
 	$(MZC) -vk $<
 	$(STAAPLC) $(STAAPLC_FLAGS) --version-tag $(shell git rev-parse HEAD) --output-code $*.sx --output-asm $*.asm $< 

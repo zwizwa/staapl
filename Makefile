@@ -16,7 +16,9 @@ all: dev
 RACKET_VER=6.1.1
 #RACKET_VER=6.2
 
-RACKET_BIN=/usr/local/racket-$(RACKET_VER)/bin
+# RACKET_BIN=/usr/local/racket-$(RACKET_VER)/bin
+RACKET_BIN=$(shell dirname $$(which racket))
+
 RACO_MAKE=$(RACKET_BIN)/mzc -vk
 RACO_PKG=$(RACKET_BIN)/raco pkg
 MZSCHEME=$(RACKET_BIN)/mzscheme
